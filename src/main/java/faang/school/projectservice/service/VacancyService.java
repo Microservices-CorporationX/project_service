@@ -2,8 +2,11 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.VacancyCreateDto;
 import faang.school.projectservice.dto.client.VacancyFilterDto;
+import faang.school.projectservice.dto.client.VacancyResponseDto;
 import faang.school.projectservice.dto.client.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyCreateMapper;
+import faang.school.projectservice.mapper.VacancyResponseMapper;
+import faang.school.projectservice.mapper.VacancyUpdateMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -29,6 +32,8 @@ import static faang.school.projectservice.model.CandidateStatus.ACCEPTED;
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyCreateMapper vacancyCreateMapper;
+    private final VacancyUpdateMapper vacancyUpdateMapper;
+    private final VacancyResponseMapper vacancyResponseMapper;
     private final List<VacancyFilter> listVacancyFilters;
     private final TeamMemberRepository teamMemberRepository;
 
@@ -45,13 +50,12 @@ public class VacancyService {
         }
     }
 
-    public Vacancy updateVacancy(Long id, VacancyUpdateDto vacancyUpdateDto) {
+    public VacancyResponseDto updateVacancy(Long id, VacancyUpdateDto vacancyUpdateDto) {
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Vacancy doesn't exist by id: %d", id)));
 
         if (vacancy.getStatus().equals("CLOSED")) {
-            throw new IllegalArgumentException("\n" +
-                    "Vacancy with a closed status cannot be updated.");
+            throw new IllegalArgumentException("Vacancy with a closed status cannot be updated.");
         }
         long acceptedCandidates = vacancy.getCandidates()
                 .stream()
@@ -61,17 +65,18 @@ public class VacancyService {
         if (vacancy.getCount().equals(acceptedCandidates)) {
             vacancy.setStatus(VacancyStatus.valueOf("CLOSED"));
         }
-        vacancy.setName(vacancyUpdateDto.getName());
-        vacancy.setDescription(vacancyUpdateDto.getDescription());
-        vacancy.setSalary(vacancyUpdateDto.getSalary());
-        vacancy.setStatus(vacancyUpdateDto.getStatus());
-        vacancy.setWorkSchedule(vacancyUpdateDto.getWorkSchedule());
-        vacancy.setRequiredSkillIds(vacancyUpdateDto.getRequiredSkillIds());
-        Vacancy updatedVacancy = vacancyRepository.save(vacancy);
-        if(updatedVacancy != null){
+        Vacancy updatedVacancy = vacancyUpdateMapper.toVacancy(vacancyUpdateDto);
+        vacancy.setName(updatedVacancy.getName());
+        vacancy.setDescription(updatedVacancy.getDescription());
+        vacancy.setSalary(updatedVacancy.getSalary());
+        vacancy.setStatus(updatedVacancy.getStatus());
+        vacancy.setWorkSchedule(updatedVacancy.getWorkSchedule());
+        vacancy.setRequiredSkillIds(updatedVacancy.getRequiredSkillIds());
+        Vacancy savedVacancy = vacancyRepository.save(vacancy);
+        if(savedVacancy != null){
             log.info("Vacancy updated: {}", id);
         }
-        return vacancy;
+        return vacancyResponseMapper.toVacancyDto(savedVacancy);
     }
 
     public void deleteVacancy(Long id) {

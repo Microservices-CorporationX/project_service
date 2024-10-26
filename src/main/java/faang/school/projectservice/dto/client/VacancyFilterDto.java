@@ -14,15 +14,15 @@ import java.util.List;
 public class VacancyFilterDto {
     private String namePattern;
     private String descriptionPattern;
-    private Project projectPattern;
-    private List<Candidate> candidatesPattern;
+    private Long  projectIdPattern;
+    private List<Long> candidatesIdPattern;
     private LocalDateTime createdAtPattern;
     private LocalDateTime updatedAtPattern;
     private Long createdByPattern;
     private Long updatedByPattern;
-    private VacancyStatus statusPattern;
+    private Long statusIdPattern;
     private Double salaryPattern;
-    private WorkSchedule workSchedulePattern;
+    private Long workScheduleIdPattern;
     private Integer countPattern;
     private List<Long> requiredSkillIdsPattern;
 }
