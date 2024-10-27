@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.subproject;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.model.dto.ProjectDto;
 import faang.school.projectservice.service.SubProjectService;
