@@ -5,7 +5,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.dto.donation.DonationDto;
 import faang.school.projectservice.model.entity.Campaign;
 import faang.school.projectservice.model.entity.CampaignStatus;
-import faang.school.projectservice.service.jira.CampaignService;
+import faang.school.projectservice.service.CampaignService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
