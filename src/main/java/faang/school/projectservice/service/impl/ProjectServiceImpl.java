@@ -11,7 +11,7 @@ import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.resource.S3Service;
-import faang.school.projectservice.validator.project.ProjectValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
