@@ -21,9 +21,11 @@ spring:
     redis:
       port: 6379
       host: localhost
-      channels:
-        calculations_channel:
-          name: calculations_channel
+
+redis:
+  channels:
+    fund-raised: fund_raised_channel
+    project-view: project_view_channel
 
 server:
   port: 8082
@@ -40,11 +42,29 @@ services:
     endpoint: http://localhost:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
-    isMocked: false
+    bucketName: corpbucket
+
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+
+cover-image:
+  maxWidth: 1080
+  maxHeightHorizontal: 566
+  maxHeightSquare: 1080
+  maxFileSize: 5242880
+
+app:
+  name: "werewolf-project-service"
+  timezone: "Europe/Moscow"
+
+calendar:
+  id: "de9c98cdcc71d25dd223e774d3bd25efbd9a1b11f35db7d8db6d404e466f5d43@group.calendar.google.com"
+  type-of-send-updates: "all"
+  oauth:
+    local:
+      server:
+        port: 8888
