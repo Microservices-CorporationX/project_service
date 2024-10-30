@@ -1,4 +1,4 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

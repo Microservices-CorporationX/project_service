@@ -1,11 +1,10 @@
 package faang.school.projectservice;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.MomentService;
 import faang.school.projectservice.mapper.MomentMapper;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.entity.Moment;
 import faang.school.projectservice.repository.MomentRepository;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

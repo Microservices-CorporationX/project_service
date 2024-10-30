@@ -1,8 +1,8 @@
-package faang.school.projectservice.service.moment;
+package faang.school.projectservice.service;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.entity.Moment;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

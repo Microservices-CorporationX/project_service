@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.entity.Moment;
 import org.mapstruct.Mapper;
 
 import java.util.Collection;

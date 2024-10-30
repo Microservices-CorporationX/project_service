@@ -1,7 +1,7 @@
-package faang.school.projectservice.controller.moment;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.moment.MomentDto;
-import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.MomentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
