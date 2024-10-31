@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class, UserNotTeamMemberException.class, StorageSizeExceededException.class})
-    public ErrorResponse handleGeneralExceptions(Exception ex) {
+    public ErrorResponse handleValidationExceptions(Exception ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
