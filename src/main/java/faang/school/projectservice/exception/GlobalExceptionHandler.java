@@ -1,9 +1,12 @@
 package faang.school.projectservice.exception;
 
 import faang.school.projectservice.dto.response.ErrorResponse;
+import faang.school.projectservice.dto.response.Violation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,28 +38,30 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public List<Violation> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        List<Violation> violations = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            violations.add(new Violation(
+                    ((FieldError) error).getField(),
+                    error.getDefaultMessage()
+            ));
         });
         log.error(ex.getMessage(), ex);
-        return errors;
+        return violations;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public List<Violation> handleConstraintViolationException(ConstraintViolationException ex) {
+        List<Violation> violations = new ArrayList<>();
         ex.getConstraintViolations().forEach(violation -> {
-            String fieldName = violation.getPropertyPath().toString();
-            String errorMessage = violation.getMessage();
-            errors.put(fieldName, errorMessage);
+            violations.add(new Violation(
+                    violation.getPropertyPath().toString(),
+                    violation.getMessage()
+            ));
         });
         log.error(ex.getMessage(), ex);
-        return errors;
+        return violations;
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -97,6 +102,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Throwable.class)
     public ErrorResponse handleThrowable(Throwable ex) {
         log.error(ex.getMessage(), ex);
-        return new ErrorResponse("An unexpected error occurred.");
+        return new ErrorResponse(ex.getMessage());
     }
 }
