@@ -36,4 +36,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V021_add_deleted_to_campaign.sql
   - include:
-      file: db/changelog/changeset/project_V021_donation_payment_number_sequence.sql
+      file: db/changelog/changeset/project_V022_donation_payment_number_sequence.sql
