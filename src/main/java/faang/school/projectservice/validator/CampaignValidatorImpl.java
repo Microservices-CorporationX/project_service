@@ -12,11 +12,11 @@ public class CampaignValidatorImpl implements CampaignValidator {
     @Override
     public void validationCampaignCreator(TeamMemberDto teamMember, ProjectDto project) {
         if (!hasManagerRole(teamMember) || !isOwner(teamMember, project)) {
-            throw new DataValidationException("User with id %d cannot create".formatted(teamMember.getUserId()));
+            throw new DataValidationException("User with id %d cannot create new campaign".formatted(teamMember.getUserId()));
         }
     }
 
-    private static boolean isOwner(TeamMemberDto teamMember, ProjectDto project) {
+    private boolean isOwner(TeamMemberDto teamMember, ProjectDto project) {
         return project.getOwnerId().equals(teamMember.getUserId());
     }
 

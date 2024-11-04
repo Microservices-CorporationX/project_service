@@ -13,6 +13,7 @@ import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.CampaignValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class CampaignServiceImpl implements CampaignService {
 
-    private static final int BATCH_SIZE = 100;
+    @Value("${project.campaign.batch_size}")
+    private int BATCH_SIZE_FOR_CAMPAIGN;
 
     private final CampaignRepository campaignRepository;
     private final ProjectService projectService;
@@ -94,7 +96,7 @@ public class CampaignServiceImpl implements CampaignService {
 
         Page<Campaign> campaignPage;
         do {
-            Pageable pageable = PageRequest.of(page, BATCH_SIZE, sort);
+            Pageable pageable = PageRequest.of(page, BATCH_SIZE_FOR_CAMPAIGN, sort);
             campaignPage = campaignRepository.findAll(pageable);
             campaigns.addAll(campaignPage.getContent());
             page++;

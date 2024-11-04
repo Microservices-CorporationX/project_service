@@ -45,6 +45,7 @@ public class CampaignDto {
     @Positive
     private Long projectId;
 
+    @NotNull
     @Positive
     private Long creatorId;
 

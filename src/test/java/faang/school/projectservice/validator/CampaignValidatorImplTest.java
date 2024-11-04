@@ -39,7 +39,7 @@ class CampaignValidatorImplTest {
     void testValidationCampaignCreator_NoManagerRole() {
         ProjectDto project = new ProjectDto();
         project.setOwnerId(1L);
-        String message = "User with id 1 cannot create";
+        String message = "User with id 1 cannot create new campaign";
         teamMemberDto.setRoles(List.of(TeamRole.DEVELOPER));
 
         DataValidationException thrown = assertThrows(DataValidationException.class,
@@ -52,7 +52,7 @@ class CampaignValidatorImplTest {
     void testValidationCampaignCreator_NotProjectOwner() {
         ProjectDto project = new ProjectDto();
         project.setOwnerId(2L);
-        String message = "User with id 1 cannot create";
+        String message = "User with id 1 cannot create new campaign";
         teamMemberDto.setRoles(List.of(TeamRole.MANAGER));
 
         DataValidationException thrown = assertThrows(DataValidationException.class,

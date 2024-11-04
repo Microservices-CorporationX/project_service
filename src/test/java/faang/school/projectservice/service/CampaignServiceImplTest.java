@@ -118,6 +118,7 @@ public class CampaignServiceImplTest {
                         .createdBy(creatorId + 1)
                         .build()
         );
+        ReflectionTestUtils.setField(campaignService, "BATCH_SIZE_FOR_CAMPAIGN", 100);
     }
 
     @Test

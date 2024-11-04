@@ -2,6 +2,7 @@ package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.filter.CampaignFilterDto;
 import faang.school.projectservice.model.Campaign;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CreationDateToFilterTest {
 
     private final CreationDateToFilter creationDateToFilter = new CreationDateToFilter();
+    
+    private LocalDateTime localDateTime;
+
+    @BeforeEach
+    void setUp() {
+        localDateTime = LocalDateTime.of(2000, 1, 1, 0, 0);
+    }
 
     @Test
     void testIsAccepted_WithValidFilter() {
@@ -39,7 +47,7 @@ class CreationDateToFilterTest {
     @Test
     void testApply_WithMatchingDate() {
         CampaignFilterDto filter = new CampaignFilterDto();
-        filter.setCreatedTo(LocalDateTime.now().plusDays(1));
+        filter.setCreatedTo(localDateTime);
 
         Stream<Campaign> campaignStream = getCampaignStream();
 
@@ -54,7 +62,7 @@ class CreationDateToFilterTest {
     @Test
     void testApply_WithNoMatchingDate() {
         CampaignFilterDto filter = new CampaignFilterDto();
-        filter.setCreatedTo(LocalDateTime.now().minusDays(3));
+        filter.setCreatedTo(localDateTime.minusDays(3));
 
         Stream<Campaign> campaignStream = getCampaignStream();
 
@@ -66,10 +74,10 @@ class CreationDateToFilterTest {
 
     private Stream<Campaign> getCampaignStream() {
         Campaign campaign1 = new Campaign();
-        campaign1.setCreatedAt(LocalDateTime.now().minusDays(2));
+        campaign1.setCreatedAt(localDateTime.minusDays(2));
 
         Campaign campaign2 = new Campaign();
-        campaign2.setCreatedAt(LocalDateTime.now().plusDays(1));
+        campaign2.setCreatedAt(localDateTime.plusDays(1));
 
         return Stream.of(campaign1, campaign2);
     }
