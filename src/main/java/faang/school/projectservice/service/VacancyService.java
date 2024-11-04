@@ -54,14 +54,6 @@ public class VacancyService {
     public void deleteVacancy(long vacancyId) {
         Optional<Vacancy> vacancy = vacancyRepository.findById(vacancyId);
         vacancyValidator.validateVacancyIfFound(vacancy, vacancyId);
-
-        for (Candidate candidate : vacancy.get().getCandidates()) {
-            if (candidate.getCandidateStatus().equals(CandidateStatus.WAITING_RESPONSE)) {
-                TeamMember teamMember = teamMemberRepository.findById(candidate.getId());
-                teamRepository.delete(teamMember.getTeam());
-            }
-        }
-
         vacancyRepository.delete(vacancy.get());
         LOGGER.info("Vacancy with ID {} deleted successfully", vacancyId);
     }
