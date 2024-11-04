@@ -16,6 +16,7 @@ public record VacancyDto(
         @NotNull @NotBlank String description,
         @NotNull List<Long> candidatesIds,
         @NotNull @NotBlank VacancyStatus status,
+        @NotNull Long createdBy,
         @NotNull Integer count
 ) {
 }

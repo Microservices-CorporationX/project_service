@@ -56,12 +56,14 @@ public class VacancyMapperTest {
         assertEquals(vacancy.getDescription(), dto.description());
         assertEquals(vacancy.getProject().getId(), dto.projectId());
         assertEquals(candidatesIds, dto.candidatesIds());
+        assertEquals(vacancy.getStatus(), dto.status());
+        assertEquals(vacancy.getCreatedBy(), dto.createdBy());
     }
 
     @Test
     public void testToEntity() {
         // arrange
-        VacancyDto dto = new VacancyDto(1L, "Java Developer", 1L, "Java Developer", List.of(1L, 2L), VacancyStatus.OPEN, 1);
+        VacancyDto dto = new VacancyDto(1L, "Java Developer", 1L, "Java Developer", List.of(1L, 2L), VacancyStatus.OPEN, 1L, 1);
 
         // act
         Vacancy vacancy = vacancyMapper.toEntity(dto);
@@ -72,5 +74,7 @@ public class VacancyMapperTest {
         assertEquals(dto.description(), vacancy.getDescription());
         assertEquals(dto.projectId(), vacancy.getProject().getId());
         assertEquals(dto.candidatesIds().size(), vacancy.getCandidates().size());
+        assertEquals(dto.status(), vacancy.getStatus());
+        assertEquals(dto.createdBy(), vacancy.getCreatedBy());
     }
 }

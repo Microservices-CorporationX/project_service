@@ -1,8 +1,8 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,33 +14,28 @@ import java.util.Optional;
 public class VacancyValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(VacancyValidator.class);
 
-    public void validateVacancyFields(String name, String description, Project project, int count, Long curatorId, Double salary) {
-        LOGGER.info("Validating vacancy fields: name={}, description={}, project={}, count={}, curatorId={}, salary={}",
-                name, description, project, count, curatorId, salary);
+    public void validateVacancyFields(VacancyDto vacancyDto) {
+        LOGGER.info("Validating vacancy fields: {}", vacancyDto);
 
-        if (name == null || name.isBlank()) {
+        if (vacancyDto.name() == null || vacancyDto.name().isBlank()) {
             LOGGER.error("Validation failed: Vacancy name cannot be empty");
             throw new DataValidationException("Vacancy name cannot be empty");
         }
-        if (description == null || description.isBlank()) {
+        if (vacancyDto.description() == null || vacancyDto.description().isBlank()) {
             LOGGER.error("Validation failed: Vacancy description cannot be empty");
             throw new DataValidationException("Vacancy description cannot be empty");
         }
-        if (project == null) {
-            LOGGER.error("Validation failed: Project cannot be empty");
-            throw new DataValidationException("Project cannot be empty");
+        if (vacancyDto.projectId() == null || vacancyDto.projectId() <= 0) {
+            LOGGER.error("Validation failed: Project id cannot be null and must be greater than 0");
+            throw new DataValidationException("Project id cannot be null and must be greater than 0");
         }
-        if (count <= 0) {
+        if (vacancyDto.count() <= 0) {
             LOGGER.error("Validation failed: Vacancy count must be greater than 0");
             throw new DataValidationException("Vacancy count must be greater than 0");
         }
-        if (curatorId == null || curatorId <= 0) {
+        if (vacancyDto.createdBy() == null || vacancyDto.createdBy() <= 0) {
             LOGGER.error("Validation failed: Curator ID cannot be empty and must be greater than 0");
             throw new DataValidationException("Curator ID cannot be empty and must be greater than 0");
-        }
-        if (salary == null || salary <= 0) {
-            LOGGER.error("Validation failed: Salary must be greater than 0");
-            throw new DataValidationException("Salary must be greater than 0");
         }
 
         LOGGER.info("Validation successful for vacancy fields");

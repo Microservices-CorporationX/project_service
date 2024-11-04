@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
@@ -21,56 +22,112 @@ public class VacancyControllerTest {
     @InjectMocks
     private VacancyController vacancyController;
 
-    private Project project;
     private Candidate candidate;
 
     @BeforeEach
     public void setUp() {
         vacancyController = new VacancyController(vacancyService);
-        project = new Project();
         candidate = new Candidate();
     }
 
     @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullCandidate() {
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(null));
+    }
+
+    @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullName() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(vacancyDto));
+    }
+
+    @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullDescription() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .projectId(1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(vacancyDto));
+    }
+
+    @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullProjectId() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(vacancyDto));
+    }
+
+    @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeProjectId() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .projectId(-1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(vacancyDto));
+    }
+
+    @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeCount() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(-1)
+                .createdBy(1L)
+                .build();
+
         assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", "description", project, -1, 1L, 1000.0));
+                () -> vacancyController.createVacancy(vacancyDto));
     }
 
     @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeId() {
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullCreatedBy() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .build();
+
         assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", "description", project, 1, -1L, 1000.0));
+                () -> vacancyController.createVacancy(vacancyDto));
     }
 
     @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithEmptyName() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy(" ", "description", project, 1, 1L, 1000.0));
-    }
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeCreatedBy() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .createdBy(-1L)
+                .build();
 
-    @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithEmptyDescription() {
         assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", " ", project, 1, 1L, 1000.0));
-    }
-
-    @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithNullProject() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", "description", null, 1, 1L, 1000.0));
-    }
-
-    @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithNullCuratorId() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", "description", project, 1, null, 1000.0));
-    }
-
-    @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeSalary() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.createVacancy("name", "description", project, 1, 1L, -1000.0));
+                () -> vacancyController.createVacancy(vacancyDto));
     }
 
     @Test

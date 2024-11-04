@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,12 @@ public class VacancyController {
     private final VacancyValidator vacancyValidator = new VacancyValidator();
     private final VacancyService vacancyService;
 
-    public void createVacancy(String name, String description, Project project, int count, Long curatorId, Double salary) {
-        vacancyValidator.validateVacancyFields(name, description, project, count, curatorId, salary);
-        vacancyService.createVacancy(name, description, project, count, curatorId, salary);
+    public void createVacancy(VacancyDto vacancyDto) {
+        if (vacancyDto == null) {
+            throw new DataValidationException("Vacancy cannot be null");
+        }
+        vacancyValidator.validateVacancyFields(vacancyDto);
+        vacancyService.createVacancy(vacancyDto);
     }
 
     public void updateVacancy(long vacancyId, Candidate candidate) {
