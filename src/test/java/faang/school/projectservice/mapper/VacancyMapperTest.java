@@ -1,0 +1,76 @@
+package faang.school.projectservice.mapper;
+
+import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class VacancyMapperTest {
+    private VacancyMapper vacancyMapper;
+
+    private Candidate candidate1;
+    private Candidate candidate2;
+    private List<Candidate> candidates;
+
+    @BeforeEach
+    public void setUp() {
+        vacancyMapper = new VacancyMapperImpl();
+        candidate1 = new Candidate();
+        candidate1.setId(1L);
+        candidate2 = new Candidate();
+        candidate2.setId(2L);
+        candidates = List.of(candidate1, candidate2);
+    }
+
+    @Test
+    public void testToDto() {
+        // arrange
+        Vacancy vacancy = new Vacancy().builder()
+                .id(1L)
+                .name("Java Developer")
+                .description("Java Developer")
+                .project(new Project())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.now())
+                .createdBy(1L)
+                .status(VacancyStatus.OPEN)
+                .count(1)
+                .salary(1000.0)
+                .build();
+        List<Long> candidatesIds = candidates.stream().map(Candidate::getId).toList();
+
+        // act
+        VacancyDto dto = vacancyMapper.toDto(vacancy);
+
+        // assert
+        assertEquals(vacancy.getId(), dto.id());
+        assertEquals(vacancy.getName(), dto.name());
+        assertEquals(vacancy.getDescription(), dto.description());
+        assertEquals(vacancy.getProject().getId(), dto.projectId());
+        assertEquals(candidatesIds, dto.candidatesIds());
+    }
+
+    @Test
+    public void testToEntity() {
+        // arrange
+        VacancyDto dto = new VacancyDto(1L, "Java Developer", 1L, "Java Developer", List.of(1L, 2L), VacancyStatus.OPEN, 1);
+
+        // act
+        Vacancy vacancy = vacancyMapper.toEntity(dto);
+
+        // assert
+        assertEquals(dto.id(), vacancy.getId());
+        assertEquals(dto.name(), vacancy.getName());
+        assertEquals(dto.description(), vacancy.getDescription());
+        assertEquals(dto.projectId(), vacancy.getProject().getId());
+        assertEquals(dto.candidatesIds().size(), vacancy.getCandidates().size());
+    }
+}
