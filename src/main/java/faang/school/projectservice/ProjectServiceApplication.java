@@ -6,9 +6,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+
 @EnableScheduling
 @EnableFeignClients
+@SpringBootApplication(scanBasePackages = "faang.school.projectservice")
 public class ProjectServiceApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(ProjectServiceApplication.class)
