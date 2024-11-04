@@ -4,12 +4,10 @@ import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +27,6 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamRepository teamRepository;
 
     public void createVacancy(VacancyDto vacancyDto) {
         long curatorId = vacancyDto.createdBy();
