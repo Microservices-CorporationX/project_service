@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.TeamMemberDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,10 +16,10 @@ public class TeamMemberServiceImpl implements TeamMemberService {
 
     @Override
     public TeamMemberDto getTeamMember(long creatorId, long projectId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectIdWithRole(creatorId, projectId)
+        return teamMemberRepository.findByUserIdAndProjectIdWithRole(creatorId, projectId)
+                .map(teamMemberMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Failed to find team member with creator id %d and project id %d".formatted(creatorId, projectId)
                 ));
-        return teamMemberMapper.toDto(teamMember);
     }
 }
