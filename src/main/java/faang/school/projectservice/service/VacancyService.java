@@ -72,6 +72,6 @@ public class VacancyService {
 
     private boolean hasCuratorAccess(Long curatorId) {
         TeamMember teamMember = teamMemberRepository.findById(curatorId);
-        return teamMember.getRoles().contains(TeamRole.MANAGER);
+        return teamMember.getRoles().contains(TeamRole.OWNER);
     }
 }
