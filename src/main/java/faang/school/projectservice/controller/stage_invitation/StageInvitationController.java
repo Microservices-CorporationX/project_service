@@ -23,12 +23,12 @@ public class StageInvitationController {
 
     @PostMapping("/accept/{userId}")
     public void acceptStageInvitation(@PathVariable long userId, @RequestParam long stageInvitationId) {
-        stageInvitationService.acceptInvitation(userId, stageInvitationId);
+        stageInvitationService.acceptStageInvitation(userId, stageInvitationId);
     }
 
     @PostMapping("/reject/{userId}")
     public void rejectStageInvitation(@PathVariable long userId, @RequestParam long stageInvitationId) {
-        stageInvitationService.rejectInvitation(userId, stageInvitationId);
+        stageInvitationService.rejectStageInvitation(userId, stageInvitationId);
     }
 
     @GetMapping("/{userId}")
