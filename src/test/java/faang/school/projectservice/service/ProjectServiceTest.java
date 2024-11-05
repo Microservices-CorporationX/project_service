@@ -1,0 +1,189 @@
+package faang.school.projectservice.service;
+
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.AlreadyExistsException;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filter.ProjectNameFilter;
+import faang.school.projectservice.filter.ProjectStatusFilter;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class ProjectServiceTest {
+
+    @Mock
+    private ProjectJpaRepository projectRepository;
+
+    @Spy
+    private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+
+    private final List<ProjectFilter> projectFilters = new ArrayList<>();
+
+    @InjectMocks
+    private ProjectService projectService;
+
+    private Project project1;
+    private Project project2;
+    private ProjectDto projectDto1;
+    private ProjectDto projectDto2;
+
+    @BeforeEach
+    public void setUp() {
+        project1 = new Project();
+        project1.setId(1L);
+        project1.setName("Project1");
+        project1.setOwnerId(1L);
+        project1.setStatus(ProjectStatus.CREATED);
+        project1.setVisibility(ProjectVisibility.PUBLIC);
+        project1.setDescription("Description1");
+
+        project2 = new Project();
+        project2.setId(2L);
+        project2.setName("Project2");
+        project2.setOwnerId(2L);
+        project2.setStatus(ProjectStatus.IN_PROGRESS);
+        project2.setVisibility(ProjectVisibility.PRIVATE);
+        project2.setDescription("Description2");
+
+        projectDto1 = new ProjectDto();
+        projectDto1.setId(1L);
+        projectDto1.setName("Project1");
+        projectDto1.setOwnerId(1L);
+        projectDto1.setStatus(ProjectStatus.CREATED);
+        projectDto1.setVisibility(ProjectVisibility.PUBLIC);
+        projectDto1.setDescription("Description1");
+
+        projectDto2 = new ProjectDto();
+        projectDto2.setId(2L);
+        projectDto2.setName("Project2");
+        projectDto2.setOwnerId(2L);
+        projectDto2.setStatus(ProjectStatus.IN_PROGRESS);
+        projectDto2.setVisibility(ProjectVisibility.PRIVATE);
+        projectDto2.setDescription("Description2");
+
+        projectFilters.add(new ProjectNameFilter());
+        projectFilters.add(new ProjectStatusFilter());
+
+        projectService = new ProjectService(projectMapper, projectFilters, projectRepository);
+    }
+
+    @Test
+    public void findByIdTest() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+
+        ProjectDto result = projectService.findById(1L);
+
+        verify(projectRepository).findById(1L);
+        assertEquals(projectDto1.getId(), result.getId());
+        assertEquals(projectDto1.getName(), result.getName());
+    }
+
+    @Test
+    public void findByIdNotFoundTest() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> projectService.findById(1L)
+        );
+    }
+
+    @Test
+    public void findAllProjectsTest() {
+        List<Project> projects = List.of(project1, project2);
+        when(projectRepository.findAll()).thenReturn(projects);
+        ProjectFilterDto filters = new ProjectFilterDto("Project1", ProjectStatus.CREATED);
+
+        List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
+
+        assertEquals(1, result.size());
+        assertEquals(projectDto1.getId(), result.get(0).getId());
+    }
+
+    @Test
+    public void findAllProjectsNoFilterTest() {
+        List<Project> projects = List.of(project1, project2);
+        when(projectRepository.findAll()).thenReturn(projects);
+        ProjectFilterDto filters = new ProjectFilterDto(null, null);
+
+        List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
+
+        assertEquals(1, result.size());
+        assertEquals(projectDto1.getId(), result.get(0).getId());
+    }
+
+    @Test
+    public void findAllProjectsNoMatchingFilterTest() {
+        List<Project> projects = List.of(project1, project2);
+        when(projectRepository.findAll()).thenReturn(projects);
+        ProjectFilterDto filters = new ProjectFilterDto("NonExistingProjectName", ProjectStatus.COMPLETED);
+
+        List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void createProjectTest() {
+        when(projectRepository.existsByOwnerIdAndName(1L, "Project1")).thenReturn(false);
+        when(projectRepository.save(project1)).thenReturn(project1);
+
+        ProjectDto result = projectService.createProject(projectDto1, 1L);
+
+        verify(projectRepository).save(project1);
+        assertEquals(projectDto1.getId(), result.getId());
+        assertEquals(projectDto1.getName(), result.getName());
+    }
+
+    @Test
+    public void createProjectAlreadyExistsTest() {
+        when(projectRepository.existsByOwnerIdAndName(1L, "Project1")).thenReturn(true);
+        assertThrows(
+                AlreadyExistsException.class,
+                () -> projectService.createProject(projectDto1, 1L)
+        );
+    }
+
+    @Test
+    public void updateProjectTest() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+        when(projectRepository.save(project1)).thenReturn(project1);
+
+        ProjectDto result = projectService.updateProject(projectDto1);
+
+        verify(projectRepository).save(project1);
+        assertEquals(projectDto1.getId(), result.getId());
+        assertEquals(projectDto1.getName(), result.getName());
+    }
+
+    @Test
+    public void updateProjectNotFoundTest() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> projectService.updateProject(projectDto1)
+        );
+    }
+}
