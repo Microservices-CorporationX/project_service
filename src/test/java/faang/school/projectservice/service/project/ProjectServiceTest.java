@@ -1,14 +1,14 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.ProjectFilter;
-import faang.school.projectservice.filter.ProjectNameFilter;
-import faang.school.projectservice.filter.ProjectStatusFilter;
+import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.project.ProjectNameFilter;
+import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
