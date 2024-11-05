@@ -1,4 +1,66 @@
 package faang.school.projectservice.dto.client;
 
+import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.model.WorkSchedule;
+import jakarta.validation.constraints.*;
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@Builder
+@Validated
 public class VacancyDto {
+
+    @Positive(message = "Vacancy id must be a positive integer")
+    private Long id;
+
+    @NotBlank(message = "Vacancy title cannot be empty")
+    private String name;
+
+    @NotBlank(message = "Vacancy description cannot be empty")
+    @Size(min = 10, max = 600, message = "Vacancy description must be at least 10 and under 600 characters long")
+    private String description;
+
+    @NotNull(message = "Project id must be a positive integer")
+    @Positive(message = "Project id must be a positive integer")
+    private long projectId;
+
+    @NotNull(message = "Candidate ids list cannot be null")
+    private List<@Positive Long> candidateIds;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @NotNull(message = "Id of a vacancy creator must be a positive integer")
+    @Positive(message = "Id of a vacancy creator must be a positive integer")
+    private Long createdBy;
+
+    @NotNull(message = "Id of a vacancy updater must be a positive integer")
+    @Positive(message = "Id of a vacancy updater must be a positive integer")
+    private Long updatedBy;
+
+    @NotNull(message = "Vacancy status cannot be empty")
+    private VacancyStatus status;
+
+    @NotNull(message = "Slavery is prohibited")
+    @Positive(message = "Salary must be a positive number")
+    private Double salary;
+
+    @NotNull(message = "Work schedule cannot be empty")
+    private WorkSchedule workSchedule;
+
+    @NotNull(message = "Number of vacancies cannot be empty")
+    @Positive(message = "Number of vacancies must be a positive integer")
+    private Integer count;
+
+    @NotNull(message = "Required skills ids list cannot be empty")
+    @Size(min = 1, message = "Required skills ids list cannot be empty")
+    private List<Long> requiredSkillsIds;
+
+
 }
