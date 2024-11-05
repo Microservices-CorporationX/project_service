@@ -41,6 +41,4 @@ public class CampaignController {
         return null;
     }
 
-    // soft delete of a campaign
-
 }
