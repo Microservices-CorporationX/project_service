@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller.stage_invitation;
 
-import faang.school.projectservice.service.StageInvitationService;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.service.stageInvitation.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +17,12 @@ public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
     @PostMapping("/send/{invitorId}")
-    public void sendStageInvitation(@PathVariable long invitorId,@RequestParam long invitedId) {
-        stageInvitationService.sendStageInvitation(invitorId, invitedId);
+    public void sendStageInvitation(@PathVariable long invitorId, @RequestParam StageInvitationDto dto) {
+        stageInvitationService.sendStageInvitation(invitorId, dto);
     }
 
     @PostMapping("/accept/{userId}")
-    public void acceptStageInvitation(@PathVariable long userId,@RequestParam long stageInvitationId) {
+    public void acceptStageInvitation(@PathVariable long userId, @RequestParam long stageInvitationId) {
         stageInvitationService.acceptInvitation(userId, stageInvitationId);
     }
 
@@ -30,7 +32,8 @@ public class StageInvitationController {
     }
 
     @GetMapping("/{userId}")
-    public void getStageInvitations(@PathVariable long userId,@RequestParam StageInvitationFilterDto filter) {
-        stageInvitationService.getStageInvitations(userId, filter);
+    public StageInvitationDto getStageInvitations(
+            @PathVariable long userId, @RequestParam StageInvitationFilterDto filter) {
+        return stageInvitationService.getStageInvitations(userId, filter);
     }
 }
