@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -30,29 +32,30 @@ public class ProjectService {
     public ProjectDto findById(long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(PROJECT, projectId));
+        log.info("Project found with ID: {}", projectId);
         return projectMapper.toDto(project);
     }
 
     @Transactional(readOnly = true)
     public List<ProjectDto> findAllProjects(ProjectFilterDto filters, Long userId) {
-        return projectRepository.findAll().stream()
+        List<ProjectDto> projects = projectRepository.findAll().stream()
                 .filter(project -> isProjectVisibleForUser(project, userId))
                 .flatMap(project -> applyFilters(project, filters))
                 .distinct()
                 .map(projectMapper::toDto)
                 .collect(Collectors.toList());
+        log.info("Projects found: {}", projects.size());
+        return projects;
     }
 
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto, Long userId) {
-        if (projectRepository.existsByOwnerIdAndName(userId, projectDto.getName())) {
-            throw new AlreadyExistsException(PROJECT);
-        }
-
+        validateProjectExistsForUser(userId, projectDto.getName());
         Project project = projectMapper.toEntityCreate(projectDto);
         project.setOwnerId(userId);
-
-        return projectMapper.toDto(projectRepository.save(project));
+        Project savedProject = projectRepository.save(project);
+        log.info("Project created with ID: {}", savedProject.getId());
+        return projectMapper.toDto(savedProject);
     }
 
     @Transactional
@@ -60,23 +63,28 @@ public class ProjectService {
         Project existingProject = projectRepository.findById(projectDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException(PROJECT, projectDto.getId()));
 
-        projectMapper.toEntityUpdate(projectDto);
+        projectMapper.toEntityUpdate(projectDto, existingProject);
         Project savedProject = projectRepository.save(existingProject);
-
+        log.info("Project updated with ID: {}", savedProject.getId());
         return projectMapper.toDto(savedProject);
     }
 
     private boolean isProjectVisibleForUser(Project project, Long userId) {
-        return project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId);
+        return project.getVisibility() == ProjectVisibility.PUBLIC
+                || project.getOwnerId().equals(userId);
     }
 
     private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
-        Stream<Project> projectStream = Stream.of(project);
-        for (ProjectFilter filter : projectFilters) {
-            if (filter.isApplicable(filters)) {
-                projectStream = filter.apply(projectStream, filters);
-            }
+        return projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .reduce(Stream.of(project),
+                        (stream, filter) -> filter.apply(stream, filters),
+                        Stream::concat);
+    }
+
+    private void validateProjectExistsForUser(Long userId, String name) {
+        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
+            throw new AlreadyExistsException(PROJECT);
         }
-        return projectStream;
     }
 }

@@ -52,37 +52,41 @@ public class ProjectServiceTest {
 
     @BeforeEach
     public void setUp() {
-        project1 = new Project();
-        project1.setId(1L);
-        project1.setName("Project1");
-        project1.setOwnerId(1L);
-        project1.setStatus(ProjectStatus.CREATED);
-        project1.setVisibility(ProjectVisibility.PUBLIC);
-        project1.setDescription("Description1");
+        project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
 
-        project2 = new Project();
-        project2.setId(2L);
-        project2.setName("Project2");
-        project2.setOwnerId(2L);
-        project2.setStatus(ProjectStatus.IN_PROGRESS);
-        project2.setVisibility(ProjectVisibility.PRIVATE);
-        project2.setDescription("Description2");
+        project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .ownerId(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .description("Description2")
+                .build();
 
-        projectDto1 = new ProjectDto();
-        projectDto1.setId(1L);
-        projectDto1.setName("Project1");
-        projectDto1.setOwnerId(1L);
-        projectDto1.setStatus(ProjectStatus.CREATED);
-        projectDto1.setVisibility(ProjectVisibility.PUBLIC);
-        projectDto1.setDescription("Description1");
+        projectDto1 = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
 
-        projectDto2 = new ProjectDto();
-        projectDto2.setId(2L);
-        projectDto2.setName("Project2");
-        projectDto2.setOwnerId(2L);
-        projectDto2.setStatus(ProjectStatus.IN_PROGRESS);
-        projectDto2.setVisibility(ProjectVisibility.PRIVATE);
-        projectDto2.setDescription("Description2");
+        projectDto2 = ProjectDto.builder()
+                .id(2L)
+                .name("Project2")
+                .ownerId(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .description("Description2")
+                .build();
 
         projectFilters.add(new ProjectNameFilter());
         projectFilters.add(new ProjectStatusFilter());

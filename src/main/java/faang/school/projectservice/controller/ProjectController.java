@@ -35,7 +35,7 @@ public class ProjectController {
         return projectService.findById(projectId);
     }
 
-    @GetMapping
+    @PostMapping("/filter")
     public List<ProjectDto> findAllProjects(@RequestBody @Valid ProjectFilterDto filters,
                                             @RequestHeader("x-user-id") @Positive Long userId) {
         return projectService.findAllProjects(filters, userId);
