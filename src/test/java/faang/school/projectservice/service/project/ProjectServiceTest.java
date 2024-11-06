@@ -45,49 +45,8 @@ public class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project project1;
-    private Project project2;
-    private ProjectDto projectDto1;
-    private ProjectDto projectDto2;
-
     @BeforeEach
     public void setUp() {
-        project1 = Project.builder()
-                .id(1L)
-                .name("Project1")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .description("Description1")
-                .build();
-
-        project2 = Project.builder()
-                .id(2L)
-                .name("Project2")
-                .ownerId(2L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .description("Description2")
-                .build();
-
-        projectDto1 = ProjectDto.builder()
-                .id(1L)
-                .name("Project1")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .description("Description1")
-                .build();
-
-        projectDto2 = ProjectDto.builder()
-                .id(2L)
-                .name("Project2")
-                .ownerId(2L)
-                .status(ProjectStatus.IN_PROGRESS)
-                .visibility(ProjectVisibility.PRIVATE)
-                .description("Description2")
-                .build();
-
         projectFilters.add(new ProjectNameFilter());
         projectFilters.add(new ProjectStatusFilter());
 
@@ -96,13 +55,31 @@ public class ProjectServiceTest {
 
     @Test
     public void findByIdTest() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
+        Project project = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        ProjectDto expectedProjectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
         ProjectDto result = projectService.findById(1L);
 
         verify(projectRepository).findById(1L);
-        assertEquals(projectDto1.getId(), result.getId());
-        assertEquals(projectDto1.getName(), result.getName());
+        assertEquals(expectedProjectDto.getId(), result.getId());
+        assertEquals(expectedProjectDto.getName(), result.getName());
     }
 
     @Test
@@ -116,33 +93,84 @@ public class ProjectServiceTest {
 
     @Test
     public void findAllProjectsTest() {
-        List<Project> projects = List.of(project1, project2);
-        when(projectRepository.findAll()).thenReturn(projects);
+        Project project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        Project project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .ownerId(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .description("Description2")
+                .build();
+
         ProjectFilterDto filters = new ProjectFilterDto("Project1", ProjectStatus.CREATED);
+        when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
 
         List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
 
         assertEquals(1, result.size());
-        assertEquals(projectDto1.getId(), result.get(0).getId());
+        assertEquals(project1.getId(), result.get(0).getId());
     }
 
     @Test
     public void findAllProjectsNoFilterTest() {
-        List<Project> projects = List.of(project1, project2);
-        when(projectRepository.findAll()).thenReturn(projects);
+        Project project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        Project project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .ownerId(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .description("Description2")
+                .build();
+
         ProjectFilterDto filters = new ProjectFilterDto(null, null);
+        when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
 
         List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
 
         assertEquals(1, result.size());
-        assertEquals(projectDto1.getId(), result.get(0).getId());
+        assertEquals(project1.getId(), result.get(0).getId());
     }
 
     @Test
     public void findAllProjectsNoMatchingFilterTest() {
-        List<Project> projects = List.of(project1, project2);
-        when(projectRepository.findAll()).thenReturn(projects);
+        Project project1 = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        Project project2 = Project.builder()
+                .id(2L)
+                .name("Project2")
+                .ownerId(2L)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .description("Description2")
+                .build();
+
         ProjectFilterDto filters = new ProjectFilterDto("NonExistingProjectName", ProjectStatus.COMPLETED);
+        when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
 
         List<ProjectDto> result = projectService.findAllProjects(filters, 1L);
 
@@ -151,43 +179,97 @@ public class ProjectServiceTest {
 
     @Test
     public void createProjectTest() {
+        ProjectDto projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
+        Project project = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
         when(projectRepository.existsByOwnerIdAndName(1L, "Project1")).thenReturn(false);
-        when(projectRepository.save(project1)).thenReturn(project1);
+        when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto result = projectService.createProject(projectDto1, 1L);
+        ProjectDto result = projectService.createProject(projectDto, 1L);
 
-        verify(projectRepository).save(project1);
-        assertEquals(projectDto1.getId(), result.getId());
-        assertEquals(projectDto1.getName(), result.getName());
+        verify(projectRepository).save(project);
+        assertEquals(projectDto.getId(), result.getId());
+        assertEquals(projectDto.getName(), result.getName());
     }
 
     @Test
     public void createProjectAlreadyExistsTest() {
+        ProjectDto projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
         when(projectRepository.existsByOwnerIdAndName(1L, "Project1")).thenReturn(true);
         assertThrows(
                 AlreadyExistsException.class,
-                () -> projectService.createProject(projectDto1, 1L)
+                () -> projectService.createProject(projectDto, 1L)
         );
     }
 
     @Test
     public void updateProjectTest() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project1));
-        when(projectRepository.save(project1)).thenReturn(project1);
+        ProjectDto projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
 
-        ProjectDto result = projectService.updateProject(projectDto1);
+        Project project = Project.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
 
-        verify(projectRepository).save(project1);
-        assertEquals(projectDto1.getId(), result.getId());
-        assertEquals(projectDto1.getName(), result.getName());
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(projectRepository.save(project)).thenReturn(project);
+
+        ProjectDto result = projectService.updateProject(projectDto);
+
+        verify(projectRepository).save(project);
+        assertEquals(projectDto.getId(), result.getId());
+        assertEquals(projectDto.getName(), result.getName());
     }
 
     @Test
     public void updateProjectNotFoundTest() {
+        ProjectDto projectDto = ProjectDto.builder()
+                .id(1L)
+                .name("Project1")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .description("Description1")
+                .build();
+
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(
                 EntityNotFoundException.class,
-                () -> projectService.updateProject(projectDto1)
+                () -> projectService.updateProject(projectDto)
         );
     }
 }
