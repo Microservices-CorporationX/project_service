@@ -27,7 +27,7 @@ public class VacancyValidator {
 
     public void validateVacancyCreatorRole(VacancyDto dto) {
         TeamMember teamMember = teamMemberService.getTeamMemberById(dto.getCreatedBy());
-        if(!(teamMember.getRoles().stream().anyMatch(ROLES_TO_CREATE_VACANCY::contains))) {
+        if(teamMember.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy can be created by following roles " + ROLES_TO_CREATE_VACANCY);
         }
     }

@@ -18,9 +18,10 @@ public class VacancyService {
 
     public VacancyDto create(VacancyDto vacancyDto) {
         vacancyValidator.validateProjectInVacancyExists(vacancyDto);
-
-
-        return vacancyDto;
+        vacancyValidator.validateVacancyCreatorRole(vacancyDto);
+        Vacancy vacancy = toEntityFromDto(vacancyDto);
+        vacancyRepository.save(vacancy);
+        return vacancyMapper.toDto(vacancy);
     }
 
     public Vacancy toEntityFromDto(VacancyDto dto) {
