@@ -21,19 +21,19 @@ public class StageInvitationController {
         stageInvitationService.sendStageInvitation(invitorId, dto);
     }
 
-    @PostMapping("/accept/{userId}")
-    public void acceptStageInvitation(@PathVariable long userId, @RequestParam long stageInvitationId) {
-        stageInvitationService.acceptStageInvitation(userId, stageInvitationId);
+    @PostMapping("/accept/{teamMemberId}")
+    public void acceptStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId) {
+        stageInvitationService.acceptStageInvitation(teamMemberId, stageInvitationId);
     }
 
-    @PostMapping("/reject/{userId}")
-    public void rejectStageInvitation(@PathVariable long userId, @RequestParam long stageInvitationId) {
-        stageInvitationService.rejectStageInvitation(userId, stageInvitationId);
+    @PostMapping("/reject/{teamMemberId}")
+    public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId) {
+        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{teamMemberId}")
     public StageInvitationDto getStageInvitations(
-            @PathVariable long userId, @RequestParam StageInvitationFilterDto filter) {
-        return stageInvitationService.getStageInvitations(userId, filter);
+            @PathVariable long teamMemberId, @RequestParam StageInvitationFilterDto filter) {
+        return stageInvitationService.getStageInvitations(teamMemberId, filter);
     }
 }
