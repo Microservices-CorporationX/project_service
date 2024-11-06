@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,5 +18,4 @@ public class ProjectDto {
     private String name;
     private String description;
     private ProjectVisibility visibility;
-    private List<Integer> childrenIds;
 }
