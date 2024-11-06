@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.stage_invitation;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
     @PostMapping("/send/{invitorId}")
-    public void sendStageInvitation(@PathVariable long invitorId, @RequestParam StageInvitationDto dto) {
+    public void sendStageInvitation(@PathVariable long invitorId, @RequestParam @Valid StageInvitationDto dto) {
         stageInvitationService.sendStageInvitation(invitorId, dto);
     }
 

@@ -11,7 +11,7 @@ public interface StageInvitationMapper {
 
     StageInvitation toEntity(StageInvitationDto dto);
 
-    @Mapping(source = "stage.id",target = "stageId")
+    @Mapping(source = "stage.stageId",target = "stageId")
     @Mapping(source = "author.id",target = "authorId")
     @Mapping(source = "invited.id",target = "invitedId")
     StageInvitationDto toDto(StageInvitation entity);
