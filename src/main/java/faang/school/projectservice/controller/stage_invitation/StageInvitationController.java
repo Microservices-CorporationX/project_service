@@ -2,14 +2,15 @@ package faang.school.projectservice.controller.stage_invitation;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
-import faang.school.projectservice.service.stageInvitation.StageInvitationService;
-import lombok.NonNull;
+import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller("/stage-invitation")
 @RequiredArgsConstructor
@@ -29,12 +30,12 @@ public class StageInvitationController {
 
     @PostMapping("/reject/{teamMemberId}")
     public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId,
-    @RequestParam String rejectReason) {
-        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId,rejectReason);
+                                      @RequestParam String rejectReason) {
+        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId, rejectReason);
     }
 
     @GetMapping("/{teamMemberId}")
-    public StageInvitationDto getStageInvitations(
+    public List<StageInvitationDto> getStageInvitations(
             @PathVariable long teamMemberId, @RequestParam StageInvitationFilterDto filter) {
         return stageInvitationService.getStageInvitations(teamMemberId, filter);
     }

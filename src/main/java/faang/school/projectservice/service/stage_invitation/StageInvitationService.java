@@ -1,9 +1,11 @@
-package faang.school.projectservice.service.stageInvitation;
+package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
+import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.IllegalArgumentException;
+import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
 import faang.school.projectservice.model.Project;
@@ -16,6 +18,9 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
@@ -25,9 +30,11 @@ public class StageInvitationService {
 
     private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationJpaRepository repository;
+    private final List<StageInvitationFilter> filters;
+
 
     public void sendStageInvitation(long invitorId, StageInvitationDto dto) {
-        stageInvitationExistenceCheckExists(dto.getId());
+        validateStageInvitationExists(dto.getId());
         //is invited/invitor ,team member //
         TeamMember author = teamMemberRepository.findById(invitorId);
         TeamMember invited = teamMemberRepository.findById(dto.getInvitedId());
@@ -43,7 +50,7 @@ public class StageInvitationService {
     }
 
     public void acceptStageInvitation(long invitedId, long stageInvitationId) {
-        StageInvitation invitation = stageInvitationExistenceCheckNotExists(stageInvitationId);
+        StageInvitation invitation = validateStageInvitationNotExists(stageInvitationId);
         validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
         TeamMember teamMember = validateIsTeamMemberParticipantOfProject(invitedId, invitation);
 
@@ -54,7 +61,7 @@ public class StageInvitationService {
     }
 
     public void rejectStageInvitation(long invitedId, long stageInvitationId, String rejectReason) {
-        StageInvitation invitation = stageInvitationExistenceCheckNotExists(stageInvitationId);
+        StageInvitation invitation = validateStageInvitationNotExists(stageInvitationId);
         validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
         validateRejectReasonIsNullOrEmpty(rejectReason);
 
@@ -64,7 +71,23 @@ public class StageInvitationService {
         repository.save(invitation);
     }
 
-    private void stageInvitationExistenceCheckExists(long id) {
+    public List<StageInvitationDto> getStageInvitations(long invitedId, StageInvitationFilterDto filter) {
+        List<StageInvitation> invitations = repository.findAll();
+        Stream<StageInvitation> filteredInvitations = invitations.stream()
+                .filter(invitation -> invitation.getInvited().getId().equals(invitedId));
+
+        return filter(filteredInvitations, filter);
+    }
+
+    private List<StageInvitationDto> filter(Stream<StageInvitation> invitations, StageInvitationFilterDto filter) {
+        return filters.stream()
+                .filter(stageFilter -> stageFilter.isApplicable(filter))
+                .flatMap(stageFilter -> stageFilter.apply(invitations, filter))
+                .map(stageInvitationMapper::toDto)
+                .toList();
+    }
+
+    private void validateStageInvitationExists(long id) {
         StageInvitation stageInvitation = repository.findById(id).orElse(null);
 
         if (stageInvitation == null) {
@@ -73,14 +96,14 @@ public class StageInvitationService {
         }
     }
 
-    private StageInvitation stageInvitationExistenceCheckNotExists(long id) {
+    private StageInvitation validateStageInvitationNotExists(long id) {
         //log
         return repository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Stage Invitation with id: " + id + " not exists"));
     }
 
     private void validateIsInvitationSentToThisTeamMember(long invitedId, long stageInvitationId) {
-        StageInvitation stageInvitation = stageInvitationExistenceCheckNotExists(stageInvitationId);
+        StageInvitation stageInvitation = validateStageInvitationNotExists(stageInvitationId);
 
         if (!stageInvitation.getInvited().getId().equals(invitedId)) {
             throw new IllegalArgumentException("This stage invitation does not belong to this team member");
@@ -89,12 +112,12 @@ public class StageInvitationService {
 
     private TeamMember validateIsTeamMemberParticipantOfProject(long invitedId, StageInvitation invitation) {
         TeamMember teamMember = teamMemberRepository.findById(invitedId);
-        Project project = invitation.getStage().getProject();
+        Project projectOfTeamMember = invitation.getStage().getProject();
 
-        boolean isTeamMember = teamMember.getStages().stream()
-                .anyMatch(stage -> stage.getProject().equals(project));
+        boolean isParticipant = teamMember.getStages().stream()
+                .anyMatch(stage -> stage.getProject().equals(projectOfTeamMember));
 
-        if (!isTeamMember) {
+        if (!isParticipant) {
             throw new IllegalArgumentException("This team member is not participant of this project");
         }
         return teamMember;
@@ -102,7 +125,7 @@ public class StageInvitationService {
 
     private void validateRejectReasonIsNullOrEmpty(String rejectReason) {
         if (rejectReason == null || rejectReason.isEmpty()) {
-            throw new IllegalArgumentException("RejectReason is can't be empty");
+            throw new IllegalArgumentException("Reject reason can't be empty");
         }
     }
 }
