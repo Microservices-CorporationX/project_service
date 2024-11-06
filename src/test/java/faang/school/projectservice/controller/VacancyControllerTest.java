@@ -34,7 +34,7 @@ class VacancyControllerTest {
 
     @BeforeEach
     void setUp() {
-        dto = getVacancyDto();
+        dto = createTestVacancyDto();
     }
 
     @Test
@@ -51,10 +51,9 @@ class VacancyControllerTest {
         assertEquals(dto, resultDto);
         assertEquals(HttpStatus.CREATED, resultResponse.getStatusCode());
         assertEquals("Vacancy 1", resultDto.getName());
-
     }
 
-    private VacancyDto getVacancyDto() {
+    private VacancyDto createTestVacancyDto() {
         return VacancyDto.builder()
                 .id(1L)
                 .name("Vacancy 1")
@@ -66,6 +65,5 @@ class VacancyControllerTest {
                 .count(1)
                 .requiredSkillIds(List.of(1L))
                 .build();
-
     }
 }

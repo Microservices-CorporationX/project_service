@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,12 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final ProjectService projectService;
+    private final VacancyValidator vacancyValidator;
 
     public VacancyDto create(VacancyDto vacancyDto) {
+        vacancyValidator.validateProjectInVacancyExists(vacancyDto);
+
+
         return vacancyDto;
     }
 

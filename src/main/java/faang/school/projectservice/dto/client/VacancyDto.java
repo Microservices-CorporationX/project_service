@@ -30,6 +30,10 @@ public class VacancyDto {
 
     private LocalDateTime createdAt;
 
+    @NotNull(message = "Created by id cannot be empty")
+    @Positive(message = "Created by id must be a positive integer")
+    private Long createdBy;
+
     @NotNull(message = "Slavery is prohibited")
     @Positive(message = "Salary must be a positive number")
     private Double salary;
