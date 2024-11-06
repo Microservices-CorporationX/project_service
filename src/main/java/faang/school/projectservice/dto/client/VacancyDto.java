@@ -11,11 +11,11 @@ import java.util.List;
 @Builder
 public record VacancyDto(
         @Positive Long id,
-        @NotNull @NotBlank String name,
-        @NotNull @Positive Long projectId,
-        @NotNull @NotBlank String description,
+        @NotBlank String name,
+        @Positive Long projectId,
+        @NotBlank String description,
         @NotNull List<Long> candidatesIds,
-        @NotNull @NotBlank VacancyStatus status,
+        @NotBlank VacancyStatus status,
         @NotNull Long createdBy,
         @NotNull Integer count
 ) {
