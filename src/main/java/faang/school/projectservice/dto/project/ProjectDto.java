@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ public class ProjectDto {
     private Long id;
 
     @NotEmpty
+    @NotBlank
     @Size(min = 1, max = 128)
     private String name;
 
@@ -28,6 +30,8 @@ public class ProjectDto {
 
     private ProjectVisibility visibility;
 
+    @NotEmpty
+    @NotBlank
     @Size(min = 1, max = 4096)
     private String description;
 

@@ -8,13 +8,14 @@ import java.util.stream.Stream;
 
 @Component
 public class ProjectNameFilter implements ProjectFilter {
+
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
-        return filters.getName() != null;
+        return filters.getName() != null && !filters.getName().trim().isEmpty();
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto filters) {
-        return projects.filter(project -> project.getName().equalsIgnoreCase(filters.getName()));
+        return projects.filter(project -> project.getName().toLowerCase().contains(filters.getName().toLowerCase()));
     }
 }
