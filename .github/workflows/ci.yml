@@ -3,7 +3,7 @@ name: CI Pipeline
 on:
   pull_request:
     branches:
-      - feature/pipline-BC-BJS2-40780
+      - Titan-master-stream7
 
 jobs:
   run-tests:
