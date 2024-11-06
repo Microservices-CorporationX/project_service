@@ -1,13 +1,17 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,26 @@ public class VacancyService {
         vacancy.setStatus(VacancyStatus.OPEN);
         vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
+    }
+
+    public VacancyDto updateVacancyStatus(VacancyDto dto) {
+        vacancyValidator.validateVacancyCreatorRole(dto);
+        Vacancy vacancy = getVacancyById(dto.getId());
+        if (dto.getStatus().equals(VacancyStatus.CLOSED)) {
+            vacancyValidator.validateCandidateCountForClosure(vacancy);
+            vacancy.setStatus(dto.getStatus());
+            vacancyRepository.save(vacancy);
+        }
+        return vacancyMapper.toDto(vacancy);
+    }
+
+    public List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
+        return getVacancyById(vacancyId).getCandidates();
+    }
+
+    public Vacancy getVacancyById(long vacancyId) {
+        return vacancyRepository.findById(vacancyId).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Vacancy not found by id: %s", vacancyId)));
     }
 
     private Vacancy toEntityFromDto(VacancyDto dto) {

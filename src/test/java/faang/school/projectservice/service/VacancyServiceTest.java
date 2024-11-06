@@ -1,10 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.WorkSchedule;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,7 +50,7 @@ class VacancyServiceTest {
 
     @Test
     @DisplayName("Create a new vacancy successfully")
-    void createSuccess() {
+    void testCreateSuccess() {
         when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
         when(projectService.getProjectById(dto.getProjectId())).thenReturn(Project.builder().id(10L).build());
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
@@ -70,7 +69,7 @@ class VacancyServiceTest {
 
     @Test
     @DisplayName("Create a new vacancy with invalid project id")
-    void createInvalidProjectId() {
+    void testCreateInvalidProjectId() {
         when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
         vacancy.setProject(null);
         when(projectService.getProjectById(dto.getProjectId())).thenThrow(EntityNotFoundException.class);
@@ -79,6 +78,57 @@ class VacancyServiceTest {
 
         verify(vacancyValidator, times(1)).validateProjectInVacancyExists(dto);
         verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
+    }
+
+    @Test
+    @DisplayName("Update vacancy status successfully")
+    void testUpdateVacancyStatusSuccess() {
+        dto.setStatus(VacancyStatus.CLOSED);
+        when(vacancyRepository.findById(dto.getId())).thenReturn(Optional.of(vacancy));
+        when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
+        when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
+
+        VacancyDto result = vacancyService.updateVacancyStatus(dto);
+
+        verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
+        verify(vacancyValidator, times(1)).validateCandidateCountForClosure(vacancy);
+        verify(vacancyRepository, times(1)).save(vacancy);
+
+        assertNotNull(result);
+        assertEquals(dto, result);
+        assertEquals(VacancyStatus.CLOSED, result.getStatus());
+    }
+
+    @Test
+    @DisplayName("Update vacancy status with invalid id")
+    void testUpdateVacancyStatusInvalidId() {
+        when(vacancyRepository.findById(dto.getId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> vacancyService.updateVacancyStatus(dto));
+
+        verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
+    }
+
+    @Test
+    @DisplayName("Get candidates by vacancy id successful")
+    void testGetCandidatesByVacancyIdValid() {
+        vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
+
+        List<Candidate> result = vacancyService.getCandidatesByVacancyId(vacancy.getId());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("Get candidates by vacancy invalid id")
+    void testGetCandidatesByVacancyIdInvalid() {
+        vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyService.getCandidatesByVacancyId(vacancy.getId()));
+        assertEquals("Vacancy not found by id: 1", ex.getMessage());
     }
 
     private VacancyDto createTestVacancyDto() {
