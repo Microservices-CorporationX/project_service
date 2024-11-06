@@ -3,11 +3,14 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ProjectMapperTest {
@@ -43,6 +46,7 @@ public class ProjectMapperTest {
                 .parentProject(Project.builder().id(2L).build())
                 .name("cool name")
                 .description("cool description")
+                .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
@@ -53,6 +57,37 @@ public class ProjectMapperTest {
         assertEquals(project.getParentProject().getId(), result.getParentId());
         assertEquals(project.getName(), result.getName());
         assertEquals(project.getDescription(), result.getDescription());
+        assertEquals(project.getStatus(), result.getStatus());
         assertEquals(project.getVisibility(), result.getVisibility());
+    }
+
+    @Test
+    @DisplayName("Test partial update")
+    public void partialUpdateTest() {
+        Project project = Project.builder()
+                .id(1L)
+                .ownerId(2L)
+                .parentProject(Project.builder().id(2L).build())
+                .name("cool name")
+                .description("cool description")
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+        ProjectDto dto = ProjectDto.builder()
+                .id(20L)
+                .ownerId(150L)
+                .name("new cool name")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        mapper.partialUpdate(project, dto);
+
+        assertNotEquals(project.getId(), dto.getId());
+        assertNotEquals(project.getOwnerId(), dto.getOwnerId());
+        assertNotNull(project.getParentProject());
+        assertEquals(project.getName(), dto.getName());
+        assertNotNull(project.getDescription());
+        assertEquals(project.getStatus(), dto.getStatus());
+        assertNotNull(project.getVisibility());
     }
 }

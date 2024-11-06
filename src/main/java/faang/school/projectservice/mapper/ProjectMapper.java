@@ -6,6 +6,8 @@ import faang.school.projectservice.model.Project;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
@@ -23,6 +25,14 @@ public interface ProjectMapper {
     @Mapping(source = "parentProject.id", target = "parentId")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "description", target = "description")
+    @Mapping(source = "status", target = "status")
     @Mapping(source = "visibility", target = "visibility")
     ProjectDto toDto(Project project);
+
+    @BeanMapping(ignoreByDefault = true, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "description", target = "description")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "visibility", target = "visibility")
+    void partialUpdate(@MappingTarget Project project, ProjectDto projectDto);
 }
