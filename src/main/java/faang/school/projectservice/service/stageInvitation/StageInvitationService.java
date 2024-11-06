@@ -3,6 +3,7 @@ package faang.school.projectservice.service.stageInvitation;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.IllegalArgumentException;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
 import faang.school.projectservice.model.Project;
@@ -48,6 +49,18 @@ public class StageInvitationService {
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         invitation.getStage().getExecutors().add(teamMember);
+
+        repository.save(invitation);
+    }
+
+    public void rejectStageInvitation(long invitedId, long stageInvitationId, String rejectReason) {
+        StageInvitation invitation = stageInvitationExistenceCheckNotExists(stageInvitationId);
+        validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
+        validateRejectReasonIsNullOrEmpty(rejectReason);
+
+        invitation.setStatus(StageInvitationStatus.REJECTED);
+        invitation.setDescription(rejectReason);
+
         repository.save(invitation);
     }
 
@@ -85,5 +98,11 @@ public class StageInvitationService {
             throw new IllegalArgumentException("This team member is not participant of this project");
         }
         return teamMember;
+    }
+
+    private void validateRejectReasonIsNullOrEmpty(String rejectReason) {
+        if (rejectReason == null || rejectReason.isEmpty()) {
+            throw new IllegalArgumentException("RejectReason is can't be empty");
+        }
     }
 }

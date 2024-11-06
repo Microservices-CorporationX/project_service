@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.stage_invitation;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
 import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
 import faang.school.projectservice.service.stageInvitation.StageInvitationService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +28,9 @@ public class StageInvitationController {
     }
 
     @PostMapping("/reject/{teamMemberId}")
-    public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId) {
-        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId);
+    public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId,
+    @RequestParam String rejectReason) {
+        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId,rejectReason);
     }
 
     @GetMapping("/{teamMemberId}")
