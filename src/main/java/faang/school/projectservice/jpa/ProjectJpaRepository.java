@@ -1,6 +1,7 @@
 package faang.school.projectservice.jpa;
 
 import faang.school.projectservice.model.Project;
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,19 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
 
     @Query("SELECT id FROM Project WHERE id IN :ids")
     List<Long> findExistingIds(List<Long> ids);
+
+    @Query(
+            value = "WITH RECURSIVE search(id) AS (SELECT p.id" +
+                    "                                FROM project p" +
+                    "                               WHERE p.parent_project_id = :id" +
+                    "                               UNOIN ALL" +
+                    "                              SELECT p.id" +
+                    "                                FROM project p" +
+                    "                                     INNER JOIN search s ON s.id = p.parent_project_id)"  +
+                    "SELECT p.*" +
+                    "  FROM project p" +
+                    "       INNER JOIN search s ON s.id = p.parent_project_id", nativeQuery = true
+    )
+    List<Project> findAllSubProjectsByParentId(@Param("id") Long id);
 }
 

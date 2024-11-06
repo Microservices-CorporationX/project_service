@@ -22,7 +22,6 @@ public class CreateSubProjectDto {
     private Long id;
 
     @Schema(description = "name of the project", example = "Project Name")
-    @NotNull
     @NotBlank(message = "Project name cannot be blank")
     private String name;
 
@@ -49,6 +48,7 @@ public class CreateSubProjectDto {
     private List<Long> teamsIds;
 
     @Schema(description = "Parent project id", example = "1")
+    @NotNull
     private Long parentProjectId;
 
     @Schema(description = "List of moments ids", example = "[1, 2, 3]", nullable = true)
