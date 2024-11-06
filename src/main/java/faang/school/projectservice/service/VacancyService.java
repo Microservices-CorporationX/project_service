@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,16 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final CandidateService candidateService;
     private final TeamMemberService teamMemberService;
+    private final ProjectService projectService;
     private final VacancyMapper vacancyMapper;
 
     public void createVacancy(VacancyDto vacancyDto) {
         long curatorId = vacancyDto.createdBy();
         checkCuratorAccess(curatorId);
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
-        vacancy = vacancyRepository.save(vacancy);
+        Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
+        vacancy.setProject(vacancyProject);
+        vacancyRepository.save(vacancy);
         log.info("Vacancy with ID {} created successfully", vacancy.getId());
     }
 
