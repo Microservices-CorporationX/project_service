@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.client;
 
-import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -29,23 +28,7 @@ public class VacancyDto {
     @Positive(message = "Project id must be a positive integer")
     private long projectId;
 
-    @NotNull(message = "Candidate ids list cannot be null")
-    private List<@Positive Long> candidateIds;
-
     private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
-    @NotNull(message = "Id of a vacancy creator must be a positive integer")
-    @Positive(message = "Id of a vacancy creator must be a positive integer")
-    private Long createdBy;
-
-    @NotNull(message = "Id of a vacancy updater must be a positive integer")
-    @Positive(message = "Id of a vacancy updater must be a positive integer")
-    private Long updatedBy;
-
-    @NotNull(message = "Vacancy status cannot be empty")
-    private VacancyStatus status;
 
     @NotNull(message = "Slavery is prohibited")
     @Positive(message = "Salary must be a positive number")
@@ -60,7 +43,5 @@ public class VacancyDto {
 
     @NotNull(message = "Required skills ids list cannot be empty")
     @Size(min = 1, message = "Required skills ids list cannot be empty")
-    private List<Long> requiredSkillsIds;
-
-
+    private List<Long> requiredSkillIds;
 }
