@@ -16,11 +16,13 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
@@ -45,6 +47,7 @@ public class StageInvitationService {
         stageInvitation.setStage(stageToInvite);
         stageInvitation.setAuthor(author);
         stageInvitation.setInvited(invited);
+        log.info("Saving new stage invitation with PENDING status, for team member with ID: {}", dto.getInvitedId());
 
         repository.save(stageInvitation);
     }
@@ -56,6 +59,8 @@ public class StageInvitationService {
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         invitation.getStage().getExecutors().add(teamMember);
+        log.info("Saving stage invitation with ID: {} and ACCEPTED status, for team member with ID: {}",
+                stageInvitationId, invitedId);
 
         repository.save(invitation);
     }
@@ -67,6 +72,8 @@ public class StageInvitationService {
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(rejectReason);
+        log.info("Saving invitation with ID: {} and REJECTED status, for team member with ID: {}",
+                stageInvitationId, invitedId);
 
         repository.save(invitation);
     }
@@ -75,6 +82,7 @@ public class StageInvitationService {
         List<StageInvitation> invitations = repository.findAll();
         Stream<StageInvitation> filteredInvitations = invitations.stream()
                 .filter(invitation -> invitation.getInvited().getId().equals(invitedId));
+        log.info("Founding filtered stage invitations for team member with ID: {}", invitedId);
 
         return filter(filteredInvitations, filter);
     }
@@ -91,13 +99,11 @@ public class StageInvitationService {
         StageInvitation stageInvitation = repository.findById(id).orElse(null);
 
         if (stageInvitation == null) {
-            //log
             throw new AlreadyExistsException("Stage Invitation with id: " + id + " already exists");
         }
     }
 
     private StageInvitation validateStageInvitationNotExists(long id) {
-        //log
         return repository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Stage Invitation with id: " + id + " not exists"));
     }
