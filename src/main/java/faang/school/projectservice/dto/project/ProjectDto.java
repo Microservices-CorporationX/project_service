@@ -21,7 +21,6 @@ public class ProjectDto {
 
     private Long id;
 
-    @NotEmpty
     @NotBlank
     @Size(min = 1, max = 128)
     private String name;
@@ -30,7 +29,6 @@ public class ProjectDto {
 
     private ProjectVisibility visibility;
 
-    @NotEmpty
     @NotBlank
     @Size(min = 1, max = 4096)
     private String description;
