@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +17,8 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyControllerTest {
@@ -39,7 +38,7 @@ class VacancyControllerTest {
 
     @Test
     @DisplayName("Create a new vacancy successfully")
-    void createVacancySuccess() {
+    void testCreateVacancySuccess() {
         when(vacancyService.create(dto)).thenReturn(dto);
 
         ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(dto);
@@ -51,6 +50,22 @@ class VacancyControllerTest {
         assertEquals(dto, resultDto);
         assertEquals(HttpStatus.CREATED, resultResponse.getStatusCode());
         assertEquals("Vacancy 1", resultDto.getName());
+    }
+
+    @Test
+    @DisplayName("Update vacancy status successfully")
+    void testUpdateVacancyStatusSuccess() {
+        VacancyDto updatedDto = VacancyDto.builder().status(VacancyStatus.CLOSED).build();
+        when(vacancyService.updateVacancyStatus(dto)).thenReturn(updatedDto);
+
+        ResponseEntity<VacancyDto> resultResponse = vacancyController.updateVacancyStatus(dto);
+        VacancyDto result = resultResponse.getBody();
+
+        verify(vacancyService, times(1)).updateVacancyStatus(dto);
+
+        assertNotNull(resultResponse);
+        assertEquals(VacancyStatus.CLOSED, result.getStatus());
+        assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
     }
 
     private VacancyDto createTestVacancyDto() {
