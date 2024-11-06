@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.client;
 
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -33,6 +34,8 @@ public class VacancyDto {
     @NotNull(message = "Created by id cannot be empty")
     @Positive(message = "Created by id must be a positive integer")
     private Long createdBy;
+
+    private VacancyStatus status;
 
     @NotNull(message = "Slavery is prohibited")
     @Positive(message = "Salary must be a positive number")

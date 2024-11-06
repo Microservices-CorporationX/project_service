@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class VacancyService {
         vacancyValidator.validateProjectInVacancyExists(vacancyDto);
         vacancyValidator.validateVacancyCreatorRole(vacancyDto);
         Vacancy vacancy = toEntityFromDto(vacancyDto);
+        vacancy.setStatus(VacancyStatus.OPEN);
         vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
     }
