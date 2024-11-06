@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -10,11 +10,11 @@ import java.util.List;
 
 @Builder
 public record VacancyDto(
-        @Positive Long id,
+        Long id,
         @NotBlank String name,
         @Positive Long projectId,
         @NotBlank String description,
-        @NotNull List<Long> candidatesIds,
+        List<Long> candidatesIds,
         @NotBlank VacancyStatus status,
         @NotNull Long createdBy,
         @NotNull Integer count

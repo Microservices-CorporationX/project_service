@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
@@ -73,7 +73,6 @@ public class VacancyMapperTest {
         assertEquals(dto.name(), vacancy.getName());
         assertEquals(dto.description(), vacancy.getDescription());
         assertEquals(dto.projectId(), vacancy.getProject().getId());
-        assertEquals(dto.candidatesIds().size(), vacancy.getCandidates().size());
         assertEquals(dto.status(), vacancy.getStatus());
         assertEquals(dto.createdBy(), vacancy.getCreatedBy());
     }

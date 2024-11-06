@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
@@ -18,8 +18,10 @@ public interface VacancyMapper {
     VacancyDto toDto(Vacancy vacancy);
 
     @Mapping(source = "projectId", target = "project.id")
-    @Mapping(source = "candidatesIds", target = "candidates", qualifiedByName = "mapCandidates")
     Vacancy toEntity(VacancyDto vacancyDto);
+
+    List<VacancyDto> toDto(List<Vacancy> vacancies);
+    List<Vacancy> toEntity(List<VacancyDto> vacancyDtos);
 
     @Named("mapCandidatesIds")
     default List<Long> mapCandidatesIds(List<Candidate> candidates) {
@@ -28,14 +30,4 @@ public interface VacancyMapper {
                 .toList();
     }
 
-    @Named("mapCandidates")
-    default List<Candidate> mapCandidates(List<Long> candidatesIds) {
-        return candidatesIds.stream()
-                .map(id -> {
-                    Candidate candidate = new Candidate();
-                    candidate.setId(id);
-                    return candidate;
-                })
-                .toList();
-    }
 }

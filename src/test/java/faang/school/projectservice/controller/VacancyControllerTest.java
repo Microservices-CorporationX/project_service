@@ -1,9 +1,8 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyControllerTest {
@@ -22,23 +22,35 @@ public class VacancyControllerTest {
     @InjectMocks
     private VacancyController vacancyController;
 
-    private Candidate candidate;
-
     @BeforeEach
     public void setUp() {
         vacancyController = new VacancyController(vacancyService);
-        candidate = new Candidate();
     }
 
     @Test
-    public void testIfThrowsExceptionWhenCreatingVacancyWithNullCandidate() {
-        assertThrows(DataValidationException.class,
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullDto() {
+        assertThrows(NullPointerException.class,
                 () -> vacancyController.createVacancy(null));
+    }
+
+    @Test
+    public void testIfThrowsExceptionWhenCreatingVacancyWithNullId() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        assertThrows(DataValidationException.class,
+                () -> vacancyController.createVacancy(vacancyDto));
     }
 
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNullName() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .description("description")
                 .projectId(1L)
                 .count(1)
@@ -52,6 +64,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNullDescription() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .projectId(1L)
                 .count(1)
@@ -65,6 +78,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNullProjectId() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .description("description")
                 .count(1)
@@ -78,6 +92,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeProjectId() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .description("description")
                 .projectId(-1L)
@@ -92,6 +107,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeCount() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .description("description")
                 .projectId(1L)
@@ -106,6 +122,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNullCreatedBy() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .description("description")
                 .projectId(1L)
@@ -119,6 +136,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfThrowsExceptionWhenCreatingVacancyWithNegativeCreatedBy() {
         VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
                 .name("name")
                 .description("description")
                 .projectId(1L)
@@ -131,38 +149,90 @@ public class VacancyControllerTest {
     }
 
     @Test
+    public void testIfCreatesVacancyWithValidDto() {
+        // arrange
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
+
+        // act
+        vacancyController.createVacancy(vacancyDto);
+
+        // assert
+        verify(vacancyService).createVacancy(vacancyDto);
+    }
+
+    @Test
     public void testIfThrowsExceptionWhenDeletingVacancyWithNegativeId() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .id(-1L)
+                .build();
+
+
         assertThrows(DataValidationException.class,
-                () -> vacancyController.deleteVacancy(-1));
+                () -> vacancyController.deleteVacancy(vacancyDto));
     }
 
     @Test
-    public void testIfThrowsExceptionWhenGettingFilteredVacanciesWithEmptyName() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.getFilteredVacancies(" ", "position"));
+    public void testIfDeletesVacancyWithValidDto() {
+        // arrange
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
+                .build();
+
+        // act
+        vacancyController.deleteVacancy(vacancyDto);
+
+        // assert
+        verify(vacancyService).deleteVacancy(vacancyDto);
     }
 
     @Test
-    public void testIfThrowsExceptionWhenGettingFilteredVacanciesWithEmptyPosition() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.getFilteredVacancies("name", " "));
+    public void testIfGetsVacancyWithValidId() {
+        // arrange
+        Long id = 1L;
+
+        // act
+        vacancyController.getVacancy(id);
+
+        // assert
+        verify(vacancyService).getVacancy(id);
     }
 
     @Test
-    public void testIfThrowsExceptionWhenUpdatingVacancyWithNullCandidate() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.updateVacancy(1, null));
+    public void testIfGetsFilteredVacanciesWithValidNameAndPosition() {
+        // arrange
+        String name = "name";
+        String position = "position";
+
+        // act
+        vacancyController.getFilteredVacancies(name, position);
+
+        // assert
+        verify(vacancyService).getFilteredVacancies(name, position);
     }
 
     @Test
-    public void testIfThrowsExceptionWhenUpdatingVacancyWithNegativeId() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.updateVacancy(-1, candidate));
-    }
+    public void testIfUpdatesVacancyWithValidDto() {
+        // arrange
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .projectId(1L)
+                .count(1)
+                .createdBy(1L)
+                .build();
 
-    @Test
-    public void testIfThrowsExceptionWhenVacancyIdIsNegative() {
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.getVacancy(-1));
+        // act
+        vacancyController.updateVacancy(vacancyDto);
+
+        // assert
+        verify(vacancyService).updateVacancy(vacancyDto);
     }
 }
