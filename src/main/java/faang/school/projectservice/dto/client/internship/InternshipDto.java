@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.client.internship;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,33 +16,25 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class InternshipCreationDto {
+public class InternshipDto {
 
-    @NotBlank(message = "The internship name cannot be blank!")
-    private String name;
-
-    @NotBlank(message = "The internship description cannot be empty!")
     private String description;
-
-    @NotNull
+    private String name;
     private Long projectId;
-
-    @NotNull(message = "The internship team must have a mentor!")
     private Long mentorUserId;
-
-    @NotNull(message = "The created internship must have a creator!")
     private Long creatorUserId;
+    private List<Long> internUserIds;
+    private InternshipStatus status;
 
-    @NotEmpty(message = "The list of interns cannot be empty!")
-    private List<@NotNull Long> internUserIds;
-
-    @NotNull(message = "The internship start date cannot be null!")
-    @Future(message = "The internship start date must be in the future!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
 
-    @NotNull(message = "The internship end date cannot be null!")
-    @Future(message = "The internship end date must be in the future!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime updatedAt;
 }
