@@ -1,30 +1,28 @@
 package faang.school.projectservice.mapper.project;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 
+@Qualifier
 @Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
-public interface SubProjectMapper {
+public interface ProjectMapper {
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "stages", ignore = true)
     @Mapping(target = "moments", ignore = true)
-    @Mapping(target = "teams", ignore = true)
-    Project toEntity(CreateSubProjectDto subProjectDto);
+    Project toEntity(ProjectDto projectDto);
 
     @Mapping(source = "children", target = "childrenIds", qualifiedByName = "childrenToIds")
     @Mapping(source = "stages", target = "stagesIds", qualifiedByName = "stagesToIds")
     @Mapping(source = "teams", target = "teamsIds", qualifiedByName = "teamsToIds")
-    @Mapping(source = "moments", target = "momentsIds", qualifiedByName = "momentsToIds")
-    @Mapping(source = "parentProject.id", target = "parentProjectId")
-    CreateSubProjectDto toDto(Project subProject);
+    ProjectDto toDto(Project project);
 
     @Named("childrenToIds")
     default List<Long> toChildrenIds(List<Project> projects) {
@@ -49,14 +47,4 @@ public interface SubProjectMapper {
         }
         return teams.stream().map(Team::getId).toList();
     }
-
-    @Named("momentsToIds")
-    default List<Long> toMomentsIds(List<Moment> moments) {
-        if (moments == null) {
-            return null;
-        }
-        return moments.stream().map(Moment::getId).toList();
-    }
-
-
 }

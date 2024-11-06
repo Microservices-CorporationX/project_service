@@ -1,36 +1,26 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.service.project.SubProjectService;
+import faang.school.projectservice.service.project.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/projects")
+@RequestMapping("api/v1/sub-projects")
 @Validated
 public class SubProjectController {
-    private final SubProjectService subProjectService;
+    private final ProjectService projectService;
 
-    @PostMapping("/sub-projects/create")
-    public CreateSubProjectDto createSubProject(@RequestBody @Valid ProjectDto projectDto) {
-        return subProjectService.createSubProject(projectDto);
+    @PostMapping("/project/{parentProjectId}")
+    @Operation(summary = "Create sub project in DB")
+    public CreateSubProjectDto createSubProject(@PathVariable @Positive @NonNull Long parentProjectId, @RequestBody @Valid CreateSubProjectDto subProjectDto) {
+        return projectService.createSubProject(parentProjectId, subProjectDto);
     }
-
-    @PatchMapping("/sub-projects/update")
-    public ProjectDto updateSubProject(@RequestBody @Valid ProjectDto projectDto) {
-        return subProjectService.updateSubProject(projectDto);
-    }
-
-    @GetMapping("/sub-projects")
-    public List<ProjectDto> getSubProjects(@RequestBody @Valid ProjectDto projectDto) {
-        return subProjectService.getSubProjectsByProject(projectDto);
-    }
-
 }
 
