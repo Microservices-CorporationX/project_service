@@ -18,6 +18,7 @@ public interface VacancyMapper {
     VacancyDto toDto(Vacancy vacancy);
 
     @Mapping(source = "projectId", target = "project.id")
+    @Mapping(target = "candidates", ignore = true)
     Vacancy toEntity(VacancyDto vacancyDto);
 
     List<VacancyDto> toDto(List<Vacancy> vacancies);
