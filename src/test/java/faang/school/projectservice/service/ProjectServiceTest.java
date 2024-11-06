@@ -67,7 +67,5 @@ class ProjectServiceTest {
                 .id(1L)
                 .name("Project 1")
                 .build();
-
     }
-
 }

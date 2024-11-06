@@ -51,6 +51,5 @@ class TeamMemberServiceTest {
                 .userId(1L)
                 .roles(List.of(TeamRole.OWNER))
                 .build();
-
     }
 }

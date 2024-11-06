@@ -7,6 +7,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

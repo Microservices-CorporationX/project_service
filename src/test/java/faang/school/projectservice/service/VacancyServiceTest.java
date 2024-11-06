@@ -6,7 +6,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.VacancyValidator;
+import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,28 +69,16 @@ class VacancyServiceTest {
     }
 
     @Test
-    @DisplayName("Create a new vacancy from Dto successfully")
-    void toEntityFromDtoSuccess() {
-        when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
-        vacancy.setProject(null);
-        when(projectService.getProjectById(dto.getProjectId())).thenReturn(Project.builder().id(1L).build());
-
-        Vacancy result = vacancyService.toEntityFromDto(dto);
-
-        assertNotNull(result);
-        assertEquals(vacancy, result);
-        assertEquals("Vacancy 1", result.getName());
-        assertEquals(1L, result.getProject().getId());
-    }
-
-    @Test
-    @DisplayName("Create a new vacancy from Dto with invalid project id")
-    void toEntityFromDtoInvalidProjectId() {
+    @DisplayName("Create a new vacancy with invalid project id")
+    void createInvalidProjectId() {
         when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
         vacancy.setProject(null);
         when(projectService.getProjectById(dto.getProjectId())).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> vacancyService.toEntityFromDto(dto));
+        assertThrows(EntityNotFoundException.class, () -> vacancyService.create(dto));
+
+        verify(vacancyValidator, times(1)).validateProjectInVacancyExists(dto);
+        verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
     }
 
     private VacancyDto createTestVacancyDto() {

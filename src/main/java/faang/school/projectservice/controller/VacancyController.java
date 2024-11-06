@@ -21,6 +21,4 @@ public class VacancyController {
     public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancyDto));
     }
-
-
 }
