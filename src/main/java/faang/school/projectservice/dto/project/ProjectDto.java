@@ -2,9 +2,9 @@ package faang.school.projectservice.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import faang.school.projectservice.dto.groups.Groups;
+import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +12,8 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.List;
 
 @Data
 public class ProjectDto {
@@ -36,6 +38,8 @@ public class ProjectDto {
 
     @Positive(message = "owner id must be positive")
     private Long ownerId;
+
+    private List<TeamDto> teams;
 
     @JsonIgnore
     @AssertTrue(groups = Groups.OnUpdate.class, message = "project description or project status is required on update")
