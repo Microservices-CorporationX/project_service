@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +38,12 @@ public class SubProjectController {
                                                 @RequestBody @Valid CreateSubProjectDto subProjectDto) {
         long userId = userContext.getUserId();
         return projectService.updateSubProject(projectId, subProjectDto, userId);
+    }
+
+    @GetMapping("/project/{projectId}/projects")
+    @Operation(summary = "Get sub projects by parent project id and filters")
+    public List<CreateSubProjectDto> getProjectsByFilters(@RequestBody @NonNull FilterProjectDto filterDto, @PathVariable @Positive @NonNull Long projectId) {
+        return projectService.getProjectsByFilter(filterDto, projectId);
     }
 }
 

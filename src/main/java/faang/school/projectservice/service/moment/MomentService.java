@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MomentService {
-    public void create(MomentRequestDto momentRequestDto, Long userId) {
-        // TODO
+    public MomentRequestDto create(MomentRequestDto momentRequestDto, Long userId) {
+        // TODO создать метод для создания момента
+        return null;
     }
 }

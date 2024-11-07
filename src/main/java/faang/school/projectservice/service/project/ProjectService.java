@@ -2,7 +2,9 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class ProjectService {
     private final TeamRepository teamRepository;
     private final ProjectJpaRepository projectJpaRepository;
     private final MomentService momentService;
+    private final List<Filter<FilterProjectDto, Project>> filters;
 
     @Transactional
     public CreateSubProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
@@ -62,6 +66,16 @@ public class ProjectService {
         project.setStages(getStages(dto));
         project.setTeams(getTeams(dto));
         return subProjectMapper.toDto(projectRepository.save(project));
+    }
+
+    public List<CreateSubProjectDto> getProjectsByFilter(FilterProjectDto filterDto, Long projectId) {
+        Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
+        return filters.stream()
+                .filter(f -> f.isApplicable(filterDto))
+                .flatMap(filter -> filter.apply(projectStream, filterDto))
+                .distinct()
+                .map(subProjectMapper::toDto)
+                .toList();
     }
 
     private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, Long userId) {
