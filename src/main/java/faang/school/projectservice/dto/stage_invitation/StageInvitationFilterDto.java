@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.stageInvitation;
+package faang.school.projectservice.dto.stage_invitation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.stage_invitation_filter;
 
-import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.BeforeEach;

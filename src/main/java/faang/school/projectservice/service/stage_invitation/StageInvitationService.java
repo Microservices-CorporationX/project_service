@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.stage_invitation;
 
-import faang.school.projectservice.dto.stageInvitation.StageInvitationDto;
-import faang.school.projectservice.dto.stageInvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.IllegalArgumentException;
 import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
@@ -25,9 +25,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class StageInvitationService {
 
+    private final List<StageInvitationFilter> filters;
     private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationJpaRepository repository;
-    private final List<StageInvitationFilter> filters;
     private final StageInvitationValidator stageInvValidator;
     private final TeamMemberValidator teamMemberValidator;
     private final StageValidator stageValidator;
@@ -63,9 +63,9 @@ public class StageInvitationService {
     }
 
     public void rejectStageInvitation(long invitedId, long stageInvitationId, String rejectReason) {
+        validateRejectReasonIsNullOrEmpty(rejectReason);
         StageInvitation invitation = stageInvValidator.validateStageInvitationNotExists(stageInvitationId);
         stageInvValidator.validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
-        validateRejectReasonIsNullOrEmpty(rejectReason);
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(rejectReason);
@@ -77,11 +77,11 @@ public class StageInvitationService {
 
     public List<StageInvitationDto> getStageInvitations(long invitedId, StageInvitationFilterDto filter) {
         List<StageInvitation> invitations = repository.findAll();
-        Stream<StageInvitation> filteredInvitations = invitations.stream()
+        Stream<StageInvitation> invitationsForUser = invitations.stream()
                 .filter(invitation -> invitation.getInvited().getId().equals(invitedId));
         log.info("Founding filtered stage invitations for team member with ID: {}", invitedId);
 
-        return filter(filteredInvitations, filter);
+        return filter(invitationsForUser, filter);
     }
 
     private List<StageInvitationDto> filter(Stream<StageInvitation> invitations, StageInvitationFilterDto filter) {
@@ -93,7 +93,7 @@ public class StageInvitationService {
     }
 
     private void validateRejectReasonIsNullOrEmpty(String rejectReason) {
-        if (rejectReason == null || rejectReason.isEmpty()) {
+        if (rejectReason == null || rejectReason.isBlank()) {
             throw new IllegalArgumentException("Reject reason can't be empty");
         }
     }
