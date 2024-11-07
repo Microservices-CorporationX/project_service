@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-    private final ProjectJpaRepository projectRepository;
+    private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
 
