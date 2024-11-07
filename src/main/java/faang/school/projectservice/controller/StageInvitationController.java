@@ -1,10 +1,10 @@
-package faang.school.projectservice.controller.stage_invitation;
+package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.AcceptStageInvitation;
 import faang.school.projectservice.dto.client.RejectStageInvitation;
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.dto.client.StageInvitationFilters;
-import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

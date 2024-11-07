@@ -1,15 +1,14 @@
-package faang.school.projectservice.service.stage_invitation;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.AcceptStageInvitation;
 import faang.school.projectservice.dto.client.RejectStageInvitation;
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.dto.client.StageInvitationFilters;
-import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapper;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.service.stage.StageService;
-import faang.school.projectservice.service.team_member.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class StageInvitationService {
     private final StageInvitationMapper stageInvitationMapper;
     private final TeamMemberService teamMemberService;
 
-    private final List<Filter> stageInvitationFilters;
+    private final List<Filter<StageInvitation, StageInvitationFilters>> stageInvitationFilters;
 
     public StageInvitationDto sendStageInvitation(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = StageInvitation

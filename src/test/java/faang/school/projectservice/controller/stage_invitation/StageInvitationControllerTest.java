@@ -1,12 +1,13 @@
 package faang.school.projectservice.controller.stage_invitation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import faang.school.projectservice.controller.StageInvitationController;
 import faang.school.projectservice.dto.client.AcceptStageInvitation;
 import faang.school.projectservice.dto.client.RejectStageInvitation;
 import faang.school.projectservice.dto.client.StageInvitationDto;
 import faang.school.projectservice.dto.client.StageInvitationFilters;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import faang.school.projectservice.service.StageInvitationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.stage_invitation;
+package faang.school.projectservice.filter;
 
 import faang.school.projectservice.dto.client.StageInvitationFilters;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -8,14 +8,14 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationStatusFilter implements Filter {
+public class StageInvitationStageIdFilter implements Filter<StageInvitation, StageInvitationFilters> {
     @Override
     public boolean isApplicable(StageInvitationFilters filters) {
-        return filters.getStatus() != null;
+        return filters.getStageId() != null;
     }
 
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> stages, StageInvitationFilters filters) {
-        return stages.filter(stage -> Objects.equals(stage.getStatus(), filters.getStatus()));
+        return stages.filter(stage -> Objects.equals(stage.getStage().getStageId(), filters.getStageId()));
     }
 }
