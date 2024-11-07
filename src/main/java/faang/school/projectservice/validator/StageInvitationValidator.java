@@ -1,12 +1,8 @@
-package faang.school.projectservice.validations;
+package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.stage_invitation.RejectStageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.StageInvitationMapper;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
 import jakarta.persistence.EntityNotFoundException;
