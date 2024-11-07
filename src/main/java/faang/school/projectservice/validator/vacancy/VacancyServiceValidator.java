@@ -16,7 +16,7 @@ public class VacancyServiceValidator {
     private final TeamService teamService;
 
     public void validateCreateVacancy(VacancyDto vacancyDto) {
-        Optional<TeamMember> teamMember = teamService.findTeamMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
+        Optional<TeamMember> teamMember = teamService.findMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
 
         if (teamMember.isPresent()) {
             if (!teamMember.get().getRoles().contains(TeamRole.OWNER) || teamMember.get().getRoles().contains(TeamRole.MANAGER)) {
@@ -27,7 +27,9 @@ public class VacancyServiceValidator {
         }
     }
 
-    public void validateUpdateVacancy(VacancyDto vacancyDto) {
-
+    public void validateCloseVacancy(VacancyDto vacancyDto) {
+        if (vacancyDto.getCount() > vacancyDto.getCandidateIds().size()) {
+            throw new IllegalArgumentException("Vacancy id %s count is greater than candidate count".formatted(vacancyDto.getId()));
+        }
     }
 }

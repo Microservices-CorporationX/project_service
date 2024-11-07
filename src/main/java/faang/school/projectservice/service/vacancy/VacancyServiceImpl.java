@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.client.vacancy.VacancyFilterDto;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -49,12 +51,32 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public VacancyDto updateVacancy(@Valid VacancyDto vacancyDto) {
-        vacancyServiceValidator.validateUpdateVacancy(vacancyDto);
-
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyRepository
                 .findById(vacancyDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Vacancy id %s not found".formatted(vacancyDto.getId())));
+
+        if (vacancyDto.getStatus().equals(VacancyStatus.CLOSED)) {
+            return closeVacancy(vacancy);
+        }
+
+        vacancy.setUpdatedAt(LocalDateTime.now());
+        vacancy.setUpdatedBy(vacancyDto.getUpdatedBy());
+        vacancy.setStatus(vacancyDto.getStatus());
+        vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
+
+        return vacancyMapper.toDto(vacancyRepository.save(vacancy));
+    }
+
+    private VacancyDto closeVacancy(Vacancy vacancy) {
+        vacancyServiceValidator.validateCloseVacancy(vacancyMapper.toDto(vacancy));
+
+        vacancy.setStatus(VacancyStatus.CLOSED);
+        vacancy.getCandidates().forEach(candidate -> {
+            TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Team member id %s not found".formatted(candidate.getUserId())));
+            teamMember.getRoles().add(TeamRole.DEVELOPER);
+        });
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
