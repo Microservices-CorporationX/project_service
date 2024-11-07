@@ -35,7 +35,7 @@ public class Campaign {
     private String description;
 
     @Column(name = "deleted", nullable = false)
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @Column(name = "goal")
     private BigDecimal goal;

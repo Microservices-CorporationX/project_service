@@ -18,6 +18,7 @@ public interface CampaignMapper {
     @Mapping(source = "projectId", target = "project.id")
     @Mapping(source = "createdId", target = "createdBy")
     @Mapping(source = "updatedId", target = "updatedBy")
+    @Mapping(target = "deleted", constant = "false")
     Campaign toEntity(CampaignDto dto);
 
     List<CampaignDto> toDtoList(List<Campaign> entities);

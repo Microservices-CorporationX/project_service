@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +34,8 @@ public class CampaignService {
 
     @Transactional(readOnly = true)
     public Campaign findCampaignById(Long campaignId) {
-        return campaignRepository.findByIdOrThrow(campaignId);
+        return campaignRepository.findById(campaignId).orElseThrow(
+                () -> new EntityNotFoundException("Campaign with id " + campaignId + " not found"));
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class CampaignService {
         validateProjectExists(projectId);
         Pageable pageable = PageRequest.of(pageNumber, Objects.nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE);
         if (Objects.isNull(filter)) {
-            return campaignRepository.findAllByProjectId(projectId, pageable);
+            return campaignRepository.findAllByProjectIdOrderByCreatedAtDesc(projectId, pageable).getContent();
         }
 
         return campaignRepository.findAllByFilters(
@@ -57,6 +57,7 @@ public class CampaignService {
                 pageable);
     }
 
+    @Transactional
     public Campaign createNewCampaign(Campaign toCreate) {
         Long currentUserId = userContext.getUserId();
         Project toReceiveCampaign = projectRepository.getByIdOrThrow(toCreate.getProject().getId());
@@ -66,8 +67,9 @@ public class CampaignService {
 
         toCreate.setAmountRaised(BigDecimal.ZERO);
         toCreate.setStatus(CampaignStatus.ACTIVE);
-        toCreate.setCreatedAt(LocalDateTime.now());
         toCreate.setCreatedBy(currentUserId);
+        toCreate.setProject(toReceiveCampaign);
+        toReceiveCampaign.getCampaigns().add(toCreate);
 
         Campaign created = campaignRepository.save(toCreate);
         log.info("Created a new campaign (title: '{}') for project (id: {})",
@@ -78,14 +80,14 @@ public class CampaignService {
     @Transactional
     public Campaign updateCampaignInfo(Long campaignId, String title, String description) {
         validateDataForUpdate(title, description);
-        Campaign toBeUpdated = campaignRepository.findByIdOrThrow(campaignId);
+        Campaign toBeUpdated = campaignRepository.findById(campaignId).orElseThrow(
+                () -> new EntityNotFoundException("Campaign with id " + campaignId + " not found"));
         if (Objects.nonNull(title)) {
             toBeUpdated.setTitle(title);
         }
         if (Objects.nonNull(description)) {
             toBeUpdated.setDescription(description);
         }
-        toBeUpdated.setUpdatedAt(LocalDateTime.now());
         toBeUpdated.setUpdatedBy(userContext.getUserId());
         Campaign updated = campaignRepository.save(toBeUpdated);
         log.info("Updated campaign info (id: {})", updated.getId());
@@ -94,7 +96,8 @@ public class CampaignService {
 
     @Transactional
     public Campaign softDeleteById(Long campaignId) {
-        Campaign toBeMarked = campaignRepository.findByIdOrThrow(campaignId);
+        Campaign toBeMarked = campaignRepository.findById(campaignId).orElseThrow(
+                () -> new EntityNotFoundException("Campaign with id " + campaignId + " not found"));
         validateCampaignForDeletion(toBeMarked);
         toBeMarked.setDeleted(true);
         log.info("Marked campaign for deletion (id: {})", toBeMarked.getId());
@@ -121,13 +124,13 @@ public class CampaignService {
 
     private void validateNoCampaignWithTitle(String title, Long id) {
         if (campaignRepository.findByTitleAndProjectId(title, id).isPresent()) {
-            throw new IllegalStateException("Campaign with title " + title + " already exists");
+            throw new IllegalStateException("Campaign with title '" + title + "' already exists");
         }
     }
 
     private void validateDataForUpdate(String title, String description) {
         if (Objects.isNull(title) || Objects.isNull(description) || title.isBlank() || description.isBlank()) {
-            throw new IllegalArgumentException("A data required for update was null/empty");
+            throw new IllegalArgumentException("Data required for update was null/empty");
         }
     }
 

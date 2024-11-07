@@ -20,7 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,6 +60,7 @@ public class CampaignServiceTest {
         testProject = new Project();
         testProject.setId(1L);
         testProject.setOwnerId(1L);
+        testProject.setCampaigns(new ArrayList<>());
 
         testCampaign = new Campaign();
         testCampaign.setId(1L);
@@ -74,12 +77,12 @@ public class CampaignServiceTest {
     public class Positive {
         @Test
         public void testFindCampaignById() {
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
-                    .thenReturn(testCampaign);
+            when(campaignRepository.findById(testCampaign.getId()))
+                    .thenReturn(Optional.of(testCampaign));
             Campaign campaign = campaignService.findCampaignById(testCampaign.getId());
             assertNotNull(campaign);
             verify(campaignRepository, times(1))
-                    .findByIdOrThrow(testCampaign.getId());
+                    .findById(testCampaign.getId());
         }
 
         @Test
@@ -100,8 +103,8 @@ public class CampaignServiceTest {
         public void testUpdateCampaignInfo() {
             String newTitle = "New Title";
             String newDescription = "New Description";
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
-                    .thenReturn(testCampaign);
+            when(campaignRepository.findById(testCampaign.getId()))
+                    .thenReturn(Optional.of(testCampaign));
             when(userContext.getUserId()).thenReturn(1L);
             when(campaignRepository.save(testCampaign)).thenReturn(testCampaign);
 
@@ -117,8 +120,8 @@ public class CampaignServiceTest {
         @Test
         public void testSoftDeleteById() {
             testCampaign.setStatus(CampaignStatus.CANCELED);
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
-                    .thenReturn(testCampaign);
+            when(campaignRepository.findById(testCampaign.getId()))
+                    .thenReturn(Optional.of(testCampaign));
             when(campaignRepository.save(testCampaign))
                     .thenReturn(testCampaign);
             Campaign marked = campaignService.softDeleteById(testCampaign.getId());
@@ -133,7 +136,7 @@ public class CampaignServiceTest {
         @Test
         @DisplayName("Find by id: invalid campaign id")
         public void testFindCampaignById_InvalidId() {
-            when(campaignRepository.findByIdOrThrow(1L))
+            when(campaignRepository.findById(1L))
                     .thenThrow(EntityNotFoundException.class);
             assertThrows(EntityNotFoundException.class,
                     () -> campaignService.findCampaignById(testCampaign.getId()));
@@ -201,7 +204,7 @@ public class CampaignServiceTest {
         @Test
         @DisplayName("Update campaign: invalid campaign id")
         public void testUpdateCampaignInfo_InvalidId() {
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
+            when(campaignRepository.findById(testCampaign.getId()))
                     .thenThrow(EntityNotFoundException.class);
             assertThrows(EntityNotFoundException.class,
                     () -> campaignService.updateCampaignInfo(
@@ -214,7 +217,7 @@ public class CampaignServiceTest {
         @Test
         @DisplayName("Soft delete by id: invalid ID")
         public void testSoftDeleteById_InvalidId() {
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
+            when(campaignRepository.findById(testCampaign.getId()))
                     .thenThrow(EntityNotFoundException.class);
             assertThrows(EntityNotFoundException.class,
                     () -> campaignService.softDeleteById(testCampaign.getId()));
@@ -223,8 +226,8 @@ public class CampaignServiceTest {
         @Test
         @DisplayName("Soft delete by id: active campaign status")
         public void testSoftDeleteById_StatusActive() {
-            when(campaignRepository.findByIdOrThrow(testCampaign.getId()))
-                    .thenReturn(testCampaign);
+            when(campaignRepository.findById(testCampaign.getId()))
+                    .thenReturn(Optional.of(testCampaign));
             assertThrows(IllegalStateException.class,
                     () -> campaignService.softDeleteById(testCampaign.getId()));
         }
