@@ -35,6 +35,9 @@ class VacancyServiceTest {
     private ProjectService projectService;
 
     @Mock
+    private CandidateService candidateService;
+
+    @Mock
     private VacancyValidator vacancyValidator;
 
     @Mock
@@ -101,6 +104,25 @@ class VacancyServiceTest {
         assertNotNull(result);
         assertEquals(dto, result);
         assertEquals(VacancyStatus.CLOSED, result.getStatus());
+    }
+
+    @Test
+    @DisplayName("Delete vacancy successful")
+    void testDeleteVacancySuccess() {
+        Candidate candidateOne = new Candidate();
+        Candidate candidateTwo = new Candidate();
+        candidateOne.setId(1L);
+        candidateOne.setVacancy(vacancy);
+        candidateTwo.setId(2L);
+        candidateTwo.setVacancy(vacancy);
+        vacancy.setCandidates(List.of(candidateOne, candidateTwo));
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
+
+        vacancyService.deleteVacancy(vacancy.getId());
+
+        verify(vacancyValidator, times(1)).validateVacancyExistsById(vacancy.getId());
+        verify(candidateService, times(2)).deleteCandidateById(anyLong());
+        verify(vacancyRepository, times(1)).deleteById(vacancy.getId());
     }
 
     @Test
