@@ -1,8 +1,11 @@
 package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
+import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ServiceCallException;
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
@@ -47,6 +50,31 @@ public class InternshipDtoValidator {
         validateProjectExistence(creationDto.getProjectId());
 
         return getMentorForProject(creationDto.getMentorUserId(), creationDto.getProjectId());
+    }
+
+    public Internship validateUpdateDtoAndGetInternship(InternshipUpdateDto updateDto) {
+        Internship internship = internshipRepository.findById(updateDto.getInternshipId())
+                .orElseThrow(
+                        () -> new DataValidationException("There is no internship with ID (%d) in the database!"
+                                .formatted(updateDto.getInternshipId())));
+
+        validateInternshipStatus(internship, updateDto.getInternshipId());
+
+        return internship;
+    }
+
+    private void validateInternshipStatus(Internship internship, long internshipId) {
+        if (internship.getStatus() == InternshipStatus.COMPLETED) {
+            throw new DataValidationException(
+                    "The internship with ID (%d) has been already completed!".formatted(internshipId)
+            );
+        }
+        if (internship.getStatus() != InternshipStatus.IN_PROGRESS
+                && LocalDateTime.now().isBefore(internship.getStartDate())) {
+            throw new DataValidationException(
+                    "The internship with ID (%d) has not started yet!".formatted(internshipId)
+            );
+        }
     }
 
     private void validateUserIds(List<Long> userIds) {
