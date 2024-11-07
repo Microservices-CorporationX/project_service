@@ -5,7 +5,8 @@ import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.VacancyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,10 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final ProjectService projectService;
     private final VacancyValidator vacancyValidator;
+    private final ProjectValidator projectValidator;
 
     public VacancyDto create(VacancyDto vacancyDto) {
-        vacancyValidator.validateProjectInVacancyExists(vacancyDto);
+        projectValidator.validateProjectExistsById(vacancyDto.getProjectId());
         vacancyValidator.validateVacancyCreatorRole(vacancyDto);
         Vacancy vacancy = toEntityFromDto(vacancyDto);
         vacancy.setStatus(VacancyStatus.OPEN);

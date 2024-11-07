@@ -1,12 +1,12 @@
-package faang.school.projectservice.validator.vacancy;
+package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.client.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.TeamMemberService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,12 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyValidator {
     private static final List<TeamRole> ROLES_TO_CREATE_VACANCY = List.of(TeamRole.OWNER, TeamRole.MANAGER);
-    private final ProjectService projectService;
+    private final VacancyRepository vacancyRepository;
     private final TeamMemberService teamMemberService;
 
-    public void validateProjectInVacancyExists(VacancyDto dto) {
-        if (!projectService.checkProjectExistsById(dto.getProjectId())) {
-            throw new EntityNotFoundException(String.format("Project doesn't exist by id: %s", dto.getProjectId()));
+    public void validateVacancyExistsById(Long vacancyId) {
+        if(!vacancyRepository.existsById(vacancyId)) {
+            throw new EntityNotFoundException(String.format("Vacancy doesn't exist by id: %s", vacancyId));
         }
     }
 
