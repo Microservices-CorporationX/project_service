@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.jpa.ProjectJpaRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,14 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectValidatorTest {
 
     @Mock
-    private ProjectJpaRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @InjectMocks
     private ProjectValidator projectValidator;
@@ -32,7 +32,7 @@ class ProjectValidatorTest {
 
     @Test
     void testValidateUniqueProjectFailed() {
-        when(projectRepository.existsByOwnerIdAndName(ownerId, projectName)).thenReturn(true);
+        when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(true);
 
         assertThrows(EntityNotFoundException.class,
                 () -> projectValidator.validateUniqueProject(projectName, ownerId));

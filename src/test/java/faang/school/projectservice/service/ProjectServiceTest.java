@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class ProjectServiceTest {
 
     @Mock
-    private ProjectJpaRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @Mock
     private ProjectValidator projectValidator;
