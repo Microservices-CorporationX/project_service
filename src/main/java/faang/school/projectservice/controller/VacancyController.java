@@ -23,12 +23,12 @@ public class VacancyController {
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(@NotNull VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(@NotNull @Valid VacancyDto vacancyDto) {
         checkDtoId(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
 
-    public void deleteVacancy(@NotNull VacancyDto vacancyDto) {
+    public void deleteVacancy(@NotNull @Valid VacancyDto vacancyDto) {
         checkDtoId(vacancyDto);
         vacancyService.deleteVacancy(vacancyDto);
     }
