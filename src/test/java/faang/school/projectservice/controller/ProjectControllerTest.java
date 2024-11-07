@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.web.servlet.function.ServerResponse.ok;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectControllerTest {
@@ -45,5 +46,38 @@ class ProjectControllerTest {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
         verify(projectService, times(1)).createProject(projectDto);
+    }
+
+    @Test
+    void testUpdateProjectDescription() {
+        when(projectService.updateProjectDescription(projectDto)).thenReturn(projectDto);
+
+        ResponseEntity<ProjectDto> response = projectController.updateProjectDescription(projectDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(projectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectDescription(projectDto);
+    }
+
+    @Test
+    void testUpdateProjectStatus() {
+        when(projectService.updateProjectStatus(projectDto)).thenReturn(projectDto);
+
+        ResponseEntity<ProjectDto> response = projectController.updateProjectStatus(projectDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(projectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectStatus(projectDto);
+    }
+
+    @Test
+    void testUpdateProjectVisibility() {
+        when(projectService.updateProjectVisibility(projectDto)).thenReturn(projectDto);
+
+        ResponseEntity<ProjectDto> response = projectController.updateProjectVisibility(projectDto);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(projectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectVisibility(projectDto);
     }
 }

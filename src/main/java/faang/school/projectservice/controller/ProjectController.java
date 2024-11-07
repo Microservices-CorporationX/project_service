@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,5 +26,23 @@ public class ProjectController {
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
         log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(dto));
+    }
+
+    @PutMapping("/description-update")
+    public ResponseEntity<ProjectDto> updateProjectDescription(@Valid @RequestBody ProjectDto dto) {
+        log.info("Updating project '{}' description by UserId #{}.", dto.getName(), dto.getOwnerId());
+        return ResponseEntity.ok().body(projectService.updateProjectDescription(dto));
+    }
+
+    @PutMapping("/status-update")
+    public ResponseEntity<ProjectDto> updateProjectStatus(@Valid @RequestBody ProjectDto dto) {
+        log.info("Updating project '{}' status by UserId #{}.", dto.getName(), dto.getOwnerId());
+        return ResponseEntity.ok().body(projectService.updateProjectStatus(dto));
+    }
+
+    @PutMapping("/visibility-update")
+    public ResponseEntity<ProjectDto> updateProjectVisibility(@Valid @RequestBody ProjectDto dto) {
+        log.info("Updating project '{}' visibility by UserId #{}.", dto.getName(), dto.getOwnerId());
+        return ResponseEntity.ok().body(projectService.updateProjectVisibility(dto));
     }
 }
