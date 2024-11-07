@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -20,6 +21,7 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
     private final ProjectService projectService;
+    private final CandidateService candidateService;
     private final VacancyValidator vacancyValidator;
 
     @Transactional
@@ -44,8 +46,10 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancy);
     }
 
+    @Transactional
     public void deleteVacancy(long vacancyId) {
-        
+        getRejectedCandidatesIds(vacancyId).forEach(candidateService::deleteCandidateById);
+        vacancyRepository.deleteById(vacancyId);
     }
 
     public List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
@@ -61,5 +65,12 @@ public class VacancyService {
         Vacancy vacancy = vacancyMapper.toEntity(dto);
         vacancy.setProject(projectService.getProjectById(dto.getProjectId()));
         return vacancy;
+    }
+    private List<Long> getRejectedCandidatesIds(Long vacancyId) {
+        return getCandidatesByVacancyId(vacancyId).stream()
+                .filter(candidate -> !(candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED) &&
+                        candidate.getVacancy().getId().equals(vacancyId)))
+                .map(Candidate::getId)
+                .toList();
     }
 }
