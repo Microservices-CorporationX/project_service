@@ -166,6 +166,30 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(any())).thenReturn(parentProject);
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
+
+        projectService.updateProject(1L, parentDto, 1L);
+        assertEquals(parentDto.getStatus(), parentProject.getStatus());
+    }
+
+    @Test
+    void testStatusDoesntHaveChildProject(){
+        CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
+                .id(1L)
+                .name("New name")
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        Project parentProject = Project.builder()
+                .id(1L)
+                .name("Parent project")
+                .parentProject(null)
+                .children(List.of())
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.getProjectById(any())).thenReturn(parentProject);
+        when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
+        when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
+
         projectService.updateProject(1L, parentDto, 1L);
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
     }
