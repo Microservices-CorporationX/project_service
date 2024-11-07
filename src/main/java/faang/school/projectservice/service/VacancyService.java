@@ -34,8 +34,9 @@ public class VacancyService {
         Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
         vacancy.setProject(vacancyProject);
         if (vacancyDto.candidatesIds() != null) {
-            candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
-            addCandidatesToVacancy(vacancyDto, vacancy);
+            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
+            candidateService.updateCandidatesWithVacancy(candidates, vacancy);
+            candidates.forEach(vacancy::addCandidate);
         } else {
             vacancy.setCandidates(new ArrayList<>());
         }
@@ -61,8 +62,9 @@ public class VacancyService {
             vacancy.setDescription(vacancyDto.description());
         }
         if (vacancyDto.candidatesIds() != null) {
-            candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
-            addCandidatesToVacancy(vacancyDto, vacancy);
+            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
+            candidateService.updateCandidatesWithVacancy(candidates, vacancy);
+            candidates.forEach(vacancy::addCandidate);
         }
         if (vacancyDto.status() != null) {
             vacancy.setStatus(vacancyDto.status());
@@ -113,13 +115,6 @@ public class VacancyService {
         if (!teamMemberService.hasCuratorAccess(curatorId)) {
             log.error("Curator with ID {} does not have access to create a vacancy", curatorId);
             throw new DataValidationException("Curator does not have access to create a vacancy");
-        }
-    }
-
-    private void addCandidatesToVacancy(VacancyDto vacancyDto, Vacancy vacancy) {
-        List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
-        for (Candidate candidate : candidates) {
-            vacancy.addCandidate(candidate);
         }
     }
 }

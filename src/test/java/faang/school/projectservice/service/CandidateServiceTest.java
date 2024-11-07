@@ -62,11 +62,8 @@ public class CandidateServiceTest {
 
     @Test
     public void testUpdateCandidatesWithVacancy_Success() {
-        // Arrange
-        when(candidateRepository.findAllById(List.of(1L))).thenReturn(List.of(candidate));
-
         // Act
-        candidateService.updateCandidatesWithVacancy(List.of(1L), vacancy);
+        candidateService.updateCandidatesWithVacancy(List.of(candidate), vacancy);
 
         // Assert
         assertEquals(vacancy, candidate.getVacancy());

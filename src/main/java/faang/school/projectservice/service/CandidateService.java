@@ -21,8 +21,7 @@ public class CandidateService {
         return candidateRepository.findAllById(candidatesIds);
     }
 
-    public void updateCandidatesWithVacancy(List<Long> candidatesIds, Vacancy vacancy) {
-        List<Candidate> candidates = findCandidates(candidatesIds);
+    public void updateCandidatesWithVacancy(List<Candidate> candidates, Vacancy vacancy) {
         for (Candidate candidate : candidates) {
             candidate.setVacancy(vacancy);
             candidateRepository.save(candidate);
