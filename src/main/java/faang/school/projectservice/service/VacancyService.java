@@ -10,6 +10,7 @@ import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class VacancyService {
     private final ProjectService projectService;
     private final VacancyValidator vacancyValidator;
 
+    @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
         vacancyValidator.validateProjectInVacancyExists(vacancyDto);
         vacancyValidator.validateVacancyCreatorRole(vacancyDto);
@@ -30,6 +32,7 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancy);
     }
 
+    @Transactional
     public VacancyDto updateVacancyStatus(VacancyDto dto) {
         vacancyValidator.validateVacancyCreatorRole(dto);
         Vacancy vacancy = getVacancyById(dto.getId());
