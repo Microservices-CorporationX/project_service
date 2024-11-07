@@ -15,7 +15,7 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.StageInvitationService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
-import faang.school.projectservice.validations.StageInvitationValidator;
+import faang.school.projectservice.validator.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
