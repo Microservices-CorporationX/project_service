@@ -61,12 +61,12 @@ public class CandidateServiceTest {
     }
 
     @Test
-    public void testMapCandidatesToVacancy_Success() {
+    public void testUpdateCandidatesWithVacancy_Success() {
         // Arrange
         when(candidateRepository.findAllById(List.of(1L))).thenReturn(List.of(candidate));
 
         // Act
-        candidateService.mapCandidatesToVacancy(List.of(1L), vacancy);
+        candidateService.updateCandidatesWithVacancy(List.of(1L), vacancy);
 
         // Assert
         assertEquals(vacancy, candidate.getVacancy());

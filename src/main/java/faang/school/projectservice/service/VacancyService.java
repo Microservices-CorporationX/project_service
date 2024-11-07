@@ -34,7 +34,7 @@ public class VacancyService {
         Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
         vacancy.setProject(vacancyProject);
         if (vacancyDto.candidatesIds() != null) {
-            candidateService.mapCandidatesToVacancy(vacancyDto.candidatesIds(), vacancy);
+            candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
         } else {
             vacancy.setCandidates(new ArrayList<>());
         }
@@ -51,7 +51,7 @@ public class VacancyService {
         long curatorId = vacancyDto.createdBy();
         checkCuratorAccess(curatorId);
 
-        Vacancy vacancy = findVacancy(vacancyId);
+        Vacancy vacancy = findVacancyById(vacancyId);
 
         if (vacancyDto.name() != null) {
             vacancy.setName(vacancyDto.name());
@@ -60,7 +60,7 @@ public class VacancyService {
             vacancy.setDescription(vacancyDto.description());
         }
         if (vacancyDto.candidatesIds() != null) {
-            candidateService.mapCandidatesToVacancy(vacancyDto.candidatesIds(), vacancy);
+            candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
         }
         if (vacancyDto.status() != null) {
             vacancy.setStatus(vacancyDto.status());
@@ -78,7 +78,7 @@ public class VacancyService {
 
     public void deleteVacancy(VacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
-        Vacancy vacancy = findVacancy(vacancyId);
+        Vacancy vacancy = findVacancyById(vacancyId);
         List<Candidate> candidates = vacancy.getCandidates();
         if (candidates != null) {
             for (Candidate candidate : candidates) {
@@ -98,11 +98,11 @@ public class VacancyService {
     }
 
     public VacancyDto getVacancy(long vacancyId) {
-        Vacancy vacancy = findVacancy(vacancyId);
+        Vacancy vacancy = findVacancyById(vacancyId);
         return vacancyMapper.toDto(vacancy);
     }
 
-    private Vacancy findVacancy(long vacancyId) {
+    private Vacancy findVacancyById(long vacancyId) {
         return vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new DataValidationException("Vacancy not found"));
     }
