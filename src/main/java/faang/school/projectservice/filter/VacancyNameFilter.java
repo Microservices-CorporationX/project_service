@@ -14,7 +14,7 @@ public class VacancyNameFilter implements VacancyFilter{
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> vacancies, VacancyFilterDto filters) {
-        return vacancies.filter(vacancy -> vacancy.getName().contains(filters.getNamePattern()));
+        return vacancies.filter(vacancy ->
+                vacancy.getName().toLowerCase().contains(filters.getNamePattern().toLowerCase()));
     }
-
 }

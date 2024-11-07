@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
+
     @Mock
     private VacancyRepository vacancyRepository;
 
