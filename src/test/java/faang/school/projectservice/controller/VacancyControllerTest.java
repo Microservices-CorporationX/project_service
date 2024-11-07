@@ -68,6 +68,18 @@ class VacancyControllerTest {
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
     }
 
+    @Test
+    @DisplayName("Test delete vacancy successfully")
+    void testDeleteVacancySuccess() {
+        long id = 1L;
+
+        ResponseEntity<Void> result = vacancyController.deleteVacancy(id);
+
+        verify(vacancyService, times(1)).deleteVacancy(id);
+        assertNotNull(result);
+        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    }
+
     private VacancyDto createTestVacancyDto() {
         return VacancyDto.builder()
                 .id(1L)

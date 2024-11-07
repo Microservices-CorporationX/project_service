@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,11 @@ public class VacancyController {
     @PutMapping
     public ResponseEntity<VacancyDto> updateVacancyStatus(@Valid @RequestBody VacancyDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.updateVacancyStatus(dto));
+    }
+
+    @DeleteMapping("/{vacancyId}")
+    public ResponseEntity<Void> deleteVacancy(@PathVariable @Positive long vacancyId) {
+        vacancyService.deleteVacancy(vacancyId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

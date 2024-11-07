@@ -44,6 +44,10 @@ public class VacancyService {
         return vacancyMapper.toDto(vacancy);
     }
 
+    public void deleteVacancy(long vacancyId) {
+        
+    }
+
     public List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
         return getVacancyById(vacancyId).getCandidates();
     }
