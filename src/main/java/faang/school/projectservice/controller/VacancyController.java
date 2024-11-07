@@ -38,4 +38,9 @@ public class VacancyController {
     public ResponseEntity<List<VacancyDto>> filterVacancies(@Valid @RequestBody FilterVacancyDto filters) {
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.filterVacancies(filters));
     }
+
+    @GetMapping("/{vacancyId})")
+    public ResponseEntity<VacancyDto> getVacancy(@PathVariable @Positive long vacancyId) {
+        return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getVacancyDtoById(vacancyId));
+    }
 }

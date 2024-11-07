@@ -58,6 +58,11 @@ public class VacancyService {
         vacancyRepository.deleteById(vacancyId);
     }
 
+    public VacancyDto getVacancyDtoById(long id) {
+        vacancyValidator.validateVacancyExistsById(id);
+        return vacancyMapper.toDto(getVacancyById(id));
+    }
+
     public List<VacancyDto> filterVacancies(FilterVacancyDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()

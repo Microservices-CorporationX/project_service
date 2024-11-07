@@ -214,6 +214,18 @@ class VacancyServiceTest {
     }
 
     @Test
+    @DisplayName("Get vacancy dto by id successfully")
+    void testGetVacancyDtoByIdSuccess() {
+        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
+        when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
+
+        VacancyDto result = vacancyService.getVacancyDtoById(vacancy.getId());
+
+        assertNotNull(result);
+        assertEquals(dto, result);
+    }
+
+    @Test
     @DisplayName("Get candidates by vacancy id successful")
     void testGetCandidatesByVacancyIdValid() {
         vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
@@ -273,5 +285,4 @@ class VacancyServiceTest {
                 projectValidator,
                 vacancyFilters);
     }
-
 }

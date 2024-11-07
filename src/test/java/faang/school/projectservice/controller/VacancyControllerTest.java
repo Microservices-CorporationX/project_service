@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +97,18 @@ class VacancyControllerTest {
         assertEquals(List.of(dto), resultDto);
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
         assertEquals("Vacancy 1", resultDto.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Get vacancy by id successfully")
+    void testGetVacancyByIdSuccess() {
+        when(vacancyService.getVacancyDtoById(dto.getId())).thenReturn(dto);
+
+        ResponseEntity<VacancyDto> resultResponse = vacancyController.getVacancy(dto.getId());
+
+        assertNotNull(resultResponse);
+        assertEquals(dto, resultResponse.getBody());
+        assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
     }
 
     private VacancyDto createTestVacancyDto() {
