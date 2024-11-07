@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
@@ -30,10 +31,12 @@ class VacancyControllerTest {
     private VacancyController vacancyController;
 
     VacancyDto dto;
+    FilterVacancyDto filters;
 
     @BeforeEach
     void setUp() {
         dto = createTestVacancyDto();
+        filters = createTestFilterVacancyDto();
     }
 
     @Test
@@ -80,6 +83,22 @@ class VacancyControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
     }
 
+    @Test
+    @DisplayName("Filter vacancies successfully")
+    void testFilterVacanciesSuccess() {
+        when(vacancyService.filterVacancies(filters)).thenReturn(List.of(dto));
+
+        ResponseEntity<List<VacancyDto>> resultResponse = vacancyController.filterVacancies(filters);
+        List<VacancyDto> resultDto = resultResponse.getBody();
+
+        verify(vacancyService).filterVacancies(filters);
+
+        assertNotNull(resultResponse);
+        assertEquals(List.of(dto), resultDto);
+        assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
+        assertEquals("Vacancy 1", resultDto.get(0).getName());
+    }
+
     private VacancyDto createTestVacancyDto() {
         return VacancyDto.builder()
                 .id(1L)
@@ -91,6 +110,14 @@ class VacancyControllerTest {
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
                 .requiredSkillIds(List.of(1L))
+                .build();
+    }
+
+    private FilterVacancyDto createTestFilterVacancyDto() {
+        return FilterVacancyDto.builder()
+                .title("Vacancy 1")
+                .salary(100.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
                 .build();
     }
 }
