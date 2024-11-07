@@ -2,10 +2,12 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -32,6 +34,14 @@ public class ProjectRepository {
     }
 
     public Project save(Project project){
+        return projectJpaRepository.save(project);
+    }
+
+    public Project create(Project project){
+        project.setCreatedAt(LocalDateTime.now());
+        project.setUpdatedAt(LocalDateTime.now());
+        project.setStatus(ProjectStatus.CREATED);
+
         return projectJpaRepository.save(project);
     }
 

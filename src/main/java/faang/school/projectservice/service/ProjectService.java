@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -32,27 +33,22 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(ProjectFilterDto projectFilterDto) {
-        Stream<Project> projects = projectRepository.findAll().stream()
-                .filter(project -> project.getTeams().stream()
-                        .anyMatch(team -> team.getTeamMembers().stream()
-                                .anyMatch(teamMember -> teamMember.getUserId() == userContext.getUserId())));
+        Stream<Project> projects = projectRepository.findAll().stream();
 
-        projectFilters.stream()
+        return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
-                .forEach(filter -> filter.apply(projectFilterDto, projects));
-
-        return projects.map(projectMapper::toDto).toList();
+                .flatMap(filter -> filter.apply(projectFilterDto, projects))
+                .filter(project -> isUserMemberOfPrivateProject(project, userContext.getUserId()))
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     public ProjectDto createProject(ProjectDto projectDto) {
         projectValidator.validate(projectDto, this::existsByOwnerUserIdAndName, userContext.getUserId());
 
         Project project = projectMapper.toEntity(projectDto);
-        project.setCreatedAt(LocalDateTime.now());
-        project.setUpdatedAt(LocalDateTime.now());
-        project.setStatus(ProjectStatus.CREATED);
 
-        return projectMapper.toDto(projectRepository.save(project));
+        return projectMapper.toDto(projectRepository.create(project));
     }
 
     public ProjectDto updateProject(ProjectDto projectDto) {
@@ -67,7 +63,21 @@ public class ProjectService {
         return projectMapper.toDto(projectRepository.save(project));
     }
 
-    public boolean existsByOwnerUserIdAndName(Long userUd, String projectName) {
-        return projectRepository.existsByOwnerUserIdAndName(userUd, projectName);
+    public boolean existsByOwnerUserIdAndName(Long userId, String projectName) {
+        return projectRepository.existsByOwnerUserIdAndName(userId, projectName);
+    }
+
+    private boolean isUserMemberOfPrivateProject(Project project, long userId) {
+        if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
+            if (project.getTeams() != null) {
+                return project.getTeams().stream()
+                        .filter(Objects::nonNull)
+                        .anyMatch(team -> team.getTeamMembers() != null && team.getTeamMembers().stream()
+                                .filter(Objects::nonNull)
+                                .anyMatch(teamMember -> teamMember.getUserId() == userId));
+            }
+            return false;
+        }
+        return true;
     }
 }

@@ -13,7 +13,7 @@ public class NameFilter implements ProjectFilter {
     }
 
     @Override
-    public void apply(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
-        projects.filter(project -> project.getName().contains(projectFilterDto.getName()));
+    public Stream<Project> apply(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
+        return projects.filter(project -> project.getName().contains(projectFilterDto.getName()));
     }
 }
