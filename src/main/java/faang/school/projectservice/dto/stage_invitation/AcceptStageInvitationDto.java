@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto.stage_invitation;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcceptStageInvitation {
+public class AcceptStageInvitationDto {
     @Positive(message = "Id must be positive")
     @NotNull(message = "Id must not be null")
     private Long id;

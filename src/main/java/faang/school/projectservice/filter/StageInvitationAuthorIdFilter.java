@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.client.StageInvitationFilters;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.springframework.stereotype.Component;
 
@@ -8,14 +8,14 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationAuthorIdFilter implements Filter<StageInvitation, StageInvitationFilters> {
+public class StageInvitationAuthorIdFilter implements Filter<StageInvitation, StageInvitationFiltersDto> {
     @Override
-    public boolean isApplicable(StageInvitationFilters filters) {
+    public boolean isApplicable(StageInvitationFiltersDto filters) {
         return filters.getAuthorId() != null;
     }
 
     @Override
-    public Stream<StageInvitation> apply(Stream<StageInvitation> stages, StageInvitationFilters filters) {
+    public Stream<StageInvitation> apply(Stream<StageInvitation> stages, StageInvitationFiltersDto filters) {
         return stages.filter(stage -> Objects.equals(stage.getAuthor().getId(), filters.getAuthorId()));
     }
 }

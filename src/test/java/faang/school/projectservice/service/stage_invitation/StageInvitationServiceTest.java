@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.stage_invitation;
 
-import faang.school.projectservice.dto.client.AcceptStageInvitation;
-import faang.school.projectservice.dto.client.RejectStageInvitation;
-import faang.school.projectservice.dto.client.StageInvitationDto;
-import faang.school.projectservice.dto.client.StageInvitationFilters;
+import faang.school.projectservice.dto.stage_invitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.RejectStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.Team;
@@ -15,6 +15,7 @@ import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.StageInvitationService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.validations.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,9 @@ class StageInvitationServiceTest {
 
     @InjectMocks
     private StageInvitationService stageInvitationService;
+
+    @Mock
+    private StageInvitationValidator stageInvitationValidator;
 
     @Mock
     private List<Filter> stageInvitationFilters;
@@ -130,9 +134,10 @@ class StageInvitationServiceTest {
     @Test
     void testSendStageInvitationFailureInvalidStage() {
         when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(null);
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(null);
 
-        stageInvitationService.sendStageInvitation(stageInvitationDto);
+        StageInvitationDto stageInvitation = stageInvitationService.sendStageInvitation(stageInvitationDto);
+
+        assertNull(stageInvitation);
 
         verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
         verify(teamMemberService, never()).getTeamMemberByUserId(null);
@@ -157,7 +162,9 @@ class StageInvitationServiceTest {
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId())).thenReturn(author);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId())).thenReturn(null);
 
-        stageInvitationService.sendStageInvitation(stageInvitationDto);
+        StageInvitationDto response = stageInvitationService.sendStageInvitation(stageInvitationDto);
+
+        assertNull(response);
 
         verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
@@ -167,8 +174,8 @@ class StageInvitationServiceTest {
 
     @Test
     void testAcceptStageInvitation() {
-        AcceptStageInvitation acceptStageInvitation = new AcceptStageInvitation();
-        acceptStageInvitation.setId(1L);
+        AcceptStageInvitationDto acceptStageInvitationDto = new AcceptStageInvitationDto();
+        acceptStageInvitationDto.setId(1L);
 
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setId(1L);
@@ -188,7 +195,7 @@ class StageInvitationServiceTest {
         StageInvitationDto expectedDto = new StageInvitationDto();
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(expectedDto);
 
-        StageInvitationDto result = stageInvitationService.acceptStageInvitation(acceptStageInvitation);
+        StageInvitationDto result = stageInvitationService.acceptStageInvitation(acceptStageInvitationDto);
 
         assertNotNull(result);
         verify(stageInvitationRepository, times(1)).findById(1L);
@@ -199,9 +206,9 @@ class StageInvitationServiceTest {
 
     @Test
     void testRejectStageInvitation() {
-        RejectStageInvitation rejectStageInvitation = new RejectStageInvitation();
-        rejectStageInvitation.setId(1L);
-        rejectStageInvitation.setDescription("Not interested");
+        RejectStageInvitationDto rejectStageInvitationDto = new RejectStageInvitationDto();
+        rejectStageInvitationDto.setId(1L);
+        rejectStageInvitationDto.setDescription("Not interested");
 
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setId(1L);
@@ -213,7 +220,7 @@ class StageInvitationServiceTest {
         StageInvitationDto expectedDto = new StageInvitationDto();
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(expectedDto);
 
-        StageInvitationDto result = stageInvitationService.rejectStageInvitation(rejectStageInvitation);
+        StageInvitationDto result = stageInvitationService.rejectStageInvitation(rejectStageInvitationDto);
 
         assertNotNull(result);
         verify(stageInvitationRepository, times(1)).findById(1L);
@@ -225,7 +232,7 @@ class StageInvitationServiceTest {
 
     @Test
     void testFilters() {
-        StageInvitationFilters filters = mock(StageInvitationFilters.class);
+        StageInvitationFiltersDto filters = mock(StageInvitationFiltersDto.class);
         StageInvitation firstInvitation = mock(StageInvitation.class);
         StageInvitation secondInvitation = mock(StageInvitation.class);
         StageInvitationDto dto = mock(StageInvitationDto.class);

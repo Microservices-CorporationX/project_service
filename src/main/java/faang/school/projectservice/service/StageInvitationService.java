@@ -1,14 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.AcceptStageInvitation;
-import faang.school.projectservice.dto.client.RejectStageInvitation;
-import faang.school.projectservice.dto.client.StageInvitationDto;
-import faang.school.projectservice.dto.client.StageInvitationFilters;
+import faang.school.projectservice.dto.stage_invitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.RejectStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.validations.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,13 @@ public class StageInvitationService {
     private final StageService stageService;
     private final StageInvitationMapper stageInvitationMapper;
     private final TeamMemberService teamMemberService;
+    private final StageInvitationValidator stageInvitationValidator;
 
-    private final List<Filter<StageInvitation, StageInvitationFilters>> stageInvitationFilters;
+    private final List<Filter<StageInvitation, StageInvitationFiltersDto>> stageInvitationFilters;
 
     public StageInvitationDto sendStageInvitation(StageInvitationDto stageInvitationDto) {
+        stageInvitationValidator.validateStageInvitation(stageInvitationDto);
+
         StageInvitation stageInvitation = StageInvitation
                 .builder()
                 .stage(stageService.getById(stageInvitationDto.getStageId()))
@@ -39,7 +43,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto acceptStageInvitation(AcceptStageInvitation stageInvitationDto) {
+    public StageInvitationDto acceptStageInvitation(AcceptStageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationDto.getId());
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         stageInvitationRepository.save(stageInvitation);
@@ -48,7 +52,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto rejectStageInvitation(RejectStageInvitation rejectStageInvitationDto) {
+    public StageInvitationDto rejectStageInvitation(RejectStageInvitationDto rejectStageInvitationDto) {
         StageInvitation stageInvitation = stageInvitationRepository.findById(rejectStageInvitationDto.getId());
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(rejectStageInvitationDto.getDescription());
@@ -58,7 +62,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public List<StageInvitationDto> filters(StageInvitationFilters filters) {
+    public List<StageInvitationDto> filters(StageInvitationFiltersDto filters) {
         Stream<StageInvitation> stageInvitation = stageInvitationRepository.findAll().stream();
 
         Stream<StageInvitation> filteredGoals = stageInvitationFilters.stream()

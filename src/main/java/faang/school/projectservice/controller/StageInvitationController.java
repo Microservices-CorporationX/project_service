@@ -1,9 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.AcceptStageInvitation;
-import faang.school.projectservice.dto.client.RejectStageInvitation;
-import faang.school.projectservice.dto.client.StageInvitationDto;
-import faang.school.projectservice.dto.client.StageInvitationFilters;
+import faang.school.projectservice.dto.stage_invitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.RejectStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +28,17 @@ public class StageInvitationController {
     }
 
     @PutMapping("/accept")
-    public ResponseEntity<StageInvitationDto> acceptStageInvitation(@Valid @RequestBody AcceptStageInvitation stageInvitation) {
+    public ResponseEntity<StageInvitationDto> acceptStageInvitation(@Valid @RequestBody AcceptStageInvitationDto stageInvitation) {
         return ResponseEntity.ok(stageInvitationService.acceptStageInvitation(stageInvitation));
     }
 
     @PutMapping("/reject")
-    public ResponseEntity<StageInvitationDto> rejectStageInvitation(@Valid @RequestBody RejectStageInvitation rejectStageInvitationDto) {
+    public ResponseEntity<StageInvitationDto> rejectStageInvitation(@Valid @RequestBody RejectStageInvitationDto rejectStageInvitationDto) {
         return ResponseEntity.ok(stageInvitationService.rejectStageInvitation(rejectStageInvitationDto));
     }
 
     @PostMapping("/filters")
-    public ResponseEntity<List<StageInvitationDto>> filterStageInvitation(@Valid @RequestBody StageInvitationFilters filters) {
+    public ResponseEntity<List<StageInvitationDto>> filterStageInvitation(@Valid @RequestBody StageInvitationFiltersDto filters) {
         return ResponseEntity.ok(stageInvitationService.filters(filters));
     }
 }

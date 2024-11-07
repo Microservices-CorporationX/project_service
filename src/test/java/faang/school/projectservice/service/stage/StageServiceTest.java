@@ -78,4 +78,20 @@ class StageServiceTest {
 
         verify(stageRepository, times(1)).getById(1L);
     }
+
+    @Test
+    void existsById_ShouldReturnTrue_WhenStageExists() {
+        Long stageId = 1L;
+        when(stageRepository.existsById(stageId)).thenReturn(true);
+
+        assertTrue(stageService.existsById(stageId));
+    }
+
+    @Test
+    void existsById_ShouldReturnFalse_WhenStageDoesNotExist() {
+        Long stageId = 2L;
+        when(stageRepository.existsById(stageId)).thenReturn(false);
+
+        assertFalse(stageService.existsById(stageId));
+    }
 }

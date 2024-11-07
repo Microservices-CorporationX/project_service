@@ -2,10 +2,10 @@ package faang.school.projectservice.controller.stage_invitation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.controller.StageInvitationController;
-import faang.school.projectservice.dto.client.AcceptStageInvitation;
-import faang.school.projectservice.dto.client.RejectStageInvitation;
-import faang.school.projectservice.dto.client.StageInvitationDto;
-import faang.school.projectservice.dto.client.StageInvitationFilters;
+import faang.school.projectservice.dto.stage_invitation.AcceptStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.RejectStageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFiltersDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.StageInvitationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +73,7 @@ class StageInvitationControllerTest {
 
     @Test
     void testAcceptStageInvitation() throws Exception {
-        AcceptStageInvitation stageInvitation = new AcceptStageInvitation();
+        AcceptStageInvitationDto stageInvitation = new AcceptStageInvitationDto();
         stageInvitation.setId(1L);
 
         StageInvitationDto responseDto = new StageInvitationDto();
@@ -94,17 +94,17 @@ class StageInvitationControllerTest {
 
     @Test
     void testRejectStageInvitation() throws Exception {
-        RejectStageInvitation rejectStageInvitation = new RejectStageInvitation();
-        rejectStageInvitation.setId(1L);
-        rejectStageInvitation.setDescription("Declined due to scheduling issues");
+        RejectStageInvitationDto rejectStageInvitationDto = new RejectStageInvitationDto();
+        rejectStageInvitationDto.setId(1L);
+        rejectStageInvitationDto.setDescription("Declined due to scheduling issues");
 
         StageInvitationDto responseDto = new StageInvitationDto();
         responseDto.setId(1L);
         responseDto.setStatus(StageInvitationStatus.REJECTED);
 
-        when(stageInvitationService.rejectStageInvitation(rejectStageInvitation)).thenReturn(responseDto);
+        when(stageInvitationService.rejectStageInvitation(rejectStageInvitationDto)).thenReturn(responseDto);
 
-        String requestJson = objectMapper.writeValueAsString(rejectStageInvitation);
+        String requestJson = objectMapper.writeValueAsString(rejectStageInvitationDto);
 
         mockMvc.perform(put("/api/v1/stage-invitation/reject")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +116,7 @@ class StageInvitationControllerTest {
 
     @Test
     void testFilterStageInvitation() throws Exception {
-        StageInvitationFilters filters = new StageInvitationFilters();
+        StageInvitationFiltersDto filters = new StageInvitationFiltersDto();
         filters.setStatus(StageInvitationStatus.PENDING);
 
         StageInvitationDto firstResponseDto = new StageInvitationDto();
@@ -127,7 +127,7 @@ class StageInvitationControllerTest {
         secondResponseDto.setId(2L);
         secondResponseDto.setStatus(StageInvitationStatus.PENDING);
 
-        when(stageInvitationService.filters(any(StageInvitationFilters.class)))
+        when(stageInvitationService.filters(any(StageInvitationFiltersDto.class)))
                 .thenReturn(List.of(firstResponseDto, secondResponseDto));
 
         String requestJson = objectMapper.writeValueAsString(filters);

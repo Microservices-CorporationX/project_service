@@ -13,4 +13,8 @@ public class TeamMemberService {
     public TeamMember getTeamMemberByUserId(Long userId) {
         return teamMemberRepository.findById(userId);
     }
+
+    public boolean existsById(Long userId) {
+        return teamMemberRepository.existsById(userId);
+    }
 }

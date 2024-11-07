@@ -60,4 +60,20 @@ class TeamMemberServiceTest {
 
         verify(teamMemberRepository, times(1)).findById(userId);
     }
+
+    @Test
+    void existsByIdShouldReturnTrueWhenUserExists() {
+        Long userId = 1L;
+        when(teamMemberRepository.existsById(userId)).thenReturn(true);
+
+        assertTrue(teamMemberService.existsById(userId));
+    }
+
+    @Test
+    void existsByIdShouldReturnFalseWhenUserDoesNotExist() {
+        Long userId = 2L;
+        when(teamMemberRepository.existsById(userId)).thenReturn(false);
+
+        assertFalse(teamMemberService.existsById(userId));
+    }
 }

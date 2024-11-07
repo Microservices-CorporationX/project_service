@@ -23,7 +23,11 @@ public class StageService {
         stageRepository.save(stage);
     }
 
-    public Stage getById(long stageId) {
+    public Stage getById(Long stageId) {
         return stageRepository.getById(stageId);
+    }
+
+    public boolean existsById(Long stageId) {
+        return stageRepository.existsById(stageId);
     }
 }
