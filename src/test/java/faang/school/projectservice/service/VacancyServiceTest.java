@@ -1,6 +1,9 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.vacancy.VacancyTitleFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
@@ -46,6 +49,7 @@ class VacancyServiceTest {
     @InjectMocks
     private VacancyService vacancyService;
 
+    private List<Filter<Vacancy, FilterVacancyDto>> vacancyFilters;
     private VacancyDto dto;
     private Vacancy vacancy;
 
@@ -53,6 +57,8 @@ class VacancyServiceTest {
     void setUp() {
         dto = createTestVacancyDto();
         vacancy = createTestVacancy();
+        Filter<Vacancy, FilterVacancyDto> filterMock = mock(VacancyTitleFilter.class);
+        vacancyFilters = List.of(filterMock);
     }
 
     @Test
@@ -136,6 +142,78 @@ class VacancyServiceTest {
     }
 
     @Test
+    @DisplayName("Filter vacancies: 2 in, 2 out")
+    void testFilterVacanciesTwoInTwoOut() {
+        vacancyServiceInit();
+        FilterVacancyDto filterDto = FilterVacancyDto.builder().title("Foo").build();
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder().name("Foo").build(),
+                Vacancy.builder().name("Bar").build()
+        );
+        List<VacancyDto> vacanciesDto = List.of(
+                VacancyDto.builder().name("Foo").build(),
+                VacancyDto.builder().name("Bar").build()
+        );
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        when(vacancyFilters.get(0).isApplicable(filterDto)).thenReturn(true);
+        when(vacancyFilters.get(0).apply(any(), any())).thenReturn(vacancies.stream());
+        when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
+        when(vacancyMapper.toDto(vacancies.get(1))).thenReturn(vacanciesDto.get(1));
+
+        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Foo", result.get(0).getName());
+        assertEquals("Bar", result.get(1).getName());
+    }
+
+    @Test
+    @DisplayName("Filter vacancies: 2 in, 1 out")
+    void testFilterVacanciesTwoInOneOut() {
+        vacancyServiceInit();
+        FilterVacancyDto filterDto = FilterVacancyDto.builder().title("Foo").build();
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder().name("Foo").build()
+        );
+        List<VacancyDto> vacanciesDto = List.of(
+                VacancyDto.builder().name("Foo").build(),
+                VacancyDto.builder().name("Bar").build()
+        );
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        when(vacancyFilters.get(0).isApplicable(filterDto)).thenReturn(true);
+        when(vacancyFilters.get(0).apply(any(), any())).thenReturn(vacancies.stream());
+        when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
+
+        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Foo", result.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Filter vacancies: 2 in, 0 out")
+    void testFilterVacanciesTwoInZeroOut() {
+        vacancyServiceInit();
+        FilterVacancyDto filterDto = FilterVacancyDto.builder().title("Foo").build();
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder().name("Foo").build(),
+                Vacancy.builder().name("Bar").build()
+        );
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        when(vacancyFilters.get(0).isApplicable(filterDto)).thenReturn(false);
+
+        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
     @DisplayName("Get candidates by vacancy id successful")
     void testGetCandidatesByVacancyIdValid() {
         vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
@@ -183,6 +261,17 @@ class VacancyServiceTest {
                 .count(1)
                 .requiredSkillIds(List.of(1L))
                 .build();
+    }
+
+    private void vacancyServiceInit() {
+        vacancyService = new VacancyService(
+                vacancyRepository,
+                vacancyMapper,
+                projectService,
+                candidateService,
+                vacancyValidator,
+                projectValidator,
+                vacancyFilters);
     }
 
 }

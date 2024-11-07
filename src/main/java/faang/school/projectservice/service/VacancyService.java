@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class VacancyService {
     private final CandidateService candidateService;
     private final VacancyValidator vacancyValidator;
     private final ProjectValidator projectValidator;
+    private final List<Filter<Vacancy, FilterVacancyDto>> vacancyFilters;
 
     @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
@@ -52,6 +56,15 @@ public class VacancyService {
         vacancyValidator.validateVacancyExistsById(vacancyId);
         getRejectedCandidatesIds(vacancyId).forEach(candidateService::deleteCandidateById);
         vacancyRepository.deleteById(vacancyId);
+    }
+
+    public List<VacancyDto> filterVacancies(FilterVacancyDto filters) {
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+        return vacancyFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(vacancies, filters))
+                .map(vacancyMapper::toDto)
+                .toList();
     }
 
     public List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
