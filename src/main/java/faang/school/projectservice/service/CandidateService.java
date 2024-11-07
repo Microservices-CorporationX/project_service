@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.CandidateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,5 +19,14 @@ public class CandidateService {
 
     public List<Candidate> findCandidates(List<Long> candidatesIds) {
         return candidateRepository.findAllById(candidatesIds);
+    }
+
+    public void mapCandidatesToVacancy(List<Long> candidatesIds, Vacancy vacancy) {
+        List<Candidate> candidates = findCandidates(candidatesIds);
+        for (Candidate candidate : candidates) {
+            candidate.setVacancy(vacancy);
+            vacancy.addCandidate(candidate);
+            candidateRepository.save(candidate);
+        }
     }
 }

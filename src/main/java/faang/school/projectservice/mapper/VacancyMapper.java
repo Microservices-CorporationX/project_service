@@ -17,7 +17,7 @@ public interface VacancyMapper {
     @Mapping(source = "project.id", target = "projectId")
     VacancyDto toDto(Vacancy vacancy);
 
-    @Mapping(target = "project.id", ignore = true)
+    @Mapping(target = "project", ignore = true)
     @Mapping(target = "candidates", ignore = true)
     Vacancy toEntity(VacancyDto vacancyDto);
 
@@ -30,5 +30,4 @@ public interface VacancyMapper {
                 .map(Candidate::getId)
                 .toList();
     }
-
 }

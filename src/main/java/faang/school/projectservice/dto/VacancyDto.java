@@ -12,8 +12,8 @@ import java.util.List;
 public record VacancyDto(
         Long id,
         @NotBlank String name,
-        @Positive Long projectId,
         @NotBlank String description,
+        @Positive Long projectId,
         List<Long> candidatesIds,
         @NotBlank VacancyStatus status,
         @NotNull Long createdBy,

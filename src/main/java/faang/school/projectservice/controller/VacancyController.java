@@ -19,14 +19,14 @@ public class VacancyController {
     private final VacancyValidator vacancyValidator = new VacancyValidator();
     private final VacancyService vacancyService;
 
-    public void createVacancy(@NotNull VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(@NotNull VacancyDto vacancyDto) {
         vacancyValidator.validateVacancyFields(vacancyDto);
-        vacancyService.createVacancy(vacancyDto);
+        return vacancyService.createVacancy(vacancyDto);
     }
 
-    public void updateVacancy(@NotNull VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(@NotNull VacancyDto vacancyDto) {
         vacancyValidator.validateId(vacancyDto.id());
-        vacancyService.updateVacancy(vacancyDto);
+        return vacancyService.updateVacancy(vacancyDto);
     }
 
     public void deleteVacancy(@NotNull VacancyDto vacancyDto) {

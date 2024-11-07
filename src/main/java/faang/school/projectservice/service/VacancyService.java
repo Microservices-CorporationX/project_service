@@ -6,12 +6,14 @@ import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
+import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -24,17 +26,27 @@ public class VacancyService {
     private final ProjectService projectService;
     private final VacancyMapper vacancyMapper;
 
-    public void createVacancy(VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(VacancyDto vacancyDto) {
         long curatorId = vacancyDto.createdBy();
         checkCuratorAccess(curatorId);
+
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
         vacancy.setProject(vacancyProject);
+        if (vacancyDto.candidatesIds() != null) {
+            candidateService.mapCandidatesToVacancy(vacancyDto.candidatesIds(), vacancy);
+        } else {
+            vacancy.setCandidates(new ArrayList<>());
+        }
+        vacancy.setStatus(VacancyStatus.OPEN);
+        vacancy.setCreatedAt(LocalDateTime.now());
         vacancyRepository.save(vacancy);
+
         log.info("Vacancy with ID {} created successfully", vacancy.getId());
+        return vacancyMapper.toDto(vacancy);
     }
 
-    public void updateVacancy(VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
         long curatorId = vacancyDto.createdBy();
         checkCuratorAccess(curatorId);
@@ -48,11 +60,7 @@ public class VacancyService {
             vacancy.setDescription(vacancyDto.description());
         }
         if (vacancyDto.candidatesIds() != null) {
-            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
-            for (Candidate candidate : candidates) {
-                candidate.setVacancy(vacancy);
-                vacancy.addCandidate(candidate);
-            }
+            candidateService.mapCandidatesToVacancy(vacancyDto.candidatesIds(), vacancy);
         }
         if (vacancyDto.status() != null) {
             vacancy.setStatus(vacancyDto.status());
@@ -63,15 +71,19 @@ public class VacancyService {
 
         vacancy.setUpdatedAt(LocalDateTime.now());
         vacancyRepository.save(vacancy);
+
         log.info("Vacancy with ID {} updated successfully", vacancyId);
+        return vacancyMapper.toDto(vacancy);
     }
 
     public void deleteVacancy(VacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
         Vacancy vacancy = findVacancy(vacancyId);
         List<Candidate> candidates = vacancy.getCandidates();
-        for (Candidate candidate : candidates) {
-            candidateService.deleteCandidate(candidate.getId());
+        if (candidates != null) {
+            for (Candidate candidate : candidates) {
+                candidateService.deleteCandidate(candidate.getId());
+            }
         }
         vacancyRepository.deleteById(vacancyId);
         log.info("Vacancy with ID {} deleted successfully", vacancyId);
@@ -80,7 +92,7 @@ public class VacancyService {
     public List<VacancyDto> getFilteredVacancies(String name, String position) {
         List<Vacancy> vacancies = vacancyRepository.findAll();
         List<Vacancy> filteredVacancies = vacancies.stream()
-                .filter(vacancy -> vacancy.getName().contains(name) && vacancy.getDescription().contains(position))
+                .filter(vacancy -> vacancy.containsName(name) && vacancy.containsPosition(position))
                 .toList();
         return vacancyMapper.toDto(filteredVacancies);
     }
