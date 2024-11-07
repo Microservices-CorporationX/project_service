@@ -10,7 +10,11 @@ import org.springframework.stereotype.Service;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public TeamMember getTeamMemberById(Long userId) {
+    public TeamMember getTeamMemberByUserId(Long userId) {
         return teamMemberRepository.findById(userId);
+    }
+
+    public boolean existsById(Long userId) {
+        return teamMemberRepository.existsById(userId);
     }
 }

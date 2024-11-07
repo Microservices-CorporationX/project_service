@@ -30,7 +30,7 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("Get project by id")
-    void getProjectById() {
+    void testGetProjectById() {
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
 
         Project result = projectService.getProjectById(project.getId());
@@ -42,7 +42,7 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("Check project exists by id")
-    void checkProjectExistsById() {
+    void testCheckProjectExistsById() {
         when(projectRepository.existsById(project.getId())).thenReturn(true);
 
         boolean result = projectService.checkProjectExistsById(project.getId());
@@ -53,7 +53,7 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("Check project exists by invalid id")
-    void checkProjectExistsByInvalidId() {
+    void testCheckProjectExistsByInvalidId() {
         when(projectRepository.existsById(project.getId())).thenReturn(false);
 
         boolean result = projectService.checkProjectExistsById(project.getId());

@@ -35,10 +35,10 @@ class TeamMemberServiceTest {
 
     @Test
     @DisplayName("Get team member by id")
-    void getTeamMemberById() {
+    void testGetTeamMemberById() {
         when(teamMemberRepository.findById(teamMember.getId())).thenReturn(teamMember);
 
-        TeamMember result = teamMemberService.getTeamMemberById(teamMember.getId());
+        TeamMember result = teamMemberService.getTeamMemberByUserId(teamMember.getId());
 
         assertNotNull(result);
         assertEquals(teamMember, result);

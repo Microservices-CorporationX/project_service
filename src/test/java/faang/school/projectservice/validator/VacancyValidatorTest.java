@@ -73,42 +73,42 @@ class VacancyValidatorTest {
     @Test
     @DisplayName("Check the vacancy creator has valid role")
     void testValidateVacancyCreatorRoleValid() {
-        when(teamMemberService.getTeamMemberById(dto.getCreatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(dto.getCreatedBy())).thenReturn(teamMember);
 
         assertDoesNotThrow(() -> vacancyValidator.validateVacancyCreatorRole(dto));
 
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getCreatedBy());
     }
 
     @Test
     @DisplayName("Check the vacancy creator has invalid role")
     void testValidateVacancyCreatorRoleInvalid() {
         teamMember.setRoles(List.of(TeamRole.DESIGNER));
-        when(teamMemberService.getTeamMemberById(dto.getCreatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(dto.getCreatedBy())).thenReturn(teamMember);
 
         Exception ex = assertThrows(DataValidationException.class, (() -> vacancyValidator.validateVacancyCreatorRole(dto)));
         assertEquals("Vacancy can be created by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getCreatedBy());
     }
 
     @Test
     @DisplayName("Check the updater of the vacancy has valid role")
     void testValidateVacancyUpdaterRoleValid(){
-        when(teamMemberService.getTeamMemberById(dto.getUpdatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy())).thenReturn(teamMember);
 
         assertDoesNotThrow(() -> vacancyValidator.validateVacancyUpdaterRole(dto));
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getUpdatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getUpdatedBy());
     }
 
     @Test
     @DisplayName("Check the updater of the vacancy has invalid role")
     void testValidateVacancyUpdaterRoleInvalid(){
         teamMember.setRoles(List.of(TeamRole.ANALYST));
-        when(teamMemberService.getTeamMemberById(dto.getUpdatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy())).thenReturn(teamMember);
 
         Exception ex = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancyUpdaterRole(dto));
         assertEquals("Vacancy status can be modified by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getUpdatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getUpdatedBy());
     }
 
     @Test

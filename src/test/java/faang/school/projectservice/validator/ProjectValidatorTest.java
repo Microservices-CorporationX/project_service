@@ -41,7 +41,7 @@ class ProjectValidatorTest {
 
     @Test
     @DisplayName("Check project exists")
-    void validateProjectExistsById() {
+    void testValidateProjectExistsById() {
         Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(true);
 
@@ -52,7 +52,7 @@ class ProjectValidatorTest {
 
     @Test
     @DisplayName("Check project doesn't exist")
-    void validateProjectInVacancyNotExists() {
+    void testValidateProjectInVacancyNotExists() {
         Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
