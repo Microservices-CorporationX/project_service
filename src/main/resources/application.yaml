@@ -57,6 +57,8 @@ services:
     port: 8080
 
 project:
+  campaign:
+    batch_size: 100
   service:
     name: project-service
   jira:
