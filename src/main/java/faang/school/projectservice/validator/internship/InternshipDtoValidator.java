@@ -64,7 +64,7 @@ public class InternshipDtoValidator {
     }
 
     private void validateInternshipStatus(Internship internship, long internshipId) {
-        if (internship.getStatus() == InternshipStatus.COMPLETED) {
+        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             throw new DataValidationException(
                     "The internship with ID (%d) has been already completed!".formatted(internshipId)
             );

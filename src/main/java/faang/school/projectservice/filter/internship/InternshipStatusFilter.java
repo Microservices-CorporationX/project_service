@@ -14,6 +14,6 @@ public class InternshipStatusFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> apply(Stream<Internship> internships, InternshipFilterDto filterDto) {
-        return internships.filter(internship -> internship.getStatus() == filterDto.getInternshipStatus());
+        return internships.filter(internship -> internship.getStatus().equals(filterDto.getInternshipStatus()));
     }
 }

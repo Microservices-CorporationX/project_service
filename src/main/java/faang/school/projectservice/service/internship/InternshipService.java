@@ -22,6 +22,7 @@ import faang.school.projectservice.service.teamMember.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipDtoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
@@ -46,8 +47,9 @@ public class InternshipService {
 
     @Transactional
     public InternshipDto createInternship(InternshipCreationDto internshipCreationDto) {
-        TeamMember mentor = internshipDtoValidator.validateCreationDtoAndGetMentor(internshipCreationDto);
+        log.info("Received request to create internship for project ID {}", internshipCreationDto.getProjectId());
 
+        TeamMember mentor = internshipDtoValidator.validateCreationDtoAndGetMentor(internshipCreationDto);
         Internship internship = internshipMapper.toEntity(internshipCreationDto);
         Project project = mentor.getTeam().getProject();
 
@@ -63,11 +65,17 @@ public class InternshipService {
         internship.setProject(project);
         internship.setStatus(InternshipStatus.NOT_STARTED);
 
-        return internshipMapper.toDto(internshipRepository.save(internship));
+        Internship savedInternship = internshipRepository.save(internship);
+        log.info("Created internship with ID {} for project ID {}",
+                savedInternship.getId(), internshipCreationDto.getProjectId()
+        );
+
+        return internshipMapper.toDto(savedInternship);
     }
 
     @Transactional
     public InternshipUpdateRequestDto updateInternship(InternshipUpdateDto updateDto) {
+        log.info("Received request to update internship status, internship ID {}", updateDto.getInternshipId());
         Internship internship = internshipDtoValidator.validateUpdateDtoAndGetInternship(updateDto);
 
         List<TeamMember> interns = internship.getInterns();
@@ -84,6 +92,9 @@ public class InternshipService {
         teamService.save(internsProjectTeam);
         internshipRepository.save(internship);
 
+        log.info("The status of an internship with ID {} was updated. The project team was updated too.",
+                updateDto.getInternshipId()
+        );
         return InternshipUpdateRequestDto.builder()
                 .id(internship.getId())
                 .idsOfUsersWithCompletedTasks(idsOfUsersWithDoneTasks.stream().toList())
@@ -93,24 +104,32 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getFilteredInternships(InternshipFilterDto filterDto) {
-        Stream<Internship> allInternships = internshipRepository.findAll().stream();
+        log.info("Received request to get internships based on provided filters.");
 
-        return internshipMapper.toDto(
-                filters.stream()
-                        .filter(filter -> filter.isApplicable(filterDto))
-                        .reduce(
-                                allInternships,
-                                (internships, filter) -> filter.apply(internships, filterDto),
-                                (s1, s2) -> s2
-                        )
-                        .toList());
+        List<Internship> allInternships = internshipRepository.findAll();
+        List<Internship> filteredInternships = filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .reduce(
+                        allInternships.stream(),
+                        (internships, filter) -> filter.apply(internships, filterDto),
+                        (s1, s2) -> s2
+                )
+                .peek(internship -> log.debug("Filtered internship: ID={}, Status={}",
+                        internship.getId(), internship.getStatus()))
+                .toList();
+
+        log.info("Filtered internships: total={}, matching criteria={}", allInternships.size(), filteredInternships.size());
+
+        return internshipMapper.toDto(filteredInternships);
     }
 
     public List<InternshipDto> getAllInternships() {
+        log.info("Received request to get all internships.");
         return internshipMapper.toDto(internshipRepository.findAll());
     }
 
     public InternshipDto getInternshipById(long internshipId) {
+        log.info("Received request to get internship by its ID: {}.", internshipId);
         return internshipMapper.toDto(
                 internshipRepository.findById(internshipId)
                         .orElseThrow(() -> new DataValidationException(
