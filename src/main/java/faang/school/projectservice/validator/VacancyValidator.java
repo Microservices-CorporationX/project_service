@@ -35,7 +35,7 @@ public class VacancyValidator {
     }
 
     public void validateVacancyUpdaterRole(VacancyDto dto) {
-        TeamMember updater = teamMemberService.getTeamMemberById(dto.getUpdatedBy());
+        TeamMember updater = teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy());
         if (updater.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy status can be modified by following roles " + ROLES_TO_CREATE_VACANCY);
         }
