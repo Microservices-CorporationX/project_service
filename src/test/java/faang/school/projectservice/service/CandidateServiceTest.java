@@ -70,7 +70,6 @@ public class CandidateServiceTest {
 
         // Assert
         assertEquals(vacancy, candidate.getVacancy());
-        assertTrue(vacancy.getCandidates().contains(candidate));
         verify(candidateRepository, times(1)).save(candidate);
     }
 }

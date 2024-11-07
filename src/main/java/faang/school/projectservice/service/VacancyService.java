@@ -35,6 +35,10 @@ public class VacancyService {
         vacancy.setProject(vacancyProject);
         if (vacancyDto.candidatesIds() != null) {
             candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
+            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
+            for (Candidate candidate : candidates) {
+                vacancy.addCandidate(candidate);
+            }
         } else {
             vacancy.setCandidates(new ArrayList<>());
         }
@@ -61,6 +65,10 @@ public class VacancyService {
         }
         if (vacancyDto.candidatesIds() != null) {
             candidateService.updateCandidatesWithVacancy(vacancyDto.candidatesIds(), vacancy);
+            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
+            for (Candidate candidate : candidates) {
+                vacancy.addCandidate(candidate);
+            }
         }
         if (vacancyDto.status() != null) {
             vacancy.setStatus(vacancyDto.status());

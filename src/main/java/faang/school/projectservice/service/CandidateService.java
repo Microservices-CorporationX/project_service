@@ -25,7 +25,6 @@ public class CandidateService {
         List<Candidate> candidates = findCandidates(candidatesIds);
         for (Candidate candidate : candidates) {
             candidate.setVacancy(vacancy);
-            vacancy.addCandidate(candidate);
             candidateRepository.save(candidate);
         }
     }
