@@ -4,7 +4,8 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,9 @@ class VacancyServiceTest {
     @Mock
     private VacancyValidator vacancyValidator;
 
+    @Mock
+    private ProjectValidator projectValidator;
+
     @InjectMocks
     private VacancyService vacancyService;
 
@@ -62,7 +66,7 @@ class VacancyServiceTest {
         assertEquals(dto, result);
         assertEquals("Vacancy 1", result.getName());
 
-        verify(vacancyValidator, times(1)).validateProjectInVacancyExists(dto);
+        verify(projectValidator, times(1)).validateProjectExistsById(dto.getProjectId());
         verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
         verify(vacancyRepository, times(1)).save(vacancy);
     }
@@ -76,7 +80,7 @@ class VacancyServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.create(dto));
 
-        verify(vacancyValidator, times(1)).validateProjectInVacancyExists(dto);
+        verify(projectValidator, times(1)).validateProjectExistsById(dto.getProjectId());
         verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
     }
 

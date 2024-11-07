@@ -5,9 +5,12 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.InsufficientCandidatesException;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.WorkSchedule;
+import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.TeamMemberService;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +29,7 @@ import static org.mockito.Mockito.*;
 class VacancyValidatorTest {
 
     @Mock
-    private ProjectService projectService;
+    private VacancyRepository vacancyRepository;
 
     @Mock
     private TeamMemberService teamMemberService;
@@ -46,24 +49,26 @@ class VacancyValidatorTest {
     }
 
     @Test
-    @DisplayName("Check project in vacancy exists")
-    void testValidateProjectInVacancyExists() {
-        when(projectService.checkProjectExistsById(dto.getProjectId())).thenReturn(true);
+    @DisplayName("Check vacancy exists")
+    void validateVacancyExistsByIdValid() {
+        Long projectId = 1L;
+        when(vacancyRepository.existsById(projectId)).thenReturn(true);
 
-        assertDoesNotThrow(() -> vacancyValidator.validateProjectInVacancyExists(dto));
+        assertDoesNotThrow(() -> vacancyValidator.validateVacancyExistsById(projectId));
 
-        verify(projectService, times(1)).checkProjectExistsById(dto.getProjectId());
+        verify(vacancyRepository, times(1)).existsById(projectId);
     }
 
     @Test
-    @DisplayName("Check project in vacancy doesn't exist")
-    void testValidateProjectInVacancyNotExists() {
-        when(projectService.checkProjectExistsById(dto.getProjectId())).thenReturn(false);
+    @DisplayName("Check vacancy doesn't exist")
+    void validateVacancyExistsByIdInvalid() {
+        Long projectId = 1L;
+        when(vacancyRepository.existsById(projectId)).thenReturn(false);
 
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyValidator.validateProjectInVacancyExists(dto));
-        assertEquals("Project doesn't exist by id: 1", ex.getMessage());
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyValidator.validateVacancyExistsById(projectId));
+        assertEquals("Vacancy doesn't exist by id: 1", ex.getMessage());
 
-        verify(projectService, times(1)).checkProjectExistsById(dto.getProjectId());
+        verify(vacancyRepository, times(1)).existsById(projectId);
     }
 
     @Test
