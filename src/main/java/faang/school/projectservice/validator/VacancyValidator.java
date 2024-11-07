@@ -28,14 +28,14 @@ public class VacancyValidator {
     }
 
     public void validateVacancyCreatorRole(VacancyDto dto) {
-        TeamMember creator = teamMemberService.getTeamMemberById(dto.getCreatedBy());
-        if (creator.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
+        TeamMember teamMember = teamMemberService.getTeamMemberByUserId(dto.getCreatedBy());
+        if(teamMember.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy can be created by following roles " + ROLES_TO_CREATE_VACANCY);
         }
     }
 
     public void validateVacancyUpdaterRole(VacancyDto dto) {
-        TeamMember updater = teamMemberService.getTeamMemberById(dto.getUpdatedBy());
+        TeamMember updater = teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy());
         if (updater.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy status can be modified by following roles " + ROLES_TO_CREATE_VACANCY);
         }

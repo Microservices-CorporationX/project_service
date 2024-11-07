@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.VacancyStatus;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
