@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
-import faang.school.projectservice.validator.VacancyValidator;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -16,21 +17,19 @@ import java.util.List;
 @Controller
 @Validated
 public class VacancyController {
-    private final VacancyValidator vacancyValidator = new VacancyValidator();
     private final VacancyService vacancyService;
 
-    public VacancyDto createVacancy(@NotNull VacancyDto vacancyDto) {
-        vacancyValidator.validateVacancyFields(vacancyDto);
+    public VacancyDto createVacancy(@NotNull @Valid VacancyDto vacancyDto) {
         return vacancyService.createVacancy(vacancyDto);
     }
 
     public VacancyDto updateVacancy(@NotNull VacancyDto vacancyDto) {
-        vacancyValidator.validateId(vacancyDto.id());
+        checkDtoId(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
 
     public void deleteVacancy(@NotNull VacancyDto vacancyDto) {
-        vacancyValidator.validateId(vacancyDto.id());
+        checkDtoId(vacancyDto);
         vacancyService.deleteVacancy(vacancyDto);
     }
 
@@ -40,5 +39,11 @@ public class VacancyController {
 
     public VacancyDto getVacancy(@Positive long vacancyId) {
         return vacancyService.getVacancy(vacancyId);
+    }
+
+    private void checkDtoId(VacancyDto vacancyDto) {
+        if (vacancyDto.id() == null || vacancyDto.id() < 0) {
+            throw new DataValidationException("Vacancy ID cannot be null");
+        }
     }
 }

@@ -13,10 +13,10 @@ public record VacancyDto(
         Long id,
         @NotBlank String name,
         @NotBlank String description,
-        @Positive Long projectId,
+        @NotNull @Positive Long projectId,
         List<Long> candidatesIds,
         @NotBlank VacancyStatus status,
-        @NotNull Long createdBy,
+        @NotNull @Positive Long createdBy,
         @NotNull Integer count
 ) {
 }
