@@ -15,7 +15,6 @@ import java.util.List;
 public interface InternshipMapper {
 
     @Mapping(source = "creatorUserId", target = "createdBy")
-    @Mapping(source = "interns", target = "interns", ignore = true)
     Internship toEntity(InternshipCreationDto creationDto);
 
     @Mapping(source = "mentorId.userId", target = "mentorUserId")

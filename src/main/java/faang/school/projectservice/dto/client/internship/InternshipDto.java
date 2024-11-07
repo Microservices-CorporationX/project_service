@@ -18,6 +18,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class InternshipDto {
 
+    private Long id;
     private String description;
     private String name;
     private Long projectId;

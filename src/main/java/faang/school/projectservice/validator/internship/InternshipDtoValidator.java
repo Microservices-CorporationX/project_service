@@ -3,8 +3,10 @@ package faang.school.projectservice.validator.internship;
 import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ServiceCallException;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.teamMember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,8 +33,9 @@ public class InternshipDtoValidator {
     private final RestTemplate restTemplate;
     private final InternshipRepository internshipRepository;
     private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
 
-    public void validateInternshipCreationDto(InternshipCreationDto creationDto) {
+    public TeamMember validateCreationDtoAndGetMentor(InternshipCreationDto creationDto) {
         List<Long> allDtoUsers =
                 Stream.concat(
                         creationDto.getInternUserIds().stream(),
@@ -42,6 +45,8 @@ public class InternshipDtoValidator {
         validateUserIds(allDtoUsers);
         validateInternshipDuration(creationDto.getStartDate(), creationDto.getEndDate());
         validateProjectExistence(creationDto.getProjectId());
+
+        return getMentorForProject(creationDto.getMentorUserId(), creationDto.getProjectId());
     }
 
     private void validateUserIds(List<Long> userIds) {
@@ -70,6 +75,16 @@ public class InternshipDtoValidator {
         if (!projectService.isProjectExists(projectId)) {
             throw new DataValidationException(String.format("The project with ID %d does not exist in database!", projectId));
         }
+    }
+
+    private TeamMember getMentorForProject(long mentorUserId, long projectId) {
+        TeamMember mentor = teamMemberService.getByUserIdAndProjectId(mentorUserId, projectId);
+        if (mentor == null) {
+            throw new DataValidationException(
+                    "There is no mentor with user ID (%d) working with a project with ID (%d) in the database."
+                            .formatted(mentorUserId, projectId));
+        }
+        return mentor;
     }
 
     private List<Long> getNotExistingUserIds(List<Long> userIds) {
