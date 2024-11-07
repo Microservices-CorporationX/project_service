@@ -31,10 +31,8 @@ import java.util.stream.Stream;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
-    private final StageJpaRepository stageRepository;
-    private final TeamRepository teamRepository;
-    private final ProjectJpaRepository projectJpaRepository;
     private final MomentService momentService;
+    private final ProjectServiceValidate projectValidator;
     private final List<Filter<FilterProjectDto, Project>> filters;
 
     @Transactional
@@ -46,40 +44,43 @@ public class ProjectService {
         log.info("Got child project from Dto withing creating subproject with id = {}", childProject.getId());
         childProject.setParentProject(parentProject);
         parentProject.getChildren().add(childProject);
-        parentProject.setStages(getStages(subProjectDto));
-        parentProject.setTeams(getTeams(subProjectDto));
+        parentProject.setStages(projectValidator.getStages(subProjectDto));
+        parentProject.setTeams(projectValidator.getTeams(subProjectDto));
         projectRepository.save(parentProject);
         projectRepository.save(childProject);
         log.info("Saved child project with id = {} to DB", childProject.getId());
         return subProjectMapper.toDto(childProject);
     }
 
-    public CreateSubProjectDto updateSubProject(Long projectId, CreateSubProjectDto dto, Long userId) {
+    public CreateSubProjectDto updateProject(Long projectId, CreateSubProjectDto dto, Long userId) {
         Project project = projectRepository.getProjectById(projectId);
         List<Project> children = projectRepository.getSubProjectsByParentId(projectId);
-        if (dto.getVisibility() != project.getVisibility()) {
+        if (projectValidator.isVisibilityDtoAndProjectNotEquals(dto, project)) {
             updateVisibility(project, dto, children);
         }
-        if (dto.getStatus() != project.getStatus()) {
+        if (projectValidator.isStatusDtoAndProjectNotEquals(dto, project)) {
             updateStatus(project, dto, children, userId);
         }
-        project.setStages(getStages(dto));
-        project.setTeams(getTeams(dto));
+        project.setStages(projectValidator.getStages(dto));
+        project.setTeams(projectValidator.getTeams(dto));
         return subProjectMapper.toDto(projectRepository.save(project));
     }
 
     public List<CreateSubProjectDto> getProjectsByFilter(FilterProjectDto filterDto, Long projectId) {
-        Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
+        List<Project> projects = projectRepository.getSubProjectsByParentId(projectId);
+        Stream<Project> projectStream = projects.stream();
         return filters.stream()
-                .filter(f -> f.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(projectStream, filterDto))
+                .filter(filter -> filter.isApplicable(filterDto))
+                .reduce(projectStream,
+                        (stream,filter) -> filter.apply(stream, filterDto),
+                        ((s1, s2) -> s2))
                 .distinct()
                 .map(subProjectMapper::toDto)
                 .toList();
     }
 
     private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, Long userId) {
-        if (!dto.getStatus().equals(ProjectStatus.COMPLETED)) {
+        if (dto.getStatus() != ProjectStatus.COMPLETED) {
             project.setStatus(dto.getStatus());
             log.info("Set project status to {}", dto.getStatus());
         } else {
@@ -115,7 +116,7 @@ public class ProjectService {
         );
         if (dto.getVisibility().equals(ProjectVisibility.PRIVATE) && !children.isEmpty()) {
             children.forEach(child -> child.setVisibility(dto.getVisibility()));
-            projectJpaRepository.saveAll(children);
+            projectRepository.saveAll(children);
             log.info("Set project visibility to {} for all children of project with id = {}",
                     dto.getVisibility(), project.getId()
             );
@@ -136,16 +137,5 @@ public class ProjectService {
         }
     }
 
-    private List<Team> getTeams(CreateSubProjectDto dto) {
-        if (dto.getTeamsIds() != null) {
-            return teamRepository.findAllById(dto.getTeamsIds());
-        }
-        return null;
-    }
 
-    private List<Stage> getStages(CreateSubProjectDto dto) {
-        if (dto.getStagesIds() != null) {
-            return stageRepository.findAllById(dto.getStagesIds());
-        } else return null;
-    }
 }

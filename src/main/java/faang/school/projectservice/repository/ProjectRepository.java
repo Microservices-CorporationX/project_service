@@ -35,6 +35,10 @@ public class ProjectRepository {
         return projectJpaRepository.save(project);
     }
 
+    public void saveAll(List<Project> projects) {
+        projectJpaRepository.saveAll(projects);
+    }
+
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
     }

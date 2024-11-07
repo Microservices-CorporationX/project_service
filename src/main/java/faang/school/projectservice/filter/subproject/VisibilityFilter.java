@@ -4,9 +4,11 @@ import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+@Component
 public class VisibilityFilter implements Filter<FilterProjectDto, Project> {
     @Override
     public boolean isApplicable(FilterProjectDto filterDto) {

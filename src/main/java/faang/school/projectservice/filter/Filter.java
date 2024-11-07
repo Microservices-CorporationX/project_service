@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.project.FilterDto;
+import faang.school.projectservice.dto.FilterDto;
 
 import java.util.stream.Stream;
 

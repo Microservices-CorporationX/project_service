@@ -37,7 +37,7 @@ public class SubProjectController {
     public CreateSubProjectDto updateProject(@PathVariable @Positive @NonNull Long projectId,
                                                 @RequestBody @Valid CreateSubProjectDto subProjectDto) {
         long userId = userContext.getUserId();
-        return projectService.updateSubProject(projectId, subProjectDto, userId);
+        return projectService.updateProject(projectId, subProjectDto, userId);
     }
 
     @GetMapping("/project/{projectId}/projects")
