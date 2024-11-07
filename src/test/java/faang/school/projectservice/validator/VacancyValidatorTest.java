@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.InsufficientCandidatesException;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -50,7 +49,7 @@ class VacancyValidatorTest {
 
     @Test
     @DisplayName("Check vacancy exists")
-    void validateVacancyExistsByIdValid() {
+    void testValidateVacancyExistsByIdValid() {
         Long projectId = 1L;
         when(vacancyRepository.existsById(projectId)).thenReturn(true);
 
@@ -61,7 +60,7 @@ class VacancyValidatorTest {
 
     @Test
     @DisplayName("Check vacancy doesn't exist")
-    void validateVacancyExistsByIdInvalid() {
+    void testValidateVacancyExistsByIdInvalid() {
         Long projectId = 1L;
         when(vacancyRepository.existsById(projectId)).thenReturn(false);
 
