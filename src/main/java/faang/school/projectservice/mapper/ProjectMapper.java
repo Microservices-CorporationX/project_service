@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
@@ -35,4 +37,6 @@ public interface ProjectMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "visibility", target = "visibility")
     void partialUpdate(@MappingTarget Project project, ProjectDto projectDto);
+
+    List<ProjectDto> toDtoList(List<Project> projects);
 }

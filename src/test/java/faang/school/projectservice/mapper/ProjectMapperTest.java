@@ -8,6 +8,8 @@ import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,5 +91,25 @@ public class ProjectMapperTest {
         assertNotNull(project.getDescription());
         assertEquals(project.getStatus(), dto.getStatus());
         assertNotNull(project.getVisibility());
+    }
+
+    @Test
+    @DisplayName("Test to dto list mapping")
+    public void toDtoListTest() {
+        Project project = Project.builder()
+                .id(1L)
+                .ownerId(2L)
+                .parentProject(Project.builder().id(2L).build())
+                .name("cool name")
+                .description("cool description")
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+        List<Project> projects = List.of(project);
+
+        List<ProjectDto> result = mapper.toDtoList(projects);
+
+        assertEquals(projects.size(), result.size());
+        assertEquals(projects.get(0).getId(), result.get(0).getId());
     }
 }
