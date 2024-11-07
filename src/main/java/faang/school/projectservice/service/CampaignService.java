@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -62,9 +64,10 @@ public class CampaignService {
         validateProjectOwnerOrManager(toReceiveCampaign, currentUserId);
         validateNoCampaignWithTitle(toCreate.getTitle(), toReceiveCampaign.getId());
 
+        toCreate.setAmountRaised(BigDecimal.ZERO);
+        toCreate.setStatus(CampaignStatus.ACTIVE);
         toCreate.setCreatedAt(LocalDateTime.now());
         toCreate.setCreatedBy(currentUserId);
-        toCreate.setStatus(CampaignStatus.ACTIVE);
 
         Campaign created = campaignRepository.save(toCreate);
         log.info("Created a new campaign (title: '{}') for project (id: {})",
@@ -90,19 +93,22 @@ public class CampaignService {
     }
 
     @Transactional
-    public void softDeleteById(Long campaignId) {
+    public Campaign softDeleteById(Long campaignId) {
         Campaign toBeMarked = campaignRepository.findByIdOrThrow(campaignId);
         validateCampaignForDeletion(toBeMarked);
         toBeMarked.setDeleted(true);
-        campaignRepository.save(toBeMarked);
         log.info("Marked campaign for deletion (id: {})", toBeMarked.getId());
+        return campaignRepository.save(toBeMarked);
     }
 
     private void validateProjectOwnerOrManager(Project toReceiveCampaign, Long currentUserId) {
         TeamMember currentMember = teamMemberJpaRepository.findByUserIdAndProjectId(currentUserId, toReceiveCampaign.getId());
+        if (Objects.isNull(currentMember)) {
+            throw new IllegalStateException("Team member not present for provided project and user id");
+        }
         boolean projectOwner = toReceiveCampaign.getOwnerId().equals(currentUserId);
         boolean projectManager = currentMember.getRoles().contains(TeamRole.MANAGER);
-        if (!projectOwner && !projectManager) {
+        if (!(projectOwner || projectManager)) {
             throw new IllegalStateException("Campaigns can only be started by project owner or manager");
         }
     }

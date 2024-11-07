@@ -97,13 +97,13 @@ public class CampaignController {
 
     @Operation(summary = "Marks campaign for deletion", description = "Marks a campaign for soft deletion later, by a unique ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Successfully marked for deletion, no content returned"),
+            @ApiResponse(responseCode = "200", description = "Successfully marked for deletion, no content returned"),
             @ApiResponse(responseCode = "400", description = "Requested campaign has an ACTIVE status, illegal for deletion"),
             @ApiResponse(responseCode = "404", description = "Requested campaign wasn't found for provided ID")})
     @PatchMapping("/{campaignId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void markCampaignForDeletion(@Parameter(description = "Unique ID for the campaign")
-                                            @PathVariable Long campaignId) {
-        campaignService.softDeleteById(campaignId);
+    public CampaignDto markCampaignForDeletion(@Parameter(description = "Unique ID for the campaign")
+                                                   @PathVariable Long campaignId) {
+        Campaign markedForDeletion = campaignService.softDeleteById(campaignId);
+        return mapper.toDto(markedForDeletion);
     }
 }
