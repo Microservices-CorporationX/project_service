@@ -17,9 +17,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -39,31 +41,31 @@ class ProjectServiceTest {
     @Captor
     private ArgumentCaptor<Project> captor;
 
-    private Long ownerId;
     private ProjectDto projectDto;
     private Project project;
 
     @BeforeEach
     void setUp() {
-        ownerId = 1L;
         projectDto = ProjectDto.builder()
                 .name("Test project")
                 .description("Test project description")
+                .ownerId(1L)
                 .build();
 
         project = Project.builder()
                 .name("Test project")
                 .description("Test project description")
+                .ownerId(1L)
                 .build();
     }
 
     @Test
     void testCreateProjectSuccessful() {
-        doNothing().when(projectValidator).validateUniqueProject(projectDto.getName(), ownerId);
+        doNothing().when(projectValidator).validateUniqueProject(projectDto.getName(), projectDto.getOwnerId());
+        when(projectRepository.save(any(Project.class))).thenReturn(project);
         project.setStatus(ProjectStatus.CREATED);
-        project.setOwnerId(ownerId);
 
-        projectService.createProject(ownerId, projectDto);
+        projectService.createProject(projectDto);
 
         verify(projectRepository, times(1)).save(captor.capture());
         Project result = captor.getValue();

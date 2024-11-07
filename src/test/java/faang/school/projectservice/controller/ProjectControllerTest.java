@@ -25,26 +25,25 @@ class ProjectControllerTest {
     @InjectMocks
     private ProjectController projectController;
 
-    private Long ownerId;
     private ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
-        ownerId = 1L;
         projectDto = ProjectDto.builder()
                 .name("Test project")
                 .description("Test project description")
+                .ownerId(1L)
                 .build();
     }
 
     @Test
     void testCreateProjectSuccess() {
-        when(projectService.createProject(ownerId, projectDto)).thenReturn(projectDto);
+        when(projectService.createProject(projectDto)).thenReturn(projectDto);
 
-        ResponseEntity<ProjectDto> response = projectController.createProject(ownerId, projectDto);
+        ResponseEntity<ProjectDto> response = projectController.createProject(projectDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).createProject(ownerId, projectDto);
+        verify(projectService, times(1)).createProject(projectDto);
     }
 }

@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.validator.ProjectValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,13 @@ public class ProjectService {
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
 
-    public ProjectDto createProject(Long ownerId, ProjectDto dto) {
-        projectValidator.validateUniqueProject(dto.getName(), ownerId);
+    @Transactional
+    public ProjectDto createProject(ProjectDto dto) {
+        projectValidator.validateUniqueProject(dto.getName(), dto.getOwnerId());
         Project project = projectMapper.toEntity(dto);
-        project.setOwnerId(ownerId);
         project.setStatus(ProjectStatus.CREATED);
-        return projectMapper.toDto(projectRepository.save(project));
+        Project savedProject = projectRepository.save(project);
+        log.info("Project #{} successfully created.", savedProject.getId());
+        return projectMapper.toDto(savedProject);
     }
 }

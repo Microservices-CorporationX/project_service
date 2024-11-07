@@ -14,9 +14,9 @@ public class ProjectValidator {
 
     public void validateUniqueProject(String name, Long ownerId) {
         if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
-            log.warn("Project '{}' with ownerId #{} already exists.", name, ownerId);
-            throw new EntityNotFoundException("Project '" + name + "' with ownerId #" + ownerId +" already exists.");
+            log.error("Project '{}' with ownerId #{} already exists.", name, ownerId);
+            throw new EntityNotFoundException("Project '" + name + "' with ownerId #" + ownerId + " already exists.");
         }
-        log.info("Project '{}' with ownerId #{} not exists.", name, ownerId);
+        log.info("Project '{}' with ownerId #{} does not exist. Can be created.", name, ownerId);
     }
 }
