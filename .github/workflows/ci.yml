@@ -1,10 +1,9 @@
-name: Java CI Test
+name: CI Pipeline Cyclop
 
 on:
   pull_request:
     branches:
-      #- cyclop-master-stream7
-      - feature/pipline-BC-BJS2-40721
+      - cyclop-master-stream7
 jobs:
   test:
     runs-on: ubuntu-latest
