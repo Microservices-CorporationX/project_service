@@ -17,7 +17,7 @@ import static faang.school.projectservice.model.ProjectStatus.COMPLETED;
 import static faang.school.projectservice.model.ProjectStatus.CREATED;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectStatusFilterTest {
+public class TestProjectStatusFilter {
     private final ProjectFilterByStatus filterByStatus = new ProjectFilterByStatus();
 
     private List<Project> projectStream;

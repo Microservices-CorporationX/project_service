@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectNameFilterTest {
+public class TestProjectNameFilter {
 
     private final ProjectFilterByName nameFilter = new ProjectFilterByName();
 
