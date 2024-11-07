@@ -134,6 +134,44 @@ class ProjectServiceTest {
         assertEquals(parentProject.getVisibility(), secondChildProject.getVisibility());
     }
 
+    @Test
+    public void testStatusHasChildProject() {
+        CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
+                .id(1L)
+                .name("New name")
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        Project firstChildProject = Project.builder()
+                .id(3L)
+                .name("FirstChild")
+                .children(List.of())
+                .status(ProjectStatus.COMPLETED)
+                .moments(List.of(new Moment()))
+                .build();
+        Project secondChildProject = Project.builder()
+                .id(4L)
+                .name("SecondChild")
+                .children(List.of())
+                .status(ProjectStatus.COMPLETED)
+                .moments(List.of(new Moment()))
+                .build();
+        Project parentProject = Project.builder()
+                .id(1L)
+                .name("Parent project")
+                .parentProject(null)
+                .children(List.of(firstChildProject, secondChildProject))
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.getProjectById(any())).thenReturn(parentProject);
+        when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
+        when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
+        projectService.updateProject(1L, parentDto, 1L);
+        assertEquals(parentDto.getStatus(), parentProject.getStatus());
+    }
+
+
+
 //    @Test
 //    void testGetProjectsByFilters() {
 //        FilterProjectDto filterDto = new FilterProjectDto();
