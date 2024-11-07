@@ -123,8 +123,8 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(any())).thenReturn(parentProject);
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
         when(projectRepository.save(parentProject)).thenReturn(parentProject);
-        when(projectValidator.isVisibilityDtoAndProjectNotEquals(any(),any())).thenReturn(true);
-        when(projectValidator.isStatusDtoAndProjectNotEquals(any(),any())).thenReturn(true);
+        when(projectValidator.isVisibilityDtoAndProjectNotEquals(any(), any())).thenReturn(true);
+        when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
         projectService.updateProject(1L, parentDto, 1L);
         verify(projectRepository, times(1)).save(parentProject);
@@ -135,7 +135,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testStatusHasChildProject() {
+    void testStatusHasChildProject() {
         CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
                 .id(1L)
                 .name("New name")
@@ -172,7 +172,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testStatusDoesntHaveChildProject(){
+    void testStatusDoesntHaveChildProject() {
         CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
                 .id(1L)
                 .name("New name")
@@ -194,6 +194,44 @@ class ProjectServiceTest {
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
     }
 
+    @Test
+    void testStatusNotCompletedSubProjects() {
+        CreateSubProjectDto parentDto = CreateSubProjectDto.builder()
+                .id(1L)
+                .name("New name")
+                .parentProjectId(1L)
+                .childrenIds(List.of(3L, 4L))
+                .status(ProjectStatus.COMPLETED)
+                .build();
+        Project firstChildProject = Project.builder()
+                .id(3L)
+                .name("FirstChild")
+                .children(List.of())
+                .status(ProjectStatus.COMPLETED)
+                .moments(List.of(new Moment()))
+                .build();
+        Project secondChildProject = Project.builder()
+                .id(4L)
+                .name("SecondChild")
+                .children(List.of())
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+        Project parentProject = Project.builder()
+                .id(2L)
+                .name("Parent project")
+                .parentProject(null)
+                .children(List.of(firstChildProject, secondChildProject))
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        when(projectRepository.getProjectById(any())).thenReturn(parentProject);
+        when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
+        when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
+
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                ()-> projectService.updateProject(2L, parentDto, 1L));
+        assertTrue(exception.getMessage().contains("Current project has unfinished subprojects"));
+    }
 
 
 //    @Test
