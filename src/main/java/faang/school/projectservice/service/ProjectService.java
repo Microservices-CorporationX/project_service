@@ -21,7 +21,7 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto createProject(ProjectDto dto) {
-        projectValidator.validateUniqueProject(dto.getName(), dto.getOwnerId());
+        projectValidator.validateUniqueProject(dto);
         Project project = projectMapper.toEntity(dto);
         project.setStatus(ProjectStatus.CREATED);
         Project savedProject = projectRepository.save(project);

@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,18 +24,25 @@ class ProjectValidatorTest {
 
     private Long ownerId;
     private String projectName;
+    ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
-        ownerId = 1L;
-        projectName = "testName";
+        projectDto = ProjectDto.builder()
+                .name("Test project")
+                .description("Test project description")
+                .ownerId(1L)
+                .build();
+
+        projectName = projectDto.getName();
+        ownerId = projectDto.getOwnerId();
     }
 
     @Test
     void testValidateUniqueProjectFailed() {
         when(projectRepository.existsByOwnerUserIdAndName(ownerId, projectName)).thenReturn(true);
 
-        assertThrows(EntityNotFoundException.class,
-                () -> projectValidator.validateUniqueProject(projectName, ownerId));
+        assertThrows(NotUniqueProjectException.class,
+                () -> projectValidator.validateUniqueProject(projectDto));
     }
 }

@@ -61,7 +61,7 @@ class ProjectServiceTest {
 
     @Test
     void testCreateProjectSuccessful() {
-        doNothing().when(projectValidator).validateUniqueProject(projectDto.getName(), projectDto.getOwnerId());
+        doNothing().when(projectValidator).validateUniqueProject(projectDto);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
         project.setStatus(ProjectStatus.CREATED);
 
