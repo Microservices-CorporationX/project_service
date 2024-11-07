@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
@@ -45,7 +45,7 @@ class VacancyValidatorTest {
 
     @Test
     @DisplayName("Check vacancy exists")
-    void validateVacancyExistsByIdValid() {
+    void testValidateVacancyExistsByIdValid() {
         Long projectId = 1L;
         when(vacancyRepository.existsById(projectId)).thenReturn(true);
 
@@ -56,7 +56,7 @@ class VacancyValidatorTest {
 
     @Test
     @DisplayName("Check vacancy doesn't exist")
-    void validateVacancyExistsByIdInvalid() {
+    void testValidateVacancyExistsByIdInvalid() {
         Long projectId = 1L;
         when(vacancyRepository.existsById(projectId)).thenReturn(false);
 
@@ -68,23 +68,23 @@ class VacancyValidatorTest {
 
     @Test
     @DisplayName("Check the vacancy creator has valid role")
-    void validateVacancyCreatorRoleValid() {
-        when(teamMemberService.getTeamMemberById(dto.getCreatedBy())).thenReturn(teamMember);
+    void testValidateVacancyCreatorRoleValid() {
+        when(teamMemberService.getTeamMemberByUserId(dto.getCreatedBy())).thenReturn(teamMember);
 
         assertDoesNotThrow(() -> vacancyValidator.validateVacancyCreatorRole(dto));
 
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getCreatedBy());
     }
 
     @Test
     @DisplayName("Check the vacancy creator has invalid role")
-    void validateVacancyCreatorRoleInvalid() {
+    void testValidateVacancyCreatorRoleInvalid() {
         teamMember.setRoles(List.of(TeamRole.DESIGNER));
-        when(teamMemberService.getTeamMemberById(dto.getCreatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(dto.getCreatedBy())).thenReturn(teamMember);
 
         Exception ex = assertThrows(DataValidationException.class, (() -> vacancyValidator.validateVacancyCreatorRole(dto)));
         assertEquals("Vacancy can be created by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
-        verify(teamMemberService, times(1)).getTeamMemberById(dto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getCreatedBy());
     }
 
     private VacancyDto createTestVacancyDto() {

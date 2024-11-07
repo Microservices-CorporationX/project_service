@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
@@ -55,7 +55,7 @@ class VacancyServiceTest {
 
     @Test
     @DisplayName("Create a new vacancy successfully")
-    void createSuccess() {
+    void testCreateSuccess() {
         when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
         when(projectService.getProjectById(dto.getProjectId())).thenReturn(Project.builder().id(10L).build());
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
@@ -74,7 +74,7 @@ class VacancyServiceTest {
 
     @Test
     @DisplayName("Create a new vacancy with invalid project id")
-    void createInvalidProjectId() {
+    void testCreateInvalidProjectId() {
         when(vacancyMapper.toEntity(dto)).thenReturn(vacancy);
         vacancy.setProject(null);
         when(projectService.getProjectById(dto.getProjectId())).thenThrow(EntityNotFoundException.class);

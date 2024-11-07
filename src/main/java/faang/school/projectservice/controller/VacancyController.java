@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

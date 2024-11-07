@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class VacancyControllerTest {
 
     @Test
     @DisplayName("Create a new vacancy successfully")
-    void createVacancySuccess() {
+    void testCreateVacancySuccess() {
         when(vacancyService.create(dto)).thenReturn(dto);
 
         ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(dto);
