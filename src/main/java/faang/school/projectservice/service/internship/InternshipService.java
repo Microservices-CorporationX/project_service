@@ -2,8 +2,11 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
 import faang.school.projectservice.dto.client.internship.InternshipDto;
+import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateRequestDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
@@ -14,7 +17,6 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.team.TeamService;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipDtoValidator;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +40,9 @@ public class InternshipService {
     private final InternshipRepository internshipRepository;
     private final InternshipDtoValidator internshipDtoValidator;
     private final InternshipMapper internshipMapper;
-    private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
     private final TeamService teamService;
+    private final List<InternshipFilter> filters;
 
     @Transactional
     public InternshipDto createInternship(InternshipCreationDto internshipCreationDto) {
@@ -87,6 +90,33 @@ public class InternshipService {
                 .internNewTeamRole(updateDto.getInternNewTeamRole())
                 .internshipStatus(internship.getStatus())
                 .build();
+    }
+
+    public List<InternshipDto> getFilteredInternships(InternshipFilterDto filterDto) {
+        Stream<Internship> allInternships = internshipRepository.findAll().stream();
+
+        return internshipMapper.toDto(
+                filters.stream()
+                        .filter(filter -> filter.isApplicable(filterDto))
+                        .reduce(
+                                allInternships,
+                                (internships, filter) -> filter.apply(internships, filterDto),
+                                (s1, s2) -> s2
+                        )
+                        .toList());
+    }
+
+    public List<InternshipDto> getAllInternships() {
+        return internshipMapper.toDto(internshipRepository.findAll());
+    }
+
+    public InternshipDto getInternshipById(long internshipId) {
+        return internshipMapper.toDto(
+                internshipRepository.findById(internshipId)
+                        .orElseThrow(() -> new DataValidationException(
+                                "There is no internship with ID (%d) in the database!".formatted(internshipId))
+                        )
+        );
     }
 
     private Set<Long> getTeamMembersIds(Collection<TeamMember> teamMembers) {

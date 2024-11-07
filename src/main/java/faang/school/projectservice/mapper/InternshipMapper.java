@@ -22,6 +22,8 @@ public interface InternshipMapper {
     @Mapping(source = "interns", target = "interns", qualifiedByName = "internsToIds")
     InternshipDto toDto(Internship internship);
 
+    List<InternshipDto> toDto(List<Internship> internships);
+
     @Named("internsToIds")
     default List<Long> internsToIds(List<TeamMember> interns) {
         return interns.stream()
