@@ -13,7 +13,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ProjectMapperTest {
 
@@ -24,7 +23,6 @@ public class ProjectMapperTest {
     public void toEntityTest() {
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
                 .ownerId(1L)
-                .parentId(2L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)
@@ -33,7 +31,6 @@ public class ProjectMapperTest {
         Project result = mapper.toEntity(dto);
 
         assertEquals(dto.getOwnerId(), result.getOwnerId());
-        assertNull(result.getParentProject());
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getDescription(), result.getDescription());
         assertEquals(dto.getVisibility(), result.getVisibility());

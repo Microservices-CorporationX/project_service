@@ -18,9 +18,6 @@ public class CreateSubProjectDto {
     @NotNull
     private Long ownerId;
 
-    @NotNull
-    private Long parentId;
-
     @NotBlank
     @Size(max = 128)
     private String name;
