@@ -10,5 +10,6 @@ import java.util.List;
 @Builder
 public record TeamMemberDto(
         long teamMemberId,
+        long userId,
         List<TeamRole> roles) {
 }
