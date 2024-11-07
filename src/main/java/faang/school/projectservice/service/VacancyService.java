@@ -7,8 +7,9 @@ import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.validator.vacancy.VacancyValidator;
+import faang.school.projectservice.validator.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,11 @@ public class VacancyService {
     private final ProjectService projectService;
     private final CandidateService candidateService;
     private final VacancyValidator vacancyValidator;
+    private final ProjectValidator projectValidator;
 
     @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
-        vacancyValidator.validateProjectInVacancyExists(vacancyDto);
+        projectValidator.validateProjectExistsById(vacancyDto.getProjectId());
         vacancyValidator.validateVacancyCreatorRole(vacancyDto);
         Vacancy vacancy = toEntityFromDto(vacancyDto);
         vacancy.setStatus(VacancyStatus.OPEN);
