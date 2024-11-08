@@ -13,31 +13,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/vacancy")
 @Slf4j
 @RequiredArgsConstructor
 public class VacancyController {
     private final VacancyService vacancyService;
 
-    @PostMapping("/new-vacancy")
+    @PostMapping()
     public VacancyDto createVacancy(@RequestBody @Validated(VacancyDto.Before.class) VacancyDto vacancyDto){
         log.info("New request to create a vacancy with id: {} and title: {} ", vacancyDto.id(), vacancyDto.description());
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    @GetMapping("/get-vacancy/{vacancyId}")
+    @GetMapping("/{vacancyId}")
     public VacancyDto getVacancy(@PathVariable Long vacancyId){
         log.info("Received a request to get a vacancy with id: {}", vacancyId);
         return vacancyService.getVacancy(vacancyId);
     }
 
-    @PatchMapping("/update-vacancy")
+    @PatchMapping()
     public VacancyDto updateVacancy(@RequestBody @Validated(VacancyDto.Before.class) VacancyDto vacancyDto){
         log.info("New request to update a vacancy with id: {} and title: {} ", vacancyDto.id(), vacancyDto.description());
         return vacancyService.updateVacancy(vacancyDto);
     }
 
-    @DeleteMapping("/delete-vacancy/{vacancyId}")
+    @DeleteMapping("/{vacancyId}")
     public void deleteVacancy(@PathVariable @NotNull Long vacancyId){
         log.info("New request to delete a vacancy with id: {}", vacancyId);
         vacancyService.deleteVacancy(vacancyId);
