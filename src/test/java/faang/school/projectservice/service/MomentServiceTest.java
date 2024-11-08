@@ -127,14 +127,14 @@ public class MomentServiceTest {
         MomentFilterDto filterDto = MomentFilterDto.builder().month(Month.MARCH).projectIds(Collections.emptyList()).build();
         when(momentRepository.findAll()).thenReturn(List.of(moment1, moment2));
         when(momentDateFilter.isApplicable(filterDto)).thenReturn(true);
-        when(momentDateFilter.applay(any(), eq(filterDto))).thenAnswer(invocation -> Stream.of(moment1));
+        when(momentDateFilter.apply(any(), eq(filterDto))).thenAnswer(invocation -> Stream.of(moment1));
 
         List<MomentDto> result = momentService.getMoments(filterDto);
 
         assertEquals(1, result.size());
         assertEquals(momentDto1, result.get(0));
         verify(momentDateFilter, times(1)).isApplicable(any(MomentFilterDto.class));
-        verify(momentDateFilter, times(1)).applay(any(), eq(filterDto));
+        verify(momentDateFilter, times(1)).apply(any(), eq(filterDto));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class MomentServiceTest {
         assertEquals(momentDto1, result.get(0));
         assertEquals(momentDto2, result.get(1));
         verify(momentDateFilter, times(1)).isApplicable(filterDto);
-        verify(momentDateFilter, never()).applay(any(Stream.class), eq(filterDto));
+        verify(momentDateFilter, never()).apply(any(Stream.class), eq(filterDto));
     }
 
     @Test

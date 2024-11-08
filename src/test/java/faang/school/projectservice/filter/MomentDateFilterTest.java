@@ -34,7 +34,7 @@ public class MomentDateFilterTest extends SetUpFilterTest {
 
     @Test
     void testMomentDateFilter() {
-        List<Moment> filteredMoments = momentDateFilter.applay(moments, momentFilterDto).toList();
+        List<Moment> filteredMoments = momentDateFilter.apply(moments, momentFilterDto).toList();
 
         assertEquals(2, filteredMoments.size());
         assertEquals(Month.MARCH, filteredMoments.get(0).getCreatedAt().getMonth());

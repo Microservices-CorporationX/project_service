@@ -39,9 +39,9 @@ public class MomentService {
 
     public List<MomentDto> getMoments(MomentFilterDto filterDto) {
         Stream<Moment> moments = momentRepository.findAll().stream();
-        for (Filter filter : filters) {
+        for (Filter<Moment, MomentFilterDto> filter : filters) {
             if (filter.isApplicable(filterDto)) {
-                moments = filter.applay(moments, filterDto);
+                moments = filter.apply(moments, filterDto);
             }
         }
         return moments.map(momentMapper::toDto).toList();

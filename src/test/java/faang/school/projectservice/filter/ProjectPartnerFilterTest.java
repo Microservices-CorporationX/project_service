@@ -35,7 +35,7 @@ public class ProjectPartnerFilterTest extends SetUpFilterTest {
 
     @Test
     void testProjectPartnerFilter() {
-        List<Moment> result = projectPartnerFilter.applay(moments, momentFilterDto).toList();
+        List<Moment> result = projectPartnerFilter.apply(moments, momentFilterDto).toList();
 
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getProjects().get(0).getId());

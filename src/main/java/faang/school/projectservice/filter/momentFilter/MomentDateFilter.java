@@ -15,7 +15,7 @@ public class MomentDateFilter implements Filter<Moment, MomentFilterDto> {
     }
 
     @Override
-    public Stream<Moment> applay(Stream<Moment> moments, MomentFilterDto filter) {
+    public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filter) {
         return moments.filter(moment -> moment.getCreatedAt().getMonth().equals(filter.getMonth()));
     }
 }
