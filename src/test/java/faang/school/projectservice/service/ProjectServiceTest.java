@@ -17,6 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -171,7 +172,6 @@ class ProjectServiceTest {
         List<Project> projects = List.of(project1, project2, project3);
         List<Project> filteredProjects = List.of(project1);
         List<ProjectDto> expected = filteredProjects.stream().map(project -> projectMapper.toDto(project)).toList();
-        when(userContext.getUserId()).thenReturn(1L);
         when(projectRepository.findAll()).thenReturn(projects);
         ProjectFilterDto projectFilterDto = new ProjectFilterDto("name", ProjectStatus.CREATED);
         List<ProjectDto> actual = projectService.findWithFilters(projectFilterDto);
@@ -181,14 +181,72 @@ class ProjectServiceTest {
     @Test
     void testFindWithFiltersFoundPrivate() {
         Project project1 = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE).id(1L).ownerId(1L).name("name").description("description")
+                .visibility(ProjectVisibility.PRIVATE).id(1L).ownerId(1L).name("name").status(ProjectStatus.CREATED)
                 .build();
         Project project2 = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE).id(2L).ownerId(2L).name("name").description("description")
+                .visibility(ProjectVisibility.PRIVATE).id(2L).ownerId(2L).name("name").status(ProjectStatus.CREATED)
                 .build();
         Team team = Team.builder().teamMembers(List.of(TeamMember.builder().userId(1L).build())).build();
         Project project3 = Project.builder()
-                .visibility(ProjectVisibility.PRIVATE).id(3L).ownerId(2L).teams(List.of(team)).name("name").description("description")
+                .visibility(ProjectVisibility.PRIVATE).id(3L).ownerId(2L).teams(List.of(team)).name("name")
+                .status(ProjectStatus.CREATED)
                 .build();
+
+        List<Project> projects = List.of(project1, project2, project3);
+        List<Project> filteredProjects = List.of(project1, project3);
+        List<ProjectDto> expected = filteredProjects.stream().map(project -> projectMapper.toDto(project)).toList();
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(userContext.getUserId()).thenReturn(1L);
+        ProjectFilterDto projectFilterDto = new ProjectFilterDto("name", ProjectStatus.CREATED);
+        List<ProjectDto> actual = projectService.findWithFilters(projectFilterDto);
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testFindAll() {
+        Project project1 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(1L).ownerId(1L).name("name").status(ProjectStatus.CREATED)
+                .build();
+        Project project2 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(2L).ownerId(2L).name("name").status(ProjectStatus.CREATED)
+                .build();
+        Team team = Team.builder().teamMembers(List.of(TeamMember.builder().userId(1L).build())).build();
+        Project project3 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(3L).ownerId(2L).teams(List.of(team)).name("name")
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        List<Project> projects = List.of(project1, project2, project3);
+        List<Project> allowedToSee = List.of(project1, project3);
+        List<ProjectDto> expected = allowedToSee.stream().map(project -> projectMapper.toDto(project)).toList();
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(userContext.getUserId()).thenReturn(1L);
+        List<ProjectDto> actual = projectService.findAll();
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testFindByIdWithPrivateProject() {
+        when(projectRepository.getProjectById(1L))
+                .thenReturn(Project.builder().ownerId(2L).visibility(ProjectVisibility.PRIVATE).build());
+        when(userContext.getUserId()).thenReturn(1L);
+        assertTrue(projectService.findById(1L).isEmpty());
+    }
+
+    @Test
+    void testFindByIdWithNonExistentProject() {
+        when(projectRepository.getProjectById(1L))
+                .thenReturn(null);
+        assertTrue(projectService.findById(1L).isEmpty());
+    }
+
+    @Test
+    void testFindByFound() {
+        Project expected = Project.builder().ownerId(2L).visibility(ProjectVisibility.PUBLIC).build();
+        when(projectRepository.getProjectById(1L))
+                .thenReturn(expected);
+        Optional<ProjectDto> actual = projectService.findById(1L);
+        assertTrue(actual.isPresent());
+        assertEquals(projectMapper.toDto(expected), actual.get());
     }
 }

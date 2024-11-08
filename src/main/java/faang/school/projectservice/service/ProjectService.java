@@ -57,9 +57,12 @@ public class ProjectService {
 
     public List<ProjectDto> findWithFilters(ProjectFilterDto projectFilterDto) {
         Stream<Project> projects = projectRepository.findAll().stream();
-        Stream<Project> filtered = filters.stream().filter(filter -> filter.isApplicable(projectFilterDto))
-                .flatMap(filter -> filter.apply(projects, projectFilterDto));
-        return filtered.filter(this::filterPrivate).map(projectMapper::toDto).toList();
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(projectFilterDto))
+                .reduce(projects, (stream, filter) -> filter.apply(stream, projectFilterDto), (s1, s2) -> s1)
+                .filter(this::filterPrivate)
+                .map(projectMapper::toDto)
+                .toList();
     }
 
     public List<ProjectDto> findAll() {
@@ -69,7 +72,7 @@ public class ProjectService {
 
     public Optional<ProjectDto> findById(long id) {
         Project project = projectRepository.getProjectById(id);
-        return project == null ? Optional.empty() : Optional.of(projectMapper.toDto(project));
+        return project == null || !filterPrivate(project) ? Optional.empty() : Optional.of(projectMapper.toDto(project));
     }
 
     private void validateName(String projectName, Long userId) {

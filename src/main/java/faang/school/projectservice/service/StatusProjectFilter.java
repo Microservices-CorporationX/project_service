@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Component
