@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +42,11 @@ public class CampaignService {
     @Transactional(readOnly = true)
     public List<Campaign> findFilteredCampaigns(Long projectId, CampaignFilterDto filter, Integer pageNumber, Integer pageSize) {
         validateProjectExists(projectId);
-        Pageable pageable = PageRequest.of(pageNumber, Objects.nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE);
+        Pageable pageable = PageRequest.of(pageNumber,
+                Objects.nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE,
+                Sort.by("createdAt").descending());
         if (Objects.isNull(filter)) {
-            return campaignRepository.findAllByProjectIdOrderByCreatedAtDesc(projectId, pageable).getContent();
+            return campaignRepository.findAllByProjectId(projectId, pageable).getContent();
         }
 
         return campaignRepository.findAllByFilters(

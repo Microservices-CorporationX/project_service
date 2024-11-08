@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     Optional<Campaign> findByTitleAndProjectId(String title, Long projectId);
 
-    Page<Campaign> findAllByProjectIdOrderByCreatedAtDesc(Long projectId, Pageable pageable);
+    Page<Campaign> findAllByProjectId(Long projectId, Pageable pageable);
 
     @Query("""
     FROM Campaign c
