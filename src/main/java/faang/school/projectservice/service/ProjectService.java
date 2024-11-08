@@ -25,7 +25,6 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UpdateProjectMapper updateProjectMapper;
 
-    @Transactional
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
 
@@ -41,7 +40,7 @@ public class ProjectService {
     public UpdateProjectDto updateProject(UpdateProjectDto dto) {
         Project project = projectRepository.getProjectById(dto.getId());
 
-        if (dto.getDescription() != null) {
+        if (dto.getDescription() != null && !dto.getDescription().isBlank()) {
             project.setDescription(dto.getDescription());
         }
         if (dto.getStatus() != null) {
