@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.IllegalArgumentException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -103,7 +103,7 @@ class TeamMemberValidatorTest {
         TeamMember result = validator.validateIsTeamMemberParticipantOfProject(memberId, stageInvitation);
 
         assertNotEquals(anotherTeamMember, result);
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DataValidationException.class,
                 () -> validator.validateIsTeamMemberParticipantOfProject(memberId, anotherStageInvitation));
     }
 }

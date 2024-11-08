@@ -14,6 +14,6 @@ public class StageValidator {
 
     public Stage validateStageExists(long id) {
         return repository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Stage with id " + id + " not found"));
+                () -> new EntityNotFoundException("Stage",id));
     }
 }

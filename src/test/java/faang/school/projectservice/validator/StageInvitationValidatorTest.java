@@ -2,7 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.IllegalArgumentException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -95,7 +95,7 @@ class StageInvitationValidatorTest {
 
         when(repository.findById(stageInvitationId)).thenReturn(Optional.of(stageInvitation));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DataValidationException.class,
                 () -> stageInvitationValidator.validateIsInvitationSentToThisTeamMember(
                         secondTeamMemberId, stageInvitationId));
     }

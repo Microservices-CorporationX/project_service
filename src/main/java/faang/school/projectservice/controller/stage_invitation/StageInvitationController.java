@@ -5,15 +5,16 @@ import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller("/stage-invitations")
+@RestController("/stage-invitations")
 @RequiredArgsConstructor
 public class StageInvitationController {
 
@@ -24,12 +25,12 @@ public class StageInvitationController {
         stageInvitationService.sendStageInvitation(invitorId, dto);
     }
 
-    @PostMapping("/accept/{teamMemberId}")
+    @PutMapping("/accept/{teamMemberId}")
     public void acceptStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId) {
         stageInvitationService.acceptStageInvitation(teamMemberId, stageInvitationId);
     }
 
-    @PostMapping("/reject/{teamMemberId}")
+    @PutMapping("/reject/{teamMemberId}")
     public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId,
                                       @RequestParam String rejectReason) {
         stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId, rejectReason);

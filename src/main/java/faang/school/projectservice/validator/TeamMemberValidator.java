@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.IllegalArgumentException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -17,19 +17,19 @@ public class TeamMemberValidator {
 
     public TeamMember validateTeamMemberExists(long teamMemberId) {
         return repository.findById(teamMemberId)
-                .orElseThrow(() -> new EntityNotFoundException("Team member with ID: " + teamMemberId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("TeamMember", teamMemberId));
     }
 
     public TeamMember validateIsTeamMemberParticipantOfProject(long invitedId, StageInvitation invitation) {
         TeamMember teamMember = repository.findById(invitedId)
-                .orElseThrow(() -> new EntityNotFoundException("Team member with ID: " + invitedId + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("TeamMember", invitedId));
         Project invitationProject = invitation.getStage().getProject();
 
         boolean isParticipant = teamMember.getStages().stream()
                 .anyMatch(stage -> stage.getProject().equals(invitationProject));
 
         if (!isParticipant) {
-            throw new IllegalArgumentException("This team member is not participant of this project");
+            throw new DataValidationException("This team member is not participant of this project");
         }
         return teamMember;
     }

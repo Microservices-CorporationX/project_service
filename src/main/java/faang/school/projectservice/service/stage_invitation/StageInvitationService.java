@@ -2,7 +2,7 @@ package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
-import faang.school.projectservice.exception.IllegalArgumentException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
@@ -97,7 +97,7 @@ public class StageInvitationService {
 
     private void validateRejectReasonIsNullOrEmpty(String rejectReason) {
         if (rejectReason == null || rejectReason.isBlank()) {
-            throw new IllegalArgumentException("Reject reason can't be empty");
+            throw new DataValidationException("Reject reason can't be empty");
         }
     }
 }
