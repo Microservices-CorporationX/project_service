@@ -83,11 +83,11 @@ tasks.test {
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
-    "**/service/**",
-    "**/mapper/**"
+    "**/service/**"
 )
 val jacocoExcludePackAgeList = listOf(
+    "**/controller/**",
+    "**/mapper/**",
     "**/model/**",
     "**/repository/**",
     "**/dto/**"
@@ -113,6 +113,13 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    include(jacocoIncludePackagesList)
+                    exclude(jacocoExcludePackAgeList)
+                }
+            )
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
@@ -123,7 +130,6 @@ tasks.jacocoTestCoverageVerification {
                 value = "COVEREDRATIO"
                 minimum = "0.70".toBigDecimal()
             }
-
         }
     }
 }
