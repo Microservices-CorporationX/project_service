@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class CandidateServiceImplTest {
@@ -29,18 +28,6 @@ class CandidateServiceImplTest {
     void setUp() {
         Mockito.lenient().when(candidateRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(getCandidate()));
         Mockito.lenient().when(candidateRepository.findAllByVacancyId(Mockito.anyLong())).thenReturn(getCandidateList());
-    }
-
-    @Test
-    void findByIdEmpty() {
-        Mockito.when(candidateRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> candidateService.findById(1L));
-        assertEquals("Candidate id %s not found".formatted(1L), exception.getMessage());
-    }
-
-    @Test
-    void findByIdSuccess() {
-        assertEquals(getCandidate(), candidateService.findById(Mockito.anyLong()));
     }
 
     @Test

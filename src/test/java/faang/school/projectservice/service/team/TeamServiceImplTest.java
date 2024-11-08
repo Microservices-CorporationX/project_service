@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceImplTest {
@@ -38,13 +39,12 @@ class TeamServiceImplTest {
     @Test
     void findMemberByUserIdAndProjectIdEmpty() {
         Mockito.lenient().when(teamMemberRepository.findByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Optional.empty());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> teamService.findMemberByUserIdAndProjectId(1L, 1L));
-        assertEquals("Member not found by project id %s and user id %s".formatted(1L, 1L), exception.getMessage());
+        assertTrue(teamService.findMemberByUserIdAndProjectId(1L, 1L).isEmpty());
     }
 
     @Test
     void findMemberByUserIdAndProjectIdSuccess() {
-        assertEquals(getTeamMember(), teamService.findMemberByUserIdAndProjectId(1L, 1L));
+        assertEquals(getTeamMember(), teamService.findMemberByUserIdAndProjectId(1L, 1L).get());
     }
 
     private TeamMember getTeamMember() {

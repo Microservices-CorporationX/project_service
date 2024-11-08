@@ -7,6 +7,8 @@ import faang.school.projectservice.service.team.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class VacancyServiceValidator {
@@ -14,10 +16,14 @@ public class VacancyServiceValidator {
     private final TeamService teamService;
 
     public void validateCreateVacancy(VacancyDto vacancyDto) {
-        TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
+        Optional<TeamMember> teamMember = teamService.findMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
 
-        if (!teamMember.getRoles().contains(TeamRole.OWNER) || teamMember.getRoles().contains(TeamRole.MANAGER)) {
-            throw new IllegalArgumentException("Team member id %s dont have needed role".formatted(vacancyDto.getCreatedBy()));
+        if (teamMember.isPresent()) {
+            if (!teamMember.get().getRoles().contains(TeamRole.OWNER) || teamMember.get().getRoles().contains(TeamRole.MANAGER)) {
+                throw new IllegalArgumentException("Team member id %s dont have needed role".formatted(vacancyDto.getCreatedBy()));
+            }
+        } else {
+            throw new IllegalArgumentException("Team member id %s not found".formatted(vacancyDto.getCreatedBy()));
         }
     }
 

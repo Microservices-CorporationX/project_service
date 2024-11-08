@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,7 @@ class VacancyServiceValidatorTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(getTeamMember());
+        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Optional.of(getTeamMember()));
     }
 
     @Test
@@ -37,7 +38,7 @@ class VacancyServiceValidatorTest {
         TeamMember teamMember = getTeamMember();
         teamMember.setRoles(List.of());
 
-        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(teamMember);
+        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Optional.of(teamMember));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> vacancyServiceValidator.validateCreateVacancy(getVacancyDto()));
         assertEquals("Team member id %s dont have needed role".formatted(getVacancyDto().getCreatedBy()), exception.getMessage());
     }

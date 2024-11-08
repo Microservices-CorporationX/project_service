@@ -5,6 +5,8 @@ import faang.school.projectservice.model.TeamMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class TeamServiceImpl implements TeamService {
@@ -16,8 +18,7 @@ public class TeamServiceImpl implements TeamService {
         teamMemberRepository.deleteByUserId(userId);
     }
 
-    public TeamMember findMemberByUserIdAndProjectId(Long userId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found by project id %s and user id %s".formatted(projectId, userId)));
+    public Optional<TeamMember> findMemberByUserIdAndProjectId(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 }

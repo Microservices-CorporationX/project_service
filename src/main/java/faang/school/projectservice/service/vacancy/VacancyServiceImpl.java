@@ -76,7 +76,8 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.getCandidates().stream()
                 .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
                 .forEach(candidate -> {
-                    TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId());
+                    TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Member not found by project id %s and user id %s".formatted(vacancy.getProject().getId(), candidate.getUserId())));
                     teamMember.getRoles().add(TeamRole.DEVELOPER);
                 });
 

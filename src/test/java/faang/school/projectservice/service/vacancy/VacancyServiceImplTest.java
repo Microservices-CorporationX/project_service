@@ -114,7 +114,7 @@ class VacancyServiceImplTest {
 
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(new ArrayList<>());
-        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(teamMember);
+        Mockito.lenient().when(teamService.findMemberByUserIdAndProjectId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Optional.of(teamMember));
         Mockito.lenient().when(vacancyRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(vacancy));
 
         vacancyService.updateVacancy(vacancyDto);

@@ -14,12 +14,6 @@ public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
 
     @Override
-    public Candidate findById(Long id) {
-        return candidateRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Candidate id %s not found".formatted(id)));
-    }
-
-    @Override
     public void deleteById(Long id) {
         candidateRepository.deleteById(id);
     }
