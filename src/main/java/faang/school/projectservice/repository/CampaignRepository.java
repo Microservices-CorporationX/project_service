@@ -25,8 +25,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     AND (:minGoal IS NULL OR c.goal >= :minGoal)
     AND (:maxGoal IS NULL OR c.goal <= :maxGoal)
     AND (:status IS NULL OR c.status = :status)
-    AND (:startDate IS NULL OR c.createdAt >= :createdAfter)
-    ORDER BY c.createdAt DESC""")
+    AND (:startDate IS NULL OR c.createdAt >= :createdAfter)""")
     List<Campaign> findAllByFilters(Long projectId,
                                     Long createdById,
                                     String namePattern,
