@@ -57,7 +57,8 @@ public class VacancyService {
     @Transactional
     public void deleteVacancy(long vacancyId) {
         vacancyValidator.validateVacancyExistsById(vacancyId);
-        getRejectedCandidatesIds(vacancyId).forEach(candidateService::deleteCandidateById);
+        getCandidatesByVacancyId(vacancyId).forEach(candidate ->
+                candidateService.deleteCandidateById(candidate.getId()));
         vacancyRepository.deleteById(vacancyId);
     }
 
@@ -88,12 +89,5 @@ public class VacancyService {
         Vacancy vacancy = vacancyMapper.toEntity(dto);
         vacancy.setProject(projectService.getProjectById(dto.getProjectId()));
         return vacancy;
-    }
-
-    private List<Long> getRejectedCandidatesIds(Long vacancyId) {
-        return getCandidatesByVacancyId(vacancyId).stream()
-                .filter(candidate -> candidate.getVacancy().getId().equals(vacancyId))
-                .map(Candidate::getId)
-                .toList();
     }
 }

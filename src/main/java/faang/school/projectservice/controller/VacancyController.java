@@ -48,6 +48,7 @@ public class VacancyController {
 
     @GetMapping("/{vacancyId})")
     public ResponseEntity<VacancyDto> getVacancy(@PathVariable @Positive long vacancyId) {
+        log.info("Request to get vacancy #{} received", vacancyId);
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getVacancyDtoById(vacancyId));
     }
 }
