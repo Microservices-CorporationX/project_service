@@ -31,19 +31,7 @@ public class ProjectController {
 
     @PutMapping("/description-update")
     public ResponseEntity<UpdateProjectDto> updateProjectDescription(@Valid @RequestBody UpdateProjectDto dto) {
-        log.info("Updating project '{}' description by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok(projectService.updateProjectDescription(dto));
-    }
-
-    @PutMapping("/status-update")
-    public ResponseEntity<UpdateProjectDto> updateProjectStatus(@Valid @RequestBody UpdateProjectDto dto) {
-        log.info("Updating project '{}' status by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok(projectService.updateProjectStatus(dto));
-    }
-
-    @PutMapping("/visibility-update")
-    public ResponseEntity<UpdateProjectDto> updateProjectVisibility(@Valid @RequestBody UpdateProjectDto dto) {
-        log.info("Updating project '{}' visibility by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok(projectService.updateProjectVisibility(dto));
+        log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+        return ResponseEntity.ok(projectService.updateProject(dto));
     }
 }

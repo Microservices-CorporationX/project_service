@@ -2,8 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
-import faang.school.projectservice.mapper.UpdateProjectMapperImpl;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,8 @@ class ProjectServiceTest {
     private Project project;
     private ProjectDto projectDto;
     private UpdateProjectDto updateProjectDto;
+    private UpdateProjectDto emptyUpdateProjectDto;
+    private Project mockProject;
 
     private Long id;
 
@@ -72,13 +75,22 @@ class ProjectServiceTest {
 
         updateProjectDto = UpdateProjectDto.builder()
                 .name("Test project")
-                .description("Test project description")
+                .description("Updated test project description")
                 .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
+                .status(ProjectStatus.IN_PROGRESS)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+
+        emptyUpdateProjectDto = UpdateProjectDto.builder()
+                .name("Test project")
+                .description(null)
+                .ownerId(1L)
+                .status(null)
+                .visibility(null)
                 .build();
 
         id = project.getId();
+        mockProject = mock(Project.class);
     }
 
     @Test
@@ -95,41 +107,28 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testUpdateProjectDescriptionSuccessful() {
-        projectDto.setDescription("Another test project description.");
-        doNothing().when(projectValidator).validateProjectDescriptionUpdatable(updateProjectDto, project);
+    void testUpdateProjectShouldNotUpdateIfValuesNull() {
+        when(projectRepository.getProjectById(id)).thenReturn(mockProject);
+        when(projectRepository.save(mockProject)).thenReturn(mockProject);
+
+        projectService.updateProject(emptyUpdateProjectDto);
+
+        verify(mockProject, times(0)).setDescription(updateProjectDto.getDescription());
+        verify(mockProject, times(0)).setStatus(updateProjectDto.getStatus());
+        verify(mockProject, times(0)).setVisibility(updateProjectDto.getVisibility());
+        verify(projectRepository, times(1)).save(mockProject);
+    }
+
+    @Test
+    void testUpdateProjectSuccessful() {
         when(projectRepository.getProjectById(id)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
 
-        UpdateProjectDto result = projectService.updateProjectDescription(updateProjectDto);
+        UpdateProjectDto result = projectService.updateProject(updateProjectDto);
 
-        verify(projectRepository).save(project);
+        verify(projectRepository, times(1)).save(project);
         assertEquals(result.getDescription(), updateProjectDto.getDescription());
-    }
-
-    @Test
-    void testUpdateProjectStatusSuccessful() {
-        projectDto.setStatus(ProjectStatus.COMPLETED);
-        doNothing().when(projectValidator).validateProjectStatusUpdatable(updateProjectDto, project);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
-
-        UpdateProjectDto result = projectService.updateProjectStatus(updateProjectDto);
-
-        verify(projectRepository).save(project);
         assertEquals(result.getStatus(), updateProjectDto.getStatus());
-    }
-
-    @Test
-    void testUpdateProjectVisibilitySuccessful() {
-        projectDto.setVisibility(ProjectVisibility.PRIVATE);
-        doNothing().when(projectValidator).validateProjectVisibilityUpdatable(updateProjectDto, project);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
-        when(projectRepository.save(project)).thenReturn(project);
-
-        UpdateProjectDto result = projectService.updateProjectVisibility(updateProjectDto);
-
-        verify(projectRepository).save(project);
         assertEquals(result.getVisibility(), updateProjectDto.getVisibility());
     }
 }

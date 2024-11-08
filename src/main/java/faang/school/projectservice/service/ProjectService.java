@@ -2,8 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.mapper.UpdateProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -38,41 +38,25 @@ public class ProjectService {
     }
 
     @Transactional
-    public UpdateProjectDto updateProjectDescription(UpdateProjectDto dto) {
+    public UpdateProjectDto updateProject(UpdateProjectDto dto) {
         Project project = projectRepository.getProjectById(dto.getId());
-        projectValidator.validateProjectDescriptionUpdatable(dto, project);
 
-        project.setDescription(dto.getDescription());
+        if (dto.getDescription() != null) {
+            project.setDescription(dto.getDescription());
+        }
+        if (dto.getStatus() != null) {
+            project.setStatus(dto.getStatus());
+        }
+        if (dto.getVisibility() != null) {
+            project.setVisibility(dto.getVisibility());
+        }
+
         project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         Project updatedProject = projectRepository.save(project);
 
-        log.info("Project #{} description successfully updated.", updatedProject.getId());
-        return updateProjectMapper.toDto(updatedProject);
-    }
-
-    @Transactional
-    public UpdateProjectDto updateProjectStatus(UpdateProjectDto dto) {
-        Project project = projectRepository.getProjectById(dto.getId());
-        projectValidator.validateProjectStatusUpdatable(dto, project);
-
-        project.setStatus(dto.getStatus());
-        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
-        Project updatedProject = projectRepository.save(project);
-
-        log.info("Project #{} status successfully updated.", updatedProject.getId());
-        return updateProjectMapper.toDto(updatedProject);
-    }
-
-    @Transactional
-    public UpdateProjectDto updateProjectVisibility(UpdateProjectDto dto) {
-        Project project = projectRepository.getProjectById(dto.getId());
-        projectValidator.validateProjectVisibilityUpdatable(dto, project);
-
-        project.setVisibility(dto.getVisibility());
-        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
-        Project updatedProject = projectRepository.save(project);
-
-        log.info("Project #{} visibility successfully updated.", updatedProject.getId());
+        log.info("Project #{} successfully updated. Current data: description: '{}'; status: '{}'; visibility: '{}'",
+                updatedProject.getId(), updatedProject.getDescription(),
+                updatedProject.getStatus(), updatedProject.getVisibility());
         return updateProjectMapper.toDto(updatedProject);
     }
 }

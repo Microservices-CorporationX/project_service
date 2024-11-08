@@ -60,35 +60,13 @@ class ProjectControllerTest {
     }
 
     @Test
-    void testUpdateProjectDescriptionSuccessful() {
-        when(projectService.updateProjectDescription(updateProjectDto)).thenReturn(updateProjectDto);
+    void testUpdateProjectSuccessful() {
+        when(projectService.updateProject(updateProjectDto)).thenReturn(updateProjectDto);
 
         ResponseEntity<UpdateProjectDto> response = projectController.updateProjectDescription(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateProjectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectDescription(updateProjectDto);
-    }
-
-    @Test
-    void testUpdateProjectStatusSuccessful() {
-        when(projectService.updateProjectStatus(updateProjectDto)).thenReturn(updateProjectDto);
-
-        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectStatus(updateProjectDto);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(updateProjectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectStatus(updateProjectDto);
-    }
-
-    @Test
-    void testUpdateProjectVisibilitySuccessful() {
-        when(projectService.updateProjectVisibility(updateProjectDto)).thenReturn(updateProjectDto);
-
-        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectVisibility(updateProjectDto);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(updateProjectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectVisibility(updateProjectDto);
+        verify(projectService, times(1)).updateProject(updateProjectDto);
     }
 }
