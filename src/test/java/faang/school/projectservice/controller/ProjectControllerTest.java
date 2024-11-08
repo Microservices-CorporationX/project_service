@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -13,6 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -28,15 +32,24 @@ class ProjectControllerTest {
     @InjectMocks
     private ProjectController projectController;
 
+    private Long ownerId;
     private ProjectDto projectDto;
     private UpdateProjectDto updateProjectDto;
+    private ProjectFilterDto filterDto;
 
     @BeforeEach
     void setUp() {
+        ownerId = 1L;
         projectDto = ProjectDto.builder()
                 .name("Test project")
                 .description("Test project description")
-                .ownerId(1L)
+                .ownerId(ownerId)
+                .status(ProjectStatus.CREATED)
+                .build();
+
+        filterDto = ProjectFilterDto.builder()
+                .name("Test project")
+                .status(ProjectStatus.CREATED)
                 .build();
 
         updateProjectDto = UpdateProjectDto.builder()
@@ -68,5 +81,16 @@ class ProjectControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateProjectDto, response.getBody());
         verify(projectService, times(1)).updateProject(updateProjectDto);
+    }
+
+    @Test
+    void testGetProjectsByFilterSuccessful() {
+        when(projectService.getProjectsByFilter(filterDto, ownerId)).thenReturn(List.of(projectDto));
+
+        ResponseEntity<List<ProjectDto>> response = projectController.getProjectsByFilter(filterDto, ownerId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(projectDto, Objects.requireNonNull(response.getBody()).get(0));
+        verify(projectService, times(1)).getProjectsByFilter(filterDto, ownerId);
     }
 }
