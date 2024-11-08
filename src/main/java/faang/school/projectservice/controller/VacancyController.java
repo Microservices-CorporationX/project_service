@@ -18,12 +18,13 @@ public class VacancyController {
 
     @PostMapping
     public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
-        log.info("Received request to create new vacancy: {}", vacancyDto);
+        log.info("Received request from user id {} to create new vacancy: {}", vacancyDto.getCreatedBy(), vacancyDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancyDto));
     }
 
     @PutMapping
     public ResponseEntity<VacancyDto> updateVacancyStatus(@Valid @RequestBody VacancyDto dto) {
+        log.info("Received request for update from user id {} for vacancy: {}", dto.getUpdatedBy(), dto.getId());
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.updateVacancyStatus(dto));
     }
 }

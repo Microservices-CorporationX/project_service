@@ -59,4 +59,10 @@ public class GlobalExceptionHandler {
         log.error("Entity not found exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
+    @ExceptionHandler(InsufficientCandidatesException.class)
+    public ResponseEntity<String> handleInsufficientCandidatesException(InsufficientCandidatesException ex) {
+        log.error("Insufficient candidates exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
