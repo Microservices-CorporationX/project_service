@@ -20,14 +20,14 @@ public class VacancyValidator {
     private final TeamMemberService teamMemberService;
 
     public void validateVacancyExistsById(Long vacancyId) {
-        if(!vacancyRepository.existsById(vacancyId)) {
+        if (!vacancyRepository.existsById(vacancyId)) {
             throw new EntityNotFoundException(String.format("Vacancy doesn't exist by id: %s", vacancyId));
         }
     }
 
     public void validateVacancyCreatorRole(VacancyDto dto) {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserId(dto.getCreatedBy());
-        if(teamMember.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
+        if (teamMember.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy can be created by following roles " + ROLES_TO_CREATE_VACANCY);
         }
     }
