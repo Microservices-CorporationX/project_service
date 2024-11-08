@@ -9,7 +9,7 @@ public class InternshipTeamRoleFilter implements InternshipFilter {
 
     @Override
     public boolean isApplicable(InternshipFilterDto filterDto) {
-        return filterDto != null;
+        return filterDto.getTeamRole() != null;
     }
 
     @Override

@@ -20,6 +20,7 @@ public interface InternshipMapper {
     @Mapping(source = "mentorId.userId", target = "mentorUserId")
     @Mapping(source = "createdBy", target = "creatorUserId")
     @Mapping(source = "interns", target = "internUserIds", qualifiedByName = "internsToIds")
+    @Mapping(source = "project.id", target = "projectId")
     InternshipDto toDto(Internship internship);
 
     List<InternshipDto> toDto(List<Internship> internships);

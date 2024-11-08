@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +64,7 @@ class InternshipDtoValidatorTest {
     @Test
     void validateCreationDtoNotExistingUserTest() {
         prepareRestTemplate(List.of(1L));
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
@@ -75,7 +76,7 @@ class InternshipDtoValidatorTest {
     @Test
     void validateCreationDtoExceededDurationTest() {
         prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
         creationDto.setEndDate(LocalDateTime.now().plusMonths(4).plusDays(5));
 
         DataValidationException exception =
@@ -88,7 +89,7 @@ class InternshipDtoValidatorTest {
     @Test
     void validateCreationDtoNotExistingProjectTest() {
         prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
         when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(false);
 
         DataValidationException exception =
@@ -102,7 +103,7 @@ class InternshipDtoValidatorTest {
     @Test
     void validateCreationDtoMentorIsNotOnProjectTest() {
         prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
         when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
         when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(null);
 
@@ -125,7 +126,7 @@ class InternshipDtoValidatorTest {
         teamMember.setRoles(List.of(TeamRole.INTERN));
 
         prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
         when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
         when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(teamMember);
 
@@ -146,7 +147,7 @@ class InternshipDtoValidatorTest {
                 .build();
 
         prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = prepareDefaultCreationDto();
+        InternshipCreationDto creationDto = createDefaultCreationDto();
         when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
         when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(teamMember);
 
@@ -160,7 +161,7 @@ class InternshipDtoValidatorTest {
 
     @Test
     void validateUpdateDtoNotExistingInternshipTest() {
-        InternshipUpdateDto updateDto = prepareDefaultUpdateDto();
+        InternshipUpdateDto updateDto = createDefaultUpdateDto();
         when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.empty());
 
         DataValidationException exception =
@@ -175,10 +176,10 @@ class InternshipDtoValidatorTest {
 
     @Test
     void validateUpdateDtoCompletedInternshipTest() {
-        Internship internship = prepareDefaultInternship();
+        Internship internship = createDefaultInternship();
         internship.setStatus(InternshipStatus.COMPLETED);
 
-        InternshipUpdateDto updateDto = prepareDefaultUpdateDto();
+        InternshipUpdateDto updateDto = createDefaultUpdateDto();
         when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
 
         DataValidationException exception =
@@ -190,11 +191,11 @@ class InternshipDtoValidatorTest {
 
     @Test
     void validateUpdateDtoNotStartedInternshipTest() {
-        Internship internship = prepareDefaultInternship();
+        Internship internship = createDefaultInternship();
         internship.setStatus(InternshipStatus.NOT_STARTED);
         internship.setStartDate(DEFAULT_START_DATE);
 
-        InternshipUpdateDto updateDto = prepareDefaultUpdateDto();
+        InternshipUpdateDto updateDto = createDefaultUpdateDto();
         when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
 
         DataValidationException exception =
@@ -206,17 +207,18 @@ class InternshipDtoValidatorTest {
 
     @Test
     void validateUpdateDtoValidTest() {
-        Internship internship = prepareDefaultInternship();
-        InternshipUpdateDto updateDto = prepareDefaultUpdateDto();
+        Internship internship = createDefaultInternship();
+        InternshipUpdateDto updateDto = createDefaultUpdateDto();
         when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
 
-        Internship internshipToUpdate = validator.validateUpdateDtoAndGetInternship(updateDto);
+        Internship internshipToUpdate = assertDoesNotThrow(() -> validator.validateUpdateDtoAndGetInternship(updateDto));
+
         assertEquals(DEFAULT_INTERNSHIP_ID, internshipToUpdate.getId());
         assertNotEquals(internshipToUpdate.getStatus(), InternshipStatus.COMPLETED);
         verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
     }
 
-    private Internship prepareDefaultInternship() {
+    private Internship createDefaultInternship() {
         Internship internship = new Internship();
         internship.setId(DEFAULT_INTERNSHIP_ID);
         internship.setStatus(InternshipStatus.IN_PROGRESS);
@@ -224,7 +226,7 @@ class InternshipDtoValidatorTest {
         return internship;
     }
 
-    private InternshipCreationDto prepareDefaultCreationDto() {
+    private InternshipCreationDto createDefaultCreationDto() {
         return InternshipCreationDto.builder()
                 .internUserIds(DEFAULT_INTERN_USER_IDS)
                 .mentorUserId(DEFAULT_MENTOR_USER_ID)
@@ -234,7 +236,7 @@ class InternshipDtoValidatorTest {
                 .build();
     }
 
-    private InternshipUpdateDto prepareDefaultUpdateDto() {
+    private InternshipUpdateDto createDefaultUpdateDto() {
         return InternshipUpdateDto.builder()
                 .internshipId(DEFAULT_INTERNSHIP_ID)
                 .internNewTeamRole(TeamRole.ANALYST)

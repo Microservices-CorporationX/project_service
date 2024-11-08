@@ -9,7 +9,7 @@ public class InternshipStatusFilter implements InternshipFilter {
 
     @Override
     public boolean isApplicable(InternshipFilterDto filterDto) {
-        return filterDto != null;
+        return filterDto.getInternshipStatus() != null;
     }
 
     @Override
