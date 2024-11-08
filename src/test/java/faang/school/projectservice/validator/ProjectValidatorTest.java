@@ -1,7 +1,9 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +24,9 @@ class ProjectValidatorTest {
     @InjectMocks
     private ProjectValidator projectValidator;
 
+    private ProjectDto projectDto;
     private Long ownerId;
     private String projectName;
-    ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
@@ -32,6 +34,8 @@ class ProjectValidatorTest {
                 .name("Test project")
                 .description("Test project description")
                 .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
         projectName = projectDto.getName();

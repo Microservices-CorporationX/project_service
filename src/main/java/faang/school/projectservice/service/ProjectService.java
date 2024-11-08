@@ -1,15 +1,25 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -18,14 +28,57 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
+    private final UpdateProjectMapper updateProjectMapper;
+    private final List<Filter<Project, ProjectFilterDto>> projectFilters;
 
-    @Transactional
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
+
         Project project = projectMapper.toEntity(dto);
         project.setStatus(ProjectStatus.CREATED);
         Project savedProject = projectRepository.save(project);
+
         log.info("Project #{} successfully created.", savedProject.getId());
         return projectMapper.toDto(savedProject);
+    }
+
+    @Transactional
+    public UpdateProjectDto updateProject(UpdateProjectDto dto) {
+        Project project = projectRepository.getProjectById(dto.getId());
+
+        if (dto.getDescription() != null && !dto.getDescription().isBlank()) {
+            project.setDescription(dto.getDescription());
+        }
+        if (dto.getStatus() != null) {
+            project.setStatus(dto.getStatus());
+        }
+        if (dto.getVisibility() != null) {
+            project.setVisibility(dto.getVisibility());
+        }
+
+        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        Project updatedProject = projectRepository.save(project);
+
+        log.info("Project #{} successfully updated. Current data: description: '{}'; status: '{}'; visibility: '{}'",
+                updatedProject.getId(), updatedProject.getDescription(),
+                updatedProject.getStatus(), updatedProject.getVisibility());
+        return updateProjectMapper.toDto(updatedProject);
+    }
+
+    public List<ProjectDto> getProjectsByFilter(ProjectFilterDto filterDto, Long currentUserId) {
+        Stream<Project> projects = projectRepository.findAll().stream()
+                .filter(project ->
+                        project.getVisibility() != ProjectVisibility.PRIVATE ||
+                                project.getOwnerId().equals(currentUserId)
+                );
+
+        List<ProjectDto> result = projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .flatMap(filter -> filter.apply(projects, filterDto))
+                .map(projectMapper::toDto)
+                .toList();
+
+        log.info("Projects filtered by {}.", filterDto);
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,10 @@ public class ProjectValidator {
 
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             log.error("Project '{}' with ownerId #{} already exists.", name, ownerId);
-            throw new NotUniqueProjectException("Project '" + name + "' with ownerId #" + ownerId + " already exists.");
+            throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
+                    name, ownerId));
         }
+
         log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
     }
 }
