@@ -2,8 +2,6 @@ package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
