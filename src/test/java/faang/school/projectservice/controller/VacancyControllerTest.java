@@ -35,7 +35,6 @@ class VacancyControllerTest {
     private VacancyDto dto;
     private NewVacancyDto newDto;
     private VacancyUpdateDto updateDto;
-    private VacancyDto dto;
     private FilterVacancyDto filters;
 
     @BeforeEach
@@ -105,6 +104,7 @@ class VacancyControllerTest {
         assertNotNull(resultResponse);
         assertEquals(List.of(dto), resultDto);
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
+        assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.get(0).getName());
     }
 
