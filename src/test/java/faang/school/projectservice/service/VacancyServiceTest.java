@@ -85,6 +85,7 @@ class VacancyServiceTest {
 
         verify(projectValidator, times(1)).validateProjectExistsById(dto.getProjectId());
         verify(vacancyValidator, times(1)).validateVacancyCreatorRole(dto);
+        verify(vacancyRepository, never()).save(vacancy);
     }
 
     @Test

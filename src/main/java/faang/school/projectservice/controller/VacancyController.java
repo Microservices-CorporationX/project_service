@@ -31,7 +31,9 @@ public class VacancyController {
 
     @DeleteMapping("/{vacancyId}")
     public ResponseEntity<Void> deleteVacancy(@PathVariable @Positive long vacancyId) {
+        log.info("Received request to delete vacancy {}", vacancyId);
         vacancyService.deleteVacancy(vacancyId);
+        log.info("Vacancy {} deleted successfully", vacancyId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
