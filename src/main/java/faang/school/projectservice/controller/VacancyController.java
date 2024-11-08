@@ -42,6 +42,7 @@ public class VacancyController {
 
     @GetMapping("/filters/")
     public ResponseEntity<List<VacancyDto>> filterVacancies(@Valid @RequestBody FilterVacancyDto filters) {
+        log.info("Filters request received: {}", filters);
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.filterVacancies(filters));
     }
 }

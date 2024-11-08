@@ -31,7 +31,6 @@ public class VacancyService {
     private final ProjectValidator projectValidator;
     private final List<Filter<Vacancy, FilterVacancyDto>> vacancyFilters;
 
-    @Transactional
     public VacancyDto create(VacancyDto vacancyDto) {
         projectValidator.validateProjectExistsById(vacancyDto.getProjectId());
         vacancyValidator.validateVacancyCreatorRole(vacancyDto);
