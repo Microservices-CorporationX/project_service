@@ -38,12 +38,6 @@ import static org.mockito.Mockito.when;
 class InternshipDtoValidatorTest {
 
     private static final int MAX_INTERNSHIP_MONTHS_DURATION = 3;
-    private static final List<Long> DEFAULT_INTERN_USER_IDS = List.of(1L, 2L, 3L, 4L);
-    private static final Long DEFAULT_MENTOR_USER_ID = 8L;
-    private static final Long DEFAULT_PROJECT_ID = 10L;
-    private static final LocalDateTime DEFAULT_START_DATE = LocalDateTime.now().plusMonths(1);
-    private static final LocalDateTime DEFAULT_END_DATE = LocalDateTime.now().plusMonths(1 + MAX_INTERNSHIP_MONTHS_DURATION);
-    private static final Long DEFAULT_INTERNSHIP_ID = 9L;
 
     @Mock
     private RestTemplate restTemplate;
@@ -63,197 +57,243 @@ class InternshipDtoValidatorTest {
 
     @Test
     void validateCreationDtoNotExistingUserTest() {
-        prepareRestTemplate(List.of(1L));
-        InternshipCreationDto creationDto = createDefaultCreationDto();
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of(1L)));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
 
         assertEquals("Not all user ids exist in database! Missing IDs: [1]", exception.getMessage());
-        verifyRestTemplateCalledOnce();
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateCreationDtoExceededDurationTest() {
-        prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = createDefaultCreationDto();
-        creationDto.setEndDate(LocalDateTime.now().plusMonths(4).plusDays(5));
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION).plusDays(5))
+                .build();
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of()));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
 
         assertEquals("The internship should last no more than %d months!".formatted(MAX_INTERNSHIP_MONTHS_DURATION), exception.getMessage());
-        verifyRestTemplateCalledOnce();
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateCreationDtoNotExistingProjectTest() {
-        prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = createDefaultCreationDto();
-        when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(false);
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+        when(projectService.isProjectExists(10L)).thenReturn(false);
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of()));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
 
-        assertEquals("The project with ID %d does not exist in database!".formatted(DEFAULT_PROJECT_ID), exception.getMessage());
-        verifyRestTemplateCalledOnce();
-        verify(projectService, times(1)).isProjectExists(DEFAULT_PROJECT_ID);
+        assertEquals("The project with ID %d does not exist in database!".formatted(10L), exception.getMessage());
+        verify(projectService, times(1)).isProjectExists(10L);
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateCreationDtoMentorIsNotOnProjectTest() {
-        prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = createDefaultCreationDto();
-        when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
-        when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(null);
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+        when(projectService.isProjectExists(10L)).thenReturn(true);
+        when(teamMemberService.getByUserIdAndProjectId(8L, 10L)).thenReturn(null);
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of()));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
 
         assertEquals(
                 "There is no mentor with user ID %d working with a project with ID %d in the database."
-                        .formatted(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID),
+                        .formatted(8L, 10L),
                 exception.getMessage()
         );
-        verifyRestTemplateCalledOnce();
-        verify(projectService, times(1)).isProjectExists(DEFAULT_PROJECT_ID);
-        verify(teamMemberService, times(1)).getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID);
+        verify(projectService, times(1)).isProjectExists(10L);
+        verify(teamMemberService, times(1)).getByUserIdAndProjectId(8L, 10L);
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateCreationDtoMentorIsInternTest() {
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.INTERN));
-
-        prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = createDefaultCreationDto();
-        when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
-        when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(teamMember);
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+        when(projectService.isProjectExists(10L)).thenReturn(true);
+        when(teamMemberService.getByUserIdAndProjectId(8L, 10L)).thenReturn(teamMember);
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of()));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateCreationDtoAndGetMentor(creationDto));
 
         assertEquals("The mentor can't be intern.", exception.getMessage());
-        verifyRestTemplateCalledOnce();
-        verify(projectService, times(1)).isProjectExists(DEFAULT_PROJECT_ID);
-        verify(teamMemberService, times(1)).getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID);
+        verify(projectService, times(1)).isProjectExists(10L);
+        verify(teamMemberService, times(1)).getByUserIdAndProjectId(8L, 10L);
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateCreationDtoValidTest() {
         TeamMember teamMember = TeamMember.builder()
-                .userId(DEFAULT_MENTOR_USER_ID)
+                .userId(8L)
                 .roles(List.of(TeamRole.ANALYST))
                 .build();
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .mentorUserId(8L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusMonths(MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+        when(projectService.isProjectExists(10L)).thenReturn(true);
+        when(teamMemberService.getByUserIdAndProjectId(8L, 10L)).thenReturn(teamMember);
+        when(restTemplate.exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        )).thenReturn(ResponseEntity.ok(List.of()));
 
-        prepareRestTemplate(List.of());
-        InternshipCreationDto creationDto = createDefaultCreationDto();
-        when(projectService.isProjectExists(DEFAULT_PROJECT_ID)).thenReturn(true);
-        when(teamMemberService.getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID)).thenReturn(teamMember);
+        TeamMember mentor = assertDoesNotThrow(() -> validator.validateCreationDtoAndGetMentor(creationDto));
 
-        TeamMember mentor = validator.validateCreationDtoAndGetMentor(creationDto);
-
-        assertEquals(DEFAULT_MENTOR_USER_ID, mentor.getUserId());
-        verifyRestTemplateCalledOnce();
-        verify(projectService, times(1)).isProjectExists(DEFAULT_PROJECT_ID);
-        verify(teamMemberService, times(1)).getByUserIdAndProjectId(DEFAULT_MENTOR_USER_ID, DEFAULT_PROJECT_ID);
+        assertEquals(8L, mentor.getUserId());
+        verify(projectService, times(1)).isProjectExists(10L);
+        verify(teamMemberService, times(1)).getByUserIdAndProjectId(8L, 10L);
+        verify(restTemplate, times(1)).exchange(
+                any(RequestEntity.class),
+                eq(new ParameterizedTypeReference<List<Long>>() {})
+        );
     }
 
     @Test
     void validateUpdateDtoNotExistingInternshipTest() {
-        InternshipUpdateDto updateDto = createDefaultUpdateDto();
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.empty());
+        InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
+                .internshipId(9L)
+                .internNewTeamRole(TeamRole.ANALYST)
+                .build();
+        when(internshipRepository.findById(9L)).thenReturn(Optional.empty());
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateUpdateDtoAndGetInternship(updateDto));
 
         assertEquals(
-                "There is no internship with ID (%d) in the database!".formatted(DEFAULT_INTERNSHIP_ID),
+                "There is no internship with ID (%d) in the database!".formatted(9L),
                 exception.getMessage()
         );
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
+        verify(internshipRepository, times(1)).findById(9L);
     }
 
     @Test
     void validateUpdateDtoCompletedInternshipTest() {
-        Internship internship = createDefaultInternship();
+        Internship internship = new Internship();
+        internship.setId(9L);
+        internship.setStartDate(LocalDateTime.now().minusMonths(1));
         internship.setStatus(InternshipStatus.COMPLETED);
-
-        InternshipUpdateDto updateDto = createDefaultUpdateDto();
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
+                .internshipId(9L)
+                .internNewTeamRole(TeamRole.ANALYST)
+                .build();
+        when(internshipRepository.findById(9L)).thenReturn(Optional.of(internship));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateUpdateDtoAndGetInternship(updateDto));
 
-        assertEquals("The internship with ID (%d) has been already completed!".formatted(DEFAULT_INTERNSHIP_ID), exception.getMessage());
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
+        assertEquals("The internship with ID (%d) has been already completed!".formatted(9L), exception.getMessage());
+        verify(internshipRepository, times(1)).findById(9L);
     }
 
     @Test
     void validateUpdateDtoNotStartedInternshipTest() {
-        Internship internship = createDefaultInternship();
+        Internship internship = new Internship();
+        internship.setId(9L);
         internship.setStatus(InternshipStatus.NOT_STARTED);
-        internship.setStartDate(DEFAULT_START_DATE);
-
-        InternshipUpdateDto updateDto = createDefaultUpdateDto();
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        internship.setStartDate(LocalDateTime.now().plusDays(1));
+        InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
+                .internshipId(9L)
+                .internNewTeamRole(TeamRole.ANALYST)
+                .build();
+        when(internshipRepository.findById(9L)).thenReturn(Optional.of(internship));
 
         DataValidationException exception =
                 assertThrows(DataValidationException.class, () -> validator.validateUpdateDtoAndGetInternship(updateDto));
 
-        assertEquals("The internship with ID (%d) has not started yet!".formatted(DEFAULT_INTERNSHIP_ID), exception.getMessage());
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
+        assertEquals("The internship with ID (%d) has not started yet!".formatted(9L), exception.getMessage());
+        verify(internshipRepository, times(1)).findById(9L);
     }
 
     @Test
     void validateUpdateDtoValidTest() {
-        Internship internship = createDefaultInternship();
-        InternshipUpdateDto updateDto = createDefaultUpdateDto();
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        Internship internship = new Internship();
+        internship.setId(9L);
+        internship.setStatus(InternshipStatus.IN_PROGRESS);
+        internship.setStartDate(LocalDateTime.now().minusMonths(1));
+        InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
+                .internshipId(9L)
+                .internNewTeamRole(TeamRole.ANALYST)
+                .build();
+        when(internshipRepository.findById(9L)).thenReturn(Optional.of(internship));
 
         Internship internshipToUpdate = assertDoesNotThrow(() -> validator.validateUpdateDtoAndGetInternship(updateDto));
 
-        assertEquals(DEFAULT_INTERNSHIP_ID, internshipToUpdate.getId());
-        assertNotEquals(internshipToUpdate.getStatus(), InternshipStatus.COMPLETED);
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
-    }
-
-    private Internship createDefaultInternship() {
-        Internship internship = new Internship();
-        internship.setId(DEFAULT_INTERNSHIP_ID);
-        internship.setStatus(InternshipStatus.IN_PROGRESS);
-        internship.setStartDate(LocalDateTime.now().minusMonths(1));
-        return internship;
-    }
-
-    private InternshipCreationDto createDefaultCreationDto() {
-        return InternshipCreationDto.builder()
-                .internUserIds(DEFAULT_INTERN_USER_IDS)
-                .mentorUserId(DEFAULT_MENTOR_USER_ID)
-                .projectId(DEFAULT_PROJECT_ID)
-                .startDate(DEFAULT_START_DATE)
-                .endDate(DEFAULT_END_DATE)
-                .build();
-    }
-
-    private InternshipUpdateDto createDefaultUpdateDto() {
-        return InternshipUpdateDto.builder()
-                .internshipId(DEFAULT_INTERNSHIP_ID)
-                .internNewTeamRole(TeamRole.ANALYST)
-                .build();
-    }
-
-    private void prepareRestTemplate(List<Long> notExistingUsers) {
-        when(restTemplate.exchange(
-                any(RequestEntity.class),
-                eq(new ParameterizedTypeReference<List<Long>>() {})
-        )).thenReturn(ResponseEntity.ok(notExistingUsers));
-    }
-
-    private void verifyRestTemplateCalledOnce() {
-        verify(restTemplate, times(1)).exchange(
-                any(RequestEntity.class),
-                eq(new ParameterizedTypeReference<List<Long>>() {})
-        );
+        assertEquals(9L, internshipToUpdate.getId());
+        assertNotEquals(InternshipStatus.COMPLETED, internshipToUpdate.getStatus());
+        verify(internshipRepository, times(1)).findById(9L);
     }
 }
