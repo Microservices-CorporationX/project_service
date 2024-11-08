@@ -57,7 +57,7 @@ class ProjectValidatorTest {
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
         Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
-        assertEquals("Project doesn't exist by id: 1", ex.getMessage());
+        assertEquals("Project with id 1 doesn't exist", ex.getMessage());
 
         verify(projectRepository, times(1)).existsById(projectId);
     }

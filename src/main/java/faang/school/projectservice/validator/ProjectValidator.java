@@ -22,7 +22,7 @@ public class ProjectValidator {
 
     public void validateProjectExistsById(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
-            throw new EntityNotFoundException(String.format("Project doesn't exist by id: %s", projectId));
+            throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
     }
 }
