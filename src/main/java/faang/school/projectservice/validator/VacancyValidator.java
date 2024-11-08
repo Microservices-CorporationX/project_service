@@ -1,6 +1,5 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.InsufficientCandidatesException;
@@ -27,17 +26,10 @@ public class VacancyValidator {
         }
     }
 
-    public void validateVacancyCreatorRole(VacancyDto dto) {
-        TeamMember teamMember = teamMemberService.getTeamMemberByUserId(dto.getCreatedBy());
-        if (teamMember.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
+    public void validateVacancyManagerRole(Long userId) {
+        TeamMember manager = teamMemberService.getTeamMemberByUserId(userId);
+        if (manager.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
             throw new DataValidationException("Vacancy can be created by following roles " + ROLES_TO_CREATE_VACANCY);
-        }
-    }
-
-    public void validateVacancyUpdaterRole(VacancyDto dto) {
-        TeamMember updater = teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy());
-        if (updater.getRoles().stream().noneMatch((ROLES_TO_CREATE_VACANCY::contains))) {
-            throw new DataValidationException("Vacancy status can be modified by following roles " + ROLES_TO_CREATE_VACANCY);
         }
     }
 
