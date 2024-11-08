@@ -1,6 +1,8 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -27,26 +29,24 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
     private final ProjectValidator projectValidator;
 
-    @Transactional
-    public VacancyDto create(VacancyDto vacancyDto) {
-        projectValidator.validateProjectExistsById(vacancyDto.getProjectId());
-        vacancyValidator.validateVacancyCreatorRole(vacancyDto);
-        Vacancy vacancy = mapToEntity(vacancyDto);
-        vacancy.setStatus(VacancyStatus.OPEN);
+    public VacancyDto create(NewVacancyDto dto) {
+        projectValidator.validateProjectExistsById(dto.getProjectId());
+        vacancyValidator.validateVacancyManagerRole(dto.getCreatedBy());
+        Vacancy vacancy = mapToNewEntity(dto);
         vacancyRepository.save(vacancy);
         log.info("New vacancy with id #{} successfully saved", vacancy.getId());
         return vacancyMapper.toDto(vacancy);
     }
 
     @Transactional
-    public VacancyDto updateVacancyStatus(VacancyDto dto) {
-        vacancyValidator.validateVacancyCreatorRole(dto);
+    public VacancyDto updateVacancyStatus(VacancyUpdateDto dto) {
+        vacancyValidator.validateVacancyManagerRole(dto.getUpdatedBy());
         Vacancy vacancy = getVacancyById(dto.getId());
         if (dto.getStatus().equals(VacancyStatus.CLOSED)) {
             vacancyValidator.validateCandidateCountForClosure(vacancy);
-            vacancy.setStatus(dto.getStatus());
-            vacancyRepository.save(vacancy);
         }
+        vacancy.setStatus(dto.getStatus());
+        vacancyRepository.save(vacancy);
         log.info("Vacancy {} updated successfully. New status: {}", vacancy.getId(), vacancy.getStatus());
         return vacancyMapper.toDto(vacancy);
     }
@@ -67,9 +67,10 @@ public class VacancyService {
                 () -> new EntityNotFoundException(String.format("Vacancy not found by id: %s", vacancyId)));
     }
 
-    private Vacancy mapToEntity(VacancyDto dto) {
+    private Vacancy mapToNewEntity(NewVacancyDto dto) {
         Vacancy vacancy = vacancyMapper.toEntity(dto);
         vacancy.setProject(projectService.getProjectById(dto.getProjectId()));
+        vacancy.setStatus(VacancyStatus.OPEN);
         return vacancy;
     }
 

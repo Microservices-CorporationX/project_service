@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,26 +31,31 @@ class VacancyControllerTest {
     @InjectMocks
     private VacancyController vacancyController;
 
-    VacancyDto dto;
+    private VacancyDto dto;
+    private NewVacancyDto newDto;
+    private VacancyUpdateDto updateDto;
 
     @BeforeEach
     void setUp() {
+        newDto = createTestNewVacancyDto();
+        updateDto = createTestVacancyUpdateDto();
         dto = createTestVacancyDto();
     }
 
     @Test
     @DisplayName("Create a new vacancy successfully")
     void testCreateVacancySuccess() {
-        when(vacancyService.create(dto)).thenReturn(dto);
+        when(vacancyService.create(newDto)).thenReturn(dto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(dto);
+        ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(newDto);
         VacancyDto resultDto = resultResponse.getBody();
 
-        verify(vacancyService).create(dto);
+        verify(vacancyService).create(newDto);
 
         assertNotNull(resultResponse);
         assertEquals(dto, resultDto);
         assertEquals(HttpStatus.CREATED, resultResponse.getStatusCode());
+        assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.getName());
     }
 
@@ -57,14 +63,15 @@ class VacancyControllerTest {
     @DisplayName("Update vacancy status successfully")
     void testUpdateVacancyStatusSuccess() {
         VacancyDto updatedDto = VacancyDto.builder().status(VacancyStatus.CLOSED).build();
-        when(vacancyService.updateVacancyStatus(dto)).thenReturn(updatedDto);
+        when(vacancyService.updateVacancyStatus(updateDto)).thenReturn(updatedDto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.updateVacancyStatus(dto);
+        ResponseEntity<VacancyDto> resultResponse = vacancyController.updateVacancyStatus(updateDto);
         VacancyDto result = resultResponse.getBody();
 
-        verify(vacancyService, times(1)).updateVacancyStatus(dto);
+        verify(vacancyService, times(1)).updateVacancyStatus(updateDto);
 
         assertNotNull(resultResponse);
+        assertNotNull(result);
         assertEquals(VacancyStatus.CLOSED, result.getStatus());
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
     }
@@ -92,6 +99,27 @@ class VacancyControllerTest {
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
                 .requiredSkillIds(List.of(1L))
+                .build();
+    }
+
+    private NewVacancyDto createTestNewVacancyDto() {
+        return NewVacancyDto.builder()
+                .name("Vacancy 1")
+                .description("Vacancy 1 description")
+                .projectId(1L)
+                .createdBy(1L)
+                .salary(100.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(1)
+                .requiredSkillIds(List.of(1L))
+                .build();
+    }
+
+    private VacancyUpdateDto createTestVacancyUpdateDto() {
+        return VacancyUpdateDto.builder()
+                .id(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.CLOSED)
                 .build();
     }
 }

@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -18,13 +20,13 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
-        log.info("Received request from user id {} to create new vacancy: {}", vacancyDto.getCreatedBy(), vacancyDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancyDto));
+    public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody NewVacancyDto dto) {
+        log.info("Received request from user id {} to create new vacancy: {}", dto.getCreatedBy(), dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(dto));
     }
 
     @PutMapping
-    public ResponseEntity<VacancyDto> updateVacancyStatus(@Valid @RequestBody VacancyDto dto) {
+    public ResponseEntity<VacancyDto> updateVacancyStatus(@Valid @RequestBody VacancyUpdateDto dto) {
         log.info("Received request for update from user id {} for vacancy: {}", dto.getUpdatedBy(), dto.getId());
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.updateVacancyStatus(dto));
     }
