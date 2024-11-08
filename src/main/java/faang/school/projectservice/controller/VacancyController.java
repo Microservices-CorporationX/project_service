@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
@@ -20,8 +21,8 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
-        log.info("Received request to create new vacancy: {}", vacancyDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(vacancyDto));
+    public ResponseEntity<VacancyDto> createVacancy(@Valid @RequestBody NewVacancyDto dto) {
+        log.info("Received request to create new vacancy: {}", dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(dto));
     }
 }
