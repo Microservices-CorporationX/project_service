@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -37,14 +38,14 @@ public class VacancyService {
     }
 
     @Transactional
-    public VacancyDto updateVacancyStatus(VacancyDto dto) {
-        vacancyValidator.validateVacancyCreatorRole(dto);
+    public VacancyDto updateVacancyStatus(VacancyUpdateDto dto) {
+        vacancyValidator.validateVacancyManagerRole(dto.getUpdatedBy());
         Vacancy vacancy = getVacancyById(dto.getId());
         if (dto.getStatus().equals(VacancyStatus.CLOSED)) {
             vacancyValidator.validateCandidateCountForClosure(vacancy);
-            vacancy.setStatus(dto.getStatus());
-            vacancyRepository.save(vacancy);
         }
+        vacancy.setStatus(dto.getStatus());
+        vacancyRepository.save(vacancy);
         log.info("Vacancy {} updated successfully. New status: {}", vacancy.getId(), vacancy.getStatus());
         return vacancyMapper.toDto(vacancy);
     }

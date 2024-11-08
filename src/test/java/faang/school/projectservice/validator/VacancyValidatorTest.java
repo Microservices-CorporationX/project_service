@@ -2,6 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.InsufficientCandidatesException;
 import faang.school.projectservice.model.*;
@@ -37,14 +38,16 @@ class VacancyValidatorTest {
     @InjectMocks
     private VacancyValidator vacancyValidator;
 
-    VacancyDto dto;
-    NewVacancyDto newDto;
-    TeamMember teamMember;
-    Vacancy vacancy;
+    private VacancyDto dto;
+    private NewVacancyDto newDto;
+    private VacancyUpdateDto updateDto;
+    private TeamMember teamMember;
+    private Vacancy vacancy;
 
     @BeforeEach
     void setUp() {
         newDto = createTestNewVacancyDto();
+        updateDto = createTestVacancyUpdateDto();
         dto = createTestVacancyDto();
         teamMember = createTestTeamMember();
         vacancy = createTestVacancy();
@@ -92,26 +95,6 @@ class VacancyValidatorTest {
         Exception ex = assertThrows(DataValidationException.class, (() -> vacancyValidator.validateVacancyManagerRole(newDto.getCreatedBy())));
         assertEquals("Vacancy can be created by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(newDto.getCreatedBy());
-    }
-
-    @Test
-    @DisplayName("Check the updater of the vacancy has valid role")
-    void testValidateVacancyUpdaterRoleValid(){
-        when(teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy())).thenReturn(teamMember);
-
-        assertDoesNotThrow(() -> vacancyValidator.validateVacancyUpdaterRole(dto));
-        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getUpdatedBy());
-    }
-
-    @Test
-    @DisplayName("Check the updater of the vacancy has invalid role")
-    void testValidateVacancyUpdaterRoleInvalid(){
-        teamMember.setRoles(List.of(TeamRole.ANALYST));
-        when(teamMemberService.getTeamMemberByUserId(dto.getUpdatedBy())).thenReturn(teamMember);
-
-        Exception ex = assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancyUpdaterRole(dto));
-        assertEquals("Vacancy status can be modified by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
-        verify(teamMemberService, times(1)).getTeamMemberByUserId(dto.getUpdatedBy());
     }
 
     @Test
@@ -190,6 +173,14 @@ class VacancyValidatorTest {
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
                 .requiredSkillIds(List.of(1L))
+                .build();
+    }
+
+    private VacancyUpdateDto createTestVacancyUpdateDto() {
+        return VacancyUpdateDto.builder()
+                .id(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.CLOSED)
                 .build();
     }
 }
