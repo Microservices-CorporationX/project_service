@@ -8,7 +8,6 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.transaction.Transactional;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -66,19 +64,21 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getProjectsByFilter(ProjectFilterDto filterDto, Long currentUserId) {
-        Stream<Project> projects = projectRepository.findAll().stream()
-                .filter(project ->
-                        project.getVisibility() != ProjectVisibility.PRIVATE ||
-                                project.getOwnerId().equals(currentUserId)
-                );
+        List<Project> projects = getAllUserAvailableProjects(currentUserId);
 
         List<ProjectDto> result = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(projects, filterDto))
+                .flatMap(filter -> filter.apply(projects.stream(), filterDto))
                 .map(projectMapper::toDto)
                 .toList();
 
         log.info("Projects filtered by {}.", filterDto);
         return result;
+    }
+
+    private List<Project> getAllUserAvailableProjects(Long currentUserId) {
+        return projectRepository.findAll().stream()
+                .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
+                .toList();
     }
 }

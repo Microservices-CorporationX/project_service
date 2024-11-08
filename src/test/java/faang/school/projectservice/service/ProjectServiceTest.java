@@ -146,6 +146,7 @@ class ProjectServiceTest {
         List<ProjectDto> filteredProjectDtos = getProjectDtosList();
         ProjectStatusFilter statusFilter = new ProjectStatusFilter();
         List<Filter<Project, ProjectFilterDto>> filters = List.of(statusFilter);
+        projectValidator = new ProjectValidator(projectRepository);
         projectService = new ProjectService(projectRepository, projectValidator,
                 projectMapper, updateProjectMapper, filters);
         when(projectRepository.findAll()).thenReturn(notFilteredProjects);
@@ -153,7 +154,7 @@ class ProjectServiceTest {
         List<ProjectDto> result = projectService.getProjectsByFilter(filterDto, ownerId);
 
         verify(projectRepository, times(1)).findAll();
-        assertEquals(result, filteredProjectDtos);
+        assertEquals(filteredProjectDtos, result);
     }
 
     private List<Project> getProjectsList() {

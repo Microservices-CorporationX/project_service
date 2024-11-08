@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,13 +40,14 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateProject(dto));
     }
 
-    @GetMapping
+    @GetMapping("/filtered/{currentUserId}")
     public ResponseEntity<List<ProjectDto>> getProjectsByFilter(
             @Valid @RequestBody ProjectFilterDto filterDto,
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
+            @PathVariable
             Long currentUserId) {
-        log.info("Getting filtered projects.");
+        log.info("Getting filtered projects by User #{}.", currentUserId);
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
 }
