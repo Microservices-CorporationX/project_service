@@ -1,6 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,7 @@ class ProjectControllerTest {
     private ProjectController projectController;
 
     private ProjectDto projectDto;
+    private UpdateProjectDto updateProjectDto;
 
     @BeforeEach
     void setUp() {
@@ -34,10 +38,18 @@ class ProjectControllerTest {
                 .description("Test project description")
                 .ownerId(1L)
                 .build();
+
+        updateProjectDto = UpdateProjectDto.builder()
+                .name("Test project")
+                .description("Test project description")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
     }
 
     @Test
-    void testCreateProjectSuccess() {
+    void testCreateProjectSuccessful() {
         when(projectService.createProject(projectDto)).thenReturn(projectDto);
 
         ResponseEntity<ProjectDto> response = projectController.createProject(projectDto);
@@ -48,35 +60,35 @@ class ProjectControllerTest {
     }
 
     @Test
-    void testUpdateProjectDescription() {
-        when(projectService.updateProjectDescription(projectDto)).thenReturn(projectDto);
+    void testUpdateProjectDescriptionSuccessful() {
+        when(projectService.updateProjectDescription(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<ProjectDto> response = projectController.updateProjectDescription(projectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectDescription(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectDescription(projectDto);
+        assertEquals(updateProjectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectDescription(updateProjectDto);
     }
 
     @Test
-    void testUpdateProjectStatus() {
-        when(projectService.updateProjectStatus(projectDto)).thenReturn(projectDto);
+    void testUpdateProjectStatusSuccessful() {
+        when(projectService.updateProjectStatus(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<ProjectDto> response = projectController.updateProjectStatus(projectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectStatus(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectStatus(projectDto);
+        assertEquals(updateProjectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectStatus(updateProjectDto);
     }
 
     @Test
-    void testUpdateProjectVisibility() {
-        when(projectService.updateProjectVisibility(projectDto)).thenReturn(projectDto);
+    void testUpdateProjectVisibilitySuccessful() {
+        when(projectService.updateProjectVisibility(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<ProjectDto> response = projectController.updateProjectVisibility(projectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectVisibility(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).updateProjectVisibility(projectDto);
+        assertEquals(updateProjectDto, response.getBody());
+        verify(projectService, times(1)).updateProjectVisibility(updateProjectDto);
     }
 }

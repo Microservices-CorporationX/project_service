@@ -1,14 +1,14 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ProjectMapper {
+public interface UpdateProjectMapper {
 
-    ProjectDto toDto(Project project);
+    UpdateProjectDto toDto(Project project);
 
-    Project toEntity(ProjectDto dto);
+    Project toEntity(UpdateProjectDto dto);
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,20 +30,20 @@ public class ProjectController {
     }
 
     @PutMapping("/description-update")
-    public ResponseEntity<ProjectDto> updateProjectDescription(@Valid @RequestBody ProjectDto dto) {
+    public ResponseEntity<UpdateProjectDto> updateProjectDescription(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' description by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok().body(projectService.updateProjectDescription(dto));
+        return ResponseEntity.ok(projectService.updateProjectDescription(dto));
     }
 
     @PutMapping("/status-update")
-    public ResponseEntity<ProjectDto> updateProjectStatus(@Valid @RequestBody ProjectDto dto) {
+    public ResponseEntity<UpdateProjectDto> updateProjectStatus(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' status by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok().body(projectService.updateProjectStatus(dto));
+        return ResponseEntity.ok(projectService.updateProjectStatus(dto));
     }
 
     @PutMapping("/visibility-update")
-    public ResponseEntity<ProjectDto> updateProjectVisibility(@Valid @RequestBody ProjectDto dto) {
+    public ResponseEntity<UpdateProjectDto> updateProjectVisibility(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' visibility by UserId #{}.", dto.getName(), dto.getOwnerId());
-        return ResponseEntity.ok().body(projectService.updateProjectVisibility(dto));
+        return ResponseEntity.ok(projectService.updateProjectVisibility(dto));
     }
 }

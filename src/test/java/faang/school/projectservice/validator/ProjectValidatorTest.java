@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
@@ -27,22 +28,14 @@ class ProjectValidatorTest {
     @InjectMocks
     private ProjectValidator projectValidator;
 
-    private Long id;
+    private Project project;
+    private ProjectDto projectDto;
+    private UpdateProjectDto updateProjectDto;
     private Long ownerId;
     private String projectName;
-    private ProjectDto projectDto;
-    private Project project;
 
     @BeforeEach
     void setUp() {
-        projectDto = ProjectDto.builder()
-                .name("Test project")
-                .description("Test project description")
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
         project = Project.builder()
                 .name("Test project")
                 .description("Test project description")
@@ -51,7 +44,22 @@ class ProjectValidatorTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
 
-        id = projectDto.getId();
+        projectDto = ProjectDto.builder()
+                .name("Test project")
+                .description("Test project description")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
+        updateProjectDto = UpdateProjectDto.builder()
+                .name("Test project")
+                .description("Test project description")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+
         projectName = projectDto.getName();
         ownerId = projectDto.getOwnerId();
     }
@@ -66,67 +74,56 @@ class ProjectValidatorTest {
 
     @Test
     void testValidateProjectDescriptionNotUpdatableOnTheSame() {
-        when(projectRepository.getProjectById(id)).thenReturn(project);
-
         assertThrows(DataValidationException.class,
-                () -> projectValidator.validateProjectDescriptionUpdatable(projectDto));
+                () -> projectValidator.validateProjectDescriptionUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectDescriptionUpdatable() {
-        projectDto.setDescription("Another test description.");
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        updateProjectDto.setDescription("Another test description.");
 
-        assertDoesNotThrow(() -> projectValidator.validateProjectDescriptionUpdatable(projectDto));
+        assertDoesNotThrow(() -> projectValidator.validateProjectDescriptionUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectStatusNotUpdatableOnNull() {
-        projectDto.setStatus(null);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        updateProjectDto.setStatus(null);
 
         assertThrows(DataValidationException.class,
-                () -> projectValidator.validateProjectStatusUpdatable(projectDto));
+                () -> projectValidator.validateProjectStatusUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectStatusNotUpdatableOnTheSame() {
-        when(projectRepository.getProjectById(id)).thenReturn(project);
-
         assertThrows(DataValidationException.class,
-                () -> projectValidator.validateProjectStatusUpdatable(projectDto));
+                () -> projectValidator.validateProjectStatusUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectStatusUpdatable() {
-        projectDto.setStatus(ProjectStatus.CANCELLED);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        updateProjectDto.setStatus(ProjectStatus.CANCELLED);
 
-        assertDoesNotThrow(() -> projectValidator.validateProjectStatusUpdatable(projectDto));
+        assertDoesNotThrow(() -> projectValidator.validateProjectStatusUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectVisibilityNotUpdatableOnNull() {
-        projectDto.setVisibility(null);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        updateProjectDto.setVisibility(null);
 
         assertThrows(DataValidationException.class,
-                () -> projectValidator.validateProjectVisibilityUpdatable(projectDto));
+                () -> projectValidator.validateProjectVisibilityUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectVisibilityNotUpdatableOnTheSame() {
-        when(projectRepository.getProjectById(id)).thenReturn(project);
-
         assertThrows(DataValidationException.class,
-                () -> projectValidator.validateProjectVisibilityUpdatable(projectDto));
+                () -> projectValidator.validateProjectVisibilityUpdatable(updateProjectDto, project));
     }
 
     @Test
     void testValidateProjectVisibilityUpdatable() {
-        projectDto.setVisibility(ProjectVisibility.PRIVATE);
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        updateProjectDto.setVisibility(ProjectVisibility.PRIVATE);
 
-        assertDoesNotThrow(() -> projectValidator.validateProjectVisibilityUpdatable(projectDto));
+        assertDoesNotThrow(() -> projectValidator.validateProjectVisibilityUpdatable(updateProjectDto, project));
     }
 }
