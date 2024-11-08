@@ -1,0 +1,44 @@
+package faang.school.projectservice.handler;
+
+import faang.school.projectservice.exception.InvalidStageTransferException;
+import faang.school.projectservice.exception.NonExistentDeletionTypeException;
+import faang.school.projectservice.exception.ProjectStatusValidationException;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEntityNotFound(EntityNotFoundException e) {
+        log.error("Entity Not Found", e);
+        return new ErrorResponse("Entity Not Found", e.getMessage());
+    }
+
+    @ExceptionHandler(ProjectStatusValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleProjectStatusValidation(ProjectStatusValidationException e) {
+        log.error("Project status validation failure", e);
+        return new ErrorResponse("Project status validation failure", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStageTransferException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidStageTransfer(InvalidStageTransferException e) {
+        log.error("Invalid target stage ID", e);
+        return new ErrorResponse("Invalid target stage ID", e.getMessage());
+    }
+
+    @ExceptionHandler(NonExistentDeletionTypeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNonExistentDeletionType(NonExistentDeletionTypeException e) {
+        log.error("Unknown deletion type", e);
+        return new ErrorResponse("Invalid target stage ID", e.getMessage());
+    }
+}
