@@ -1,213 +1,158 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.deletestrategy.DeleteStrategyRegistry;
+import faang.school.projectservice.dto.stage.DeleteTypeDto;
+import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.entity.stage.DeleteStrategy;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.stage.StageUpdateDto;
+import faang.school.projectservice.exception.ExecutorRoleNotValidException;
+import faang.school.projectservice.exception.NotEnoughTeamMembersException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
+import faang.school.projectservice.exception.WrongProjectStatusException;
 import faang.school.projectservice.filters.*;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.notification.NotificationService;
-import faang.school.projectservice.service.team.TeamMemberService;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static faang.school.projectservice.exception.ExceptionMessages.PROJECT_NOT_FOUND;
-import static faang.school.projectservice.exception.ExceptionMessages.WRONG_PROJECT_STATUS;
-import static faang.school.projectservice.exception.ExceptionMessages.PROJECT_STATUS_CANCELLED;
-
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class StageService {
     private final StageRepository stageRepository;
-    private final TeamMemberService teamMemberService;
-    private final StageMapper stageMapper;
     private final ProjectRepository projectRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final StageMapper stageMapper;
     private final List<StageFilter> stageFilters;
+    private final DeleteStrategyRegistry deleteStrategyRegistry;
 
-    public StageDto createStage(StageDto stageDto) {
-        validateProject(stageDto.getProjectId());
-        Project project = projectRepository.getProjectById(stageDto.getProjectId());
+    public StageDto createStage(StageCreateDto stageCreateDto) {
+        validateProject(stageCreateDto.projectId());
+        Project project = projectRepository.getProjectById(stageCreateDto.projectId());
         if (project.getStatus() == ProjectStatus.CANCELLED || project.getStatus() == ProjectStatus.COMPLETED) {
-            throw new DataValidationException(WRONG_PROJECT_STATUS.getMessage().formatted(stageDto.getProjectId()));
+            throw new WrongProjectStatusException(stageCreateDto.projectId());
         }
-        Stage newStage = stageMapper.toEntity(stageDto);
+        Stage newStage = stageMapper.toEntity(stageCreateDto);
         newStage.getStageRoles().forEach(role -> role.setStage(newStage));
         Stage savedStage = stageRepository.save(newStage);
         log.info("Stage created: {}", savedStage.getStageId());
         return stageMapper.toDto(savedStage);
     }
 
-    public List<StageDto> getFilteredStages(Long projectId, StageFilterDto filter) {
-        Project project = projectRepository.getReferenceById(projectId);
-        if (project.getStatus().equals(ProjectStatus.CANCELLED)) {
-            throw new DataValidationException(PROJECT_STATUS_CANCELLED.getMessage());
-        }
-        Stream<Stage> stageStream = project.getStages().stream();
-        log.info("Found {} filtered stages for project: {}", stageFilters.size(), projectId);
-        return stageFilters.stream()
-                .filter(stageFilter -> stageFilter.isApplicable(filter))
-                .flatMap(stageFilter -> stageFilter.apply(stageStream, filter))
-                .map(stageMapper::toDto)
-                .toList();
+    public List<StageDto> getStages(Long projectId, StageFilterDto filter) {
+        validateProject(projectId);
+        List<Stage> stages = projectRepository.getProjectById(projectId).getStages();
+        List<Stage> filteredStages = filterStages(stages.stream(), filter);
+        log.info("Found {} filtered stages for project: {}", filteredStages.size(), projectId);
+        return stageMapper.toDtos(filteredStages);
     }
 
-    public void deleteStage(Long id, DeleteStrategy strategy, Long targetStageId) {
-        Stage stage = stageRepository.getById(id);
-
-        switch (strategy) {
-            case CASCADE_DELETE:
-                log.debug("Executing CASCADE_DELETE strategy");
-                break;
-            case CLOSE_TASKS:
-                log.debug("Executing CLOSE_TASKS strategy");
-                stage.getTasks().forEach(task -> task.setStatus(TaskStatus.DONE));
-                break;
-            case MOVE_TASKS:
-                log.debug("Executing MOVE_TASKS strategy");
-                if (targetStageId == null) {
-                    log.error("Target stage ID is required for MOVE_TASKS strategy");
-                    throw new IllegalArgumentException("Target stage ID is required for MOVE_TASKS strategy");
-                }
-                Stage targetStage = stageRepository.getById(targetStageId);
-                stage.getTasks().forEach(task -> task.setStage(targetStage));
-                break;
-        }
-        stageRepository.delete(stage);
-        log.info("Stage removed: {}", id);
+    public StageDto deleteStage(Long stageId, DeleteTypeDto deleteTypeDto) {
+        Stage stage = stageRepository.getById(stageId);
+        deleteStrategyRegistry.getExecutor(deleteTypeDto.getDeleteStrategy()).execute(stage, deleteTypeDto);
+        log.info("Stage removed: {}", stageId);
+        return stageMapper.toDto(stage);
     }
 
-    public StageDto updateStage(Long id, StageDto stageDto) {
-        log.info("Updating stage with ID: {}", id);
-        Stage existingStage = stageRepository.getById(id);
-        existingStage.setStageName(stageDto.getStageName());
-        List<StageRoles> newRoles = stageDto.getRoles().stream()
-                .map(roleDto -> {
-                    StageRoles role = stageMapper.toStageRoles(roleDto);
-                    role.setStage(existingStage);
-                    return role;
-                })
-                .toList();
-        existingStage.getStageRoles().clear();
-        existingStage.getStageRoles().addAll(newRoles);
-
-        if (stageDto.getExecutorIds() != null) {
-            log.debug("Updating executors for stage: {}", existingStage.getStageName());
-            List<TeamMember> newExecutors = stageDto.getExecutorIds().stream()
-                    .map(teamMemberService::getTeamMemberById)
-                    .toList();
-            existingStage.setExecutors(newExecutors);
+    public StageDto updateStage(StageUpdateDto stageUpdateDto, Long stageId) {
+        log.info("Updating stage with ID: {}", stageId);
+        Stage stage = stageRepository.getById(stageId);
+        if (stageUpdateDto.stageName() != null) {
+            stage.setStageName(stageUpdateDto.stageName());
+            log.info("Stage name updated: {}", stageId);
         }
-
-        validateRolesRequirements(existingStage);
-        sendInvitationsIfNeeded(existingStage);
-
-        Stage savedStage = stageRepository.save(existingStage);
-        log.info("Stage '{}' updated successfully", savedStage.getStageName());
-        return stageMapper.toDto(savedStage);
+        List<TeamMember> executors = teamMemberRepository.findAllByIds(stageUpdateDto.executorIds());
+        validateExecutorsRoles(stage, executors);
+        stage.setExecutors(executors);
+        log.info("New executors set for stage: {}", stageId);
+        setStageForExecutors(stage, executors);
+        checkMemberCountForRole(stage, executors);
+        log.info("Stage '{}' updated successfully", stage.getStageName());
+        return stageMapper.toDto(stageRepository.save(stage));
     }
 
     public StageDto getStage(Long id) {
         return stageMapper.toDto(stageRepository.getById(id));
     }
 
-    private void sendInvitationsIfNeeded(Stage stage) {
-        Map<TeamRole, Integer> requiredRoles = getRequiredRoles(stage);
-        Map<List<TeamRole>, Long> actualRoles = getActualRoles(stage);
-
-        for (Map.Entry<TeamRole, Integer> entry : requiredRoles.entrySet()) {
-            TeamRole role = entry.getKey();
-            int required = entry.getValue();
-            long actual = actualRoles.getOrDefault(role, 0L);
-
-            if (actual < required) {
-                int needCount = required - (int) actual;
-                List<TeamMember> availableMembers = findAvailableMembers(stage, role, needCount);
-
-                if (!availableMembers.isEmpty()) {
-                    stage.getExecutors().addAll(availableMembers);
-                    sendInvitations(availableMembers, stage);
-                } else {
-                    log.warn("Not enough team members with role {} for stage {}. Required: {}, Current: {}",
-                            role, stage.getStageName(), required, actual);
-                }
-            }
-        }
-    }
-
-    private List<TeamMember> findAvailableMembers(Stage stage, TeamRole role, int needCount) {
-        List<TeamMember> projectMembers = stage.getProject().getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .distinct()
-                .toList();
-
-        return projectMembers.stream()
-                .filter(member -> member.getRoles().contains(role))
-                .filter(member -> !stage.getExecutors().contains(member))
-                .filter(member -> member.getStages().stream()
-                        .noneMatch(memberStage ->
-                                memberStage.getProject().equals(stage.getProject()) &&
-                                        !memberStage.equals(stage)))
-                .limit(needCount)
-                .collect(Collectors.toList());
-    }
-
-    private void sendInvitations(List<TeamMember> members, Stage stage) {
-        members.forEach(member -> NotificationService.sendInvitation(member, stage));
-    }
-
-    private void validateRolesRequirements(Stage stage) {
-        Map<TeamRole, Integer> requiredRoles = getRequiredRoles(stage);
-        Map<List<TeamRole>, Long> actualRoles = getActualRoles(stage);
-
-        for (Map.Entry<TeamRole, Integer> entry : requiredRoles.entrySet()) {
-            TeamRole role = entry.getKey();
-            int required = entry.getValue();
-            long actual = actualRoles.getOrDefault(Collections.singletonList(role), 0L);
-
-            if (actual < required) {
-                throw new DataValidationException(
-                        String.format("Not enough executors with role %s: required %d, actual %d", role, required, actual));
-            }
-        }
-    }
-    private Map<TeamRole, Integer> getRequiredRoles(Stage stage) {
-        return stage.getStageRoles().stream()
+    private void checkMemberCountForRole(Stage stage, List<TeamMember> executors) {
+        Map<TeamRole, Long> executorRolesCount = executors.stream()
+                .flatMap(executor -> executor.getRoles().stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        Map<TeamRole, Long> neededRolesCount = stage.getStageRoles().stream()
+                .filter(stageRole ->
+                        stageRole.getCount() - executorRolesCount.getOrDefault(stageRole.getTeamRole(), 0L) > 0)
                 .collect(Collectors.toMap(
                         StageRoles::getTeamRole,
-                        StageRoles::getCount
-                ));
+                        stageRole ->
+                                stageRole.getCount() - executorRolesCount.getOrDefault(stageRole.getTeamRole(), 0L)));
+        List<TeamMember> projectTeamMembers = getTeamMembersForProjectExcludingExecutors(stage.getProject(), executors);
+        for (Map.Entry<TeamRole, Long> entry : neededRolesCount.entrySet()) {
+            List<TeamMember> foundedTeamMembers = projectTeamMembers.stream()
+                    .filter(teamMember -> teamMember.getRoles().contains(entry.getKey()))
+                    .limit(entry.getValue())
+                    .toList();
+            if (foundedTeamMembers.size() < entry.getValue()) {
+                throw new NotEnoughTeamMembersException(entry.getKey(), stage.getProject().getId());
+            }
+//            foundedTeamMembers.forEach(teamMember -> sendInvitationsIfNeeded(stage));
+        }
     }
 
-    private Map<List<TeamRole>, Long> getActualRoles(Stage stage) {
-        return stage.getExecutors().stream()
-                .collect(Collectors.groupingBy(
-                        TeamMember::getRoles,
-                        Collectors.counting()
-                ));
+    private List<TeamMember> getTeamMembersForProjectExcludingExecutors(Project project, List<TeamMember> executors) {
+        return project.getTeams()
+                .stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> !executors.contains(teamMember))
+                .toList();
+    }
+
+    private void validateExecutorsRoles(Stage stage, List<TeamMember> executors) {
+        List<TeamRole> roles = stage.getStageRoles().stream()
+                .map(StageRoles::getTeamRole)
+                .toList();
+        for (TeamMember executor : executors) {
+            if (executor.getRoles().stream()
+                    .noneMatch(roles::contains)) {
+                throw new ExecutorRoleNotValidException(executor.getId(), stage.getStageId());
+            }
+        }
+    }
+
+    private void setStageForExecutors(Stage stage, List<TeamMember> executors) {
+        for (TeamMember executor : executors) {
+            executor.getStages().add(stage);
+        }
+    }
+
+    private List<Stage> filterStages(Stream<Stage> stages, StageFilterDto filters) {
+        for (StageFilter filter : stageFilters) {
+            if (filter.isApplicable(filters)) {
+                filter.apply(stages, filters);
+            }
+        }
+        return stages.toList();
     }
 
     private void validateProject(Long projectId) {
         if (!projectRepository.existsById(projectId)) {
-            throw new DataValidationException(PROJECT_NOT_FOUND.getMessage().formatted(projectId));
+            throw new ProjectNotFoundException(projectId);
         }
     }
 }
