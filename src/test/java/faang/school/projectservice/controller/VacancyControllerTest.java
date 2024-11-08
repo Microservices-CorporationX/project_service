@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -31,21 +32,23 @@ class VacancyControllerTest {
     private VacancyController vacancyController;
 
     VacancyDto dto;
+    NewVacancyDto newDto;
 
     @BeforeEach
     void setUp() {
+        newDto = createTestNewVacancyDto();
         dto = createTestVacancyDto();
     }
 
     @Test
     @DisplayName("Create a new vacancy successfully")
     void testCreateVacancySuccess() {
-        when(vacancyService.create(dto)).thenReturn(dto);
+        when(vacancyService.create(newDto)).thenReturn(dto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(dto);
+        ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(newDto);
         VacancyDto resultDto = resultResponse.getBody();
 
-        verify(vacancyService).create(dto);
+        verify(vacancyService).create(newDto);
 
         assertNotNull(resultResponse);
         assertEquals(dto, resultDto);
@@ -76,6 +79,19 @@ class VacancyControllerTest {
                 .description("Vacancy 1 description")
                 .projectId(1L)
                 .createdAt(LocalDateTime.now())
+                .salary(100.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(1)
+                .requiredSkillIds(List.of(1L))
+                .build();
+    }
+
+    private NewVacancyDto createTestNewVacancyDto() {
+        return NewVacancyDto.builder()
+                .name("Vacancy 1")
+                .description("Vacancy 1 description")
+                .projectId(1L)
+                .createdBy(1L)
                 .salary(100.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
