@@ -2,6 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -12,7 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,7 @@ class ProjectValidatorTest {
     private ProjectValidator projectValidator;
 
     private ProjectDto projectDto;
+    private Project project;
     private Long ownerId;
     private String projectName;
 
@@ -35,7 +39,15 @@ class ProjectValidatorTest {
                 .description("Test project description")
                 .ownerId(1L)
                 .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+
+        project = Project.builder()
+                .name("Test project")
+                .description("Test project description")
+                .ownerId(1L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PRIVATE)
                 .build();
 
         projectName = projectDto.getName();
@@ -48,5 +60,23 @@ class ProjectValidatorTest {
 
         assertThrows(NotUniqueProjectException.class,
                 () -> projectValidator.validateUniqueProject(projectDto));
+    }
+
+    @Test
+    void testUserCanAccessPrivateProject() {
+        assertTrue(projectValidator.canUserAccessProject(project, ownerId));
+    }
+
+    @Test
+    void testUserCanNotAccessPrivateProject() {
+        project.setOwnerId(2L);
+        assertFalse(projectValidator.canUserAccessProject(project, ownerId));
+    }
+
+    @Test
+    void testUserCanAccessPublicProject() {
+        project.setOwnerId(2L);
+        project.setVisibility(ProjectVisibility.PUBLIC);
+        assertTrue(projectValidator.canUserAccessProject(project, ownerId));
     }
 }

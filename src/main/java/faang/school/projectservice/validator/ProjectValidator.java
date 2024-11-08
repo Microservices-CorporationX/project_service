@@ -2,6 +2,8 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,5 +26,9 @@ public class ProjectValidator {
         }
 
         log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
+    }
+
+    public boolean canUserAccessProject(Project project, Long currentUserId) {
+        return project.getOwnerId().equals(currentUserId) || project.getVisibility() == ProjectVisibility.PUBLIC;
     }
 }
