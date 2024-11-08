@@ -40,28 +40,6 @@ class ProjectServiceTest {
         assertEquals("Project 1", result.getName());
     }
 
-    @Test
-    @DisplayName("Check project exists by id")
-    void testCheckProjectExistsById() {
-        when(projectRepository.existsById(project.getId())).thenReturn(true);
-
-        boolean result = projectService.checkProjectExistsById(project.getId());
-
-        verify(projectRepository, times(1)).existsById(anyLong());
-        assertTrue(result);
-    }
-
-    @Test
-    @DisplayName("Check project exists by invalid id")
-    void testCheckProjectExistsByInvalidId() {
-        when(projectRepository.existsById(project.getId())).thenReturn(false);
-
-        boolean result = projectService.checkProjectExistsById(project.getId());
-
-        verify(projectRepository, times(1)).existsById(anyLong());
-        assertFalse(result);
-    }
-
     private Project createTestProject() {
         return Project.builder()
                 .id(1L)

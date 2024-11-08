@@ -213,28 +213,6 @@ class VacancyServiceTest {
         assertEquals(0, result.size());
     }
 
-    @Test
-    @DisplayName("Get candidates by vacancy id successful")
-    void testGetCandidatesByVacancyIdValid() {
-        vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
-        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
-
-        List<Candidate> result = vacancyService.getCandidatesByVacancyId(vacancy.getId());
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    @DisplayName("Get candidates by vacancy invalid id")
-    void testGetCandidatesByVacancyIdInvalid() {
-        vacancy.setCandidates(List.of(new Candidate(), new Candidate()));
-        when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.empty());
-
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyService.getCandidatesByVacancyId(vacancy.getId()));
-        assertEquals("Vacancy not found by id: 1", ex.getMessage());
-    }
-
     private VacancyDto createTestVacancyDto() {
         return VacancyDto.builder()
                 .id(1L)

@@ -67,13 +67,13 @@ public class VacancyService {
                 .toList();
     }
 
-    public List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
-        return getVacancyById(vacancyId).getCandidates();
-    }
-
     public Vacancy getVacancyById(long vacancyId) {
         return vacancyRepository.findById(vacancyId).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Vacancy not found by id: %s", vacancyId)));
+    }
+
+    private List<Candidate> getCandidatesByVacancyId(Long vacancyId) {
+        return getVacancyById(vacancyId).getCandidates();
     }
 
     private Vacancy toEntityFromDto(VacancyDto dto) {
