@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -44,7 +45,7 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setId(null);
         vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
-        vacancy.setCreatedAt(LocalDateTime.now());
+        vacancy.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setStatus(VacancyStatus.OPEN);
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
@@ -60,7 +61,7 @@ public class VacancyServiceImpl implements VacancyService {
             return closeVacancy(vacancy);
         }
 
-        vacancy.setUpdatedAt(LocalDateTime.now());
+        vacancy.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setUpdatedBy(vacancyDto.getUpdatedBy());
         vacancy.setStatus(vacancyDto.getStatus());
         vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
@@ -72,11 +73,12 @@ public class VacancyServiceImpl implements VacancyService {
         vacancyServiceValidator.validateCloseVacancy(vacancyMapper.toDto(vacancy));
 
         vacancy.setStatus(VacancyStatus.CLOSED);
-        vacancy.getCandidates().forEach(candidate -> {
-            TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Team member id %s not found".formatted(candidate.getUserId())));
-            teamMember.getRoles().add(TeamRole.DEVELOPER);
-        });
+        vacancy.getCandidates().stream()
+                .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
+                .forEach(candidate -> {
+                    TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId());
+                    teamMember.getRoles().add(TeamRole.DEVELOPER);
+                });
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }

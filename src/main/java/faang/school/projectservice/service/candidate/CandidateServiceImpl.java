@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +14,9 @@ public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
 
     @Override
-    public Optional<Candidate> findById(Long id) {
-        return candidateRepository.findById(id);
+    public Candidate findById(Long id) {
+        return candidateRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate id %s not found".formatted(id)));
     }
 
     @Override

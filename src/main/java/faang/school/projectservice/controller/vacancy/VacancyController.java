@@ -40,13 +40,13 @@ public class VacancyController {
 
     private void validateValidateVacancy(VacancyDto vacancyDto) {
         if (vacancyDto == null) {
-            throw new IllegalArgumentException("Vacancy is null");
+            throw new IllegalArgumentException("Vacancy cannot be null");
         }
     }
 
     private void validateVacancyId(Long vacancyId) {
         if (vacancyId == null) {
-            throw new IllegalArgumentException("Vacancy Id is null");
+            throw new IllegalArgumentException("Vacancy Id cannot be null");
         }
     }
 }

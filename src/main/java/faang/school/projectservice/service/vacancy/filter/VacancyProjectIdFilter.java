@@ -13,6 +13,6 @@ public class VacancyProjectIdFilter implements VacancyFilter {
 
     @Override
     public Stream<Vacancy> apply(Stream<Vacancy> vacancyStream, VacancyFilterDto filters) {
-        return vacancyStream.filter(vacancy -> vacancy.getId().equals(filters.getProjectId()));
+        return vacancyStream.filter(vacancy -> vacancy.getProject().getId().equals(filters.getProjectId()));
     }
 }
