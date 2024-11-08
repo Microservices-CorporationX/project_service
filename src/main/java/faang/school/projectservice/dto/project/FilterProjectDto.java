@@ -4,12 +4,14 @@ import faang.school.projectservice.dto.FilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "Filter for projects")
 @Data
+@Builder
 public class FilterProjectDto extends FilterDto {
     @Schema(description = "Filter for project name", example = "Project name", nullable = true)
     private String name;

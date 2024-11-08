@@ -67,13 +67,10 @@ public class ProjectService {
     }
 
     public List<CreateSubProjectDto> getProjectsByFilter(FilterProjectDto filterDto, Long projectId) {
-        List<Project> projects = projectRepository.getSubProjectsByParentId(projectId);
-        Stream<Project> projectStream = projects.stream();
+        Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .reduce(projectStream,
-                        (stream,filter) -> filter.apply(stream, filterDto),
-                        ((s1, s2) -> s2))
+                .flatMap(filter-> filter.apply(projectStream, filterDto))
                 .distinct()
                 .map(subProjectMapper::toDto)
                 .toList();

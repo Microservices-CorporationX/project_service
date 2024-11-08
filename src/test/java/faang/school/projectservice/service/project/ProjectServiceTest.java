@@ -4,10 +4,8 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.filter.subproject.NameFilter;
-import faang.school.projectservice.filter.subproject.StatusFilter;
-import faang.school.projectservice.filter.subproject.VisibilityFilter;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
+import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -23,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,20 +34,11 @@ class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private SubProjectMapper subProjectMapper;
+    private SubProjectMapperImpl subProjectMapper;
     @Mock
     private ProjectServiceValidate projectValidator;
     @Mock
     private MomentService momentService;
-
-
-    @BeforeEach
-    public void init() {
-        Filter<FilterProjectDto, Project> nameFilter = mock(NameFilter.class);
-        Filter<FilterProjectDto, Project> statusFilter = mock(StatusFilter.class);
-        Filter<FilterProjectDto, Project> visibilityFilter = mock(VisibilityFilter.class);
-        List<Filter<FilterProjectDto, Project>> filters = List.of(nameFilter, statusFilter, visibilityFilter);
-    }
 
     @Test
     void createSubProject() {
@@ -229,54 +219,34 @@ class ProjectServiceTest {
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                ()-> projectService.updateProject(2L, parentDto, 1L));
+                () -> projectService.updateProject(2L, parentDto, 1L));
         assertTrue(exception.getMessage().contains("Current project has unfinished subprojects"));
     }
 
+    @Test
+    public void testGetProjectByFiltersSuccess() {
+        Filter<FilterProjectDto, Project> mockFilter = mock(Filter.class);
+        List<Filter<FilterProjectDto, Project>> filters = List.of(mockFilter);
+        projectService = new ProjectService(projectRepository, subProjectMapper, momentService, projectValidator, filters);
 
-//    @Test
-//    void testGetProjectsByFilters() {
-//        FilterProjectDto filterDto = new FilterProjectDto();
-//        filterDto.setName("project");
-//        Long id = 1L;
-//        Project projectFirst = Project.builder().name("First").build();
-//        Project projectSecond = Project.builder().name("Second project").build();
-//        Project projectThird = Project.builder().name("Third project").build();
-//        List<Project> findProjects = List.of(projectFirst, projectSecond, projectThird);
-//        List<CreateSubProjectDto> filteredProjects = List.of(new CreateSubProjectDto(), new CreateSubProjectDto());
-//
-//        when(projectRepository.getSubProjectsByParentId(id)).thenReturn(findProjects);
-////        filters.forEach(filter -> when(filters.get(filters.indexOf(filter)).isApplicable(filterDto)).thenReturn(true));
-////        filters.forEach(filter -> when(filters.get(filters.indexOf(filter)).apply(any(),any())).thenReturn(Stream.of(new Project())));
-//
-//        List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(filterDto, id);
-//
-//        assertEquals(resultProjects.size(), filteredProjects.size());
-//
-//    }
+        when(filters.get(0).isApplicable(any())).thenReturn(true);
+        when(filters.get(0).apply(any(), any())).thenAnswer(invocation -> {
+            Stream<Project> projectStream = invocation.getArgument(0);
+            FilterProjectDto filterDto = invocation.getArgument(1);
+            return projectStream.filter(project -> project.getName().contains(filterDto.getName()));
+        });
+
+        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
+        List<Project> projects = List.of(
+                Project.builder().name("First").build(),
+                Project.builder().name("Second project").build()
+        );
+        CreateSubProjectDto projectDto = CreateSubProjectDto.builder().name("Second project").build();
+
+        when(projectRepository.getSubProjectsByParentId(any())).thenReturn(projects);
+        when(subProjectMapper.toDto(any())).thenReturn(projectDto);
+
+        List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(filterDto, 1L);
+        assertTrue(resultProjects.get(0).getName().contains(projectDto.getName()));
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
