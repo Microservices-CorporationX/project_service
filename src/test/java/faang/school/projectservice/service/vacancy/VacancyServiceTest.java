@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.filter.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
@@ -11,10 +11,9 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.vacancy.VacancyService;
+import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,10 +43,10 @@ public class VacancyServiceTest {
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
 
     @Mock
-    private CandidateRepository candidateRepository;
+    private CandidateService candidateService;
 
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private TeamMemberService teamMemberService;
 
     @InjectMocks
     private VacancyService vacancyService;
@@ -71,7 +70,7 @@ public class VacancyServiceTest {
         vacancyDto.setCreatedBy(1L);
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.TESTER));
-        when(teamMemberRepository.findById(1L)).thenReturn(teamMember);
+        when(teamMemberService.findById(1L)).thenReturn(teamMember);
 
         assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(vacancyDto));
     }
@@ -85,7 +84,7 @@ public class VacancyServiceTest {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         TeamMember teamMember = new TeamMember();
         teamMember.setRoles(List.of(TeamRole.MANAGER));
-        when(teamMemberRepository.findById(10L)).thenReturn(teamMember);
+        when(teamMemberService.findById(10L)).thenReturn(teamMember);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
 
         VacancyDto createVacancy = vacancyService.createVacancy(vacancyDto);

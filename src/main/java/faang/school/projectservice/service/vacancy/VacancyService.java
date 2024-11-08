@@ -10,9 +10,9 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +28,8 @@ public class VacancyService {
 
     private final VacancyRepository vacancyRepository;
     private final VacancyMapper vacancyMapper;
-    private final CandidateRepository candidateRepository;
-    private final TeamMemberRepository teamMemberRepository;
+    private final CandidateService candidateService;
+    private final TeamMemberService teamMemberService;
     private final List<VacancyFilter> vacancyFilters;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
@@ -63,8 +63,7 @@ public class VacancyService {
 
         List<Candidate> candidateIds = vacancy.get().getCandidates();
         for (Candidate candidate : candidateIds) {
-            candidateRepository.deleteById(candidate.getId());
-            log.info("Delete candidate with ID {}", candidate.getId());
+            candidateService.deleteById(candidate.getId());
         }
 
         log.info("Delete vacancy with ID {}", id);
@@ -95,7 +94,7 @@ public class VacancyService {
             throw new DataValidationException("Curator null");
         }
         Long curatorId = vacancy.getCreatedBy();
-        TeamMember curator = teamMemberRepository.findById(curatorId);
+        TeamMember curator = teamMemberService.findById(curatorId);
         if (!curator.getRoles().contains(TeamRole.MANAGER)) {
             throw new DataValidationException("Curator not have the manager role");
         }
