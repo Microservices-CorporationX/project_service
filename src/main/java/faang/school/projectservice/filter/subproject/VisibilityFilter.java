@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public class VisibilityFilter implements Filter<FilterProjectDto, Project> {
     @Override
     public boolean isApplicable(FilterProjectDto filterDto) {
-        return filterDto.getVisibility() != null && !filterDto.getVisibility().equals(ProjectVisibility.PRIVATE);
+        return filterDto.getVisibility() != null && filterDto.getVisibility() != ProjectVisibility.PRIVATE;
     }
 
     @Override
