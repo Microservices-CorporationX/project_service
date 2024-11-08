@@ -87,7 +87,10 @@ public class StageInvitationService {
     private List<StageInvitationDto> filter(Stream<StageInvitation> invitations, StageInvitationFilterDto filter) {
         return filters.stream()
                 .filter(stageFilter -> stageFilter.isApplicable(filter))
-                .flatMap(stageFilter -> stageFilter.apply(invitations, filter))
+                .reduce(invitations,
+                        (invStream, stageFilter) -> stageFilter.apply(invStream, filter),
+                        (a, b) -> b
+                )
                 .map(stageInvitationMapper::toDto)
                 .toList();
     }

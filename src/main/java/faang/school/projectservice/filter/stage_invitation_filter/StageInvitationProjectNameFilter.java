@@ -17,7 +17,7 @@ public class StageInvitationProjectNameFilter implements StageInvitationFilter {
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> invitations, StageInvitationFilterDto filter) {
         return invitations.filter(
-                stageInvitation -> stageInvitation.getStage().getProject().getName().
-                        contains(filter.getProjectNamePattern()));
+                stageInvitation -> stageInvitation.getStage().getProject().getName().toLowerCase().
+                        contains(filter.getProjectNamePattern().toLowerCase()));
     }
 }

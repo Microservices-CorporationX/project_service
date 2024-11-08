@@ -17,6 +17,7 @@ public class StageInvitationDescriptionFilter implements StageInvitationFilter {
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> invitations, StageInvitationFilterDto filter) {
         return invitations.filter(stageInvitation ->
-                stageInvitation.getDescription().contains(filter.getDescriptionPattern()));
+                stageInvitation.getDescription().toLowerCase().
+                        contains(filter.getDescriptionPattern().toLowerCase()));
     }
 }
