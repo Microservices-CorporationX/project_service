@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.ServiceCallException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
@@ -94,14 +95,14 @@ public class InternshipDtoValidator {
                 || internshipDuration.getMonths() == MAX_INTERNSHIP_MONTHS_DURATION && internshipDuration.getDays() > 0
         ) {
             throw new DataValidationException(
-                    String.format("The internship should last no more than %d months!", MAX_INTERNSHIP_MONTHS_DURATION)
+                    "The internship should last no more than %d months!".formatted(MAX_INTERNSHIP_MONTHS_DURATION)
             );
         }
     }
 
     private void validateProjectExistence(long projectId) {
         if (!projectService.isProjectExists(projectId)) {
-            throw new DataValidationException(String.format("The project with ID %d does not exist in database!", projectId));
+            throw new DataValidationException("The project with ID %d does not exist in database!".formatted(projectId));
         }
     }
 
@@ -109,8 +110,11 @@ public class InternshipDtoValidator {
         TeamMember mentor = teamMemberService.getByUserIdAndProjectId(mentorUserId, projectId);
         if (mentor == null) {
             throw new DataValidationException(
-                    "There is no mentor with user ID (%d) working with a project with ID (%d) in the database."
+                    "There is no mentor with user ID %d working with a project with ID %d in the database."
                             .formatted(mentorUserId, projectId));
+        }
+        if (mentor.getRoles().contains(TeamRole.INTERN)) {
+            throw new DataValidationException("The mentor can't be intern.");
         }
         return mentor;
     }
