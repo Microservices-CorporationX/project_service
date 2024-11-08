@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.ObjectError;
@@ -17,7 +16,6 @@ import org.springframework.validation.ObjectError;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Controller
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/projects")
