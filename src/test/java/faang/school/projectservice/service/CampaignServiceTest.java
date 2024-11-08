@@ -146,7 +146,7 @@ public class CampaignServiceTest {
         @DisplayName("Find by project id: invalid project id")
         public void testFindFilteredCampaigns() {
             assertThrows(EntityNotFoundException.class,
-                    () -> campaignService.findFilteredCampaigns(testProject.getId(), null, null, null));
+                    () -> campaignService.findFilteredCampaigns(testProject.getId(), null, null));
         }
 
         @Test

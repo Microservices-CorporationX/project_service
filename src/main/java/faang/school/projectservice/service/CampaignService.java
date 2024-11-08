@@ -40,11 +40,8 @@ public class CampaignService {
     }
 
     @Transactional(readOnly = true)
-    public List<Campaign> findFilteredCampaigns(Long projectId, CampaignFilterDto filter, Integer pageNumber, Integer pageSize) {
+    public List<Campaign> findFilteredCampaigns(Long projectId, CampaignFilterDto filter, Pageable pageable) {
         validateProjectExists(projectId);
-        Pageable pageable = PageRequest.of(pageNumber,
-                Objects.nonNull(pageSize) ? pageSize : DEFAULT_PAGE_SIZE,
-                Sort.by("createdAt").descending());
         if (Objects.isNull(filter)) {
             return campaignRepository.findAllByProjectId(projectId, pageable).getContent();
         }

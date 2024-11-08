@@ -8,6 +8,7 @@ import faang.school.projectservice.service.CampaignService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +35,9 @@ public class CampaignController {
 
     @PostMapping("/projects/{projectId}/campaigns")
     public List<CampaignDto> getCampaignsForProject(@PathVariable Long projectId,
-                                                    @RequestParam Integer page,
-                                                    @RequestParam(required = false) Integer pageSize,
-                                                    @RequestBody(required = false) CampaignFilterDto filter) {
-        List<Campaign> campaignsForProject = campaignService.findFilteredCampaigns(projectId, filter, page, pageSize);
+                                                    @RequestBody(required = false) CampaignFilterDto filter,
+                                                    Pageable pageable) {
+        List<Campaign> campaignsForProject = campaignService.findFilteredCampaigns(projectId, filter, pageable);
         return mapper.toDtoList(campaignsForProject);
     }
 
