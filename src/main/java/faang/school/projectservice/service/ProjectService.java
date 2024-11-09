@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -45,13 +47,15 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+    public ProjectResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
         projectValidator.validateProjectExistsById(updateSubProjectDto.getId());
         Project project = getProjectById(updateSubProjectDto.getId());
         changeStatus(project, updateSubProjectDto);
+        changeVisibility(project, updateSubProjectDto);
+        // add Moment
+        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
 
-
-        return null;
+        return projectMapper.toResponseDto(project);
     }
 
     public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
@@ -82,5 +86,11 @@ public class ProjectService {
         statusUpdates.stream()
                 .filter(update -> update.isApplicable(updateSubProjectDto))
                 .forEach(update -> update.changeStatus(project));
+    }
+
+    private void changeVisibility(Project project, UpdateSubProjectDto updateSubProjectDto) {
+        if (updateSubProjectDto.getVisibility() != null) {
+            project.setVisibility(updateSubProjectDto.getVisibility());
+        }
     }
 }
