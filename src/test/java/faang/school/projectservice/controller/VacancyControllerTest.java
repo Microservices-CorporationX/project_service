@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,7 +35,7 @@ class VacancyControllerTest {
     @InjectMocks
     private VacancyController vacancyController;
 
-    private VacancyDto dto;
+    private VacancyResponseDto responseDto;
     private NewVacancyDto newDto;
     private VacancyUpdateDto updateDto;
     private FilterVacancyDto filters;
@@ -41,35 +44,46 @@ class VacancyControllerTest {
     void setUp() {
         newDto = createTestNewVacancyDto();
         updateDto = createTestVacancyUpdateDto();
-        dto = createTestVacancyDto();
+        responseDto = createTestVacancyResponseDto();
         filters = createTestFilterVacancyDto();
     }
 
     @Test
     @DisplayName("Create a new vacancy successfully")
     void testCreateVacancySuccess() {
-        when(vacancyService.create(newDto)).thenReturn(dto);
+        when(vacancyService.create(newDto)).thenReturn(responseDto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.createVacancy(newDto);
-        VacancyDto resultDto = resultResponse.getBody();
+        ResponseEntity<VacancyResponseDto> resultResponse = vacancyController.createVacancy(newDto);
+        VacancyResponseDto resultDto = resultResponse.getBody();
 
         verify(vacancyService).create(newDto);
 
         assertNotNull(resultResponse);
-        assertEquals(dto, resultDto);
+        assertNotNull(resultDto);
+        assertEquals(responseDto, resultDto);
         assertEquals(HttpStatus.CREATED, resultResponse.getStatusCode());
         assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.getName());
     }
 
     @Test
+    @DisplayName("Create a new vacancy fail")
+    void testCreateVacancyFailWrongId() {
+        when(vacancyService.create(newDto)).
+                thenThrow(new EntityNotFoundException(String.format("Project with id %s doesn't exist", newDto.getProjectId())));
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyController.createVacancy(newDto));
+        assertEquals("Project with id 1 doesn't exist", ex.getMessage());
+    }
+
+    @Test
     @DisplayName("Update vacancy status successfully")
     void testUpdateVacancyStatusSuccess() {
-        VacancyDto updatedDto = VacancyDto.builder().status(VacancyStatus.CLOSED).build();
-        when(vacancyService.updateVacancyStatus(updateDto)).thenReturn(updatedDto);
+        responseDto.setStatus(VacancyStatus.CLOSED);
+        when(vacancyService.updateVacancyStatus(updateDto)).thenReturn(responseDto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.updateVacancyStatus(updateDto);
-        VacancyDto result = resultResponse.getBody();
+        ResponseEntity<VacancyResponseDto> resultResponse = vacancyController.updateVacancyStatus(updateDto);
+        VacancyResponseDto result = resultResponse.getBody();
 
         verify(vacancyService, times(1)).updateVacancyStatus(updateDto);
 
@@ -94,15 +108,15 @@ class VacancyControllerTest {
     @Test
     @DisplayName("Filter vacancies successfully")
     void testFilterVacanciesSuccess() {
-        when(vacancyService.filterVacancies(filters)).thenReturn(List.of(dto));
+        when(vacancyService.filterVacancies(filters)).thenReturn(List.of(responseDto));
 
-        ResponseEntity<List<VacancyDto>> resultResponse = vacancyController.filterVacancies(filters);
-        List<VacancyDto> resultDto = resultResponse.getBody();
+        ResponseEntity<List<VacancyResponseDto>> resultResponse = vacancyController.filterVacancies(filters);
+        List<VacancyResponseDto> resultDto = resultResponse.getBody();
 
         verify(vacancyService).filterVacancies(filters);
 
         assertNotNull(resultResponse);
-        assertEquals(List.of(dto), resultDto);
+        assertEquals(List.of(responseDto), resultDto);
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
         assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.get(0).getName());
@@ -120,8 +134,8 @@ class VacancyControllerTest {
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
     }
 
-    private VacancyDto createTestVacancyDto() {
-        return VacancyDto.builder()
+    private VacancyResponseDto createTestVacancyResponseDto() {
+        return VacancyResponseDto.builder()
                 .id(1L)
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
@@ -139,7 +153,7 @@ class VacancyControllerTest {
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
                 .projectId(1L)
-                .createdBy(1L)
+                .createdById(1L)
                 .salary(100.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
@@ -150,7 +164,7 @@ class VacancyControllerTest {
     private VacancyUpdateDto createTestVacancyUpdateDto() {
         return VacancyUpdateDto.builder()
                 .id(1L)
-                .updatedBy(1L)
+                .updatedById(1L)
                 .status(VacancyStatus.CLOSED)
                 .build();
     }

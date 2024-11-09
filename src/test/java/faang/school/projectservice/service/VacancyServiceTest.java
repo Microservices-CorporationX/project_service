@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.vacancy.VacancyTitleFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -52,7 +53,7 @@ class VacancyServiceTest {
     private VacancyService vacancyService;
 
     private List<Filter<Vacancy, FilterVacancyDto>> vacancyFilters;
-    private VacancyDto dto;
+    private VacancyResponseDto dto;
     private NewVacancyDto newDto;
     private VacancyUpdateDto updateDto;
     private Vacancy vacancy;
@@ -75,14 +76,14 @@ class VacancyServiceTest {
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
 
-        VacancyDto result = vacancyService.create(newDto);
+        VacancyResponseDto result = vacancyService.create(newDto);
 
         assertNotNull(result);
         assertEquals(dto, result);
         assertEquals("Vacancy 1", result.getName());
 
         verify(projectValidator, times(1)).validateProjectExistsById(newDto.getProjectId());
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(newDto.getCreatedBy());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(newDto.getCreatedById());
         verify(vacancyRepository, times(1)).save(vacancy);
     }
 
@@ -95,8 +96,8 @@ class VacancyServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.create(newDto));
 
-        verify(projectValidator, times(1)).validateProjectExistsById(dto.getProjectId());
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(newDto.getCreatedBy());
+        verify(projectValidator, times(1)).validateProjectExistsById(newDto.getProjectId());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(newDto.getCreatedById());
         verify(vacancyRepository, never()).save(vacancy);
     }
 
@@ -108,9 +109,9 @@ class VacancyServiceTest {
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
 
-        VacancyDto result = vacancyService.updateVacancyStatus(updateDto);
+        VacancyResponseDto result = vacancyService.updateVacancyStatus(updateDto);
 
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedBy());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedById());
         verify(vacancyValidator, times(1)).validateCandidateCountForClosure(vacancy);
         verify(vacancyRepository, times(1)).save(vacancy);
 
@@ -145,7 +146,7 @@ class VacancyServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.updateVacancyStatus(updateDto));
 
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedBy());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedById());
     }
 
     @Test
@@ -157,9 +158,9 @@ class VacancyServiceTest {
                 Vacancy.builder().name("Foo").build(),
                 Vacancy.builder().name("Bar").build()
         );
-        List<VacancyDto> vacanciesDto = List.of(
-                VacancyDto.builder().name("Foo").build(),
-                VacancyDto.builder().name("Bar").build()
+        List<VacancyResponseDto> vacanciesDto = List.of(
+                VacancyResponseDto.builder().name("Foo").build(),
+                VacancyResponseDto.builder().name("Bar").build()
         );
 
         when(vacancyRepository.findAll()).thenReturn(vacancies);
@@ -168,7 +169,7 @@ class VacancyServiceTest {
         when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
         when(vacancyMapper.toDto(vacancies.get(1))).thenReturn(vacanciesDto.get(1));
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -184,9 +185,9 @@ class VacancyServiceTest {
         List<Vacancy> vacancies = List.of(
                 Vacancy.builder().name("Foo").build()
         );
-        List<VacancyDto> vacanciesDto = List.of(
-                VacancyDto.builder().name("Foo").build(),
-                VacancyDto.builder().name("Bar").build()
+        List<VacancyResponseDto> vacanciesDto = List.of(
+                VacancyResponseDto.builder().name("Foo").build(),
+                VacancyResponseDto.builder().name("Bar").build()
         );
 
         when(vacancyRepository.findAll()).thenReturn(vacancies);
@@ -194,7 +195,7 @@ class VacancyServiceTest {
         when(vacancyFilters.get(0).apply(any(), any())).thenReturn(vacancies.stream());
         when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -214,7 +215,7 @@ class VacancyServiceTest {
         when(vacancyRepository.findAll()).thenReturn(vacancies);
         when(vacancyFilters.get(0).isApplicable(filterDto)).thenReturn(false);
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -232,8 +233,8 @@ class VacancyServiceTest {
         assertEquals(dto, result);
     }
 
-    private VacancyDto createTestVacancyDto() {
-        return VacancyDto.builder()
+    private VacancyResponseDto createTestVacancyDto() {
+        return VacancyResponseDto.builder()
                 .id(1L)
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
@@ -251,7 +252,7 @@ class VacancyServiceTest {
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
                 .projectId(1L)
-                .createdBy(1L)
+                .createdById(1L)
                 .salary(100.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
@@ -276,7 +277,7 @@ class VacancyServiceTest {
     private VacancyUpdateDto createTestVacancyUpdateDto() {
         return VacancyUpdateDto.builder()
                 .id(1L)
-                .updatedBy(1L)
+                .updatedById(1L)
                 .status(VacancyStatus.CLOSED)
                 .build();
     }
