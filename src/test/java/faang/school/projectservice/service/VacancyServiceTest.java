@@ -94,19 +94,6 @@ class VacancyServiceTest {
         verify(vacancyRepository, never()).save(vacancy);
     }
 
-    private NewVacancyDto createTestNewVacancyDto() {
-        return NewVacancyDto.builder()
-                .name("Vacancy 1")
-                .description("Vacancy 1 description")
-                .projectId(1L)
-                .createdById(1L)
-                .salary(100.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(1)
-                .requiredSkillIds(List.of(1L))
-                .build();
-    }
-
     @Test
     @DisplayName("Update vacancy status successfully")
     void testUpdateVacancyStatusSuccess() {
@@ -196,7 +183,7 @@ class VacancyServiceTest {
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
                 .projectId(1L)
-                .createdBy(1L)
+                .createdById(1L)
                 .salary(100.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
