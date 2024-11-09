@@ -8,11 +8,14 @@ import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -21,28 +24,41 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final ProjectService projectService;
     private final MomentMapper momentMapper;
+    private final ProjectValidator projectValidator;
     private final List<Filter<Moment, MomentFilterDto>> filters;
 
-    public void saveMoment(MomentDto momentDto) {
-        List<Project> openProject = momentDto.getProjectsIds().stream()
-                .filter(projectService::projectIsOpen)
+    public MomentDto saveMoment(MomentDto momentDto) {
+        List<Project> filteredOpenProjects = Optional.ofNullable(momentDto.getProjectsIds())
+                .orElse(List.of())
+                .stream()
+                .filter(projectValidator::isOpenProject)
                 .map(projectService::getProjectById)
                 .toList();
         Moment moment = momentMapper.toEntity(momentDto);
-        moment.setProjects(openProject);
-        momentRepository.save(moment);
+        moment.setProjects(filteredOpenProjects);
+        Moment saveMoment = momentRepository.save(moment);
+        return momentMapper.toDto(saveMoment);
     }
 
-    public void updateMoment(MomentDto momentDto) {
-        momentRepository.save(findMomentById(momentDto.getId()));
+    public MomentDto updateMoment(MomentDto momentDto) {
+        Moment updateMoment = findMomentById(momentDto.getId());
+        List<Project> projects = projectService.findAllById(momentDto.getProjectsIds());
+        updateMoment.getProjects().addAll(projects);
+        momentRepository.save(updateMoment);
+        return momentMapper.toDto(updateMoment);
     }
 
     public List<MomentDto> getMoments(MomentFilterDto filterDto) {
         Stream<Moment> moments = momentRepository.findAll().stream();
+        boolean filterApplied = false;
         for (Filter<Moment, MomentFilterDto> filter : filters) {
             if (filter.isApplicable(filterDto)) {
                 moments = filter.apply(moments, filterDto);
+                filterApplied = true;
             }
+        }
+        if (!filterApplied) {
+            return new ArrayList<>();
         }
         return moments.map(momentMapper::toDto).toList();
     }
@@ -52,7 +68,7 @@ public class MomentService {
     }
 
     public MomentDto getMoment(Long momentId) {
-        return momentMapper.toDto(momentRepository.getReferenceById(momentId));
+        return momentMapper.toDto(momentRepository.getById(momentId));
     }
 
     private Moment findMomentById(long momentId) {

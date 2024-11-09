@@ -15,7 +15,6 @@ public class ProjectPartnerFilterTest extends SetUpFilterTest {
     ProjectPartnerFilter projectPartnerFilter;
 
     @BeforeEach
-
     @Override
     void setUp() {
         super.setUp();

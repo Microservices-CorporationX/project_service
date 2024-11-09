@@ -6,17 +6,18 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    public boolean projectIsOpen(Long projectId) {
-        ProjectStatus status = getProjectById(projectId).getStatus();
-        return status == ProjectStatus.CREATED || status == ProjectStatus.IN_PROGRESS;
-    }
-
     public Project getProjectById(Long projectId) {
         return projectRepository.getProjectById(projectId);
+    }
+
+    public List<Project> findAllById (List<Long> ids){
+        return   projectRepository.findAllByIds(ids);
     }
 }

@@ -3,6 +3,7 @@ package faang.school.projectservice.dto.client;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MomentDto {
 
-    @NotNull(message = "Id is required")
+    @Positive(message = "Id is required")
     private Long id;
 
     @NotBlank(message = "Username is required")
