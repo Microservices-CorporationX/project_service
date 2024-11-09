@@ -268,12 +268,7 @@ public class StageServiceTest {
     }
 
     private StageDto createStageDto(Long stageId, String stageName, Long projectId, List<StageRolesDto> stageRoles) {
-        StageDto stageDto = new StageDto();
-        stageDto.setStageId(stageId);
-        stageDto.setStageName(stageName);
-        stageDto.setProjectId(projectId);
-        stageDto.setStageRoles(stageRoles);
-        return stageDto;
+        return new StageDto(stageId, stageName, projectId, stageRoles);
     }
 
     private Stage createStage(Long stageId, String stageName, Project project, List<StageRoles> stageRoles, List<Task> tasks) {
