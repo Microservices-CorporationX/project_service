@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
@@ -25,7 +26,7 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{parentId}/subprojects")
-    public ResponseEntity<ProjectDto>  createSubProject(
+    public ResponseEntity<ProjectResponseDto>  createSubProject(
             @PathVariable
             @NotNull(message = "Parent project Id must not be empty")
             @Positive(message = "Parent project Id must be positive integer")
@@ -38,7 +39,7 @@ public class SubProjectController {
     }
 
     @PutMapping("/{parentId}/subprojects")
-    public ResponseEntity<ProjectDto> updateSubProject(
+    public ResponseEntity<ProjectResponseDto> updateSubProject(
             @PathVariable
             @NotNull(message = "Parent project Id must not be empty")
             @Positive(message = "Parent project Id must be positive integer")
@@ -51,7 +52,7 @@ public class SubProjectController {
     }
 
     @GetMapping("/{parentId}")
-    public ResponseEntity<List<ProjectDto>> filterSubProjects(
+    public ResponseEntity<List<ProjectResponseDto>> filterSubProjects(
             @PathVariable
             @Positive (message = "Parent project Id must be positive integer")
             Long parentId,

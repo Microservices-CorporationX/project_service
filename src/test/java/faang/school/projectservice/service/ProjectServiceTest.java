@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;

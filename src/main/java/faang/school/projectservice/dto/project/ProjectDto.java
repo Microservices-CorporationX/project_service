@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.project;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
