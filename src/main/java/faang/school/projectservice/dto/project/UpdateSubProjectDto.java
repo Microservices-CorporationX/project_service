@@ -11,6 +11,10 @@ import lombok.Data;
 @Builder
 public class UpdateSubProjectDto {
 
+    @NotNull(message = "Id must not be empty")
+    @Positive(message = "Id must be positive integer")
+    private Long id;
+
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }
