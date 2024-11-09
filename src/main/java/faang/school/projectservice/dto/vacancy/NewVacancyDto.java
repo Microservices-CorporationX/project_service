@@ -1,10 +1,7 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.WorkSchedule;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
@@ -23,13 +20,13 @@ public class NewVacancyDto {
     @Size(min = 10, max = 600, message = "Vacancy description must be at least 10 and under 600 characters long")
     private String description;
 
-    @NotNull(message = "Project id must be a positive integer")
+    @NotNull(message = "Project id cannot be empty")
     @Positive(message = "Project id must be a positive integer")
-    private long projectId;
+    private Long projectId;
 
     @NotNull(message = "Created by id cannot be empty")
     @Positive(message = "Created by id must be a positive integer")
-    private Long createdBy;
+    private Long createdById;
 
     @NotNull(message = "Slavery is prohibited")
     @Positive(message = "Salary must be a positive number")
@@ -42,7 +39,6 @@ public class NewVacancyDto {
     @Positive(message = "Number of vacancies must be a positive integer")
     private Integer count;
 
-    @NotNull(message = "Required skills ids list cannot be empty")
-    @Size(min = 1, message = "Required skills ids list cannot be empty")
+    @NotEmpty(message = "Required skills ids list cannot be null or empty")
     private List<Long> requiredSkillIds;
 }

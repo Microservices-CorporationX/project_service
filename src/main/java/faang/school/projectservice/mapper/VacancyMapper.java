@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface VacancyMapper {
     Vacancy toEntity(NewVacancyDto dto);
 
     @Mapping(source = "project.id", target = "projectId")
-    VacancyDto toDto(Vacancy vacancy);
+    VacancyResponseDto toDto(Vacancy vacancy);
 }

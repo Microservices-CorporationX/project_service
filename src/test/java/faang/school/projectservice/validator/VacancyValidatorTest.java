@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -79,22 +80,22 @@ class VacancyValidatorTest {
     @Test
     @DisplayName("Check the vacancy manager has valid role")
     void testValidateVacancyManagerRoleValid() {
-        when(teamMemberService.getTeamMemberByUserId(newDto.getCreatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(newDto.getCreatedById())).thenReturn(teamMember);
 
-        assertDoesNotThrow(() -> vacancyValidator.validateVacancyManagerRole(newDto.getCreatedBy()));
+        assertDoesNotThrow(() -> vacancyValidator.validateVacancyManagerRole(newDto.getCreatedById()));
 
-        verify(teamMemberService, times(1)).getTeamMemberByUserId(newDto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(newDto.getCreatedById());
     }
 
     @Test
     @DisplayName("Check the vacancy manager has invalid role")
     void testValidateVacancyManagerRoleInvalid() {
         teamMember.setRoles(List.of(TeamRole.DESIGNER));
-        when(teamMemberService.getTeamMemberByUserId(newDto.getCreatedBy())).thenReturn(teamMember);
+        when(teamMemberService.getTeamMemberByUserId(newDto.getCreatedById())).thenReturn(teamMember);
 
-        Exception ex = assertThrows(DataValidationException.class, (() -> vacancyValidator.validateVacancyManagerRole(newDto.getCreatedBy())));
+        Exception ex = assertThrows(DataValidationException.class, (() -> vacancyValidator.validateVacancyManagerRole(newDto.getCreatedById())));
         assertEquals("Vacancy can be created by following roles " + List.of(TeamRole.OWNER, TeamRole.MANAGER), ex.getMessage());
-        verify(teamMemberService, times(1)).getTeamMemberByUserId(newDto.getCreatedBy());
+        verify(teamMemberService, times(1)).getTeamMemberByUserId(newDto.getCreatedById());
     }
 
     @Test
@@ -126,8 +127,8 @@ class VacancyValidatorTest {
         assertEquals("Vacancy should have at least 4 candidates to be closed", ex.getMessage());
     }
 
-    private VacancyDto createTestVacancyDto() {
-        return VacancyDto.builder()
+    private VacancyResponseDto createTestVacancyDto() {
+        return VacancyResponseDto.builder()
                 .id(1L)
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
@@ -145,7 +146,7 @@ class VacancyValidatorTest {
                 .name("Vacancy 1")
                 .description("Vacancy 1 description")
                 .projectId(1L)
-                .createdBy(1L)
+                .createdById(1L)
                 .salary(100.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(1)
