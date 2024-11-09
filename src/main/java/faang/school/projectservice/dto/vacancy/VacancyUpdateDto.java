@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 @Builder
 @Validated
 public class VacancyUpdateDto {
-    @NotNull(message = "Vacancy id must be a positive integer")
+    @NotNull(message = "Vacancy id cannot be empty")
     @Positive(message = "Vacancy id must be a positive integer")
     private Long id;
 

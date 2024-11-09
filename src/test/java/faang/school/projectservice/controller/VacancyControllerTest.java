@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
@@ -94,6 +95,16 @@ class VacancyControllerTest {
     }
 
     @Test
+    @DisplayName("Update vacancy fail")
+    void testUpdateVacancyFail() {
+        when(vacancyService.updateVacancyStatus(updateDto)).
+                thenThrow(new DataValidationException("Invalid manager role"));
+
+        Exception ex = assertThrows(DataValidationException.class, () -> vacancyController.updateVacancyStatus(updateDto));
+        assertEquals("Invalid manager role", ex.getMessage());
+    }
+
+    @Test
     @DisplayName("Test delete vacancy successfully")
     void testDeleteVacancySuccess() {
         long id = 1L;
@@ -103,6 +114,15 @@ class VacancyControllerTest {
         verify(vacancyService, times(1)).deleteVacancy(id);
         assertNotNull(result);
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Delete vacancy fail")
+    void testDeleteVacancyFail() {
+        doThrow(new EntityNotFoundException("Vacancy doesn't exist")).when(vacancyService).deleteVacancy(anyLong());
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyController.deleteVacancy(anyLong()));
+        assertEquals("Vacancy doesn't exist", ex.getMessage());
     }
 
     @Test
@@ -125,13 +145,23 @@ class VacancyControllerTest {
     @Test
     @DisplayName("Get vacancy by id successfully")
     void testGetVacancyByIdSuccess() {
-        when(vacancyService.getVacancyDtoById(dto.getId())).thenReturn(dto);
+        when(vacancyService.getVacancyDtoById(responseDto.getId())).thenReturn(responseDto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.getVacancy(dto.getId());
+        ResponseEntity<VacancyResponseDto> resultResponse = vacancyController.getVacancy(responseDto.getId());
 
         assertNotNull(resultResponse);
-        assertEquals(dto, resultResponse.getBody());
+        assertEquals(responseDto, resultResponse.getBody());
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Get vacancy by id fail fail")
+    void testGetVacancyByIdFail() {
+        when(vacancyService.getVacancyDtoById((responseDto.getId()))).
+                thenThrow(new EntityNotFoundException("Vacancy doesn't exist"));
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> vacancyController.getVacancy(responseDto.getId()));
+        assertEquals("Vacancy doesn't exist", ex.getMessage());
     }
 
     private VacancyResponseDto createTestVacancyResponseDto() {

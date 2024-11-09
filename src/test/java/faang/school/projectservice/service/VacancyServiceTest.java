@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.filter.Filter;
@@ -227,7 +226,7 @@ class VacancyServiceTest {
         when(vacancyRepository.findById(vacancy.getId())).thenReturn(Optional.of(vacancy));
         when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
 
-        VacancyDto result = vacancyService.getVacancyDtoById(vacancy.getId());
+        VacancyResponseDto result = vacancyService.getVacancyDtoById(vacancy.getId());
 
         assertNotNull(result);
         assertEquals(dto, result);

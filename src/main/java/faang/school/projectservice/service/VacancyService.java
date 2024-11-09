@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
@@ -61,6 +60,7 @@ public class VacancyService {
         vacancyValidator.validateVacancyExistsById(vacancyId);
         getCandidatesByVacancyId(vacancyId).forEach(candidate ->
                 candidateService.deleteCandidateById(candidate.getId()));
+        log.info("Vacancy {} deleted successfully", vacancyId);
         vacancyRepository.deleteById(vacancyId);
     }
 
