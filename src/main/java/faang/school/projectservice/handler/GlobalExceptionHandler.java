@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.handler;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

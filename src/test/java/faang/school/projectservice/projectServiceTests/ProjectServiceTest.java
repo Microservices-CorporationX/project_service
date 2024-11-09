@@ -37,7 +37,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -66,12 +65,11 @@ public class ProjectServiceTest {
         when(projectMapper.toResponseDtoFromEntity(project)).thenReturn(expectedDto);
 
         ProjectResponseDto result = projectService.getProjectById(projectId);
+        verify(projectRepository, Mockito.times(1)).getProjectById(projectId);
+        verify(projectMapper, Mockito.times(1)).toResponseDtoFromEntity(project);
 
         assertNotNull(result);
         assertEquals(expectedDto, result);
-
-        verify(projectRepository, Mockito.times(1)).getProjectById(projectId);
-        verify(projectMapper, Mockito.times(1)).toResponseDtoFromEntity(project);
     }
 
     @Test
@@ -159,7 +157,7 @@ public class ProjectServiceTest {
 
 
     @Test
-    public void testUpdateProjectStatus() {
+    public void testUpdateProject() {
         long projectId = 1L;
         Project existingProject = projectForTests();
         ProjectUpdateDto projectUpdateDto = projectDtoForUpdate();
@@ -183,7 +181,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectMapper.toResponseDtoFromEntity(existingProject)).thenReturn(responseDto);
 
-        ProjectResponseDto response = projectService.updateProjectStatus(projectId, projectUpdateDto);
+        ProjectResponseDto response = projectService.updateProject(projectId, projectUpdateDto);
 
         verify(projectRepository, times(1)).save(existingProject);
         verify(projectMapper, times(1)).toResponseDtoFromEntity(existingProject);
@@ -213,7 +211,7 @@ public class ProjectServiceTest {
         when(projectRepository.findAll()).thenReturn(projects);
 
         when(filterMock.isApplicable(filterDto)).thenReturn(true);
-        when(filterMock.apply(any(Stream.class), eq(filterDto)))
+        when(filterMock.apply(any(), eq(filterDto)))
                 .thenReturn(projects.stream().filter(project -> "New".equals(project.getName())));
 
         when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests);
@@ -226,7 +224,7 @@ public class ProjectServiceTest {
         verify(projectMapper).toResponseDtoFromEntity(any(Project.class));
 
         verify(filterMock).isApplicable(filterDto);
-        verify(filterMock).apply(any(Stream.class), eq(filterDto));
+        verify(filterMock).apply(any(), eq(filterDto));
 
         assertEquals(1, projectResponseDtos.size());
         assertEquals("New", projectResponseDtos.get(0).getName());

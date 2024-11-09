@@ -34,10 +34,10 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ProjectResponseDto updateProject(@PathVariable @Min(1) Long projectId,
                                             @RequestBody ProjectUpdateDto projectUpdateDto) {
-        return projectService.updateProjectStatus(projectId, projectUpdateDto);
+        return projectService.updateProject(projectId, projectUpdateDto);
     }
 
-    @GetMapping("/filtered")
+    @PostMapping("/filtered")
     public List<ProjectResponseDto> getAllProjectsWithFilters(@RequestBody ProjectFilterDto filterDto) {
         return projectService.findAllProjectsWithFilters(filterDto);
     }

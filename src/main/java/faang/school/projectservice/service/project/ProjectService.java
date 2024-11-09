@@ -47,7 +47,7 @@ public class ProjectService {
         return projectMapper.toResponseDtoFromEntity(savedProject);
     }
 
-    public ProjectResponseDto updateProjectStatus(Long projectId, ProjectUpdateDto projectUpdateDto) {
+    public ProjectResponseDto updateProject(Long projectId, ProjectUpdateDto projectUpdateDto) {
         Project projectForUpdate = projectRepository.getProjectById(projectId);
 
         if (projectUpdateDto.getVisibility() != null) {
