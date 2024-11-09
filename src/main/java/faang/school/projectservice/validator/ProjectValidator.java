@@ -1,6 +1,8 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,5 +26,9 @@ public class ProjectValidator {
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
+    }
+
+    public boolean isProjectPublic(Project project) {
+        return project.getVisibility() == ProjectVisibility.PUBLIC;
     }
 }
