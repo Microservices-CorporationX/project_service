@@ -49,15 +49,6 @@ import static org.mockito.Mockito.when;
 class InternshipServiceTest {
 
     private static final int MAX_INTERNSHIP_MONTHS_DURATION = 3;
-    private static final List<Long> DEFAULT_INTERN_USER_IDS = List.of(1L, 2L, 3L, 4L);
-    private static final Long DEFAULT_MENTOR_USER_ID = 8L;
-    private static final Long DEFAULT_PROJECT_ID = 10L;
-    private static final LocalDateTime DEFAULT_START_DATE = LocalDateTime.now().plusMonths(1);
-    private static final LocalDateTime DEFAULT_END_DATE = LocalDateTime.now().plusMonths(1 + MAX_INTERNSHIP_MONTHS_DURATION);
-    private static final Long DEFAULT_CREATOR_USER_ID = 9L;
-    private static final String DEFAULT_INTERNSHIP_DESCRIPTION = "Some description";
-    private static final String DEFAULT_INTERNSHIP_NAME = "Internship Spring 2025";
-    private static final Long DEFAULT_INTERNSHIP_ID = 9L;
 
     @Mock
     private InternshipRepository internshipRepository;
@@ -76,13 +67,11 @@ class InternshipServiceTest {
 
     private InternshipService internshipService;
 
-    private List<InternshipFilter> filters;
-
     @BeforeEach
     void setUp() {
         InternshipFilter statusFilter = Mockito.spy(InternshipStatusFilter.class);
         InternshipFilter roleFilter = Mockito.spy(InternshipTeamRoleFilter.class);
-        filters = List.of(statusFilter, roleFilter);
+        List<InternshipFilter> filters = List.of(statusFilter, roleFilter);
 
         internshipService = new InternshipService(
                 internshipRepository, validator, internshipMapper, teamMemberService, teamService, filters
@@ -91,15 +80,28 @@ class InternshipServiceTest {
 
     @Test
     void createInternshipValidTest() {
+        InternshipStatus expectedInternshipStatus = InternshipStatus.NOT_STARTED;
+
+        InternshipCreationDto creationDto = InternshipCreationDto.builder()
+                .internUserIds(List.of(1L, 2L, 3L, 4L))
+                .name("Internship Spring 2025")
+                .description("Some description")
+                .mentorUserId(8L)
+                .creatorUserId(9L)
+                .projectId(10L)
+                .startDate(LocalDateTime.now().plusMonths(1))
+                .endDate(LocalDateTime.now().plusMonths(1 + MAX_INTERNSHIP_MONTHS_DURATION))
+                .build();
+
         Project project = new Project();
-        project.setId(DEFAULT_PROJECT_ID);
+        project.setId(10L);
+
         Team mentorTeam = new Team();
         mentorTeam.setProject(project);
-        TeamMember mentor = new TeamMember();
-        mentor.setUserId(DEFAULT_MENTOR_USER_ID);
-        mentor.setTeam(mentorTeam);
 
-        InternshipCreationDto creationDto = createDefaultCreationDto();
+        TeamMember mentor = new TeamMember();
+        mentor.setUserId(8L);
+        mentor.setTeam(mentorTeam);
 
         when(validator.validateCreationDtoAndGetMentor(creationDto)).thenReturn(mentor);
         when(internshipRepository.save(any(Internship.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -114,50 +116,125 @@ class InternshipServiceTest {
         InternshipDto savedInternshipDto = assertDoesNotThrow(() -> internshipService.createInternship(creationDto));
 
         verify(internshipRepository, times(1)).save(any(Internship.class));
-        assertEquals(DEFAULT_INTERN_USER_IDS, savedInternshipDto.getInternUserIds());
-        assertEquals(DEFAULT_INTERNSHIP_NAME, savedInternshipDto.getName());
-        assertEquals(DEFAULT_INTERNSHIP_DESCRIPTION, savedInternshipDto.getDescription());
-        assertEquals(DEFAULT_MENTOR_USER_ID, savedInternshipDto.getMentorUserId());
-        assertEquals(DEFAULT_CREATOR_USER_ID, savedInternshipDto.getCreatorUserId());
-        assertEquals(DEFAULT_PROJECT_ID, savedInternshipDto.getProjectId());
-        assertEquals(DEFAULT_START_DATE, savedInternshipDto.getStartDate());
-        assertEquals(DEFAULT_END_DATE, savedInternshipDto.getEndDate());
-        assertEquals(InternshipStatus.NOT_STARTED, savedInternshipDto.getStatus());
+        assertEquals(creationDto.getInternUserIds(), savedInternshipDto.getInternUserIds());
+        assertEquals(creationDto.getName(), savedInternshipDto.getName());
+        assertEquals(creationDto.getDescription(), savedInternshipDto.getDescription());
+        assertEquals(creationDto.getMentorUserId(), savedInternshipDto.getMentorUserId());
+        assertEquals(creationDto.getCreatorUserId(), savedInternshipDto.getCreatorUserId());
+        assertEquals(creationDto.getProjectId(), savedInternshipDto.getProjectId());
+        assertEquals(creationDto.getStartDate(), savedInternshipDto.getStartDate());
+        assertEquals(creationDto.getEndDate(), savedInternshipDto.getEndDate());
+        assertEquals(expectedInternshipStatus, savedInternshipDto.getStatus());
     }
 
     @Test
     void updateInternshipInternshipInProgressTest() {
-        updateInternshipValidTest(false, 2, InternshipStatus.IN_PROGRESS);
+        updateInternshipValidTest(false);
     }
 
     @Test
-    void updateInternshipInternshipAfterEndDateTest() {
-        updateInternshipValidTest(true, 1, InternshipStatus.COMPLETED);
+    void updateInternshipInternshipCompletedTest() {
+        updateInternshipValidTest(true);
     }
 
     @Test
     void getFilteredInternshipsEmptyFilterTest() {
-        getFilteredInternshipsValidTest(null, null, 6);
+        InternshipFilterDto filterDto = InternshipFilterDto.builder()
+                .internshipStatus(null)
+                .teamRole(null)
+                .build();
+
+        List<Internship> internships = List.of(
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.ANALYST),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.TESTER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
+        );
+        when(internshipRepository.findAll()).thenReturn(internships);
+
+        List<InternshipDto> filteredInternshipDtos = assertDoesNotThrow(() -> internshipService.getFilteredInternships(filterDto));
+
+        assertEquals(6, filteredInternshipDtos.size());
     }
 
     @Test
     void getFilteredInternshipsStatusFilterTest() {
-        getFilteredInternshipsValidTest(InternshipStatus.COMPLETED, null, 3);
+        InternshipFilterDto filterDto = InternshipFilterDto.builder()
+                .internshipStatus(InternshipStatus.COMPLETED)
+                .teamRole(null)
+                .build();
+
+        List<Internship> internships = List.of(
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.ANALYST),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.TESTER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
+        );
+        when(internshipRepository.findAll()).thenReturn(internships);
+
+        List<InternshipDto> filteredInternshipDtos = assertDoesNotThrow(() -> internshipService.getFilteredInternships(filterDto));
+
+        assertEquals(3, filteredInternshipDtos.size());
     }
 
     @Test
     void getFilteredInternshipsTeamRoleFilterTest() {
-        getFilteredInternshipsValidTest(null, TeamRole.ANALYST, 2);
+        InternshipFilterDto filterDto = InternshipFilterDto.builder()
+                .internshipStatus(null)
+                .teamRole(TeamRole.ANALYST)
+                .build();
+
+        List<Internship> internships = List.of(
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.ANALYST),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.TESTER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
+        );
+        when(internshipRepository.findAll()).thenReturn(internships);
+
+        List<InternshipDto> filteredInternshipDtos = assertDoesNotThrow(() -> internshipService.getFilteredInternships(filterDto));
+
+        assertEquals(2, filteredInternshipDtos.size());
     }
 
     @Test
     void getFilteredInternshipsStatusAndTeamRoleFilterTest() {
-        getFilteredInternshipsValidTest(InternshipStatus.COMPLETED, TeamRole.ANALYST, 1);
+        InternshipFilterDto filterDto = InternshipFilterDto.builder()
+                .internshipStatus(InternshipStatus.COMPLETED)
+                .teamRole(TeamRole.ANALYST)
+                .build();
+
+        List<Internship> internships = List.of(
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.ANALYST),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.TESTER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
+        );
+        when(internshipRepository.findAll()).thenReturn(internships);
+
+        List<InternshipDto> filteredInternshipDtos = assertDoesNotThrow(() -> internshipService.getFilteredInternships(filterDto));
+
+        assertEquals(1, filteredInternshipDtos.size());
     }
 
     @Test
     void getAllInternshipsValidTest() {
-        List<Internship> internships = prepareInternships();
+        List<Internship> internships = List.of(
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.ANALYST),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.COMPLETED, TeamRole.TESTER),
+                createInternshipWithStatusAndMentorRole(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
+        );
         when(internshipRepository.findAll()).thenReturn(internships);
 
         List<InternshipDto> internshipDtos = assertDoesNotThrow(() -> internshipService.getAllInternships());
@@ -169,34 +246,74 @@ class InternshipServiceTest {
 
     @Test
     void getInternshipByIdValidTest() {
-        Internship internship = createDefaultInternship();
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        Long internshipId = 5L;
+        Internship internship = new Internship();
+        internship.setInterns(Collections.emptyList());
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
 
-        assertDoesNotThrow(() -> internshipService.getInternshipById(DEFAULT_INTERNSHIP_ID));
+        assertDoesNotThrow(() -> internshipService.getInternshipById(internshipId));
 
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
+        verify(internshipRepository, times(1)).findById(internshipId);
         verify(internshipMapper, times(1)).toDto(internship);
     }
 
     @Test
     void getInternshipByIdNotExistingInternshipTest() {
-        when(internshipRepository.findById(DEFAULT_INTERNSHIP_ID)).thenReturn(Optional.empty());
+        Long internshipId = 5L;
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.empty());
 
         DataValidationException exception =
-                assertThrows(DataValidationException.class, () -> internshipService.getInternshipById(DEFAULT_INTERNSHIP_ID));
+                assertThrows(DataValidationException.class, () -> internshipService.getInternshipById(internshipId));
 
-        verify(internshipRepository, times(1)).findById(DEFAULT_INTERNSHIP_ID);
-        assertEquals("There is no internship with ID (%d) in the database!".formatted(DEFAULT_INTERNSHIP_ID), exception.getMessage());
+        verify(internshipRepository, times(1)).findById(internshipId);
+        assertEquals("There is no internship with ID (%d) in the database!".formatted(internshipId), exception.getMessage());
     }
 
-    private void updateInternshipValidTest(boolean isAfterEndDate, int expectedTeamSize, InternshipStatus internshipStatus) {
-        Internship internship = createDefaultInternship();
-        Team internTeam = internship.getInterns().get(0).getTeam();
+    private void updateInternshipValidTest(boolean isAfterEndDate) {
+        Long firstInternUserId = 1L;
+        TeamMember firstIntern = new TeamMember();
+        firstIntern.setUserId(firstInternUserId);
+        firstIntern.setRoles(new ArrayList<>(List.of(TeamRole.INTERN)));
 
-        if (isAfterEndDate) {
-            internship.setEndDate(LocalDateTime.now().minusDays(1));
-        }
-        InternshipUpdateDto updateDto = createDefaultUpdateDto();
+        Long secondInternUserId = 2L;
+        TeamMember secondIntern = new TeamMember();
+        secondIntern.setUserId(secondInternUserId);
+        secondIntern.setRoles(new ArrayList<>(List.of(TeamRole.INTERN)));
+
+        List<Task> tasks = List.of(
+                Task.builder().performerUserId(firstInternUserId).status(TaskStatus.DONE).build(),
+                Task.builder().performerUserId(firstInternUserId).status(TaskStatus.DONE).build(),
+                Task.builder().performerUserId(secondInternUserId).status(TaskStatus.IN_PROGRESS).build(),
+                Task.builder().performerUserId(secondInternUserId).status(TaskStatus.DONE).build()
+        );
+
+        InternshipStatus expectedInternshipStatus = isAfterEndDate ? InternshipStatus.COMPLETED : InternshipStatus.IN_PROGRESS;
+        int expectedTeamSize = isAfterEndDate ? 1 : 2;
+        List<Long> idsOfUsersWithCompletedTasks = List.of(firstInternUserId);
+
+        long projectId = 9L;
+        Project project = new Project();
+        project.setId(projectId);
+        project.setTasks(tasks);
+
+        Team internTeam = new Team();
+        internTeam.setTeamMembers(new ArrayList<>(List.of(firstIntern, secondIntern)));
+        firstIntern.setTeam(internTeam);
+        secondIntern.setTeam(internTeam);
+        internTeam.setProject(project);
+
+        Internship internship = new Internship();
+        internship.setId(projectId);
+        internship.setProject(project);
+        internship.setStatus(InternshipStatus.NOT_STARTED);
+        internship.setStartDate(LocalDateTime.now().minusMonths(2));
+        internship.setInterns(internTeam.getTeamMembers());
+        internship.setEndDate(isAfterEndDate ? LocalDateTime.now().minusDays(1) : LocalDateTime.now().plusDays(4));
+
+        InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
+                .internshipId(projectId)
+                .internNewTeamRole(TeamRole.ANALYST)
+                .build();
 
         when(validator.validateUpdateDtoAndGetInternship(updateDto)).thenReturn(internship);
 
@@ -204,118 +321,23 @@ class InternshipServiceTest {
 
         verify(teamService, times(1)).save(internTeam);
         verify(internshipRepository, times(1)).save(internship);
-        assertEquals(expectedTeamSize, internTeam.getTeamMembers().size());
+        assertEquals(projectId, requestDto.getId());
         assertEquals(updateDto.getInternshipId(), requestDto.getId());
-        assertEquals(List.of(DEFAULT_INTERN_USER_IDS.get(0)), requestDto.getIdsOfUsersWithCompletedTasks());
         assertEquals(updateDto.getInternNewTeamRole(), requestDto.getInternNewTeamRole());
-        assertEquals(internshipStatus, requestDto.getInternshipStatus());
-        assertTrue(internTeam.getTeamMembers().get(0).getRoles().contains(updateDto.getInternNewTeamRole()));
+        assertTrue(firstIntern.getRoles().contains(updateDto.getInternNewTeamRole()));
+        assertEquals(idsOfUsersWithCompletedTasks, requestDto.getIdsOfUsersWithCompletedTasks());
+        assertEquals(expectedTeamSize, internTeam.getTeamMembers().size());
+        assertEquals(expectedInternshipStatus, requestDto.getInternshipStatus());
     }
 
-    private void getFilteredInternshipsValidTest(InternshipStatus internshipStatus, TeamRole teamRole,
-                                                 int expectedFilteredInternshipsNumbers) {
-        InternshipFilterDto filterDto = InternshipFilterDto.builder()
-                .internshipStatus(internshipStatus)
-                .teamRole(teamRole)
-                .build();
-        List<Internship> internships = prepareInternships();
-        when(internshipRepository.findAll()).thenReturn(internships);
-
-        List<InternshipDto> filteredInternshipDtos = assertDoesNotThrow(() -> internshipService.getFilteredInternships(filterDto));
-
-        assertEquals(expectedFilteredInternshipsNumbers, filteredInternshipDtos.size());
-    }
-
-    private List<Internship> prepareInternships() {
-        return List.of(
-                createInternship(InternshipStatus.COMPLETED, TeamRole.ANALYST),
-                createInternship(InternshipStatus.IN_PROGRESS, TeamRole.DESIGNER),
-                createInternship(InternshipStatus.COMPLETED, TeamRole.DEVELOPER),
-                createInternship(InternshipStatus.NOT_STARTED, TeamRole.MANAGER),
-                createInternship(InternshipStatus.COMPLETED, TeamRole.TESTER),
-                createInternship(InternshipStatus.NOT_STARTED, TeamRole.ANALYST)
-        );
-    }
-
-    private Internship createInternship(InternshipStatus internshipStatus, TeamRole mentorTeamRole) {
-        Internship internship = createDefaultInternship();
+    private Internship createInternshipWithStatusAndMentorRole(InternshipStatus internshipStatus, TeamRole mentorTeamRole) {
         TeamMember mentor = new TeamMember();
         mentor.setRoles(List.of(mentorTeamRole));
-        internship.setMentorId(mentor);
+
+        Internship internship = new Internship();
         internship.setMentorId(mentor);
         internship.setStatus(internshipStatus);
         internship.setInterns(Collections.emptyList());
         return internship;
-    }
-
-    private Internship createDefaultInternship() {
-        Team internTeam = new Team();
-        List<Task> tasks = createDefaultTasksAndSetTeam(internTeam);
-        Project project = new Project();
-        project.setId(DEFAULT_PROJECT_ID);
-        project.setTasks(tasks);
-        internTeam.setProject(project);
-
-        Internship internship = new Internship();
-        internship.setId(DEFAULT_INTERNSHIP_ID);
-        internship.setProject(project);
-        internship.setStatus(InternshipStatus.NOT_STARTED);
-        internship.setStartDate(LocalDateTime.now().minusMonths(2));
-        internship.setEndDate(LocalDateTime.now().plusMonths(2));
-        internship.setInterns(internTeam.getTeamMembers());
-
-        return internship;
-    }
-
-    private List<Task> createDefaultTasksAndSetTeam(Team team) {
-        Long firstInternUserId = DEFAULT_INTERN_USER_IDS.get(0);
-        Long secondInternUserId = DEFAULT_INTERN_USER_IDS.get(1);
-
-        TeamMember firstIntern = createIntern(firstInternUserId);
-        TeamMember secondIntern = createIntern(secondInternUserId);
-        team.setTeamMembers(new ArrayList<>(List.of(firstIntern, secondIntern)));
-        firstIntern.setTeam(team);
-        secondIntern.setTeam(team);
-
-        Task firstInternFirstTask = createTask(firstInternUserId, TaskStatus.DONE);
-        Task firstInternSecondTask = createTask(firstInternUserId, TaskStatus.DONE);
-        Task secondInternFirstTask = createTask(secondInternUserId, TaskStatus.IN_PROGRESS);
-        Task secondInternSecondTask = createTask(secondInternUserId, TaskStatus.DONE);
-
-        return List.of(firstInternFirstTask, firstInternSecondTask, secondInternFirstTask, secondInternSecondTask);
-    }
-
-    private TeamMember createIntern(Long internUserId) {
-        TeamMember intern = new TeamMember();
-        intern.setUserId(internUserId);
-        intern.setRoles(new ArrayList<>(List.of(TeamRole.INTERN)));
-        return intern;
-    }
-
-    private Task createTask(Long performerUserId, TaskStatus taskStatus) {
-        Task task = new Task();
-        task.setPerformerUserId(performerUserId);
-        task.setStatus(taskStatus);
-        return task;
-    }
-
-    private InternshipCreationDto createDefaultCreationDto() {
-        return InternshipCreationDto.builder()
-                .internUserIds(DEFAULT_INTERN_USER_IDS)
-                .name(DEFAULT_INTERNSHIP_NAME)
-                .description(DEFAULT_INTERNSHIP_DESCRIPTION)
-                .mentorUserId(DEFAULT_MENTOR_USER_ID)
-                .creatorUserId(DEFAULT_CREATOR_USER_ID)
-                .projectId(DEFAULT_PROJECT_ID)
-                .startDate(DEFAULT_START_DATE)
-                .endDate(DEFAULT_END_DATE)
-                .build();
-    }
-
-    private InternshipUpdateDto createDefaultUpdateDto() {
-        return InternshipUpdateDto.builder()
-                .internshipId(DEFAULT_INTERNSHIP_ID)
-                .internNewTeamRole(TeamRole.ANALYST)
-                .build();
     }
 }
