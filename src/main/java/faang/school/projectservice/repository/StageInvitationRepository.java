@@ -24,6 +24,10 @@ public class StageInvitationRepository {
         );
     }
 
+    public boolean stageInvitationExist (Long stageInvitationId){
+        return repository.existsById(stageInvitationId);
+    }
+
     public List<StageInvitation> findAll() {
         return repository.findAll();
     }
