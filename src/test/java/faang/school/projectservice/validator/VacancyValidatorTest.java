@@ -2,7 +2,6 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.InsufficientCandidatesException;
@@ -39,7 +38,7 @@ class VacancyValidatorTest {
     @InjectMocks
     private VacancyValidator vacancyValidator;
 
-    private VacancyDto dto;
+    private VacancyResponseDto dto;
     private NewVacancyDto newDto;
     private VacancyUpdateDto updateDto;
     private TeamMember teamMember;
@@ -180,7 +179,7 @@ class VacancyValidatorTest {
     private VacancyUpdateDto createTestVacancyUpdateDto() {
         return VacancyUpdateDto.builder()
                 .id(1L)
-                .updatedBy(1L)
+                .updatedById(1L)
                 .status(VacancyStatus.CLOSED)
                 .build();
     }

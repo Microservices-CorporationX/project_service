@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.mapper.VacancyMapper;
@@ -112,9 +111,9 @@ class VacancyServiceTest {
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(dto);
 
-        VacancyDto result = vacancyService.updateVacancyStatus(updateDto);
+        VacancyResponseDto result = vacancyService.updateVacancyStatus(updateDto);
 
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedBy());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedById());
         verify(vacancyValidator, times(1)).validateCandidateCountForClosure(vacancy);
         verify(vacancyRepository, times(1)).save(vacancy);
 
@@ -130,7 +129,7 @@ class VacancyServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> vacancyService.updateVacancyStatus(updateDto));
 
-        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedBy());
+        verify(vacancyValidator, times(1)).validateVacancyManagerRole(updateDto.getUpdatedById());
     }
 
     @Test
@@ -186,7 +185,7 @@ class VacancyServiceTest {
     private VacancyUpdateDto createTestVacancyUpdateDto() {
         return VacancyUpdateDto.builder()
                 .id(1L)
-                .updatedBy(1L)
+                .updatedById(1L)
                 .status(VacancyStatus.CLOSED)
                 .build();
     }

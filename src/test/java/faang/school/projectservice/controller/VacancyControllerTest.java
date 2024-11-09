@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
@@ -24,7 +23,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,9 +34,7 @@ class VacancyControllerTest {
     @InjectMocks
     private VacancyController vacancyController;
 
-    private VacancyResponseDto dto;
-    private NewVacancyDto newDto;
-    private VacancyDto dto;
+    private VacancyResponseDto responseDto;
     private NewVacancyDto newDto;
     private VacancyUpdateDto updateDto;
 
@@ -46,13 +42,13 @@ class VacancyControllerTest {
     void setUp() {
         newDto = createTestNewVacancyDto();
         updateDto = createTestVacancyUpdateDto();
-        dto = createTestVacancyDto();
+        responseDto = createTestVacancyResponseDto();
     }
 
     @Test
     @DisplayName("Create a new vacancy successfully")
     void testCreateVacancySuccess() {
-        when(vacancyService.create(newDto)).thenReturn(dto);
+        when(vacancyService.create(newDto)).thenReturn(responseDto);
 
         ResponseEntity<VacancyResponseDto> resultResponse = vacancyController.createVacancy(newDto);
         VacancyResponseDto resultDto = resultResponse.getBody();
@@ -61,7 +57,7 @@ class VacancyControllerTest {
 
         assertNotNull(resultResponse);
         assertNotNull(resultDto);
-        assertEquals(dto, resultDto);
+        assertEquals(responseDto, resultDto);
         assertEquals(HttpStatus.CREATED, resultResponse.getStatusCode());
         assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.getName());
@@ -70,11 +66,11 @@ class VacancyControllerTest {
     @Test
     @DisplayName("Update vacancy status successfully")
     void testUpdateVacancyStatusSuccess() {
-        VacancyDto updatedDto = VacancyDto.builder().status(VacancyStatus.CLOSED).build();
-        when(vacancyService.updateVacancyStatus(updateDto)).thenReturn(updatedDto);
+        responseDto.setStatus(VacancyStatus.CLOSED);
+        when(vacancyService.updateVacancyStatus(updateDto)).thenReturn(responseDto);
 
-        ResponseEntity<VacancyDto> resultResponse = vacancyController.updateVacancyStatus(updateDto);
-        VacancyDto result = resultResponse.getBody();
+        ResponseEntity<VacancyResponseDto> resultResponse = vacancyController.updateVacancyStatus(updateDto);
+        VacancyResponseDto result = resultResponse.getBody();
 
         verify(vacancyService, times(1)).updateVacancyStatus(updateDto);
 
@@ -94,7 +90,7 @@ class VacancyControllerTest {
         assertEquals("Project with id 1 doesn't exist", ex.getMessage());
     }
 
-    private VacancyResponseDto createTestVacancyDto() {
+    private VacancyResponseDto createTestVacancyResponseDto() {
         return VacancyResponseDto.builder()
                 .id(1L)
                 .name("Vacancy 1")
@@ -124,7 +120,7 @@ class VacancyControllerTest {
     private VacancyUpdateDto createTestVacancyUpdateDto() {
         return VacancyUpdateDto.builder()
                 .id(1L)
-                .updatedBy(1L)
+                .updatedById(1L)
                 .status(VacancyStatus.CLOSED)
                 .build();
     }
