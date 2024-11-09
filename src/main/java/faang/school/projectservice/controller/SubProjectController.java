@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
@@ -24,7 +26,7 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{parentId}/subprojects")
-    public ResponseEntity<ProjectDto>  createSubProject(
+    public ResponseEntity<ProjectResponseDto>  createSubProject(
             @PathVariable
             @NotNull(message = "Parent project Id must not be empty")
             @Positive(message = "Parent project Id must be positive integer")
@@ -43,13 +45,13 @@ public class SubProjectController {
     }
 
     @GetMapping("/{parentId}")
-    public ResponseEntity<List<ProjectDto>> filterSubProjects(
+    public ResponseEntity<List<ProjectResponseDto>> filterSubProjects(
             @PathVariable
             @Positive (message = "Parent project Id must be positive integer")
             Long parentId,
             @Valid
             @RequestBody
-            SubProjectFiltersDto filters) {
+            ProjectFilterDto filters) {
         log.info("Request for all subprojects for parent project id #{}", parentId);
         return ResponseEntity.status(HttpStatus.OK).body(projectService.filterSubProjects(parentId, filters));
     }

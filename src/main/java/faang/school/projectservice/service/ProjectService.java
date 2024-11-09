@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -38,7 +39,7 @@ public class ProjectService {
         return projectRepository.getProjectById(projectId);
     }
 
-    public ProjectDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
+    public ProjectResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
 
         return null;
     }
@@ -53,7 +54,7 @@ public class ProjectService {
         return null;
     }
 
-    public List<ProjectDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
+    public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
 
         Project project = projectRepository.getProjectById(parentId);
         Stream<Project> childrenProjectsStream;
@@ -70,7 +71,7 @@ public class ProjectService {
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(childrenProjectsStream, filters))
-                .map(projectMapper::toDto)
+                .map(projectMapper::toResponseDto)
                 .toList();
     }
 
