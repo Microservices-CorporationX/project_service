@@ -16,8 +16,8 @@ public class ProjectDto {
     @Positive(message = "Id must be greater than 0.")
     private Long id;
 
-    @NotBlank(message = "Project name must not be empty.")
-    @Size(min = 3, max = 128, message = "Name must be between 3 and 128 characters.")
+    @NotBlank(message = "Project name is required")
+    @Size(min = 3, max = 128, message = "Project name must be between 3 and 128 characters")
     private String name;
 
     @NotBlank(message = "Project description must not be empty.")
