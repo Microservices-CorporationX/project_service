@@ -24,7 +24,7 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
             value = "WITH RECURSIVE search(id) AS (SELECT p.id" +
                     "                                FROM project p" +
                     "                               WHERE p.parent_project_id = :id" +
-                    "                               UNOIN ALL" +
+                    "                               UNION ALL" +
                     "                              SELECT p.id" +
                     "                                FROM project p" +
                     "                                     INNER JOIN search s ON s.id = p.parent_project_id)"  +

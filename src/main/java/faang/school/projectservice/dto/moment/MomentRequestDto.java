@@ -19,26 +19,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MomentRequestDto {
-    @NotBlank
     @Schema(description = "Name of the moment")
+    @NotNull
+    @NotBlank
     private String name;
 
-    @NotBlank
     @Schema(description = "Description of the moment")
+    @NotBlank
     private String description;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Schema(description = "Date and time of the moment")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Builder.Default
     private LocalDateTime date = LocalDateTime.now();
 
-    @NotNull
-    @Size(min = 1)
     @Schema(description = "List of project ids", example = "[1, 2, 3]")
+    @Size(min = 1)
     private List<@Positive Long> projectIds;
 
-    @NotNull
-    @Size(min = 1)
     @Schema(description = "List of user ids", example = "[1, 2, 3]")
+    @Size(min = 1)
     private List<@Positive Long> userIds;
 }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
@@ -61,21 +63,22 @@ public class ProjectService {
         return subProjectMapper.toDto(projectRepository.save(project));
     }
 
-    public List<CreateSubProjectDto> getProjectsByFilter(FilterProjectDto filterDto, Long projectId) {
+    public List<CreateSubProjectDto> getProjectsByFilter(Long projectId, FilterProjectDto filterDto) {
         Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter-> filter.apply(projectStream, filterDto))
+                .flatMap(filter -> filter.apply(projectStream, filterDto))
                 .distinct()
                 .map(subProjectMapper::toDto)
                 .toList();
     }
 
     private void updateStatus(Project project, CreateSubProjectDto dto, List<Project> children, Long userId) {
+        log.info("Trying to update status of project with id = {}", project.getId());
         if (dto.getStatus() != ProjectStatus.COMPLETED) {
             project.setStatus(dto.getStatus());
-            log.info("Set project status to {}", dto.getStatus());
         } else {
+            log.info("Trying to complete project with id = {}", project.getId());
             List<Project> completedProjects = children.stream()
                     .filter(child -> child.getStatus().equals(ProjectStatus.COMPLETED))
                     .toList();
@@ -87,9 +90,11 @@ public class ProjectService {
             project.setStatus(dto.getStatus());
             addMoment(project.getId(), completedProjects, userId);
         }
+        log.info("Set project status to {}", dto.getStatus());
     }
 
     private void addMoment(Long id, List<Project> completedChildProjects, Long userId) {
+        log.info("Trying to create moment for project with id = {}", id);
         String message = "Project with id = " + id + " is completed";
         MomentRequestDto momentRequestDto = new MomentRequestDto();
         momentRequestDto.setName(message);
@@ -98,10 +103,12 @@ public class ProjectService {
         completedProjects.add(id);
         completedProjects.addAll(completedProjectsIds);
         momentRequestDto.setProjectIds(completedProjects);
+        log.info("Created moment for project with id = {}", id);
         momentService.create(momentRequestDto, userId);
     }
 
     private void updateVisibility(Project project, CreateSubProjectDto dto, List<Project> children) {
+        log.info("Trying to update visibility of project with id = {}", project.getId());
         project.setVisibility(dto.getVisibility());
         log.info("Set project visibility to {} for project with id = {}",
                 dto.getVisibility(), project.getId()
@@ -116,7 +123,7 @@ public class ProjectService {
     }
 
     private void validateVisibilityProjectAndSubProject(Project parentProject, Project childProject) {
-        if (parentProject.getVisibility().equals(ProjectVisibility.PUBLIC) &&
+        if (parentProject.getVisibility() == ProjectVisibility.PUBLIC &&
                 childProject.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             log.warn("Not allowed to create private sub project in public project." +
                             " Parent project id {} is {} and sub project id {} is {}",

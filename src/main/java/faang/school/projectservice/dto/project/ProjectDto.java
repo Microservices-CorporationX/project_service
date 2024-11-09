@@ -5,6 +5,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,10 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ProjectDto {
+
     @Schema(description = "Unique identifier of the project", example = "1")
+    @NotNull
+    @Positive
     private Long id;
 
     @Schema(description = "Name of the project", example = "Project name")
@@ -27,7 +31,7 @@ public class ProjectDto {
     private String name;
 
     @Schema(description = "List of child project ids", example = "[1, 2, 3]", nullable = true)
-    private List<Long> childrenIds;
+    private List<@Positive Long> childrenIds;
 
     @Builder.Default
     @Schema(description = "Status of the project", example = "CREATED", defaultValue = "CREATED")
@@ -44,8 +48,8 @@ public class ProjectDto {
     private LocalDateTime updatedAt;
 
     @Schema(description = "List of stages ids", example = "[1, 2, 3]", nullable = true)
-    private List<Long> stagesIds;
+    private List<@Positive Long> stagesIds;
 
     @Schema(description = "List of teams ids", example = "[1, 2, 3]", nullable = true)
-    private List<Long> teamsIds;
+    private List<@Positive Long> teamsIds;
 }

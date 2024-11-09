@@ -240,11 +240,12 @@ class ProjectServiceTest {
                 Project.builder().name("Second project").build()
         );
         CreateSubProjectDto projectDto = CreateSubProjectDto.builder().name("Second project").build();
+        Long id = 1L;
 
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(projects);
         when(subProjectMapper.toDto(any())).thenReturn(projectDto);
 
-        List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(filterDto, 1L);
+        List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(id, filterDto);
         assertTrue(resultProjects.get(0).getName().contains(projectDto.getName()));
     }
 }

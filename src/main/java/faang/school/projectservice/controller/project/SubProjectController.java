@@ -26,24 +26,27 @@ public class SubProjectController {
 
     @PostMapping("/project/{parentProjectId}")
     @Operation(summary = "Create sub project in DB")
-    public CreateSubProjectDto createSubProject(@PathVariable @Positive @NonNull Long parentProjectId, @RequestBody @Valid CreateSubProjectDto subProjectDto) {
+    public CreateSubProjectDto createSubProject(@PathVariable @Positive @NonNull Long parentProjectId,
+                                                @RequestBody CreateSubProjectDto subProjectDto) {
         return projectService.createSubProject(parentProjectId, subProjectDto);
     }
 
     @PutMapping("/project/{projectId}")
     @Operation(summary = "Update project by id",
-            parameters = @Parameter(name="x-user-id", in = ParameterIn.HEADER, required = true, description = "User id")
+            parameters = @Parameter(name = "x-user-id", in = ParameterIn.HEADER, required = true, description = "User id")
     )
     public CreateSubProjectDto updateProject(@PathVariable @Positive @NonNull Long projectId,
-                                                @RequestBody @Valid CreateSubProjectDto subProjectDto) {
+                                             @RequestBody CreateSubProjectDto subProjectDto) {
         long userId = userContext.getUserId();
         return projectService.updateProject(projectId, subProjectDto, userId);
     }
 
     @GetMapping("/project/{projectId}/projects")
     @Operation(summary = "Get sub projects by parent project id and filters")
-    public List<CreateSubProjectDto> getProjectsByFilters(@RequestBody @NonNull FilterProjectDto filterDto, @PathVariable @Positive @NonNull Long projectId) {
-        return projectService.getProjectsByFilter(filterDto, projectId);
+    public List<CreateSubProjectDto> getProjectsByFilters(@PathVariable @Positive @NonNull Long projectId,
+                                                          @RequestBody @NonNull FilterProjectDto filterDto
+    ) {
+        return projectService.getProjectsByFilter(projectId, filterDto);
     }
 }
 

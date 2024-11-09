@@ -7,28 +7,28 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class ProjectServiceValidate {
     private final TeamRepository teamRepository;
     private final StageJpaRepository stageRepository;
 
-
     public List<Team> getTeams(CreateSubProjectDto dto) {
-        if (dto.getTeamsIds() != null) {
-            return teamRepository.findAllById(dto.getTeamsIds());
+        if (dto.getTeamsIds() == null) {
+            return null;
         }
-        return null;
+        return teamRepository.findAllById(dto.getTeamsIds());
     }
 
     public List<Stage> getStages(CreateSubProjectDto dto) {
-        if (dto.getStagesIds() != null) {
-            return stageRepository.findAllById(dto.getStagesIds());
-        } else return null;
+        if (dto.getStagesIds() == null) {
+            return null;
+        }
+        return stageRepository.findAllById(dto.getStagesIds());
     }
 
     public boolean isVisibilityDtoAndProjectNotEquals(CreateSubProjectDto dto, Project project) {
@@ -38,6 +38,4 @@ public class ProjectServiceValidate {
     public boolean isStatusDtoAndProjectNotEquals(CreateSubProjectDto dto, Project project) {
         return dto.getStatus() != project.getStatus();
     }
-
-
 }

@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class NameFilterTest {
     private final NameFilter nameFilter = new NameFilter();
 
-
     @Test
     void testIsApplicableNotNullNotEmptyTrue() {
         FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
@@ -48,7 +47,6 @@ class NameFilterTest {
 
         Stream<Project> result = nameFilter.apply(projectStream.stream(), filterDto);
         assertEquals(result.toList(), projectsFiltered);
-
     }
 
     @Test

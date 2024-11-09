@@ -65,7 +65,6 @@ class VisibilityFilterTest {
         assertFalse(resultPRIVATE);
     }
 
-
     @Test
     void testApplyReturnEmptyProjectNotMatch() {
         FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
