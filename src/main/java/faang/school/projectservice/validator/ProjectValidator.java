@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,5 +31,11 @@ public class ProjectValidator {
 
     public boolean canUserAccessProject(Project project, Long currentUserId) {
         return project.getOwnerId().equals(currentUserId) || project.getVisibility() == ProjectVisibility.PUBLIC;
+    }
+
+    public void validateProjectExistsById(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
+        }
     }
 }

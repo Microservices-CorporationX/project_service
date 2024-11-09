@@ -7,6 +7,8 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
+import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -40,6 +42,8 @@ public class ProjectService {
         log.info("Project #{} successfully created.", savedProject.getId());
 
         return projectMapper.toDto(savedProject);
+    public ProjectDto getById(Long projectId) {
+        return projectMapper.toDto(projectRepository.getProjectById(projectId));
     }
 
     @Transactional
@@ -55,6 +59,10 @@ public class ProjectService {
         if (dto.getVisibility() != null) {
             project.setVisibility(dto.getVisibility());
         }
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+}
 
         project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         Project updatedProject = projectRepository.save(project);
