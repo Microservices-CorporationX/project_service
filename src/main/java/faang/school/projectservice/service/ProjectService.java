@@ -1,5 +1,7 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
@@ -17,7 +19,16 @@ import java.util.List;
 @Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
     List<Filter<Project, ProjectFilterDto>> projectFilters;
+
+    public ProjectDto getById(Long projectId) {
+        return projectMapper.toDto(projectRepository.getProjectById(projectId));
+    }
+
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
 
     public ProjectDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
 
@@ -33,5 +44,4 @@ public class ProjectService {
 
         return null;
     }
-
 }
