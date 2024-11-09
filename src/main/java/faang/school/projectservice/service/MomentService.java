@@ -42,10 +42,11 @@ public class MomentService {
 
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment updateMoment = findMomentById(momentDto.getId());
-        List<Project> projects = projectService.findAllById(momentDto.getProjectsIds());
-        updateMoment.getProjects().addAll(projects);
-        momentRepository.save(updateMoment);
-        return momentMapper.toDto(updateMoment);
+//        List<Project> projects = projectService.findAllById(momentDto.getProjectsIds());
+//        updateMoment.getProjects().addAll(projects);
+//        momentRepository.save(updateMoment);
+        momentMapper.update(momentDto,updateMoment);
+        return momentMapper.toDto(momentRepository.save(updateMoment));
     }
 
     public List<MomentDto> getMoments(MomentFilterDto filterDto) {

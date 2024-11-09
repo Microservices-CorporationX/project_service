@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -19,6 +20,8 @@ public interface MomentMapper {
 
     @Mapping(target = "projects", ignore = true)
     Moment toEntity(MomentDto momentDto);
+
+    void update(MomentDto momentDto, @MappingTarget Moment moment);
 
     @Named("mapToProjectIds")
     default List<Long> mapToProjectIds(List<Project> projects) {

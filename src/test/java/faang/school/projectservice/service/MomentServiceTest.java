@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -133,32 +134,27 @@ public class MomentServiceTest {
     public void updateMomentWhenMomentExists() {
         Long momentId = 1L;
         momentDto1.setId(momentId);
-        momentDto1.setProjectsIds(List.of(10L, 20L));
-        moment1.setId(momentId);
-        moment1.setProjects(new ArrayList<>());
-        Project project1 = new Project();
-        project1.setId(10L);
         when(momentRepository.findById(1L)).thenReturn(Optional.of(moment1));
-        when(projectService.findAllById(momentDto1.getProjectsIds())).thenReturn(List.of(project1));
+        doNothing().when(momentMapper).update(momentDto1, moment1);
+        when(momentRepository.save(moment1)).thenReturn(moment1);
+        when(momentMapper.toDto(moment1)).thenReturn(momentDto1);
 
-        momentService.updateMoment(momentDto1);
+        MomentDto updatedMomentDto = momentService.updateMoment(momentDto1);
 
-        assertEquals(1, moment1.getProjects().size());
-        assertEquals(10L, moment1.getProjects().get(0).getId());
+
+        assertEquals(momentDto1, updatedMomentDto);
+        verify(momentMapper, times(1)).update(momentDto1, moment1);
         verify(momentRepository, times(1)).findById(momentId);
         verify(momentRepository, times(1)).save(moment1);
-
     }
 
     @Test
     public void updateMomentWhenMomentNotFound() {
-        Long momentId = 1L;
-        MomentDto momentDto = new MomentDto();
-        momentDto.setId(momentId);
         when(momentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> momentService.updateMoment(momentDto));
+        assertThrows(EntityNotFoundException.class, () -> momentService.updateMoment(momentDto1));
         verify(momentRepository, never()).save(any(Moment.class));
+        verify(momentMapper, times(0)).update(any(MomentDto.class), any(Moment.class));
     }
 
     @Test
