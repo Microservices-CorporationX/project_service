@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public boolean hasCuratorAccess(Long curatorId) {
+    public boolean curatorHasNoAccess(Long curatorId) {
         TeamMember teamMember = teamMemberRepository.findById(curatorId);
-        return teamMember.isCurator();
+        return !teamMember.isCurator();
     }
 }

@@ -28,7 +28,7 @@ public class VacancyService {
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         long curatorId = vacancyDto.createdBy();
-        checkCuratorAccess(curatorId);
+        ensureCuratorHasAccess(curatorId);
 
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
@@ -51,7 +51,7 @@ public class VacancyService {
     public VacancyDto updateVacancy(VacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
         long curatorId = vacancyDto.createdBy();
-        checkCuratorAccess(curatorId);
+        ensureCuratorHasAccess(curatorId);
 
         Vacancy vacancy = findVacancyById(vacancyId);
 
@@ -111,8 +111,8 @@ public class VacancyService {
                 .orElseThrow(() -> new DataValidationException("Vacancy not found"));
     }
 
-    private void checkCuratorAccess(long curatorId) {
-        if (!teamMemberService.hasCuratorAccess(curatorId)) {
+    private void ensureCuratorHasAccess(long curatorId) {
+        if (teamMemberService.curatorHasNoAccess(curatorId)) {
             log.error("Curator with ID {} does not have access to create a vacancy", curatorId);
             throw new DataValidationException("Curator does not have access to create a vacancy");
         }
