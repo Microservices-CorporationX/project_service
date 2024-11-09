@@ -10,6 +10,6 @@ public enum TaskStatus {
 
     @Override
     public String toString() {
-        return super.toString().toLowerCase();
+        return this.name().toLowerCase();
     }
 }

@@ -50,9 +50,9 @@ public class StageService {
         return stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId().equals(projectId))
                 .filter(stage -> stage.getStageRoles().stream()
-                        .anyMatch(stageRole -> Objects.equals(stageRole.getTeamRole().name(), role.toLowerCase())))
+                        .anyMatch(stageRole -> Objects.equals(stageRole.getTeamRole().toString(), role.toLowerCase())))
                 .filter(stage -> stage.getTasks().stream()
-                        .anyMatch(task -> Objects.equals(task.getStatus().name(), status.toLowerCase())))
+                        .anyMatch(task -> Objects.equals(task.getStatus().toString(), status.toLowerCase())))
                 .map(stageMapper::toDto)
                 .toList();
     }
