@@ -5,7 +5,6 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -27,12 +25,12 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
     @InjectMocks
     private ProjectService projectService;
 
     private Project project;
     private ProjectDto projectDto;
-
     private final long projectId = 1L;
 
     @BeforeEach
