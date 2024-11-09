@@ -28,7 +28,7 @@ public class ProjectService {
     private final UserContext userContext;
 
     public void createProject(ProjectCreateReq projectCreateReq) {
-        checkProjectNameUniquenessForUser(projectCreateReq.getName(), projectCreateReq.getOwnerId());
+        checkProjectNameUniquenessForUser(projectCreateReq.name(), projectCreateReq.ownerId());
         Project project = projectMapper.mapProjectCreateReqToProject(projectCreateReq);
         project.setStatus(ProjectStatus.CREATED);
         projectRepository.save(project);
@@ -36,8 +36,7 @@ public class ProjectService {
 
     @Transactional
     public void patchProject(ProjectPatchReq projectPatchReq) {
-        Long projectId = projectPatchReq.getId();
-        validateProject(projectId);
+        Long projectId = projectPatchReq.id();
         Project project = projectRepository.getProjectById(projectId);
         projectMapper.patchProjectFromProjectPatchReq(projectPatchReq, project);
     }
@@ -59,8 +58,8 @@ public class ProjectService {
 
     private Predicate<Project> constructFilter(ProjectFiltersReq projectFiltersReq) {
         Predicate<Project> filter = constructFilterByProjectVisibility();
-        String name = projectFiltersReq.getName();
-        ProjectStatus status = projectFiltersReq.getStatus();
+        String name = projectFiltersReq.name();
+        ProjectStatus status = projectFiltersReq.status();
         if (name != null || status != null) {
             filter = constructFilterByNameAndStatus(filter, name, status);
         }
@@ -70,10 +69,10 @@ public class ProjectService {
     private Predicate<Project> constructFilterByProjectVisibility() {
         long userId = userContext.getUserId();
         return project -> project.getVisibility().equals(ProjectVisibility.PUBLIC) ||
-                isPrivateAndUserIsTeamMember(userId, project);
+                isPrivateProjectAndUserIsTeamMember(userId, project);
     }
 
-    private boolean isPrivateAndUserIsTeamMember(long userId, Project project) {
+    private boolean isPrivateProjectAndUserIsTeamMember(long userId, Project project) {
         return project.getVisibility().equals(ProjectVisibility.PRIVATE) &&
                 project.getTeams().stream()
                         .flatMap(team -> team.getTeamMembers().stream())
@@ -89,13 +88,6 @@ public class ProjectService {
             filter = filter.and(project -> project.getStatus().equals(status));
         }
         return filter;
-    }
-
-    private void validateProject(Long id) {
-        if (!projectRepository.existsById(id)) {
-            log.error("Project with id: {} does not exist", id);
-            throw new IllegalArgumentException(String.format("Project with id: %s does not exist", id));
-        }
     }
 
     private void checkProjectNameUniquenessForUser(String name, Long ownerId) {

@@ -2,10 +2,6 @@ package faang.school.projectservice.utilities;
 
 import lombok.experimental.UtilityClass;
 
-/**
- * Класс содержит константы для формирования url.
- *
- */
 @UtilityClass
 public class UrlUtils {
     public static final String MAIN_URL = "/api/project-service";
