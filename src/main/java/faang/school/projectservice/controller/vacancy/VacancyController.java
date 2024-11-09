@@ -5,8 +5,10 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,13 +33,13 @@ public class VacancyController {
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    @PutMapping("/update")
-    public VacancyDto updateVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
-        return vacancyService.updateVacancy(vacancyDto);
+    @PutMapping("/{id}/update")
+    public VacancyDto updateVacancy(@PathVariable @Min(1L) Long id, @Valid @RequestBody VacancyDto vacancyDto) {
+        return vacancyService.updateVacancy(id, vacancyDto);
     }
 
     @PostMapping("/close")
-    public void closeVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
-        vacancyService.closeVacancy(vacancyDto);
+    public VacancyDto closeVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
+        return vacancyService.closeVacancy(vacancyDto);
     }
 }

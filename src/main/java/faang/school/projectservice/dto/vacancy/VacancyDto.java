@@ -1,18 +1,18 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.WorkSchedule;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @Builder
-@Validated
 public class VacancyDto {
     private Long id;
 
@@ -22,22 +22,23 @@ public class VacancyDto {
     @NotNull
     private String description;
 
-    @NotNull
+    @Min(1L)
     private Long projectId;
 
+    @NotNull
     List<Long> candidateIds;
 
+    private LocalDateTime createdAt;
+
+    @Min(1)
     private Double salary;
 
     @NotNull
     WorkSchedule workSchedule;
 
+    @NotNull
     List<Long> requiredSkillIds;
 
-    @NotNull
-    private Long createdBy;
-
-    private Long updatedBy;
-
+    @Min(1)
     int count;
 }

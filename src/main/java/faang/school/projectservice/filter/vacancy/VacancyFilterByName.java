@@ -1,16 +1,20 @@
 package faang.school.projectservice.filter.vacancy;
 
+
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.filter.Filter;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-public class VacancyFilterByName implements Filter<VacancyFilterDto, Vacancy> {
+
+@Component
+public class VacancyFilterByName implements VacancyFilter {
 
     @Override
     public boolean isApplicable(VacancyFilterDto filterDto) {
-        return filterDto.getNamePattern().isBlank();
+        return StringUtils.isNotBlank(filterDto.getNamePattern());
     }
 
     @Override
