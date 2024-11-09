@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -58,7 +59,7 @@ public class SubProjectController {
             Long parentId,
             @Valid
             @RequestBody
-            SubProjectFiltersDto filters) {
+            ProjectFilterDto filters) {
         log.info("Request for all subprojects for parent project id #{}", parentId);
         return ResponseEntity.status(HttpStatus.OK).body(projectService.filterSubProjects(parentId, filters));
     }

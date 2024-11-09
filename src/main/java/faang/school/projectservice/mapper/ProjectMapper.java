@@ -31,7 +31,7 @@ public interface ProjectMapper {
     @Mapping(source = "stages", target = "stageIds", qualifiedByName = "mapToStageIds")
     @Mapping(source = "vacancies", target = "vacancyIds", qualifiedByName = "mapToVacancyIds")
     @Mapping(source = "moments", target = "momentIds", qualifiedByName = "mapToMomentIds")
-    @Mapping(source = "meets", target = "meetIds", qualifiedByName = "mapToMeetIds")
+    @Mapping(source = "meets", target = "meetIds", qualifiedByName = "mapToMeetsIds")
     ProjectResponseDto toResponseDto(Project project);
 
     @Mapping(target = "parentProject", ignore = true)
@@ -62,7 +62,6 @@ public interface ProjectMapper {
     default List<Long> mapToStageIds(List<Stage> stages) {
         return stages.stream().map(Stage::getStageId).toList();
     }
-
     @Named("mapToVacancyIds")
     default List<Long> mapToVacancyIds(List<Vacancy> vacancies) {
         return vacancies.stream().map(Vacancy::getId).toList();
@@ -73,7 +72,7 @@ public interface ProjectMapper {
         return moments.stream().map(Moment::getId).toList();
     }
 
-    @Named("mapToMeetIds")
+    @Named("mapToMeetsIds")
     default List<Long> mapToMeetsIds(List<Meet> meets) {
         return meets.stream().map(Meet::getId).toList();
     }

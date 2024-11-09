@@ -32,18 +32,18 @@ public class ProjectResponseDto {
     private BigInteger maxStorageSize;
     private Long ownerId;
     private Long parentProjectId; // это замаппить +
-    private List<Project> children; // list +
-    private List<Task> tasks; // list +
-    private List<Resource> resources; // list +
+    private List<Long> childrenIds; // list +
+    private List<Long> taskIds; // list +
+    private List<Long> resourceIds; // list +
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProjectStatus status;
     private ProjectVisibility visibility;
     private Long coverImageId;
-    private List<Team> teams; // list +
+    private List<Long> teamIds; // list +
     private Long scheduleId; // это замаппить +
-    private List<Stage> stages; // list +
-    private List<Vacancy> vacancies; // list +
-    private List<Moment> moments; // list +
-    private List<Meet> meets; // list +
+    private List<Long> stageIds; // list +
+    private List<Long> vacancyIds; // list +
+    private List<Long> momentIds; // list +
+    private List<Long> meetIds; // list +
 }
