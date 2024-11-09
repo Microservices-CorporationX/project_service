@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,6 +47,9 @@ class ProjectServiceTest {
 
     @Spy
     private UpdateProjectMapperImpl updateProjectMapper;
+
+    @Mock
+    List<Filter<Project, ProjectFilterDto>> filters;
 
     @InjectMocks
     private ProjectService projectService;
@@ -145,7 +150,7 @@ class ProjectServiceTest {
         List<Project> notFilteredProjects = getProjectsList();
         List<ProjectDto> filteredProjectDtos = getProjectDtosList();
         ProjectStatusFilter statusFilter = new ProjectStatusFilter();
-        List<Filter<Project, ProjectFilterDto>> filters = List.of(statusFilter);
+        filters = List.of(statusFilter);
         projectValidator = new ProjectValidator(projectRepository);
         projectService = new ProjectService(projectRepository, projectValidator,
                 projectMapper, updateProjectMapper, filters);
@@ -155,6 +160,45 @@ class ProjectServiceTest {
 
         verify(projectRepository, times(1)).findAll();
         assertEquals(filteredProjectDtos, result);
+    }
+
+    @Test
+    void testGetAllProjectsToUserSuccess() {
+        List<Project> allProjects = getProjectsList();
+        allProjects.get(2).setVisibility(ProjectVisibility.PRIVATE);
+        List<ProjectDto> availableProjectDtos = getProjectDtosList();
+        projectValidator = new ProjectValidator(projectRepository);
+        projectService = new ProjectService(projectRepository, projectValidator,
+                projectMapper, updateProjectMapper, filters);
+
+        when(projectRepository.findAll()).thenReturn(allProjects);
+
+        List<ProjectDto> result = projectService.getAllProjectsToUser(1L);
+
+        assertEquals(availableProjectDtos, result);
+    }
+
+    @Test
+    void testGetUserAvailableProjectByIdSuccess() {
+        project.setId(1L);
+        project.setStatus(ProjectStatus.CREATED);
+        projectDto.setId(1L);
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(true);
+
+        ProjectDto result = projectService.getUserAvailableProjectById(project.getId(), ownerId);
+
+        assertEquals(projectDto, result);
+    }
+
+    @Test
+    void testGetUserAvailableProjectByIdShouldThrowException() {
+        project.setId(1L);
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () ->
+                projectService.getUserAvailableProjectById(project.getId(), ownerId));
     }
 
     private List<Project> getProjectsList() {

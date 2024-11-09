@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
@@ -74,6 +75,27 @@ public class ProjectService {
 
         log.info("Projects filtered by {}.", filterDto);
         return result;
+    }
+
+    public List<ProjectDto> getAllProjectsToUser(Long currentUserId) {
+        List<ProjectDto> result = getAllUserAvailableProjects(currentUserId).stream()
+                .map(projectMapper::toDto)
+                .toList();
+
+        log.info("Founded all projects, available for User #{}", currentUserId);
+        return result;
+    }
+
+    public ProjectDto getUserAvailableProjectById(Long currentUserId, Long projectId) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        if (!projectValidator.canUserAccessProject(project, currentUserId)) {
+            log.error("Project #{} not found by User #{}", projectId, currentUserId);
+            throw new EntityNotFoundException(String.format("Project #%d not found by User #%d",
+                    projectId, currentUserId));
+        }
+
+        return projectMapper.toDto(project);
     }
 
     private List<Project> getAllUserAvailableProjects(Long currentUserId) {

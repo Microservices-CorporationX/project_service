@@ -50,4 +50,27 @@ public class ProjectController {
         log.info("Getting filtered projects by User #{}.", currentUserId);
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
+
+    @GetMapping("/all-projects/{currentUserId}")
+    public ResponseEntity<List<ProjectDto>> getAllProjects(
+            @NotNull(message = "CurrentUserId is required.")
+            @Positive(message = "CurrentUserId must be greater than 0.")
+            @PathVariable
+            Long currentUserId) {
+        log.info("Getting all projects by User #{}.", currentUserId);
+        return ResponseEntity.ok(projectService.getAllProjectsToUser(currentUserId));
+    }
+
+    @GetMapping("/project/{currentUserId}")
+    public ResponseEntity<ProjectDto> getProjectById(
+            @NotNull(message = "CurrentUserId is required.")
+            @Positive(message = "CurrentUserId must be greater than 0.")
+            @PathVariable
+            Long currentUserId,
+            @NotNull(message = "CurrentUserId is required.")
+            @Positive(message = "CurrentUserId must be greater than 0.")
+            Long projectId) {
+        log.info("Getting project id #{} by User #{}.", projectId, currentUserId);
+        return ResponseEntity.ok(projectService.getUserAvailableProjectById(currentUserId, projectId));
+    }
 }
