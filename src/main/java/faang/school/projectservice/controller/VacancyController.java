@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.service.VacancyService;
 import jakarta.validation.Valid;
@@ -44,7 +43,7 @@ public class VacancyController {
     }
 
     @GetMapping("/filters/")
-    public ResponseEntity<List<VacancyDto>> filterVacancies(@Valid @RequestBody FilterVacancyDto filters) {
+    public ResponseEntity<List<VacancyResponseDto>> filterVacancies(@Valid @RequestBody FilterVacancyDto filters) {
         log.info("Filters request received: {}", filters);
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.filterVacancies(filters));
     }

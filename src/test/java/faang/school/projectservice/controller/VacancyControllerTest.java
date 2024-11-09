@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
@@ -109,15 +108,15 @@ class VacancyControllerTest {
     @Test
     @DisplayName("Filter vacancies successfully")
     void testFilterVacanciesSuccess() {
-        when(vacancyService.filterVacancies(filters)).thenReturn(List.of(dto));
+        when(vacancyService.filterVacancies(filters)).thenReturn(List.of(responseDto));
 
-        ResponseEntity<List<VacancyDto>> resultResponse = vacancyController.filterVacancies(filters);
-        List<VacancyDto> resultDto = resultResponse.getBody();
+        ResponseEntity<List<VacancyResponseDto>> resultResponse = vacancyController.filterVacancies(filters);
+        List<VacancyResponseDto> resultDto = resultResponse.getBody();
 
         verify(vacancyService).filterVacancies(filters);
 
         assertNotNull(resultResponse);
-        assertEquals(List.of(dto), resultDto);
+        assertEquals(List.of(responseDto), resultDto);
         assertEquals(HttpStatus.OK, resultResponse.getStatusCode());
         assertNotNull(resultDto);
         assertEquals("Vacancy 1", resultDto.get(0).getName());

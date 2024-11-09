@@ -157,9 +157,9 @@ class VacancyServiceTest {
                 Vacancy.builder().name("Foo").build(),
                 Vacancy.builder().name("Bar").build()
         );
-        List<VacancyDto> vacanciesDto = List.of(
-                VacancyDto.builder().name("Foo").build(),
-                VacancyDto.builder().name("Bar").build()
+        List<VacancyResponseDto> vacanciesDto = List.of(
+                VacancyResponseDto.builder().name("Foo").build(),
+                VacancyResponseDto.builder().name("Bar").build()
         );
 
         when(vacancyRepository.findAll()).thenReturn(vacancies);
@@ -168,7 +168,7 @@ class VacancyServiceTest {
         when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
         when(vacancyMapper.toDto(vacancies.get(1))).thenReturn(vacanciesDto.get(1));
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -184,9 +184,9 @@ class VacancyServiceTest {
         List<Vacancy> vacancies = List.of(
                 Vacancy.builder().name("Foo").build()
         );
-        List<VacancyDto> vacanciesDto = List.of(
-                VacancyDto.builder().name("Foo").build(),
-                VacancyDto.builder().name("Bar").build()
+        List<VacancyResponseDto> vacanciesDto = List.of(
+                VacancyResponseDto.builder().name("Foo").build(),
+                VacancyResponseDto.builder().name("Bar").build()
         );
 
         when(vacancyRepository.findAll()).thenReturn(vacancies);
@@ -194,7 +194,7 @@ class VacancyServiceTest {
         when(vacancyFilters.get(0).apply(any(), any())).thenReturn(vacancies.stream());
         when(vacancyMapper.toDto(vacancies.get(0))).thenReturn(vacanciesDto.get(0));
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -214,7 +214,7 @@ class VacancyServiceTest {
         when(vacancyRepository.findAll()).thenReturn(vacancies);
         when(vacancyFilters.get(0).isApplicable(filterDto)).thenReturn(false);
 
-        List<VacancyDto> result = vacancyService.filterVacancies(filterDto);
+        List<VacancyResponseDto> result = vacancyService.filterVacancies(filterDto);
 
         assertNotNull(result);
         assertEquals(0, result.size());

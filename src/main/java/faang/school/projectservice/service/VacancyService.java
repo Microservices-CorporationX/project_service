@@ -62,7 +62,7 @@ public class VacancyService {
         vacancyRepository.deleteById(vacancyId);
     }
 
-    public List<VacancyDto> filterVacancies(FilterVacancyDto filters) {
+    public List<VacancyResponseDto> filterVacancies(FilterVacancyDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
