@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -37,15 +36,8 @@ public class SubProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createSubProject(parentId,createProjectDto));
     }
 
-    @PutMapping("/{parentId}/subprojects")
-    public ResponseEntity<ProjectDto> updateSubProject(
-            @PathVariable
-            @NotNull(message = "Parent project Id must not be empty")
-            @Positive(message = "Parent project Id must be positive integer")
-            Long parentId,
-            @Valid
-            @RequestBody
-            UpdateSubProjectDto updateSubProjectDto) {
+    @PutMapping()
+    public ResponseEntity<ProjectDto> updateSubProject(@Valid @RequestBody UpdateSubProjectDto updateSubProjectDto) {
         log.info("Request to update subproject id #{} for parent project id #{}", updateSubProjectDto.getId(), parentId);
         return ResponseEntity.status(HttpStatus.OK).body(projectService.updateSubProject(parentId, updateSubProjectDto));
     }

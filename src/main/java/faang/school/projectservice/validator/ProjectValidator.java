@@ -1,7 +1,10 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +33,38 @@ public class ProjectValidator {
 
     public boolean isProjectPublic(Project project) {
         return project.getVisibility() == ProjectVisibility.PUBLIC;
+    }
+
+    public boolean hasParentProject(Project project) {
+        return project.getParentProject() != null;
+    }
+
+    public boolean hasChildrenProjects(Project project) {
+        return project.getChildren() != null && !project.getChildren().isEmpty();
+    }
+
+    public void validateSameProjectStatus(Project project, UpdateSubProjectDto updateSubProjectDto) {
+        if (project.getStatus() == updateSubProjectDto.getStatus()) {
+            throw new NoStatusChangeException("Project status can't be the same");
+        }
+    }
+
+    public void validateProjectStatusCompletedOrCancelled(Project project) {
+        if(project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
+            throw new NoStatusChangeException("Status can't change since project is completed or cancelled");
+        }
+    }
+
+    public void validateProjectStatusValidToHold(Project project) {
+        if (project.getStatus() == ProjectStatus.CREATED) {
+            throw new NoStatusChangeException("To hold project it must be in progress first");
+        }
+    }
+
+    public void validateProjectIsValidToComplete(Project project) {
+        if (!project.getChildren().stream().allMatch(child ->
+                child.getStatus() == ProjectStatus.COMPLETED) || project.getStatus() == ProjectStatus.CANCELLED) {
+            throw new NoStatusChangeException("All subprojects should be completed or cancelled first");
+        }
     }
 }
