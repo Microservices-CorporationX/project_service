@@ -10,15 +10,14 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.CampaignRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.specification.CampaignSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +26,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class CampaignService {
-    private final int DEFAULT_PAGE_SIZE = 5;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final CampaignRepository campaignRepository;
     private final ProjectRepository projectRepository;
@@ -45,16 +43,16 @@ public class CampaignService {
         if (Objects.isNull(filter)) {
             return campaignRepository.findAllByProjectId(projectId, pageable).getContent();
         }
-
-        return campaignRepository.findAllByFilters(
+        Specification<Campaign> specification = CampaignSpecification.filteredCampaigns(
                 projectId,
                 filter.getCreatedById(),
-                filter.getTitlePattern(),
+                filter.getTitle(),
                 filter.getMinGoal(),
                 filter.getMaxGoal(),
-                filter.getStatus() == null ? null : filter.getStatus().name(),
-                filter.getCreatedAfter(),
-                pageable);
+                filter.getStatus(),
+                filter.getCreatedAfter()
+        );
+        return campaignRepository.findAll(specification, pageable).getContent();
     }
 
     @Transactional
