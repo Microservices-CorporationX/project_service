@@ -1,8 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -24,8 +22,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
@@ -44,13 +48,9 @@ class StageServiceTest {
     @Spy
     private StageMapper stageMapper;
 
-    @Spy
-    private ProjectMapper projectMapper;
-
     private Stage stage;
     private TeamMember teamMember;
     private Project project;
-    private ProjectDto projectDto;
     private StageDto stageDto;
 
     @BeforeEach
@@ -78,12 +78,6 @@ class StageServiceTest {
         project = Project
                 .builder()
                 .id(1L)
-                .name("Project 1")
-                .description("Description 1")
-                .build();
-
-        projectDto = ProjectDto
-                .builder()
                 .name("Project 1")
                 .description("Description 1")
                 .build();
@@ -134,18 +128,17 @@ class StageServiceTest {
 
     @Test
     void testCreateStageThrowException() {
-        when(projectService.getById(1L)).thenThrow(new EntityNotFoundException(
+        when(projectService.getProjectById(1L)).thenThrow(new EntityNotFoundException(
                 String.format("Project not found by id: %s", 1L)));
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.getById(1L),
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(1L),
                 String.format("Project not found by id: %s", 1L));
     }
 
     @Test
     void testCreateStageSuccessfully() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
-        when(projectService.getById(stageDto.getProjectId())).thenReturn(projectDto);
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
+        when(projectService.getProjectById(stageDto.getProjectId())).thenReturn(project);
         when(stageRepository.save(stage)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 

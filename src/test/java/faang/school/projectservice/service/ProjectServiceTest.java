@@ -4,8 +4,6 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -67,7 +65,7 @@ class ProjectServiceTest {
     private UpdateProjectDto emptyUpdateProjectDto;
     private Project mockProject;
     private ProjectFilterDto filterDto;
-    private Long id;
+    private Long projectId;
     private Long ownerId;
 
     @BeforeEach
@@ -105,7 +103,7 @@ class ProjectServiceTest {
                 .build();
 
         filterDto = ProjectFilterDto.builder().status(ProjectStatus.IN_PROGRESS).build();
-        id = project.getId();
+        projectId = project.getId();
         ownerId = 1L;
         mockProject = mock(Project.class);
     }
@@ -115,18 +113,17 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenThrow(new EntityNotFoundException(
                 String.format("Project not found by id: %s", projectId)));
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.getById(projectId),
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(projectId),
                 String.format("Project not found by id: %s", projectId));
     }
 
     @Test
     void testGetByIdSuccessfully() {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
-        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        projectService.getById(projectId);
+        Project result = projectService.getProjectById(projectId);
 
-        assertEquals(projectDto.getName(), projectService.getById(1L).getName());
+        assertEquals(project.getName(), result.getName());
     }
 
     @Test
@@ -144,7 +141,7 @@ class ProjectServiceTest {
 
     @Test
     void testUpdateProjectShouldNotUpdateIfValuesNull() {
-        when(projectRepository.getProjectById(id)).thenReturn(mockProject);
+        when(projectRepository.getProjectById(projectId)).thenReturn(mockProject);
         when(projectRepository.save(mockProject)).thenReturn(mockProject);
 
         projectService.updateProject(emptyUpdateProjectDto);
@@ -164,12 +161,13 @@ class ProjectServiceTest {
 
         assertNotNull(result);
         assertEquals(project, result);
-        assertEquals("Project 1", result.getName());
+        assertEquals("Test project", result.getName());
     }
 
     @Test
     @DisplayName("Get project by id fail")
     void testGetProjectByIdFail() {
+        project.setId(1L);
         when(projectRepository.getProjectById(project.getId())).
                 thenThrow(new EntityNotFoundException(String.format("Project with id %s doesn't exist", project.getId())));
 
@@ -179,7 +177,7 @@ class ProjectServiceTest {
 
     @Test
     void testUpdateProjectSuccessful() {
-        when(projectRepository.getProjectById(id)).thenReturn(project);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(projectRepository.save(project)).thenReturn(project);
 
         UpdateProjectDto result = projectService.updateProject(updateProjectDto);
