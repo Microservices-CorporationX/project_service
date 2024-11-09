@@ -76,7 +76,7 @@ public class StageService {
                 if (targetStageId == null) {
                     throw new InvalidStageTransferException("Target stage ID is required for task transfer");
                 }
-                Stage targetStage = stageRepository.getById(stageId);
+                Stage targetStage = stageRepository.getById(targetStageId);
                 stage.getTasks().forEach(task -> {
                     task.setStage(targetStage);
                     task.setUpdatedAt(LocalDateTime.now());
