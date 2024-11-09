@@ -10,10 +10,12 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.statusUpdater.StatusUpdater;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,6 +28,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectValidator projectValidator;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
+    private final List<StatusUpdater> statusUpdates;
 
     public ProjectDto getById(Long projectId) {
         return projectMapper.toDto(projectRepository.getProjectById(projectId));
@@ -40,8 +43,12 @@ public class ProjectService {
         return null;
     }
 
-    public ProjectDto updateSubProject(Long parentId, UpdateSubProjectDto updateSubProjectDto) {
+    @Transactional
+    public ProjectDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
         projectValidator.validateProjectExistsById(updateSubProjectDto.getId());
+        Project project = getProjectById(updateSubProjectDto.getId());
+        changeStatus(project, updateSubProjectDto);
+
 
         return null;
     }
@@ -71,48 +78,8 @@ public class ProjectService {
         projectValidator.validateSameProjectStatus(project, updateSubProjectDto);
         projectValidator.validateProjectStatusCompletedOrCancelled(project);
 
-        if (updateSubProjectDto.getStatus() == ProjectStatus.IN_PROGRESS) {
-            applyInProgressStatus(project);
-        } else if (updateSubProjectDto.getStatus() == ProjectStatus.ON_HOLD) {
-            applyOnHoldStatus(project);
-        } else if (updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED) {
-            applyCompletedStatus(project);
-        } else if (updateSubProjectDto.getStatus() == ProjectStatus.CANCELLED) {
-            applyCancelledStatus(project);
-        }
+        statusUpdates.stream()
+                .filter(update -> update.isApplicable(updateSubProjectDto))
+                .forEach(update -> update.changeStatus(project));
     }
-
-    private void applyInProgressStatus(Project project) {
-        project.setStatus(ProjectStatus.IN_PROGRESS);
-        if (projectValidator.hasParentProject(project)) {
-            Project parentProject = project.getParentProject();
-            applyInProgressStatus(parentProject);
-        }
-        projectRepository.save(project);
-    }
-
-    private void applyOnHoldStatus(Project project) {
-        projectValidator.validateProjectStatusValidToHold(project);
-        project.setStatus(ProjectStatus.ON_HOLD);
-        if (projectValidator.hasChildrenProjects(project)) {
-            project.getChildren().forEach(this::applyOnHoldStatus);
-        }
-        projectRepository.save(project);
-    }
-
-    private void applyCancelledStatus(Project project) {
-        project.setStatus(ProjectStatus.CANCELLED);
-        if (projectValidator.hasChildrenProjects(project)) {
-            project.getChildren().forEach(this::applyCancelledStatus);
-        }
-        projectRepository.save(project);
-    }
-
-    private void applyCompletedStatus(Project project) {
-        projectValidator.validateProjectIsValidToComplete(project);
-        project.setStatus(ProjectStatus.COMPLETED);
-        projectRepository.save(project);
-    }
-
-
 }
