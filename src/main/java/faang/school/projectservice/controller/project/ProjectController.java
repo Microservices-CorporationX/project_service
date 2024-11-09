@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Project methods")
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
