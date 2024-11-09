@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
@@ -22,9 +22,9 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
     private final ProjectValidator projectValidator;
 
-    public VacancyDto create(NewVacancyDto dto) {
+    public VacancyResponseDto create(NewVacancyDto dto) {
         projectValidator.validateProjectExistsById(dto.getProjectId());
-        vacancyValidator.validateVacancyManagerRole(dto.getCreatedBy());
+        vacancyValidator.validateVacancyManagerRole(dto.getCreatedById());
         Vacancy vacancy = mapToNewEntity(dto);
         vacancyRepository.save(vacancy);
         log.info("New vacancy with id #{} successfully saved", vacancy.getId());
