@@ -1,4 +1,4 @@
-package faang.school.projectservice.config;
+package faang.school.projectservice.config.swagger;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -16,12 +16,12 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .servers(
                         List.of(new Server()
-                                .url("http://localhost:8082/api/v1/swagger-ui/index.html")
+                                .url("http://localhost:8082/api/v1/")
                                 .description("Main Server"))
                 )
                 .info(new Info()
                         .title("Project API")
-                        .description("Documentation  for Project Managing")
-                        .version("1.0.0"));
+                        .version("1.0.0")
+                        .description("Documentation  for Project Managing"));
     }
 }
