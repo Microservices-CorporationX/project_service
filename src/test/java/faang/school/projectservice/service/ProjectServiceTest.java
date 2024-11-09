@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +30,27 @@ class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("Get project by id")
-    void testGetProjectById() {
+    @DisplayName("Get project by id success")
+    void testGetProjectByIdSuccess() {
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
 
         Project result = projectService.getProjectById(project.getId());
-        
+
         assertNotNull(result);
         assertEquals(project, result);
         assertEquals("Project 1", result.getName());
     }
+
+    @Test
+    @DisplayName("Get project by id fail")
+    void testGetProjectByIdFail() {
+        when(projectRepository.getProjectById(project.getId())).
+                thenThrow(new EntityNotFoundException(String.format("Project with id %s doesn't exist", project.getId())));
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(project.getId()));
+        assertEquals("Project with id 1 doesn't exist", ex.getMessage());
+    }
+
 
     @Test
     @DisplayName("Check project exists by id")

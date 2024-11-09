@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacancy.NewVacancyDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -29,9 +29,9 @@ public class VacancyService {
     private final VacancyValidator vacancyValidator;
     private final ProjectValidator projectValidator;
 
-    public VacancyDto create(NewVacancyDto dto) {
+    public VacancyResponseDto create(NewVacancyDto dto) {
         projectValidator.validateProjectExistsById(dto.getProjectId());
-        vacancyValidator.validateVacancyManagerRole(dto.getCreatedBy());
+        vacancyValidator.validateVacancyManagerRole(dto.getCreatedById());
         Vacancy vacancy = mapToNewEntity(dto);
         vacancyRepository.save(vacancy);
         log.info("New vacancy with id #{} successfully saved", vacancy.getId());
@@ -39,8 +39,8 @@ public class VacancyService {
     }
 
     @Transactional
-    public VacancyDto updateVacancyStatus(VacancyUpdateDto dto) {
-        vacancyValidator.validateVacancyManagerRole(dto.getUpdatedBy());
+    public VacancyResponseDto updateVacancyStatus(VacancyUpdateDto dto) {
+        vacancyValidator.validateVacancyManagerRole(dto.getUpdatedById());
         Vacancy vacancy = getVacancyById(dto.getId());
         if (dto.getStatus().equals(VacancyStatus.CLOSED)) {
             vacancyValidator.validateCandidateCountForClosure(vacancy);
