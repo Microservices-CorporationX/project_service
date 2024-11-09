@@ -52,7 +52,7 @@ class InternshipDtoValidatorTest {
     private TeamMemberService teamMemberService;
 
     @InjectMocks
-    InternshipDtoValidator validator;
+    private InternshipDtoValidator validator;
 
 
     @Test
@@ -85,12 +85,12 @@ class InternshipDtoValidatorTest {
         LocalDateTime startDate = LocalDateTime.now().plusDays(1);
         LocalDateTime endDate = LocalDateTime.now().plusMonths(1 + MAX_INTERNSHIP_MONTHS_DURATION);
 
-
         InternshipCreationDto creationDto = InternshipCreationDto.builder()
                 .internUserIds(internUserIds)
                 .startDate(startDate)
                 .endDate(endDate)
                 .build();
+
         when(restTemplate.exchange(
                 any(RequestEntity.class),
                 eq(new ParameterizedTypeReference<List<Long>>() {})
