@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +44,16 @@ public class StageService {
         Project project = projectMapper.toEntity(projectService.getById(stageDto.getProjectId()));
         stage.setProject(project);
         return stageMapper.toDto(stageRepository.save(stage));
+    }
+
+    public List<StageDto> getStagesByProjectIdRoleAndStatus(Long projectId, String role, String status) {
+        return stageRepository.findAll().stream()
+                .filter(stage -> stage.getProject().getId().equals(projectId))
+                .filter(stage -> stage.getStageRoles().stream()
+                        .anyMatch(stageRole -> Objects.equals(stageRole.getTeamRole().name(), role.toLowerCase())))
+                .filter(stage -> stage.getTasks().stream()
+                        .anyMatch(task -> Objects.equals(task.getStatus().name(), status.toLowerCase())))
+                .map(stageMapper::toDto)
+                .toList();
     }
 }

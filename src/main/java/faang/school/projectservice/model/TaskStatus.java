@@ -6,5 +6,10 @@ public enum TaskStatus {
     REVIEW,
     TESTING,
     DONE,
-    CANCELLED,
+    CANCELLED;
+
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase();
+    }
 }
