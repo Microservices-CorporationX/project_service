@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,12 +32,14 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
         log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(dto));
     }
 
     @PutMapping
     public ResponseEntity<UpdateProjectDto> updateProjectDescription(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+
         return ResponseEntity.ok(projectService.updateProject(dto));
     }
 
@@ -48,6 +51,7 @@ public class ProjectController {
             @PathVariable
             Long currentUserId) {
         log.info("Getting filtered projects by User #{}.", currentUserId);
+
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
 
@@ -58,7 +62,8 @@ public class ProjectController {
             @PathVariable
             Long currentUserId) {
         log.info("Getting all projects by User #{}.", currentUserId);
-        return ResponseEntity.ok(projectService.getAllProjectsToUser(currentUserId));
+
+        return ResponseEntity.ok(projectService.getAllProjectsForUser(currentUserId));
     }
 
     @GetMapping("/project/{currentUserId}")
@@ -69,8 +74,10 @@ public class ProjectController {
             Long currentUserId,
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
+            @RequestParam("projectId")
             Long projectId) {
         log.info("Getting project id #{} by User #{}.", projectId, currentUserId);
-        return ResponseEntity.ok(projectService.getUserAvailableProjectById(currentUserId, projectId));
+
+        return ResponseEntity.ok(projectService.getAccessibleProjectsById(currentUserId, projectId));
     }
 }

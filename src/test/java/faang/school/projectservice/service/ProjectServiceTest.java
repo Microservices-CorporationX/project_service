@@ -163,7 +163,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testGetAllProjectsToUserSuccess() {
+    void testGetAllProjectsForUserSuccess() {
         List<Project> allProjects = getProjectsList();
         allProjects.get(2).setVisibility(ProjectVisibility.PRIVATE);
         List<ProjectDto> availableProjectDtos = getProjectDtosList();
@@ -173,32 +173,32 @@ class ProjectServiceTest {
 
         when(projectRepository.findAll()).thenReturn(allProjects);
 
-        List<ProjectDto> result = projectService.getAllProjectsToUser(1L);
+        List<ProjectDto> result = projectService.getAllProjectsForUser(1L);
 
         assertEquals(availableProjectDtos, result);
     }
 
     @Test
-    void testGetUserAvailableProjectByIdSuccess() {
+    void testGetAccessibleProjectsByIdSuccess() {
         project.setId(1L);
         project.setStatus(ProjectStatus.CREATED);
         projectDto.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
         when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(true);
 
-        ProjectDto result = projectService.getUserAvailableProjectById(project.getId(), ownerId);
+        ProjectDto result = projectService.getAccessibleProjectsById(project.getId(), ownerId);
 
         assertEquals(projectDto, result);
     }
 
     @Test
-    void testGetUserAvailableProjectByIdShouldThrowException() {
+    void testGetAccessibleProjectsByIdShouldThrowException() {
         project.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
         when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () ->
-                projectService.getUserAvailableProjectById(project.getId(), ownerId));
+                projectService.getAccessibleProjectsById(project.getId(), ownerId));
     }
 
     private List<Project> getProjectsList() {

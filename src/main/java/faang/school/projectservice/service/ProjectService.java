@@ -38,6 +38,7 @@ public class ProjectService {
         Project savedProject = projectRepository.save(project);
 
         log.info("Project #{} successfully created.", savedProject.getId());
+
         return projectMapper.toDto(savedProject);
     }
 
@@ -61,11 +62,12 @@ public class ProjectService {
         log.info("Project #{} successfully updated. Current data: description: '{}'; status: '{}'; visibility: '{}'",
                 updatedProject.getId(), updatedProject.getDescription(),
                 updatedProject.getStatus(), updatedProject.getVisibility());
+
         return updateProjectMapper.toDto(updatedProject);
     }
 
     public List<ProjectDto> getProjectsByFilter(ProjectFilterDto filterDto, Long currentUserId) {
-        List<Project> projects = getAllUserAvailableProjects(currentUserId);
+        List<Project> projects = getAllAccessibleProjects(currentUserId);
 
         List<ProjectDto> result = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
@@ -74,19 +76,21 @@ public class ProjectService {
                 .toList();
 
         log.info("Projects filtered by {}.", filterDto);
+
         return result;
     }
 
-    public List<ProjectDto> getAllProjectsToUser(Long currentUserId) {
-        List<ProjectDto> result = getAllUserAvailableProjects(currentUserId).stream()
+    public List<ProjectDto> getAllProjectsForUser(Long currentUserId) {
+        List<ProjectDto> result = getAllAccessibleProjects(currentUserId).stream()
                 .map(projectMapper::toDto)
                 .toList();
 
         log.info("Founded all projects, available for User #{}", currentUserId);
+
         return result;
     }
 
-    public ProjectDto getUserAvailableProjectById(Long currentUserId, Long projectId) {
+    public ProjectDto getAccessibleProjectsById(Long currentUserId, Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
         if (!projectValidator.canUserAccessProject(project, currentUserId)) {
@@ -98,7 +102,7 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    private List<Project> getAllUserAvailableProjects(Long currentUserId) {
+    private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();

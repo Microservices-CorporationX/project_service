@@ -96,24 +96,24 @@ class ProjectControllerTest {
 
     @Test
     void testGetAllProjectSuccess() {
-        when(projectService.getAllProjectsToUser(ownerId)).thenReturn(List.of(projectDto));
+        when(projectService.getAllProjectsForUser(ownerId)).thenReturn(List.of(projectDto));
 
         ResponseEntity<List<ProjectDto>> response = projectController.getAllProjects(ownerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, Objects.requireNonNull(response.getBody()).get(0));
-        verify(projectService, times(1)).getAllProjectsToUser(ownerId);
+        verify(projectService, times(1)).getAllProjectsForUser(ownerId);
     }
 
     @Test
     void testGetProjectByIdSuccess() {
         projectDto.setId(1L);
-        when(projectService.getUserAvailableProjectById(projectDto.getId(), ownerId)).thenReturn(projectDto);
+        when(projectService.getAccessibleProjectsById(projectDto.getId(), ownerId)).thenReturn(projectDto);
 
         ResponseEntity<ProjectDto> response = projectController.getProjectById(projectDto.getId(), ownerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).getUserAvailableProjectById(projectDto.getId(), ownerId);
+        verify(projectService, times(1)).getAccessibleProjectsById(projectDto.getId(), ownerId);
     }
 }
