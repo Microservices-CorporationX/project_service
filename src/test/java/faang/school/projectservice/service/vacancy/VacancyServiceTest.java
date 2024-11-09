@@ -17,6 +17,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.validator.vacancy.VacancyServiceValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,10 +43,13 @@ class VacancyServiceTest {
     private VacancyRepository vacancyRepository;
 
     @Mock
-    ProjectRepository projectRepository;
+    private VacancyServiceValidator vacancyServiceValidator;
 
     @Mock
-    CandidateRepository candidateRepository;
+    private ProjectRepository projectRepository;
+
+    @Mock
+    private CandidateRepository candidateRepository;
 
     @Mock
     private TeamMemberJpaRepository teamMemberJpaRepository;
@@ -82,6 +84,7 @@ class VacancyServiceTest {
         when(userContext.getUserId()).thenReturn(id);
         when(teamMemberJpaRepository.findByUserId(id)).thenReturn(teamMembers);
         when(projectRepository.findAll()).thenReturn(List.of(project));
+        when(vacancyServiceValidator.verificationOfCurator(any(), any(List.class), any(List.class))).thenReturn(true);
         when(projectRepository.getProjectById(any())).thenReturn(project);
         when(candidateRepository.findAllById(any())).thenReturn(candidates);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
@@ -144,9 +147,9 @@ class VacancyServiceTest {
         });
         vacancy.setCandidates(candidates);
 
-        when(vacancyRepository.findById(any())).thenReturn(Optional.of(vacancy));
-        when(vacancyMapper.vacancyToVacancyDto(any())).thenReturn(actualVacancyDto);
-        verify(vacancyRepository, never()).save(vacancy);
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+        when(vacancyServiceValidator.validationCompletedVacancy(any())).thenReturn(true);
+        when(vacancyMapper.vacancyToVacancyDto(vacancy)).thenReturn(actualVacancyDto);
 
         VacancyDto inspectedDto = vacancyService.closeVacancy(actualVacancyDto);
         assertEquals(inspectedDto.getName(), actualVacancyDto.getName());

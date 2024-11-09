@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,29 +17,32 @@ import java.util.List;
 public class VacancyDto {
     private Long id;
 
-    @NotNull
+    @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     private String description;
 
     @Min(1L)
+    @NotNull
     private Long projectId;
 
     @NotNull
-    List<Long> candidateIds;
+    List<@NotNull @Min(1) Long> candidateIds;
 
     private LocalDateTime createdAt;
 
-    @Min(1)
+    @Min(0)
+    @NotNull
     private Double salary;
 
     @NotNull
     WorkSchedule workSchedule;
 
     @NotNull
-    List<Long> requiredSkillIds;
+    List<@NotNull @Min(1) Long> requiredSkillIds;
 
     @Min(1)
+    @NotNull
     int count;
 }

@@ -1,13 +1,11 @@
 package faang.school.projectservice.filter.vacancy;
 
-
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.model.Vacancy;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
-
 
 @Component
 public class VacancyFilterByName implements VacancyFilter {

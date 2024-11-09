@@ -10,13 +10,13 @@ import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
+import faang.school.projectservice.validator.vacancy.VacancyServiceValidator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -35,18 +35,16 @@ public class VacancyService {
     private ProjectRepository projectRepository;
     private CandidateRepository candidateRepository;
     private TeamMemberJpaRepository teamMemberJpaRepository;
+    private VacancyServiceValidator vacancyServiceValidator;
     private List<VacancyFilter> vacancyFilters;
     private UserContext userContext;
 
-    private static final TeamRole CURATOR_ROLE = TeamRole.OWNER;
-
     public List<VacancyDto> getVacancyIdsByFilters(VacancyFilterDto filterDto) {
-        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
-        log.info("Vacancies loaded");
+        Stream<Vacancy> vacanciesStream = vacancyRepository.findAll().stream();
         return vacancyFilters.stream()
                 .filter(vacancyFilter -> vacancyFilter.isApplicable(filterDto))
-                .flatMap(vacancyFilterActual -> vacancyFilterActual.apply(vacancies, filterDto))
-                .map(vacancy -> vacancyMapper.vacancyToVacancyDto(vacancy))
+                .flatMap(vacancyFilterActual -> vacancyFilterActual.apply(vacanciesStream, filterDto))
+                .map(vacancyMapper::vacancyToVacancyDto)
                 .distinct()
                 .toList();
     }
@@ -54,8 +52,10 @@ public class VacancyService {
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         Long userId = userContext.getUserId();
         Vacancy vacancy = vacancyMapper.vacancyDtoToVacancy(vacancyDto);
-        if (!verificationOfCurator(userId)) {
-            throw new DataValidationException("Такой куратор не найден");
+        List<TeamMember> teamMembers = teamMemberJpaRepository.findByUserId(userId);
+        List<Project> listOfProjectOwners = projectRepository.findAll();
+        if (!vacancyServiceValidator.verificationOfCurator(userId, teamMembers, listOfProjectOwners)) {
+                throw new DataValidationException("Такой куратор не найден");
         }
         vacancy.setProject(projectRepository.getProjectById(vacancyDto.getProjectId()));
         vacancy.setStatus(VacancyStatus.OPEN);
@@ -68,24 +68,20 @@ public class VacancyService {
     }
 
     public VacancyDto updateVacancy(Long id, VacancyDto vacancyDto) {
-        Vacancy oldVacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new DataValidationException("Такой задачи не существует"));
-        Vacancy actualVacancy = vacancyMapper.vacancyDtoToVacancy(vacancyDto);
-        actualVacancy.setId(id);
-        actualVacancy.setProject(oldVacancy.getProject());
-        actualVacancy.setCandidates(getCandidatesByIds(vacancyDto.getCandidateIds()));
-        actualVacancy.setCreatedBy(oldVacancy.getCreatedBy());
-        actualVacancy.setUpdatedBy(userContext.getUserId());
-        actualVacancy = vacancyRepository.save(actualVacancy);
-        VacancyDto resultDto = vacancyMapper.vacancyToVacancyDto(actualVacancy);
-        resultDto.setCandidateIds(getCandidateIds(actualVacancy));
+        Vacancy vacancy = vacancyRepository.findById(id)
+                .orElseThrow(() -> new DataValidationException("Такой задачи не существует"));;
+        vacancy.setCandidates(getCandidatesByIds(vacancyDto.getCandidateIds()));
+        vacancy.setUpdatedBy(userContext.getUserId());
+         vacancyRepository.save(vacancy);
+        VacancyDto resultDto = vacancyMapper.vacancyToVacancyDto(vacancy);
+        resultDto.setCandidateIds(getCandidateIds(vacancy));
         return resultDto;
     }
 
     public VacancyDto closeVacancy(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyRepository.findById(vacancyDto.getId())
-                .orElseThrow(() -> new DataValidationException("Такой вакансии не существует"));
-        if (!validationCompletedVacancy(vacancy)) {
+                .orElseThrow(() -> new DataValidationException("Такой задачи не существует"));;
+        if (!vacancyServiceValidator.validationCompletedVacancy(vacancy)) {
             vacancy.setStatus(VacancyStatus.POSTPONED);
             vacancy = vacancyRepository.save(vacancy);
             log.info("Неудачная попытка закрыть вакансию");
@@ -93,6 +89,7 @@ public class VacancyService {
         }
         deleteVacancy(vacancy);
         vacancy.setStatus(VacancyStatus.CLOSED);
+        log.info("Вакансия закрыта");
         return vacancyMapper.vacancyToVacancyDto(vacancy);
     }
 
@@ -104,29 +101,6 @@ public class VacancyService {
                 .toList();
         candidateRepository.deleteAllById(candidateIds);
         vacancyRepository.deleteById(vacancy.getId());
-        log.info("Удачная попытка закрыть вакансию");
-    }
-
-
-    private boolean verificationOfCurator(Long userId) {
-        List<TeamMember> teamMembers = teamMemberJpaRepository.findByUserId(userId);
-        List<TeamRole> roles = teamMembers.stream()
-                .flatMap(teamMember -> teamMember.getRoles().stream())
-                .distinct()
-                .toList();
-        List<Long> listOfProjectOwners = projectRepository.findAll().stream()
-                .map(Project::getOwnerId).toList();
-        boolean isTheUserReal = listOfProjectOwners.contains(userId);
-        boolean rolesContainCurator = roles.contains(CURATOR_ROLE);
-        return rolesContainCurator && isTheUserReal;
-    }
-
-    private boolean validationCompletedVacancy(Vacancy vacancy) {
-        int count = vacancy.getCount();
-        List<Candidate> listCandidates = vacancy.getCandidates().stream()
-                .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
-                .toList();
-        return listCandidates.size() >= count;
     }
 
     private List<Long> getCandidateIds(Vacancy vacancy) {
