@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipCreationDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ServiceCallException;
 import faang.school.projectservice.model.Internship;
@@ -59,6 +59,7 @@ public class InternshipDtoValidator {
                         () -> new DataValidationException("There is no internship with ID (%d) in the database!"
                                 .formatted(updateDto.getInternshipId())));
 
+        validateUserIds(updateDto.getUserIdsOfInternsToSack());
         validateInternshipStatus(internship, updateDto.getInternshipId());
 
         return internship;

@@ -1,10 +1,10 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateRequestDto;
+import faang.school.projectservice.dto.internship.InternshipCreationDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
@@ -325,7 +325,7 @@ class InternshipServiceTest {
         assertEquals(updateDto.getInternshipId(), requestDto.getId());
         assertEquals(updateDto.getInternNewTeamRole(), requestDto.getInternNewTeamRole());
         assertTrue(firstIntern.getRoles().contains(updateDto.getInternNewTeamRole()));
-        assertEquals(idsOfUsersWithCompletedTasks, requestDto.getIdsOfUsersWithCompletedTasks());
+        assertEquals(idsOfUsersWithCompletedTasks, requestDto.getCompletedInternUserIds());
         assertEquals(expectedTeamSize, internTeam.getTeamMembers().size());
         assertEquals(expectedInternshipStatus, requestDto.getInternshipStatus());
     }

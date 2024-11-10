@@ -1,10 +1,10 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateRequestDto;
+import faang.school.projectservice.dto.internship.InternshipCreationDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
@@ -97,7 +97,7 @@ public class InternshipService {
         );
         return InternshipUpdateRequestDto.builder()
                 .id(internship.getId())
-                .idsOfUsersWithCompletedTasks(idsOfUsersWithDoneTasks.stream().toList())
+                .completedInternUserIds(idsOfUsersWithDoneTasks.stream().toList())
                 .internNewTeamRole(updateDto.getInternNewTeamRole())
                 .internshipStatus(internship.getStatus())
                 .build();

@@ -1,14 +1,13 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.client.internship.InternshipDto;
-import faang.school.projectservice.dto.client.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.client.internship.InternshipUpdateRequestDto;
+import faang.school.projectservice.dto.internship.InternshipCreationDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
