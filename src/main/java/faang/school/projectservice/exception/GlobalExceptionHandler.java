@@ -1,16 +1,14 @@
 package faang.school.projectservice.exception;
 
+import com.atlassian.jira.rest.client.api.RestClientException;
 import faang.school.projectservice.dto.response.ErrorResponse;
 import faang.school.projectservice.dto.response.Violation;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -101,6 +99,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Throwable.class)
     public ErrorResponse handleThrowable(Throwable ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(RestClientException.class)
+    public ErrorResponse handleRestClientException(RestClientException ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }

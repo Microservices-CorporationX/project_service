@@ -31,6 +31,11 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
+  jira:
+    client:
+      username: ruslan-iovlev@mail.ru
+      url: https://crpx.atlassian.net
+
 server:
   port: 8082
 

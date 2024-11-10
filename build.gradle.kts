@@ -11,6 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+            url = uri("https://packages.atlassian.com/maven/repository/public")
+        }
 }
 
 dependencies {
@@ -43,6 +46,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
     implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
     implementation("io.springfox:springfox-boot-starter:3.0.0")
+
+    /**
+     * Jira
+     */
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4")
+    implementation ("io.atlassian.fugue:fugue:6.1.0")
 
     /**
      * Utils & Logging
