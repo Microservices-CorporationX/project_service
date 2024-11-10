@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.CreateVacancyDto;
+import faang.school.projectservice.dto.UpdateDeleteVacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -26,15 +27,15 @@ public class VacancyService {
     private final ProjectService projectService;
     private final VacancyMapper vacancyMapper;
 
-    public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        long curatorId = vacancyDto.createdBy();
+    public CreateVacancyDto createVacancy(CreateVacancyDto createVacancyDto) {
+        long curatorId = createVacancyDto.createdBy();
         ensureCuratorHasAccess(curatorId);
 
-        Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
-        Project vacancyProject = projectService.findProjectById(vacancyDto.projectId());
+        Vacancy vacancy = vacancyMapper.toEntity(createVacancyDto);
+        Project vacancyProject = projectService.findProjectById(createVacancyDto.projectId());
         vacancy.setProject(vacancyProject);
-        if (vacancyDto.candidatesIds() != null) {
-            List<Candidate> candidates = candidateService.findCandidates(vacancyDto.candidatesIds());
+        if (createVacancyDto.candidatesIds() != null) {
+            List<Candidate> candidates = candidateService.findCandidates(createVacancyDto.candidatesIds());
             candidateService.updateCandidatesWithVacancy(candidates, vacancy);
             candidates.forEach(vacancy::addCandidate);
         } else {
@@ -45,10 +46,10 @@ public class VacancyService {
         vacancyRepository.save(vacancy);
 
         log.info("Vacancy with ID {} created successfully", vacancy.getId());
-        return vacancyMapper.toDto(vacancy);
+        return vacancyMapper.toCreateDto(vacancy);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    public UpdateDeleteVacancyDto updateVacancy(UpdateDeleteVacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
         long curatorId = vacancyDto.createdBy();
         ensureCuratorHasAccess(curatorId);
@@ -77,10 +78,10 @@ public class VacancyService {
         vacancyRepository.save(vacancy);
 
         log.info("Vacancy with ID {} updated successfully", vacancyId);
-        return vacancyMapper.toDto(vacancy);
+        return vacancyMapper.toUpdateDeleteDto(vacancy);
     }
 
-    public void deleteVacancy(VacancyDto vacancyDto) {
+    public void deleteVacancy(UpdateDeleteVacancyDto vacancyDto) {
         long vacancyId = vacancyDto.id();
         Vacancy vacancy = findVacancyById(vacancyId);
         List<Candidate> candidates = vacancy.getCandidates();
@@ -93,17 +94,17 @@ public class VacancyService {
         log.info("Vacancy with ID {} deleted successfully", vacancyId);
     }
 
-    public List<VacancyDto> getFilteredVacancies(String name, String position) {
+    public List<UpdateDeleteVacancyDto> getFilteredVacancies(String name, String position) {
         List<Vacancy> vacancies = vacancyRepository.findAll();
         List<Vacancy> filteredVacancies = vacancies.stream()
                 .filter(vacancy -> vacancy.containsName(name) && vacancy.containsPosition(position))
                 .toList();
-        return vacancyMapper.toDto(filteredVacancies);
+        return vacancyMapper.toUpdateDeleteDto(filteredVacancies);
     }
 
-    public VacancyDto getVacancy(long vacancyId) {
+    public UpdateDeleteVacancyDto getVacancy(long vacancyId) {
         Vacancy vacancy = findVacancyById(vacancyId);
-        return vacancyMapper.toDto(vacancy);
+        return vacancyMapper.toUpdateDeleteDto(vacancy);
     }
 
     private Vacancy findVacancyById(long vacancyId) {

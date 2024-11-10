@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.CreateVacancyDto;
+import faang.school.projectservice.dto.UpdateDeleteVacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -43,13 +44,15 @@ public class VacancyServiceTest {
     @InjectMocks
     private VacancyService vacancyService;
 
-    private VacancyDto vacancyDto;
+    private CreateVacancyDto createVacancyDto;
+    private UpdateDeleteVacancyDto updateVacancyDto;
     private Vacancy vacancy;
     private Project project;
 
     @BeforeEach
     public void setUp() {
-        vacancyDto = new VacancyDto(1L, "Test Vacancy", "Description", 1L, List.of(1L), null, 1L, 5);
+        createVacancyDto = new CreateVacancyDto(1L, "Test Vacancy", "Description", 1L, List.of(1L), null, 1L, 5);
+        updateVacancyDto = new UpdateDeleteVacancyDto(1L, "Test Vacancy", "Description", 1L, List.of(1L), null, 1L, 5);
         vacancy = new Vacancy();
         project = new Project();
     }
@@ -57,13 +60,13 @@ public class VacancyServiceTest {
     @Test
     public void testCreateVacancy_Success() {
         // Arrange
-        when(teamMemberService.hasCuratorAccess(1L)).thenReturn(true);
-        when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
+        when(teamMemberService.curatorHasNoAccess(1L)).thenReturn(false);
+        when(vacancyMapper.toEntity(createVacancyDto)).thenReturn(vacancy);
         when(projectService.findProjectById(1L)).thenReturn(project);
-        when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
+        when(vacancyMapper.toCreateDto(vacancy)).thenReturn(createVacancyDto);
 
         // Act
-        VacancyDto result = vacancyService.createVacancy(vacancyDto);
+        CreateVacancyDto result = vacancyService.createVacancy(createVacancyDto);
 
         // Assert
         assertNotNull(result);
@@ -73,22 +76,22 @@ public class VacancyServiceTest {
     @Test
     public void testCreateVacancy_NoCuratorAccess() {
         // Arrange
-        when(teamMemberService.hasCuratorAccess(1L)).thenReturn(false);
+        when(teamMemberService.curatorHasNoAccess(1L)).thenReturn(true);
 
         // Act & Assert
-        assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(vacancyDto));
+        assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(createVacancyDto));
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }
 
     @Test
     public void testUpdateVacancy_Success() {
         // Arrange
-        when(teamMemberService.hasCuratorAccess(1L)).thenReturn(true);
+        when(teamMemberService.curatorHasNoAccess(1L)).thenReturn(false);
         when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
-        when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
+        when(vacancyMapper.toUpdateDeleteDto(vacancy)).thenReturn(updateVacancyDto);
 
         // Act
-        VacancyDto result = vacancyService.updateVacancy(vacancyDto);
+        UpdateDeleteVacancyDto result = vacancyService.updateVacancy(updateVacancyDto);
 
         // Assert
         assertNotNull(result);
@@ -98,10 +101,10 @@ public class VacancyServiceTest {
     @Test
     public void testUpdateVacancy_NoCuratorAccess() {
         // Arrange
-        when(teamMemberService.hasCuratorAccess(1L)).thenReturn(false);
+        when(teamMemberService.curatorHasNoAccess(1L)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(vacancyDto));
+        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(updateVacancyDto));
         verify(vacancyRepository, never()).save(any(Vacancy.class));
     }
 
@@ -114,7 +117,7 @@ public class VacancyServiceTest {
         when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
 
         // Act
-        vacancyService.deleteVacancy(vacancyDto);
+        vacancyService.deleteVacancy(updateVacancyDto);
 
         // Assert
         verify(candidateService, times(1)).deleteCandidate(1L);
@@ -133,10 +136,10 @@ public class VacancyServiceTest {
         vacancy2.setDescription("Tester");
 
         when(vacancyRepository.findAll()).thenReturn(List.of(vacancy1, vacancy2));
-        when(vacancyMapper.toDto(anyList())).thenReturn(List.of(vacancyDto));
+        when(vacancyMapper.toUpdateDeleteDto(anyList())).thenReturn(List.of(updateVacancyDto));
 
         // Act
-        List<VacancyDto> result = vacancyService.getFilteredVacancies("Test Vacancy 1", "Developer");
+        List<UpdateDeleteVacancyDto> result = vacancyService.getFilteredVacancies("Test Vacancy 1", "Developer");
 
         // Assert
         assertNotNull(result);
@@ -147,14 +150,14 @@ public class VacancyServiceTest {
     public void testGetVacancy_Success() {
         // Arrange
         when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
-        when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
+        when(vacancyMapper.toUpdateDeleteDto(vacancy)).thenReturn(updateVacancyDto);
 
         // Act
-        VacancyDto result = vacancyService.getVacancy(1L);
+        UpdateDeleteVacancyDto result = vacancyService.getVacancy(1L);
 
         // Assert
         assertNotNull(result);
-        assertEquals(vacancyDto, result);
+        assertEquals(updateVacancyDto, result);
     }
 
     @Test

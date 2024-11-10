@@ -9,7 +9,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record VacancyDto(
+public record CreateVacancyDto(
         Long id,
         @NotBlank String name,
         @NotBlank String description,

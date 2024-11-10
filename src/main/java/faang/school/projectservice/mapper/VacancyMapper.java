@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.CreateVacancyDto;
+import faang.school.projectservice.dto.UpdateDeleteVacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;
@@ -15,14 +16,19 @@ public interface VacancyMapper {
 
     @Mapping(source = "candidates", target = "candidatesIds", qualifiedByName = "mapCandidatesIds")
     @Mapping(source = "project.id", target = "projectId")
-    VacancyDto toDto(Vacancy vacancy);
+    CreateVacancyDto toCreateDto(Vacancy vacancy);
 
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "candidates", ignore = true)
-    Vacancy toEntity(VacancyDto vacancyDto);
+    Vacancy toEntity(CreateVacancyDto createVacancyDto);
 
-    List<VacancyDto> toDto(List<Vacancy> vacancies);
-    List<Vacancy> toEntity(List<VacancyDto> vacancyDtos);
+    List<CreateVacancyDto> toCreateDto(List<Vacancy> vacancies);
+    List<Vacancy> toEntity(List<CreateVacancyDto> createVacancyDtos);
+
+    @Mapping(source = "candidates", target = "candidatesIds", qualifiedByName = "mapCandidatesIds")
+    @Mapping(source = "project.id", target = "projectId")
+    UpdateDeleteVacancyDto toUpdateDeleteDto(Vacancy vacancy);
+    List<UpdateDeleteVacancyDto> toUpdateDeleteDto(List<Vacancy> vacancies);
 
     @Named("mapCandidatesIds")
     default List<Long> mapCandidatesIds(List<Candidate> candidates) {

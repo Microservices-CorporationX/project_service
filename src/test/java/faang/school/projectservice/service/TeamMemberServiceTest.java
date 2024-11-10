@@ -32,10 +32,10 @@ public class TeamMemberServiceTest {
         when(teamMemberRepository.findById(1L)).thenReturn(curator);
 
         // Act
-        boolean result = teamMemberService.hasCuratorAccess(1L);
+        boolean result = teamMemberService.curatorHasNoAccess(1L);
 
         // Assert
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
@@ -46,9 +46,9 @@ public class TeamMemberServiceTest {
         when(teamMemberRepository.findById(2L)).thenReturn(nonCurator);
 
         // Act
-        boolean result = teamMemberService.hasCuratorAccess(2L);
+        boolean result = teamMemberService.curatorHasNoAccess(2L);
 
         // Assert
-        assertFalse(result);
+        assertTrue(result);
     }
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.CreateVacancyDto;
+import faang.school.projectservice.dto.UpdateDeleteVacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.VacancyService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfCreatesVacancyWithValidDto() {
         // arrange
-        VacancyDto vacancyDto = VacancyDto.builder()
+        CreateVacancyDto createVacancyDto = CreateVacancyDto.builder()
                 .id(1L)
                 .name("name")
                 .description("description")
@@ -39,15 +40,15 @@ public class VacancyControllerTest {
                 .build();
 
         // act
-        vacancyController.createVacancy(vacancyDto);
+        vacancyController.createVacancy(createVacancyDto);
 
         // assert
-        verify(vacancyService).createVacancy(vacancyDto);
+        verify(vacancyService).createVacancy(createVacancyDto);
     }
 
     @Test
     public void testIfThrowsExceptionWhenDeletingVacancyWithNegativeId() {
-        VacancyDto vacancyDto = VacancyDto.builder()
+        UpdateDeleteVacancyDto vacancyDto = UpdateDeleteVacancyDto.builder()
                 .id(-1L)
                 .build();
 
@@ -59,7 +60,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfDeletesVacancyWithValidDto() {
         // arrange
-        VacancyDto vacancyDto = VacancyDto.builder()
+        UpdateDeleteVacancyDto vacancyDto = UpdateDeleteVacancyDto.builder()
                 .id(1L)
                 .build();
 
@@ -98,7 +99,7 @@ public class VacancyControllerTest {
     @Test
     public void testIfUpdatesVacancyWithValidDto() {
         // arrange
-        VacancyDto vacancyDto = VacancyDto.builder()
+        UpdateDeleteVacancyDto vacancyDto = UpdateDeleteVacancyDto.builder()
                 .id(1L)
                 .name("name")
                 .description("description")

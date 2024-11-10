@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.CreateVacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
@@ -31,7 +31,7 @@ public class VacancyMapperTest {
     }
 
     @Test
-    public void testToDto() {
+    public void testToCreateDto() {
         // arrange
         Vacancy vacancy = new Vacancy().builder()
                 .id(1L)
@@ -48,7 +48,7 @@ public class VacancyMapperTest {
         List<Long> candidatesIds = candidates.stream().map(Candidate::getId).toList();
 
         // act
-        VacancyDto dto = vacancyMapper.toDto(vacancy);
+        CreateVacancyDto dto = vacancyMapper.toCreateDto(vacancy);
 
         // assert
         assertEquals(vacancy.getId(), dto.id());
@@ -63,7 +63,7 @@ public class VacancyMapperTest {
     @Test
     public void testToEntity() {
         // arrange
-        VacancyDto dto = new VacancyDto(1L, "Java Developer", "Java Developer", 1L, List.of(1L, 2L), VacancyStatus.OPEN, 1L, 1);
+        CreateVacancyDto dto = new CreateVacancyDto(1L, "Java Developer", "Java Developer", 1L, List.of(1L, 2L), VacancyStatus.OPEN, 1L, 1);
 
         // act
         Vacancy vacancy = vacancyMapper.toEntity(dto);
