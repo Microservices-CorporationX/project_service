@@ -224,28 +224,29 @@ class ProjectServiceTest {
     @Test
     public void testGetProjectByFiltersSuccess() {
         Filter<FilterProjectDto, Project> mockFilter = mock(Filter.class);
-        List<Filter<FilterProjectDto, Project>> filters = List.of(mockFilter);
+        Filter<FilterProjectDto, Project> mockFilter2 = mock(Filter.class);
+        List<Filter<FilterProjectDto, Project>> filters = List.of(mockFilter,mockFilter2);
         projectService = new ProjectService(projectRepository, subProjectMapper, momentService, projectValidator, filters);
 
-        when(filters.get(0).isApplicable(any())).thenReturn(true);
-        when(filters.get(0).apply(any(), any())).thenAnswer(invocation -> {
-            Stream<Project> projectStream = invocation.getArgument(0);
-            FilterProjectDto filterDto = invocation.getArgument(1);
-            return projectStream.filter(project -> project.getName().contains(filterDto.getName()));
-        });
-
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
-        List<Project> projects = List.of(
-                Project.builder().name("First").build(),
-                Project.builder().name("Second project").build()
-        );
         CreateSubProjectDto projectDto = CreateSubProjectDto.builder().name("Second project").build();
         Long id = 1L;
 
+        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").status(ProjectStatus.COMPLETED).build();
+        List<Project> projects = List.of(
+                Project.builder().name("First").status(ProjectStatus.COMPLETED).build(),
+                Project.builder().name("Second project").status(ProjectStatus.COMPLETED).build(),
+                Project.builder().name("Third project").status(ProjectStatus.COMPLETED).build()
+        );
+        Stream<Project> projectStream = projects.subList(1, projects.size()).stream();
+
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(projects);
+        when(filters.get(0).isApplicable(any())).thenReturn(true);
+        when(filters.get(0).apply(any(), any())).thenReturn(projectStream);
+
         when(subProjectMapper.toDto(any())).thenReturn(projectDto);
 
         List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(id, filterDto);
         assertTrue(resultProjects.get(0).getName().contains(projectDto.getName()));
+        assertEquals(2, resultProjects.size());
     }
 }
