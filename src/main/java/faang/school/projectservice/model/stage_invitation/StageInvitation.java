@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "stage_invitation")
 @AllArgsConstructor
@@ -42,4 +44,14 @@ public class StageInvitation {
 
     @Column(name = "rejection_reason")
     private String rejectionReason;
+
+    @Column(name = "created_date", nullable = false, updatable = false)
+    private LocalDateTime createdDate;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdDate == null) {
+            createdDate = LocalDateTime.now();
+        }
+    }
 }
