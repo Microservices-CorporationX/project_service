@@ -9,7 +9,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.teamMember.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
