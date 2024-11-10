@@ -4,8 +4,9 @@ import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface StageInvitationMapper {
 
     @Mapping(source = "stage.id", target = "stageId")
