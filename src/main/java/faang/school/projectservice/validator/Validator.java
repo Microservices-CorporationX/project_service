@@ -3,9 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.TeamMember;
 
-import java.util.Objects;
 
 public class Validator {
 

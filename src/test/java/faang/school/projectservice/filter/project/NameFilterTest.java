@@ -1,13 +1,12 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 

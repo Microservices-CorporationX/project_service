@@ -2,11 +2,7 @@ package faang.school.projectservice.update.projects;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 

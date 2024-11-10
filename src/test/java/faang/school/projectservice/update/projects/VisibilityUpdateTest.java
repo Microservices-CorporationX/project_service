@@ -2,16 +2,12 @@ package faang.school.projectservice.update.projects;
 
 import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.validator.Validator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
+
 
 class VisibilityUpdateTest {
     private VisibilityUpdate statusUpdate = new VisibilityUpdate();
