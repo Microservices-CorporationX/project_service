@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -84,10 +85,17 @@ public class InternshipService {
         List<Task> tasks = internsProjectTeam.getProject().getTasks();
 
         Set<Long> internsUserIds = getTeamMembersIds(interns);
-        Set<Long> idsOfUsersWithDoneTasks = getIdsOfUsersWithDoneTasks(internsUserIds, tasks);
+        Set<Long> completedInternUserIds = getIdsOfUsersWithDoneTasks(internsUserIds, tasks);
 
-        updateTeamMembersRoles(teamMembers, idsOfUsersWithDoneTasks, updateDto.getInternNewTeamRole());
-        updateInternshipStatusAndProjectTeam(internship, teamMembers, idsOfUsersWithDoneTasks);
+        updateTeamMembersRoles(teamMembers, completedInternUserIds, updateDto.getInternNewTeamRole());
+        updateInternshipStatusAndProjectTeam(internship, teamMembers, completedInternUserIds);
+
+        List<Long> sackedInternUserIds = new ArrayList<>();
+        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+            sackedInternUserIds = internsUserIds.stream()
+                    .filter(internUserId -> !completedInternUserIds.contains(internUserId))
+                    .toList();
+        }
 
         teamService.save(internsProjectTeam);
         internshipRepository.save(internship);
@@ -97,7 +105,8 @@ public class InternshipService {
         );
         return InternshipUpdateRequestDto.builder()
                 .id(internship.getId())
-                .completedInternUserIds(idsOfUsersWithDoneTasks.stream().toList())
+                .completedInternUserIds(completedInternUserIds.stream().toList())
+                .sackedInternUserIds(sackedInternUserIds)
                 .internNewTeamRole(updateDto.getInternNewTeamRole())
                 .internshipStatus(internship.getStatus())
                 .build();

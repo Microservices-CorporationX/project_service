@@ -59,7 +59,6 @@ public class InternshipDtoValidator {
                         () -> new DataValidationException("There is no internship with ID (%d) in the database!"
                                 .formatted(updateDto.getInternshipId())));
 
-        validateUserIds(updateDto.getUserIdsOfInternsToSack());
         validateInternshipStatus(internship, updateDto.getInternshipId());
 
         return internship;

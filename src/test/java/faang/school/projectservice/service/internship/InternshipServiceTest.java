@@ -289,7 +289,8 @@ class InternshipServiceTest {
 
         InternshipStatus expectedInternshipStatus = isAfterEndDate ? InternshipStatus.COMPLETED : InternshipStatus.IN_PROGRESS;
         int expectedTeamSize = isAfterEndDate ? 1 : 2;
-        List<Long> idsOfUsersWithCompletedTasks = List.of(firstInternUserId);
+        List<Long> expectedSackedInternUserIds = isAfterEndDate ? List.of(secondInternUserId) : Collections.emptyList();
+        List<Long> expectedCompletedInternUserIds = List.of(firstInternUserId);
 
         long projectId = 9L;
         Project project = new Project();
@@ -325,9 +326,10 @@ class InternshipServiceTest {
         assertEquals(updateDto.getInternshipId(), requestDto.getId());
         assertEquals(updateDto.getInternNewTeamRole(), requestDto.getInternNewTeamRole());
         assertTrue(firstIntern.getRoles().contains(updateDto.getInternNewTeamRole()));
-        assertEquals(idsOfUsersWithCompletedTasks, requestDto.getCompletedInternUserIds());
+        assertEquals(expectedCompletedInternUserIds, requestDto.getCompletedInternUserIds());
         assertEquals(expectedTeamSize, internTeam.getTeamMembers().size());
         assertEquals(expectedInternshipStatus, requestDto.getInternshipStatus());
+        assertEquals(expectedSackedInternUserIds, requestDto.getSackedInternUserIds());
     }
 
     private Internship createInternshipWithStatusAndMentorRole(InternshipStatus internshipStatus, TeamRole mentorTeamRole) {
