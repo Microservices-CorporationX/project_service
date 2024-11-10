@@ -36,6 +36,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
 
+    private static final String PROJECT = "Project";
+
     @Mock
     private ProjectJpaRepository projectRepository;
 
@@ -293,5 +295,28 @@ public class ProjectServiceTest {
 
         assertFalse(existsById);
         verify(projectRepository, times(1)).existsById(1L);
+    }
+
+    @Test
+    void getProjectByIdExistingProjectTest() {
+        long projectId = 1L;
+        Project project = Project.builder().id(projectId).build();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Project resultProject = projectService.getProjectById(projectId);
+
+        assertEquals(project, resultProject);
+        verify(projectRepository, times(1)).findById(projectId);
+    }
+
+    @Test
+    void getProjectByIdNotExistingProjectTest() {
+        long projectId = 1L;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class, () -> projectService.getProjectById(projectId));
+        assertEquals("Entity %s with ID %s not found".formatted(PROJECT, projectId), exception.getMessage());
+        verify(projectRepository, times(1)).findById(projectId);
     }
 }

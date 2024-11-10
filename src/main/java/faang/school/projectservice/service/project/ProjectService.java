@@ -31,8 +31,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDto findById(long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException(PROJECT, projectId));
+        Project project = getProjectById(projectId);
         log.info("Project found with ID: {}", projectId);
         return projectMapper.toDto(project);
     }
@@ -72,6 +71,11 @@ public class ProjectService {
 
     public boolean isProjectExists(long projectId) {
         return projectRepository.existsById(projectId);
+    }
+
+    public Project getProjectById(long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException(PROJECT, projectId));
     }
 
     private boolean isProjectVisibleForUser(Project project, Long userId) {
