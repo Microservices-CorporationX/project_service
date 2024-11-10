@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +16,10 @@ public class StageController {
     private final StageService stageService;
 
     @GetMapping("get/all/{projectId}/filter")
-    public List<StageDto> getStagesByProjectId(@PathVariable Long projectId,
-                                               @RequestParam String role,
-                                               @RequestParam String status) {
-        return stageService.getStagesByProjectIdRoleAndStatus(projectId, role, status);
+    public List<StageDto> getAllStagesBy(@PathVariable Long projectId,
+                                                            @NonNull @RequestParam String role,
+                                                            @NonNull @RequestParam String status) {
+        return stageService.getStagesBy(projectId, role, status);
     }
 
     @PostMapping("/create")

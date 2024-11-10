@@ -7,11 +7,12 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validator.StageValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class StageService {
     private final ProjectService projectService;
     private final StageMapper stageMapper;
     private final ProjectMapper projectMapper;
+    private final StageValidator stageValidator;
 
     public void setExecutor(Long stageId, Long executorId) {
         Stage stage = stageRepository.getById(stageId);
@@ -46,14 +48,26 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
-    public List<StageDto> getStagesByProjectIdRoleAndStatus(Long projectId, String role, String status) {
+    public List<StageDto> getStagesBy(Long projectId, String role, String status) {
+        validateInput(projectId, role, status);
         return stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId().equals(projectId))
                 .filter(stage -> stage.getStageRoles().stream()
-                        .anyMatch(stageRole -> Objects.equals(stageRole.getTeamRole().toString(), role.toLowerCase())))
+                        .map(stageRole -> stageRole.getTeamRole().toString())
+                        .anyMatch(role.toLowerCase()::equals))
                 .filter(stage -> stage.getTasks().stream()
-                        .anyMatch(task -> Objects.equals(task.getStatus().toString(), status.toLowerCase())))
+                        .map(task -> task.getStatus().toString())
+                        .anyMatch(status.toLowerCase()::equals))
                 .map(stageMapper::toDto)
                 .toList();
+    }
+
+    private void validateInput(Long projectId, String role, String status) {
+        if (projectService.existsById(projectId)) {
+            stageValidator.validateStageRole(role);
+            stageValidator.validateTaskStatus(status);
+        } else {
+            throw new EntityNotFoundException("Project with id " + projectId + " not found");
+        }
     }
 }

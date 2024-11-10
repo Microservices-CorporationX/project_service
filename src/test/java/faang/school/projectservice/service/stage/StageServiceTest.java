@@ -4,14 +4,14 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +41,9 @@ class StageServiceTest {
     @Mock
     private TeamMemberService teamMemberService;
 
+    @Mock
+    private StageValidator stageValidator;
+
     @Spy
     private StageMapper stageMapper;
 
@@ -52,13 +55,32 @@ class StageServiceTest {
     private Project project;
     private ProjectDto projectDto;
     private StageDto stageDto;
+    private StageRoles stageRoles;
+    private Task task;
 
     @BeforeEach
     public void setUp() {
+        stageRoles = StageRoles.builder()
+                .teamRole(TeamRole.DESIGNER)
+                .build();
+
+        task = Task
+                .builder()
+                .status(TaskStatus.DONE)
+                .build();
+
         stage = Stage
                 .builder()
                 .stageId(1L)
                 .stageName("Stage 1")
+                .stageRoles(List.of(stageRoles))
+                .tasks(List.of(task))
+                .project(
+                        Project
+                                .builder()
+                                .id(1L)
+                                .build()
+                )
                 .executors(new ArrayList<>())
                 .build();
 
@@ -79,6 +101,7 @@ class StageServiceTest {
                 .builder()
                 .id(1L)
                 .name("Project 1")
+                .stages(List.of(stage))
                 .description("Description 1")
                 .build();
 
@@ -153,5 +176,49 @@ class StageServiceTest {
 
         assertNotNull(result);
         assertEquals("Stage 1", result.getStageName());
+    }
+
+    @Test
+    void testGetStagesByProjectIdRoleAndStatusSuccessfully() {
+        when(projectService.existsById(1L)).thenReturn(true);
+        when(stageRepository.findAll()).thenReturn(List.of(stage));
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        List<StageDto> result = stageService.getStagesBy(1L, "designer", "done");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Stage 1", result.get(0).getStageName());
+    }
+
+    @Test
+    void testGetStagesByProjectIdRoleAndStatusInvalidProjectIdThrowEntityNotFoundException() {
+        when(projectService.existsById(3L)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () ->
+                        stageService.getStagesBy(3L, "designer", "done"),
+                String.format("Project not found by id: %s", 3L));
+    }
+
+    @Test
+    void testGetStagesByProjectIdRoleAndStatusInvalidRoleThrowIllegalArgumentException() {
+        when(projectService.existsById(1L)).thenReturn(true);
+        when(stageService.getStagesBy(1L, "developer", "done"))
+                .thenThrow(new IllegalArgumentException(String.format("Invalid role: %s", "developer")));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                        stageService.getStagesBy(1L, "developer", "done"),
+                String.format("Invalid role: %s", "developer"));
+    }
+
+    @Test
+    void testGetStagesByProjectIdRoleAndStatusInvalidStatusThrowIllegalArgumentException() {
+        when(projectService.existsById(1L)).thenReturn(true);
+        when(stageService.getStagesBy(1L, "designer", "sleep"))
+                .thenThrow(new IllegalArgumentException(String.format("Invalid status: %s", "in progress")));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                        stageService.getStagesBy(1L, "designer", "sleep"),
+                String.format("Invalid status: %s", "sleep"));
     }
 }
