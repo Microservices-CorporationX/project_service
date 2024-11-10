@@ -7,6 +7,7 @@ import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class SubProjectController {
     @PostMapping("/project/{parentProjectId}")
     @Operation(summary = "Create sub project in DB")
     public CreateSubProjectDto createSubProject(@PathVariable @Positive @NonNull Long parentProjectId,
-                                                @RequestBody CreateSubProjectDto subProjectDto) {
+                                                @RequestBody @Valid CreateSubProjectDto subProjectDto) {
         return projectService.createSubProject(parentProjectId, subProjectDto);
     }
 
@@ -35,7 +36,7 @@ public class SubProjectController {
             parameters = @Parameter(name = "x-user-id", in = ParameterIn.HEADER, required = true, description = "User id")
     )
     public CreateSubProjectDto updateProject(@PathVariable @Positive @NonNull Long projectId,
-                                             @RequestBody CreateSubProjectDto subProjectDto) {
+                                             @RequestBody @Valid CreateSubProjectDto subProjectDto) {
         long userId = userContext.getUserId();
         return projectService.updateProject(projectId, subProjectDto, userId);
     }
@@ -43,7 +44,7 @@ public class SubProjectController {
     @GetMapping("/project/{projectId}/projects")
     @Operation(summary = "Get sub projects by parent project id and filters")
     public List<CreateSubProjectDto> getProjectsByFilters(@PathVariable @Positive @NonNull Long projectId,
-                                                          @RequestBody @NonNull FilterProjectDto filterDto
+                                                          @RequestBody @Valid FilterProjectDto filterDto
     ) {
         return projectService.getProjectsByFilter(projectId, filterDto);
     }
