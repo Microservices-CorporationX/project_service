@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IssueMapper {
 
-    @Mapping(source = "dueTo", target = "deadline")
+    @Mapping(source = "dueDate", target = "deadline")
     IssueDto toIssueDto(Issue issue);
 
     List<IssueDto> toIssueDtos(List<Issue> issues);

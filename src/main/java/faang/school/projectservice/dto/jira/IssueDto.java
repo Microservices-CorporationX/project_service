@@ -11,7 +11,6 @@ public record IssueDto(String issueKey,
                        @NonNull
                        String summary,
                        String description,
-                       String assignee,
                        @NonNull
                        @Future
                        LocalDateTime deadline) {
