@@ -23,7 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JiraServiceImpl implements JiraService {
 
-    private final JiraRestClient restClient;
+    private final JiraRestClient jiraRestClient;
     private final IssueMapper mapper;
     private final List<IssueFilter> issueFilter;
 
@@ -36,7 +36,7 @@ public class JiraServiceImpl implements JiraService {
                     .setDescription(issueDto.description())
                     .setDueDate(issueDto.deadline().toDateTime())
                     .build();
-            BasicIssue basicIssue = restClient.getIssueClient().createIssue(issue).claim();
+            BasicIssue basicIssue = jiraRestClient.getIssueClient().createIssue(issue).claim();
             return mapper.toIssueDto((Issue) basicIssue);
         } catch (RestClientException e) {
             log.error(e.getMessage());
@@ -51,7 +51,7 @@ public class JiraServiceImpl implements JiraService {
                 .map(filters -> filters.getJql(projectKey, filter))
                 .findFirst();
         try {
-            SearchResult result = restClient.getSearchClient().searchJql(jql.get()).claim();
+            SearchResult result = jiraRestClient.getSearchClient().searchJql(jql.get()).claim();
             return mapper.toIssueDtos((List<Issue>) result.getIssues());
         } catch (RestClientException e) {
             log.error(e.getMessage());
@@ -62,7 +62,7 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public List<IssueDto> getAllIssues(String projectKey) {
         try {
-            SearchResult result = restClient.getSearchClient()
+            SearchResult result = jiraRestClient.getSearchClient()
                     .searchJql("project = " + projectKey).claim();
             return mapper.toIssueDtos((List<Issue>) result.getIssues());
         } catch (RestClientException e) {
@@ -74,7 +74,7 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public IssueDto getIssue(String issueKey) {
         try {
-            Issue issue = restClient.getIssueClient().getIssue(issueKey).claim();
+            Issue issue = jiraRestClient.getIssueClient().getIssue(issueKey).claim();
             return mapper.toIssueDto(issue);
         } catch (RestClientException e) {
             log.error(e.getMessage());

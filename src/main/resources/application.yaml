@@ -68,3 +68,5 @@ resource:
     max-rectangle-width: 1080
     max-rectangle-height: 566
     max-square-dimension: 1080
+
+api-token: 5

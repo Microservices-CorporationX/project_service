@@ -20,8 +20,8 @@ public class JiraClient {
     private String token;
 
     @Bean
-    public JiraRestClient getJiraRestClient() throws URISyntaxException {
+    public JiraRestClient jiraRestClient() throws URISyntaxException {
         return new AsynchronousJiraRestClientFactory()
-                .createWithBasicHttpAuthentication(new URI(url), username, token);
+                .createWithBasicHttpAuthentication(URI.create(url), username, token);
     }
 }
