@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.team;
 
+import faang.school.projectservice.exception.EntityNullException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.repository.TeamRepository;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
+
+    private static final String TEAM = "Team";
 
     @Mock
     private TeamRepository teamRepository;
@@ -21,11 +26,15 @@ class TeamServiceTest {
     private TeamService teamService;
 
     @Test
-    void saveTeamTest() {
+    void saveTeamValidTest() {
         Team team = new Team();
-
         teamService.save(team);
-
         verify(teamRepository, times(1)).save(team);
+    }
+
+    @Test
+    void saveNullTeamTest() {
+        EntityNullException exception = assertThrows(EntityNullException.class, () -> teamService.save(null));
+        assertEquals("Entity %s cannot be null".formatted(TEAM), exception.getMessage());
     }
 }

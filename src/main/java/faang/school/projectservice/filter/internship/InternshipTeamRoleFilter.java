@@ -14,6 +14,6 @@ public class InternshipTeamRoleFilter implements InternshipFilter {
 
     @Override
     public Stream<Internship> apply(Stream<Internship> internships, InternshipFilterDto filterDto) {
-        return internships.filter(internship -> internship.getMentorId().getRoles().contains(filterDto.getTeamRole()));
+        return internships.filter(internship -> internship.getMentor().getRoles().contains(filterDto.getTeamRole()));
     }
 }
