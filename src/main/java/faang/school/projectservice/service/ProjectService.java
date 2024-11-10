@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +32,15 @@ public class ProjectService {
     }
 
     public List<ProjectDto> getAllProjects(ProjectFilterDto projectFilterDto) {
-        Stream<Project> projects = projectRepository.findAll().stream();
+        List<Project> projects = projectRepository.findAll().stream()
+                .filter(project -> isUserMemberOfPrivateProject(project, userContext.getUserId()))
+                .toList();
 
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(projectFilterDto))
-                .flatMap(filter -> filter.apply(projectFilterDto, projects))
-                .filter(project -> isUserMemberOfPrivateProject(project, userContext.getUserId()))
+                .reduce(projects.stream(),
+                        (stream, filter) -> filter.apply(projectFilterDto, stream),
+                        (s1, s2) -> s1)
                 .map(projectMapper::toDto)
                 .toList();
     }

@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,8 +57,8 @@ public class ProjectServiceTest {
 
     @BeforeEach
     public void setUp() {
-        List<ProjectUpdate> projectUpdates = List.of(update);
-        List<ProjectFilter> projectFilters = List.of(filter);
+        List<ProjectUpdate> projectUpdates = List.of(update, update);
+        List<ProjectFilter> projectFilters = List.of(filter, filter);
 
         projectService = new ProjectService(
                 projectRepository,
@@ -93,7 +94,7 @@ public class ProjectServiceTest {
 
         List<ProjectDto> result = projectService.getAllProjects(projectFilterDto);
         assertEquals(2, result.size());
-        verify(filter).apply(any(), any());
+        verify(filter, times(2)).apply(any(), any());
     }
 
     @Test
@@ -103,7 +104,7 @@ public class ProjectServiceTest {
         List<ProjectDto> result = projectService.getAllProjects(projectFilterDto);
 
         assertEquals(1, result.size());
-        verify(filter).apply(any(), any());
+        verify(filter, times(2)).apply(any(), any());
     }
 
     @Test
@@ -125,7 +126,7 @@ public class ProjectServiceTest {
 
         projectService.updateProject(dto);
 
-        verify(update).apply(any(), any());
+        verify(update, times(2)).apply(any(), any());
         verify(projectRepository).save(project);
     }
 
