@@ -64,10 +64,10 @@ public class Vacancy {
     private LocalDateTime updatedAt;
 
     @CreatedBy
-    private Long createdBy;
+    private Long createdById;
 
     @LastModifiedBy
-    private Long updatedBy;
+    private Long updatedById;
 
     @Enumerated(EnumType.STRING)
     @NotNull

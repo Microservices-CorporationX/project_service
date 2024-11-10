@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,12 @@ public class ProjectService {
     public ProjectDto getById(Long projectId) {
         return projectMapper.toDto(projectRepository.getProjectById(projectId));
     }
-
+  
     public boolean existsById(Long projectId) {
         return projectRepository.existsById(projectId);
+    }
+  
+    public Project getProjectById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
     }
 }
