@@ -17,7 +17,7 @@ public interface InternshipMapper {
     @Mapping(source = "creatorUserId", target = "createdBy")
     Internship toEntity(InternshipCreationDto creationDto);
 
-    @Mapping(source = "mentorId.userId", target = "mentorUserId")
+    @Mapping(source = "mentor.userId", target = "mentorUserId")
     @Mapping(source = "createdBy", target = "creatorUserId")
     @Mapping(source = "interns", target = "internUserIds", qualifiedByName = "internsToIds")
     @Mapping(source = "project.id", target = "projectId")
