@@ -14,6 +14,6 @@ public class StatusFilter implements ProjectFilter {
 
     @Override
     public Stream<Project> apply(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
-        return projects.filter(project -> project.getStatus().name().contains(projectFilterDto.getStatus()));
+        return projects.filter(project -> project.getStatus().equals(projectFilterDto.getStatus()));
     }
 }

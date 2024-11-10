@@ -2,6 +2,7 @@ package faang.school.projectservice.update.project;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ public class StatusUpdateTest {
 
     @Test
     public void testIsApplicableSuccessful() {
-        projectDto.setStatus("status");
+        projectDto.setStatus(ProjectStatus.CREATED);
 
         boolean result = statusUpdate.isApplicable(projectDto);
         assertTrue(result);
@@ -42,9 +43,9 @@ public class StatusUpdateTest {
     @Test
     public void testApplySuccessful() {
         Project project = new Project();
-        projectDto.setStatus("CREATED");
+        projectDto.setStatus(ProjectStatus.CREATED);
 
         statusUpdate.apply(projectDto, project);
-        assertEquals(projectDto.getStatus(), project.getStatus().name());
+        assertEquals(projectDto.getStatus(), project.getStatus());
     }
 }

@@ -112,7 +112,7 @@ public class ProjectServiceTest {
         doNothing().when(projectValidator).validate(any(), any(), any());
 
         projectService.createProject(dto);
-        verify(projectRepository).save(any());
+        verify(projectRepository).create(any());
     }
 
     @Test

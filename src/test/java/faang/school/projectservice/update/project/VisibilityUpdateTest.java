@@ -2,6 +2,7 @@ package faang.school.projectservice.update.project;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ public class VisibilityUpdateTest {
 
     @Test
     public void testIsApplicableSuccessful() {
-        projectDto.setVisibility("visible");
+        projectDto.setVisibility(ProjectVisibility.PUBLIC);
 
         boolean result = visibilityUpdate.isApplicable(projectDto);
         assertTrue(result);
@@ -42,9 +43,9 @@ public class VisibilityUpdateTest {
     @Test
     public void testApplySuccessful() {
         Project project = new Project();
-        projectDto.setVisibility("PUBLIC");
+        projectDto.setVisibility(ProjectVisibility.PUBLIC);
 
         visibilityUpdate.apply(projectDto, project);
-        assertEquals(projectDto.getVisibility(), project.getVisibility().name());
+        assertEquals(projectDto.getVisibility(), project.getVisibility());
     }
 }

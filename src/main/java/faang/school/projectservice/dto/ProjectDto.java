@@ -1,10 +1,13 @@
 package faang.school.projectservice.dto;
 
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -22,11 +25,11 @@ public class ProjectDto {
     @NotNull(message = "OwnerId must not be null")
     private Long ownerId;
     private Long parentProjectId;
-    private String createdAt;
-    private String updatedAt;
-    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private ProjectStatus status;
     @NotNull(message = "Visibility must not be null")
-    private String visibility;
+    private ProjectVisibility visibility;
     private String coverImageId;
     private List<Long> teamIds;
 }

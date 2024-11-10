@@ -37,7 +37,7 @@ public class StatusFilterTest {
 
     @Test
     public void testIsApplicableSuccessful() {
-        projectFilterDto.setStatus("STATUS");
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
         boolean result = statusFilter.isApplicable(projectFilterDto);
 
         assertTrue(result);
@@ -49,7 +49,7 @@ public class StatusFilterTest {
         Project secondProject = new Project();
         firstProject.setStatus(ProjectStatus.CREATED);
         secondProject.setStatus(ProjectStatus.COMPLETED);
-        projectFilterDto.setStatus("CREATED");
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
         Stream<Project> projects = Stream.of(firstProject, secondProject);
 
         List<Project> result = statusFilter.apply(projectFilterDto, projects).toList();
