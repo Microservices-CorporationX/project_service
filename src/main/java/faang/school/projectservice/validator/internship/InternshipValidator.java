@@ -2,6 +2,7 @@ package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.dto.internship.InternshipCreationDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
+import faang.school.projectservice.dto.user.UserIdsDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.ServiceCallException;
 import faang.school.projectservice.model.Internship;
@@ -147,15 +148,17 @@ public class InternshipValidator {
     private List<Long> getNotExistingUserIds(List<Long> userIds) {
         String url = String.format("%s/not-existing-ids", USER_SERVICE_URL);
 
-        RequestEntity<List<Long>> request = RequestEntity
+        UserIdsDto requestDto = new UserIdsDto();
+        requestDto.setUserIds(userIds);
+
+        RequestEntity<UserIdsDto> request = RequestEntity
                 .post(URI.create(url))
-                .body(userIds);
+                .body(requestDto);
 
         try {
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     request,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    new ParameterizedTypeReference<>() {}
             );
             return response.getBody();
         } catch (RestClientException e) {
