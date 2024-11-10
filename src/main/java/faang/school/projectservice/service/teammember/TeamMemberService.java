@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.EntityNullException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,19 @@ public class TeamMemberService {
 
     private final TeamMemberJpaRepository teamMemberRepository;
 
-    public TeamMember findById(Long id) {
+    public TeamMember findById(long id) {
         return teamMemberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, id));
     }
 
     public TeamMember save(TeamMember teamMember) {
+        if (teamMember == null) {
+            throw new EntityNullException(TEAM_MEMBER);
+        }
         return teamMemberRepository.save(teamMember);
     }
 
-    public TeamMember getByUserIdAndProjectId(long userId, long projectId) {
+    public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
     }
