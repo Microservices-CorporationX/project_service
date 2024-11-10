@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.teammember;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TeamMemberService {
 
+    private static final String TEAM_MEMBER = "TeamMember";
+
     private final TeamMemberJpaRepository teamMemberRepository;
 
     public TeamMember findById(Long id) {
         return teamMemberRepository.findById(id)
-                .orElseThrow(() -> new DataValidationException("Team member doesn't exist by id: %d".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, id));
     }
 
     public TeamMember save(TeamMember teamMember) {
@@ -24,6 +26,7 @@ public class TeamMemberService {
     }
 
     public TeamMember getByUserIdAndProjectId(long userId, long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
     }
 }
