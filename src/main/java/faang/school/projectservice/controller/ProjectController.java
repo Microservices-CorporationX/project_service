@@ -31,7 +31,7 @@ public class ProjectController {
         return projectService.getAllProjects(new ProjectFilterDto());
     }
 
-    @GetMapping("/with-filters")
+    @PostMapping("/with-filters")
     public List<ProjectDto> getAllProjectsByFilters(@RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getAllProjects(projectFilterDto);
     }
