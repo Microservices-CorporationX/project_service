@@ -3,7 +3,7 @@ package faang.school.projectservice.projectServiceTests.projectValidatorTest;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.projectServiceValidator.ProjectParticipantValidatorByVisibility;
+import faang.school.projectservice.validator.projectservice.ProjectParticipantValidatorByVisibility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

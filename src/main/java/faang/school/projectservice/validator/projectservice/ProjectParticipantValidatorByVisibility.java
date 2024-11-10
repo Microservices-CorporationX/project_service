@@ -1,4 +1,4 @@
-package faang.school.projectservice.projectServiceValidator;
+package faang.school.projectservice.validator.projectservice;
 
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;

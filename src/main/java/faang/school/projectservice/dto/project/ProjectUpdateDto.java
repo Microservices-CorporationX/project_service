@@ -14,11 +14,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ProjectUpdateDto {
-    @NotNull
     @NotBlank
     private String description;
     @NotNull
-    @NotBlank
     private ProjectStatus status;
     private ProjectVisibility visibility;
 }

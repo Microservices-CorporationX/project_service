@@ -6,21 +6,18 @@ import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.project.ProjectService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,30 +28,25 @@ import static faang.school.projectservice.model.ProjectStatus.IN_PROGRESS;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;  // Для отправки GET-запросов
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // Для отправки POST-запросов
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put; // Для отправки PUT-запросов
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;  // Для проверки контента
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;  // Для проверки JSON-путей
-import static org.hamcrest.Matchers.hasSize;  // Для проверки размера массива в JSON
-import static org.hamcrest.Matchers.is; //Для проверки совпадений
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest
+@ContextConfiguration(classes = {ProjectController.class})
 public class ProjectControllerTest {
 
-    @Mock
+    @MockBean
     private ProjectService projectService;
 
-    @InjectMocks
-    private ProjectController projectController;
-
+    @Autowired
     private MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(projectController).build();
-    }
 
     @Test
     public void findAllProjectsTest() throws Exception {
@@ -120,6 +112,7 @@ public class ProjectControllerTest {
         ProjectFilterDto filterDto = ProjectFilterDto
                 .builder()
                 .name("This my first TEST")
+                .status(COMPLETED)
                 .build();
 
         when(projectService.findAllProjectsWithFilters(filterDto)).thenReturn(mockProjects);
@@ -157,6 +150,7 @@ public class ProjectControllerTest {
         mockMvc.perform(post("/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(projectCreateDto)))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ownerId", is(1)))
                 .andExpect(jsonPath("$.description", is("Тут новый проект")))
                 .andExpect(jsonPath("$.name", is("New project")));

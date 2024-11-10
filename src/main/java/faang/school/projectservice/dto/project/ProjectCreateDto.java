@@ -3,7 +3,7 @@ package faang.school.projectservice.dto.project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,12 +14,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ProjectCreateDto {
-    @NotNull
+    @Positive
     private Long ownerId;
-    @NotNull
     @NotBlank
     private String name;
-    @NotNull
     @NotBlank
     private String description;
     private ProjectStatus status;

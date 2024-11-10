@@ -4,7 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.projectServiceValidator.ProjectParticipantValidatorByVisibility;
+import faang.school.projectservice.validator.projectservice.ProjectParticipantValidatorByVisibility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

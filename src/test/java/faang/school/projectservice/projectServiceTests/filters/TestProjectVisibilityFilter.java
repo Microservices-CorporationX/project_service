@@ -6,7 +6,7 @@ import faang.school.projectservice.filters.projectFilters.FilterByProjectVisibil
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 
-import faang.school.projectservice.projectServiceValidator.ProjectParticipantValidatorByVisibility;
+import faang.school.projectservice.validator.projectservice.ProjectParticipantValidatorByVisibility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
