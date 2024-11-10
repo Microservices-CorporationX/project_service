@@ -2,7 +2,6 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateReq;
-import faang.school.projectservice.dto.project.ProjectFiltersReq;
 import faang.school.projectservice.dto.project.ProjectPatchReq;
 import faang.school.projectservice.dto.project.ProjectResp;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -130,7 +129,7 @@ public class ProjectServiceTest {
         when(projectMapper.mapProjectListToProjectRespList(List.of(project1))).thenReturn(List.of(projectResp));
         when(userContext.getUserId()).thenReturn(1L);
         assertDoesNotThrow(() -> {
-            List<ProjectResp> projects = projectService.findProjectsWithFilters(new ProjectFiltersReq("Test3", ProjectStatus.IN_PROGRESS));
+            List<ProjectResp> projects = projectService.findProjectsWithFilters("Test3", ProjectStatus.IN_PROGRESS);
             assertEquals(1, projects.size());
             assertEquals(3, projects.get(0).id());
             assertEquals("Test3", projects.get(0).name());
@@ -175,7 +174,7 @@ public class ProjectServiceTest {
         when(projectMapper.mapProjectListToProjectRespList(List.of(project1, project2))).thenReturn(List.of(projectResp1, projectResp2));
         when(userContext.getUserId()).thenReturn(1L);
         assertDoesNotThrow(() -> {
-            List<ProjectResp> projects = projectService.findProjectsWithFilters(new ProjectFiltersReq(null, null));
+            List<ProjectResp> projects = projectService.findProjectsWithFilters(null, null);
             assertEquals(2, projects.size());
             assertEquals("Test3", projects.get(0).name());
             assertEquals(ProjectStatus.IN_PROGRESS, projects.get(0).status());
@@ -195,7 +194,7 @@ public class ProjectServiceTest {
         when(projectMapper.mapProjectListToProjectRespList(Collections.emptyList())).thenReturn(Collections.emptyList());
         when(userContext.getUserId()).thenReturn(1L);
         assertDoesNotThrow(() -> {
-            List<ProjectResp> projects = projectService.findProjectsWithFilters(new ProjectFiltersReq("Test", ProjectStatus.CREATED));
+            List<ProjectResp> projects = projectService.findProjectsWithFilters("Test", ProjectStatus.CREATED);
             assertEquals(0, projects.size());
         });
         verify(projectRepository, times(1)).findAll();

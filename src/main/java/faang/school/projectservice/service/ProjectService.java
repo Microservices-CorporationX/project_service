@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateReq;
-import faang.school.projectservice.dto.project.ProjectFiltersReq;
 import faang.school.projectservice.dto.project.ProjectPatchReq;
 import faang.school.projectservice.dto.project.ProjectResp;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -36,14 +35,13 @@ public class ProjectService {
 
     @Transactional
     public void patchProject(ProjectPatchReq projectPatchReq) {
-        Long projectId = projectPatchReq.id();
-        Project project = projectRepository.getProjectById(projectId);
+        Project project = projectRepository.getProjectById(projectPatchReq.id());
         projectMapper.patchProjectFromProjectPatchReq(projectPatchReq, project);
     }
 
-    public List<ProjectResp> findProjectsWithFilters(ProjectFiltersReq projectFiltersReq) {
+    public List<ProjectResp> findProjectsWithFilters(String searchName, ProjectStatus searchStatus) {
         List<Project> projects = projectRepository.findAll();
-        Predicate<Project> projectFilter = constructFilter(projectFiltersReq);
+        Predicate<Project> projectFilter = constructFilter(searchName, searchStatus);
         List<Project> filteredProjects = projects.stream().filter(projectFilter).toList();
         return projectMapper.mapProjectListToProjectRespList(filteredProjects);
     }
@@ -56,12 +54,10 @@ public class ProjectService {
         return projectMapper.mapProjectToProjectResp(projectRepository.getProjectById(id));
     }
 
-    private Predicate<Project> constructFilter(ProjectFiltersReq projectFiltersReq) {
+    private Predicate<Project> constructFilter(String searchName, ProjectStatus searchStatus) {
         Predicate<Project> filter = constructFilterByProjectVisibility();
-        String name = projectFiltersReq.name();
-        ProjectStatus status = projectFiltersReq.status();
-        if (name != null || status != null) {
-            filter = constructFilterByNameAndStatus(filter, name, status);
+        if (searchName != null || searchStatus != null) {
+            filter = constructFilterByNameAndStatus(filter, searchName, searchStatus);
         }
         return filter;
     }

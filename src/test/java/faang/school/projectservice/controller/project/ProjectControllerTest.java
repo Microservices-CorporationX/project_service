@@ -2,7 +2,6 @@ package faang.school.projectservice.controller.project;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.project.ProjectCreateReq;
-import faang.school.projectservice.dto.project.ProjectFiltersReq;
 import faang.school.projectservice.dto.project.ProjectPatchReq;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -164,7 +163,8 @@ public class ProjectControllerTest {
         mockMvc.perform(get(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECTS + UrlUtils.FILTER)
                         .header("x-user-id", 3L)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ProjectFiltersReq("Test3", ProjectStatus.IN_PROGRESS))))
+                        .param("searchName", "Test3")
+                        .param("searchStatus", ProjectStatus.IN_PROGRESS.name()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -179,9 +179,7 @@ public class ProjectControllerTest {
     @Test
     void findProjectsWithOnlyUserIdFilterSuccessTest() throws Exception {
         mockMvc.perform(get(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECTS + UrlUtils.FILTER)
-                        .header("x-user-id", 3L)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ProjectFiltersReq(null, null))))
+                        .header("x-user-id", 3L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(4)))
@@ -204,7 +202,7 @@ public class ProjectControllerTest {
         mockMvc.perform(get(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECTS + UrlUtils.FILTER)
                         .header("x-user-id", 3L)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ProjectFiltersReq("Test3", null))))
+                        .param("searchName", "Test3"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -217,8 +215,7 @@ public class ProjectControllerTest {
     void findProjectsWithUserIdAndStatusFilterSuccessTest() throws Exception {
         mockMvc.perform(get(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECTS + UrlUtils.FILTER)
                         .header("x-user-id", 5L)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ProjectFiltersReq(null, ProjectStatus.ON_HOLD))))
+                        .param("searchStatus", ProjectStatus.ON_HOLD.name()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -232,8 +229,8 @@ public class ProjectControllerTest {
     void findProjectsWithFiltersEmptyResultSuccessTest() throws Exception {
         mockMvc.perform(get(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECTS + UrlUtils.FILTER)
                         .header("x-user-id", 3L)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ProjectFiltersReq("Test7", ProjectStatus.CREATED))))
+                        .param("searchName", "Test7")
+                        .param("searchStatus", ProjectStatus.CREATED.name()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
