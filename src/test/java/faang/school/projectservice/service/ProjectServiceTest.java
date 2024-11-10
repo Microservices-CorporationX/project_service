@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -36,7 +36,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetProjectTeamMembersIdsWithMentorPresent() {
-        InternShipCreatedDto internShipCreatedDto = mock(InternShipCreatedDto.class);
+        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
         Project project = mock(Project.class);
         Team team = mock(Team.class);
         TeamMember teamMember = mock(TeamMember.class);
@@ -60,7 +60,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetProjectTeamMembersIdsWithMentorAbsent() {
-        InternShipCreatedDto internShipCreatedDto = mock(InternShipCreatedDto.class);
+        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
         Project project = mock(Project.class);
         Team team = mock(Team.class);
         TeamMember teamMember = mock(TeamMember.class);
@@ -84,7 +84,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetProjectTeamMembersIdsWithEmptyTeams() {
-        InternShipCreatedDto internShipCreatedDto = mock(InternShipCreatedDto.class);
+        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
         Project project = mock(Project.class);
         TeamMember mentor = mock(TeamMember.class);
 
@@ -101,7 +101,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetProjectTeamMembersIdsWithEmptyTeamMembers() {
-        InternShipCreatedDto internShipCreatedDto = mock(InternShipCreatedDto.class);
+        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
         Project project = mock(Project.class);
         Team team = mock(Team.class);
         TeamMember mentor = mock(TeamMember.class);

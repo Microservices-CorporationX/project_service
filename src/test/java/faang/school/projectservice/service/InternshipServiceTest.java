@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternShipUpdatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.handler.InternshipCompletionHandler;
-import faang.school.projectservice.mapper.InternShipCreateMapper;
-import faang.school.projectservice.mapper.InternShipUpdateMapper;
+import faang.school.projectservice.mapper.InternshipCreateMapper;
+import faang.school.projectservice.mapper.InternshipUpdateMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -37,31 +37,31 @@ public class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
-    private InternShipCreateMapper internShipCreateMapper;
+    private InternshipCreateMapper internShipCreateMapper;
 
     @Mock
     private InternshipDurationValidator internshipDurationValidator;
 
     @Mock
-    private InternShipUpdateMapper internShipUpdateMapper;
+    private InternshipUpdateMapper internShipUpdateMapper;
 
     @Mock
     private InternshipCompletionHandler completionHandler;
 
 
-    private InternShipCreatedDto createdDto;
-    private InternShipUpdatedDto updatedDto;
+    private InternshipCreatedDto createdDto;
+    private InternshipUpdatedDto updatedDto;
     private Internship internship;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        createdDto = new InternShipCreatedDto();
+        createdDto = new InternshipCreatedDto();
         createdDto.setStartDate(LocalDateTime.now());
         createdDto.setEndDate(LocalDateTime.now().plusMonths(1));
 
-        updatedDto = new InternShipUpdatedDto();
+        updatedDto = new InternshipUpdatedDto();
         updatedDto.setId(1L);
         updatedDto.setStatus(InternshipStatus.COMPLETED);
 
@@ -75,7 +75,7 @@ public class InternshipServiceTest {
         when(internShipCreateMapper.toDto(internship)).thenReturn(createdDto);
         when(internshipRepository.save(any(Internship.class))).thenReturn(internship);
 
-        InternShipCreatedDto result = internshipService.create(createdDto);
+        InternshipCreatedDto result = internshipService.createInternship(createdDto);
 
         verify(internshipDurationValidator).durationValidate(createdDto);
         verify(projectService).getProjectTeamMembersIds(createdDto);
@@ -84,13 +84,13 @@ public class InternshipServiceTest {
     }
 
     @Test
-    void testToUpdatedDtoInternshipAndHandleCompletion() {
+    void testToUpdateInternshipInternshipAndHandleCompletion() {
         when(internshipRepository.findById(1L)).thenReturn(Optional.of(internship));
         when(internShipUpdateMapper.toEntity(updatedDto)).thenReturn(internship);
         when(internShipUpdateMapper.toDto(internship)).thenReturn(updatedDto);
         when(internshipRepository.save(any(Internship.class))).thenReturn(internship);
 
-        InternShipUpdatedDto result = internshipService.updatedDto(updatedDto);
+        InternshipUpdatedDto result = internshipService.updateInternship(updatedDto);
 
         verify(completionHandler).handleInternsCompletion(internship);
         verify(internshipRepository).save(internship);
@@ -98,8 +98,8 @@ public class InternshipServiceTest {
     }
 
     @Test
-    void updatedDto_ShouldThrowEntityNotFoundExceptionWhenInternshipNotFound() {
+    void updateInternship_ShouldThrowEntityNotFoundExceptionWhenInternshipNotFound() {
         when(internshipRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> internshipService.updatedDto(updatedDto));
+        assertThrows(EntityNotFoundException.class, () -> internshipService.updateInternship(updatedDto));
     }
 }

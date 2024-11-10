@@ -2,7 +2,6 @@ package faang.school.projectservice.dto.client.internShip;
 
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -18,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
-public class InternShipUpdatedDto {
+public class InternshipUpdatedDto {
     @PositiveOrZero
     private Long id;
 

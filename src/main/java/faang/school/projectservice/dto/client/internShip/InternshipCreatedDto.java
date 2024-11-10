@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InternShipCreatedDto {
+public class InternshipCreatedDto {
     private Long projectId;
 
     @NotNull(message = "Mentor is can not be null")

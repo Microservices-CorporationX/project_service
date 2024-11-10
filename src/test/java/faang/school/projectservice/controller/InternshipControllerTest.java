@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternShipUpdatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,17 +24,17 @@ public class InternshipControllerTest {
 
     @Test
     public void testExistingInternshipCreating() {
-        InternShipCreatedDto internShipCreatedDto = InternShipCreatedDto.builder().build();
-        when(internshipService.create(any(InternShipCreatedDto.class))).thenReturn(internShipCreatedDto);
-        InternShipCreatedDto result = internshipController.create(internShipCreatedDto);
+        InternshipCreatedDto internShipCreatedDto = InternshipCreatedDto.builder().build();
+        when(internshipService.createInternship(any(InternshipCreatedDto.class))).thenReturn(internShipCreatedDto);
+        InternshipCreatedDto result = internshipController.createInternship(internShipCreatedDto);
         assertEquals(internShipCreatedDto, result);
     }
 
     @Test
     public void testExistingInternshipUpdating() {
-        InternShipUpdatedDto internShipUpdatedDto = InternShipUpdatedDto.builder().build();
-        when(internshipService.updatedDto(any(InternShipUpdatedDto.class))).thenReturn(internShipUpdatedDto);
-        InternShipUpdatedDto result = internshipController.update(internShipUpdatedDto);
+        InternshipUpdatedDto internShipUpdatedDto = InternshipUpdatedDto.builder().build();
+        when(internshipService.updateInternship(any(InternshipUpdatedDto.class))).thenReturn(internShipUpdatedDto);
+        InternshipUpdatedDto result = internshipController.updateInternship(internShipUpdatedDto);
         assertEquals(internShipUpdatedDto, result);
     }
 

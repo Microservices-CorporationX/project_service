@@ -1,7 +1,10 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternShipUpdatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
+import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,25 +21,25 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping("/create")
-    public InternShipCreatedDto create(InternShipCreatedDto internShipCreatedDto) {
-        return internshipService.create(internShipCreatedDto);
+    public InternshipCreatedDto createInternship(InternshipCreatedDto internShipCreatedDto) {
+        return internshipService.createInternship(internShipCreatedDto);
     }
 
     @PutMapping("/update")
-    public InternShipUpdatedDto update(InternShipUpdatedDto InternShipUpdatedDto) {
-        return internshipService.updatedDto(InternShipUpdatedDto);
+    public InternshipUpdatedDto updateInternship(InternshipUpdatedDto InternShipUpdatedDto) {
+        return internshipService.updateInternship(InternShipUpdatedDto);
     }
 
 
-    public List<InternShipCreatedDto> filter() {
-        return null;
+    public List<InternshipFilterDto> filterInternship(InternshipFilterDto internShipFilterDto) {
+        return internshipService.filterInternship(internShipFilterDto);
     }
 
-    public List<InternShipCreatedDto> getInternships() {
-        return null;
+    public List<InternshipGetAllDto> getAllInternship() {
+        return internshipService.getAllInternships();
     }
 
-    public InternShipCreatedDto getInternShipById(long id) {
-        return null;
+    public InternshipGetByIdDto getInternshipById(long internshipId) {
+        return internshipService.getByIdInternship(internshipId);
     }
 }

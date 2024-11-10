@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -17,7 +17,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectServiceValidator projectServiceValidator;
 
-    public void getProjectTeamMembersIds(InternShipCreatedDto internShipCreatedDto) {
+    public void getProjectTeamMembersIds(InternshipCreatedDto internShipCreatedDto) {
         Long projectId = internShipCreatedDto.getProjectId();
         Project projectById = projectRepository.getProjectById(projectId);
         List<Team> teams = projectById.getTeams();
