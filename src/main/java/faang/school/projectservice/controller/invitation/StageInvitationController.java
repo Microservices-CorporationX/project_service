@@ -1,10 +1,14 @@
 package faang.school.projectservice.controller.invitation;
 
+import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.invitation.StageInvitationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,37 +25,28 @@ public class StageInvitationController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public StageInvitationDTO sendInvitation(@Valid @RequestBody StageInvitationDTO invitationDto) {
-        log.info("Запрос на отправку приглашения с данными: {}", invitationDto);
-        StageInvitationDTO result = stageInvitationService.sendInvitation(invitationDto);
-        log.info("Приглашение успешно отправлено: {}", result);
-        return result;
+        log.info("Received request to send invitation: {}", invitationDto);
+        return stageInvitationService.sendInvitation(invitationDto);
     }
 
     @PatchMapping("/{invitationId}/accept")
-    public StageInvitationDTO acceptInvitation(@PathVariable Long invitationId) {
-        log.info("Запрос на принятие приглашения с ID: {}", invitationId);
-        StageInvitationDTO result = stageInvitationService.acceptInvitation(invitationId);
-        log.info("Приглашение с ID {} успешно принято", invitationId);
-        return result;
+    public StageInvitationDTO acceptInvitation(@PathVariable @NotNull Long invitationId) {
+        log.info("Received request to accept invitation with ID: {}", invitationId);
+        return stageInvitationService.acceptInvitation(invitationId);
     }
 
     @PatchMapping("/{invitationId}/reject")
-    public StageInvitationDTO rejectInvitation(
-        @PathVariable Long invitationId,
-        @RequestBody String rejectionReason) {  // Причина отклонения передается как строка
-        log.info("Запрос на отклонение приглашения с ID: {}. Причина: {}", invitationId, rejectionReason);
-        StageInvitationDTO result = stageInvitationService.rejectInvitation(invitationId, rejectionReason);
-        log.info("Приглашение с ID {} успешно отклонено. Причина: {}", invitationId, rejectionReason);
-        return result;
+    public StageInvitationDTO rejectInvitation(@PathVariable @NotNull Long invitationId,
+                                               @Valid @RequestBody RejectionReasonDTO rejectionReason) {
+        log.info("Received request to reject invitation with ID: {} for reason: {}", invitationId, rejectionReason.getReason());
+        return stageInvitationService.rejectInvitation(invitationId, rejectionReason.getReason());
     }
 
     @GetMapping
-    public List<StageInvitationDTO> getAllInvitations(@RequestParam Long userId, @RequestParam String status, @RequestParam String dateFilter) {
-        log.info("Запрос на получение всех приглашений для пользователя с ID: {}. Статус: {}, Дата: {}", userId, status, dateFilter);
-
-        List<StageInvitationDTO> invitations = stageInvitationService.getAllInvitationsForUser(userId, status, dateFilter);
-
-        log.info("Получено {} приглашений для пользователя с ID: {}", invitations.size(), userId);
-        return invitations;
+    public List<StageInvitationDTO> getAllInvitations(@RequestParam @NotNull Long userId,
+                                                      @RequestParam(required = false) StageInvitationStatus status,
+                                                      @RequestParam(required = false) LocalDate dateFilter) {
+        log.info("Received request to get all invitations for user ID: {}, with status: {}, dateFilter: {}", userId, status, dateFilter);
+        return stageInvitationService.getAllInvitationsForUser(userId, status, dateFilter);
     }
 }
