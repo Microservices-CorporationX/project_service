@@ -11,6 +11,9 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,7 +36,8 @@ public class ProjectService {
     private final List<Filter<FilterProjectDto, Project>> filters;
 
     @Transactional
-    public CreateSubProjectDto createSubProject(Long parentId, CreateSubProjectDto subProjectDto) {
+    public CreateSubProjectDto createSubProject(@NotNull @Positive Long parentId,
+                                                @Valid CreateSubProjectDto subProjectDto) {
         Project parentProject = projectRepository.getProjectById(parentId);
         Project childProject = subProjectMapper.toEntity(subProjectDto);
         validateVisibilityProjectAndSubProject(parentProject, childProject);
@@ -49,7 +53,9 @@ public class ProjectService {
         return subProjectMapper.toDto(childProject);
     }
 
-    public CreateSubProjectDto updateProject(Long projectId, CreateSubProjectDto dto, Long userId) {
+    public CreateSubProjectDto updateProject(@NotNull @Positive Long projectId,
+                                             @Valid CreateSubProjectDto dto,
+                                             @NotNull @Positive Long userId) {
         Project project = projectRepository.getProjectById(projectId);
         List<Project> children = projectRepository.getSubProjectsByParentId(projectId);
         if (projectValidator.isVisibilityDtoAndProjectNotEquals(dto, project)) {
@@ -63,7 +69,8 @@ public class ProjectService {
         return subProjectMapper.toDto(projectRepository.save(project));
     }
 
-    public List<CreateSubProjectDto> getProjectsByFilter(Long projectId, FilterProjectDto filterDto) {
+    public List<CreateSubProjectDto> getProjectsByFilter(@NotNull @Positive Long projectId,
+                                                         FilterProjectDto filterDto) {
         Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))

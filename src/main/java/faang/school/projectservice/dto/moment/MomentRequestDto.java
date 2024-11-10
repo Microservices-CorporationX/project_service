@@ -20,7 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 public class MomentRequestDto {
     @Schema(description = "Name of the moment")
-    @NotNull
     @NotBlank
     private String name;
 

@@ -24,7 +24,6 @@ public class CreateSubProjectDto {
     private Long id;
 
     @Schema(description = "name of the project", example = "Project Name")
-    @NotNull
     @NotBlank(message = "Project name cannot be blank")
     private String name;
 

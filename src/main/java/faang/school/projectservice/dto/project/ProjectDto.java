@@ -26,8 +26,7 @@ public class ProjectDto {
     private Long id;
 
     @Schema(description = "Name of the project", example = "Project name")
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Project name cannot be blank and not null")
     private String name;
 
     @Schema(description = "List of child project ids", example = "[1, 2, 3]", nullable = true)

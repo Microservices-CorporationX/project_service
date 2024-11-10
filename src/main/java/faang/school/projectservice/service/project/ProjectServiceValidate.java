@@ -6,36 +6,39 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Validated
 public class ProjectServiceValidate {
     private final TeamRepository teamRepository;
     private final StageJpaRepository stageRepository;
 
-    public List<Team> getTeams(CreateSubProjectDto dto) {
+    public List<Team> getTeams(@Valid CreateSubProjectDto dto) {
         if (dto.getTeamsIds() == null) {
             return null;
         }
         return teamRepository.findAllById(dto.getTeamsIds());
     }
 
-    public List<Stage> getStages(CreateSubProjectDto dto) {
+    public List<Stage> getStages(@Valid CreateSubProjectDto dto) {
         if (dto.getStagesIds() == null) {
             return null;
         }
         return stageRepository.findAllById(dto.getStagesIds());
     }
 
-    public boolean isVisibilityDtoAndProjectNotEquals(CreateSubProjectDto dto, Project project) {
+    public boolean isVisibilityDtoAndProjectNotEquals(@Valid CreateSubProjectDto dto, @Valid Project project) {
         return dto.getVisibility() != project.getVisibility();
     }
 
-    public boolean isStatusDtoAndProjectNotEquals(CreateSubProjectDto dto, Project project) {
+    public boolean isStatusDtoAndProjectNotEquals(@Valid CreateSubProjectDto dto,@Valid Project project) {
         return dto.getStatus() != project.getStatus();
     }
 }
