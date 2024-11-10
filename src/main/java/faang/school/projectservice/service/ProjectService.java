@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.project.ProjectDto;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,16 +26,16 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public ProjectDto createProject(String name, String description, Long ownerId) {
-        log.info("Creating project with name: {} for owner ID: {}", name, ownerId);
-        validateProjectNameUniqueness(ownerId, name);
+    public ProjectDto createProject(ProjectDto projectDto) {
+        log.info("Creating project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
+        validateProjectNameUniqueness(projectDto.getOwnerId(), projectDto.getName());
 
         Project project = Project.builder()
-                .name(name)
-                .description(description)
-                .ownerId(ownerId)
+                .name(projectDto.getName())
+                .description(projectDto.getDescription())
+                .ownerId(projectDto.getOwnerId())
                 .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
+                .visibility(projectDto.getVisibility() != null ? projectDto.getVisibility() : ProjectVisibility.PUBLIC)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -43,21 +45,31 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectDto updateProject(Long projectId, String description, String status) {
+    public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
         log.info("Updating project with ID: {}", projectId);
         Project project = projectRepository.getProjectById(projectId);
-        updateProjectDetails(project, description, status);
+
+
+        project.setName(projectDto.getName());
+        project.setDescription(projectDto.getDescription());
+        project.setVisibility(projectDto.getVisibility() != null ? projectDto.getVisibility() : project.getVisibility());
+
+        if (projectDto.getStatus() != null) {
+            project.setStatus(projectDto.getStatus());
+        }
+
+        project.setUpdatedAt(LocalDateTime.now());
+
         project = projectRepository.save(project);
         log.info("Project with ID: {} updated successfully", projectId);
         return projectMapper.toDto(project);
     }
 
-    public List<ProjectDto> findProjects(String name, ProjectStatus status, Long userId) {
-        log.info("Finding projects with filters - Name: {}, Status: {}", name, status);
+    public List<ProjectDto> findProjects(String name, ProjectStatus status, ProjectVisibility visibility, Long userId) {
+        log.info("Finding projects with filters - Name: {}, Status: {}, Visibility: {}", name, status, visibility);
+        ProjectFilter filter = new ProjectFilter(name, status, visibility, userId);
         return projectRepository.findAll().stream()
-                .filter(project -> (name == null || project.getName().equals(name)) &&
-                        (status == null || project.getStatus() == status) &&
-                        (project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId)))
+                .filter(filter::apply)
                 .map(projectMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -71,26 +83,20 @@ public class ProjectService {
 
     public ProjectDto getProjectById(Long projectId) {
         log.info("Retrieving project with ID: {}", projectId);
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        Project project = projectRepository.getProjectById(projectId);
         return projectMapper.toDto(project);
     }
 
     private void validateProjectNameUniqueness(Long ownerId, String name) {
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
             log.warn("Project with name: {} already exists for owner ID: {}", name, ownerId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Project with the same name already exists for this owner.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Project with the same name already exists for this owner.");
         }
     }
 
-    private void updateProjectDetails(Project project, String description, String status) {
+    private void updateProjectDetails(Project project, String description, ProjectStatus status) {
         project.setDescription(description);
-        try{
-            project.setStatus(ProjectStatus.valueOf(status));
-        } catch (IllegalArgumentException e){
-            log.error("Invalid project status provided: {}", status);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid project status provided.");
-        }
+        project.setStatus(status);
         project.setUpdatedAt(LocalDateTime.now());
     }
 }

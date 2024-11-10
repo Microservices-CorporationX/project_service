@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -22,7 +23,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,26 +57,29 @@ class ProjectServiceApplicationTests {
         projectDto.setName("Test Project");
         projectDto.setDescription("A sample project description");
         projectDto.setOwnerId(100L);
-        projectDto.setStatus("CREATED");
-        projectDto.setVisibility("PUBLIC");
+        projectDto.setStatus(ProjectStatus.CREATED);
+        projectDto.setVisibility(ProjectVisibility.PUBLIC);
         projectDto.setCreatedAt(LocalDateTime.now());
+
+
+        lenient().when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
     }
 
     @Test
     void createProject_Success() {
         when(projectRepository.existsByOwnerUserIdAndName(100L, "Test Project")).thenReturn(false);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
-        ProjectDto result = projectService.createProject("Test Project", "A sample project description", 100L);
+        ProjectDto result = projectService.createProject(projectDto);
 
         verify(projectRepository).existsByOwnerUserIdAndName(100L, "Test Project");
         verify(projectRepository).save(any(Project.class));
+
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Test Project");
         assertThat(result.getDescription()).isEqualTo("A sample project description");
         assertThat(result.getOwnerId()).isEqualTo(100L);
-        assertThat(result.getStatus()).isEqualTo("CREATED");
+        assertThat(result.getStatus()).isEqualTo(ProjectStatus.CREATED);
     }
 
     @Test
@@ -85,7 +88,7 @@ class ProjectServiceApplicationTests {
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> projectService.createProject("Test Project", "A sample project description", 100L)
+                () -> projectService.createProject(projectDto)
         );
 
         assertThat(exception.getMessage()).contains("Project with the same name already exists for this owner.");
@@ -94,12 +97,11 @@ class ProjectServiceApplicationTests {
 
     @Test
     void getProjectById_Success() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
 
         ProjectDto result = projectService.getProjectById(1L);
 
-        verify(projectRepository).findById(1L);
+        verify(projectRepository).getProjectById(1L);
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("Test Project");
@@ -107,7 +109,8 @@ class ProjectServiceApplicationTests {
 
     @Test
     void getProjectById_NotFound() {
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"))
+                .when(projectRepository).getProjectById(1L);
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -120,12 +123,12 @@ class ProjectServiceApplicationTests {
     @Test
     void findProjects_PublicAndOwnedProjects() {
         when(projectRepository.findAll()).thenReturn(List.of(project));
-        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
-        List<ProjectDto> result = projectService.findProjects("Test Project", ProjectStatus.CREATED, 100L);
+        List<ProjectDto> result = projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC, 100L);
 
         verify(projectRepository).findAll();
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getName()).isEqualTo("Test Project");
+        assertThat(result).allMatch(dto -> "Test Project".equals(dto.getName()));
     }
 }
