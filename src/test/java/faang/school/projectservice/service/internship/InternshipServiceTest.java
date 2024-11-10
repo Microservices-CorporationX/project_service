@@ -25,6 +25,8 @@ import faang.school.projectservice.validator.internship.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -38,6 +40,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,6 +67,9 @@ class InternshipServiceTest {
 
     @Mock
     private TeamService teamService;
+
+    @Captor
+    private ArgumentCaptor<Team> teamCaptor;
 
     private InternshipService internshipService;
 
@@ -267,6 +273,38 @@ class InternshipServiceTest {
 
         verify(internshipRepository, times(1)).findById(internshipId);
         assertEquals("There is no internship with ID (%d) in the database!".formatted(internshipId), exception.getMessage());
+    }
+
+    @Test
+    void removeInternsFromInternshipValidTest() {
+        Long firstInternUserId = 1L;
+        TeamMember firstIntern = new TeamMember();
+        firstIntern.setUserId(firstInternUserId);
+
+        Long secondInternUserId = 2L;
+        TeamMember secondIntern = new TeamMember();
+        secondIntern.setUserId(secondInternUserId);
+
+        List<TeamMember> teamMembers = new ArrayList<>(List.of(firstIntern, secondIntern));
+
+        Team internTeam = new Team();
+        internTeam.setTeamMembers(teamMembers);
+        firstIntern.setTeam(internTeam);
+        secondIntern.setTeam(internTeam);
+
+        long internshipId = 9L;
+        Internship internship = new Internship();
+        internship.setInterns(teamMembers);
+        List<Long> internUserIdsToRemove = List.of(2L);
+
+        when(validator.validateInternsRemoval(internshipId, internUserIdsToRemove)).thenReturn(internship);
+
+        assertDoesNotThrow(() -> internshipService.removeInternsFromInternship(internshipId, internUserIdsToRemove));
+        verify(teamService, times(1)).save(teamCaptor.capture());
+        verify(internshipRepository, times(1)).save(internship);
+        assertEquals(1, teamCaptor.getValue().getTeamMembers().size());
+        assertTrue(teamCaptor.getValue().getTeamMembers().contains(firstIntern));
+        assertFalse(teamCaptor.getValue().getTeamMembers().contains(secondIntern));
     }
 
     private void updateInternshipValidTest(boolean isAfterEndDate) {
