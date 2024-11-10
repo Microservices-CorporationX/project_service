@@ -1,0 +1,24 @@
+package faang.school.projectservice.validator;
+
+import faang.school.projectservice.dto.client.internShip.InternShipCreatedDto;
+import faang.school.projectservice.exception.InternshipDurationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+@Slf4j
+@Component
+public class InternshipDurationValidator {
+    public void durationValidate(InternShipCreatedDto internShipCreatedDto) {
+        LocalDateTime startDate = internShipCreatedDto.getStartDate();
+        LocalDateTime endDate = internShipCreatedDto.getEndDate();
+
+        if (ChronoUnit.MONTHS.between(startDate, endDate) > 3 ) {
+            throw new InternshipDurationException("Internship duration cannot exceed 3 months");
+        } else {
+            log.info("End of Internship");
+        }
+    }
+}
