@@ -148,7 +148,14 @@ public class InternshipService {
     }
 
     public void removeInternsFromInternship(long internshipId, List<Long> internUserIdsToRemove) {
+        Internship internship = internshipValidator.validateInternsRemoval(internshipId, internUserIdsToRemove);
+        Team internProjectTeam = internship.getInterns().get(0).getTeam();
+        List<TeamMember> internTeamMembers = internProjectTeam.getTeamMembers();
 
+        internTeamMembers.removeIf(intern -> internUserIdsToRemove.contains(intern.getUserId()));
+
+        teamService.save(internProjectTeam);
+        internshipRepository.save(internship);
     }
 
     private Set<Long> getTeamMembersIds(Collection<TeamMember> teamMembers) {
