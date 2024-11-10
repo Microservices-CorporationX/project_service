@@ -1,4 +1,4 @@
-package faang.school.projectservice.exceptions.invitation.handler;
+package faang.school.projectservice.handler;
 
 import faang.school.projectservice.exceptions.invitation.InvitationNotFoundException;
 import faang.school.projectservice.exceptions.invitation.RejectionReasonMissingException;
