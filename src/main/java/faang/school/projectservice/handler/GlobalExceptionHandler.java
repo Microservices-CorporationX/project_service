@@ -13,27 +13,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private void logError(Exception ex, String logLevel) {
+        String message = String.format("[%s] Ошибка: %s", ex.getClass().getSimpleName(), ex.getMessage());
+        if ("error".equalsIgnoreCase(logLevel)) {
+            log.error(message, ex);
+        } else if ("warn".equalsIgnoreCase(logLevel)) {
+            log.warn(message, ex);
+        }
+    }
+
     @ExceptionHandler(InvitationNotFoundException.class)
     public ResponseEntity<String> handleInvitationNotFoundException(InvitationNotFoundException ex) {
-        log.error("[{}] Ошибка: {}", ex.getMessage(), ex);
+        logError(ex, "error");
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RejectionReasonMissingException.class)
     public ResponseEntity<String> handleRejectionReasonMissingException(RejectionReasonMissingException ex) {
-        log.warn("[{}] Ошибка: {}", ex.getMessage(), ex);
+        logError(ex, "warn");
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidInvitationDataException.class)
     public ResponseEntity<String> handleInvalidInvitationDataException(InvalidInvitationDataException ex) {
-        log.warn("[{}] Ошибка: {}", ex.getMessage(), ex);
+        logError(ex, "warn");
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
-        log.error("[{}] Непредвиденная ошибка: {}", ex.getMessage(), ex);
+        logError(ex, "error");
         return new ResponseEntity<>("Произошла непредвиденная ошибка: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
