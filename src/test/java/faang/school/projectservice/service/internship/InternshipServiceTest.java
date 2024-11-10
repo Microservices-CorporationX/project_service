@@ -21,7 +21,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.team.TeamService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
-import faang.school.projectservice.validator.internship.InternshipDtoValidator;
+import faang.school.projectservice.validator.internship.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
-    private InternshipDtoValidator validator;
+    private InternshipValidator validator;
 
     @Spy
     private InternshipMapperImpl internshipMapper;

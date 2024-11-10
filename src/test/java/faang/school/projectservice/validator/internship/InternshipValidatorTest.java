@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InternshipDtoValidatorTest {
+class InternshipValidatorTest {
 
     private static final int MAX_INTERNSHIP_MONTHS_DURATION = 3;
 
@@ -52,7 +53,7 @@ class InternshipDtoValidatorTest {
     private TeamMemberService teamMemberService;
 
     @InjectMocks
-    private InternshipDtoValidator validator;
+    private InternshipValidator validator;
 
 
     @Test
@@ -345,5 +346,54 @@ class InternshipDtoValidatorTest {
         assertEquals(internshipId, internshipToUpdate.getId());
         assertNotEquals(InternshipStatus.COMPLETED, internshipToUpdate.getStatus());
         verify(internshipRepository, times(1)).findById(internshipId);
+    }
+
+    @Test
+    void validateInternsRemovalNotExistingInternshipTest() {
+        Long internshipId = 9L;
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.empty());
+
+        DataValidationException exception =
+                assertThrows(DataValidationException.class, () -> validator.validateInternsRemoval(internshipId, List.of()));
+        assertEquals("There is no internship with ID (%d) in the database!".formatted(internshipId), exception.getMessage());
+    }
+
+    @Test
+    void validateInternsRemovalNotExistingInternTest() {
+        Long internshipId = 9L;
+        Long notExistingInternUserId = 4L;
+        Internship internship = new Internship();
+        List<TeamMember> interns = List.of(
+                TeamMember.builder().userId(1L).build(),
+                TeamMember.builder().userId(2L).build(),
+                TeamMember.builder().userId(3L).build()
+        );
+        internship.setInterns(interns);
+        List<Long> internUserIdsToRemove = List.of(2L, notExistingInternUserId);
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
+
+        DataValidationException exception = assertThrows(
+                DataValidationException.class,
+                () -> validator.validateInternsRemoval(internshipId, internUserIdsToRemove));
+        assertEquals("Intern with user ID %d is not part of the internship with ID %d."
+                .formatted(notExistingInternUserId, internshipId), exception.getMessage());
+    }
+    @Test
+    void validateInternsRemovalValidTest() {
+        long internshipId = 9L;
+        Internship internship = new Internship();
+        List<TeamMember> interns = List.of(
+                TeamMember.builder().userId(1L).build(),
+                TeamMember.builder().userId(2L).build(),
+                TeamMember.builder().userId(3L).build()
+        );
+        internship.setInterns(interns);
+        List<Long> internUserIdsToRemove = List.of(2L, 3L);
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
+
+        assertDoesNotThrow(() -> validator.validateInternsRemoval(internshipId, internUserIdsToRemove));
     }
 }

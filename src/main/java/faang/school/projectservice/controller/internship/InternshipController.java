@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.internship.InternshipCreationDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,5 +59,13 @@ public class InternshipController {
     public ResponseEntity<InternshipDto> getInternshipById(@PathVariable @Positive long internshipId) {
         InternshipDto internship = internshipService.getInternshipById(internshipId);
         return ResponseEntity.ok(internship);
+    }
+
+    @DeleteMapping("/{internshipId}/interns")
+    public ResponseEntity<Void> deleteInternsFromInternship(
+            @PathVariable @Positive long internshipId,
+            @RequestBody List<Long> internUserIdsToRemove) {
+        internshipService.removeInternsFromInternship(internshipId, internUserIdsToRemove);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -19,7 +19,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.team.TeamService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
-import faang.school.projectservice.validator.internship.InternshipDtoValidator;
+import faang.school.projectservice.validator.internship.InternshipValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class InternshipService {
 
     private final InternshipRepository internshipRepository;
-    private final InternshipDtoValidator internshipDtoValidator;
+    private final InternshipValidator internshipValidator;
     private final InternshipMapper internshipMapper;
     private final TeamMemberService teamMemberService;
     private final TeamService teamService;
@@ -50,7 +50,7 @@ public class InternshipService {
     public InternshipDto createInternship(InternshipCreationDto internshipCreationDto) {
         log.info("Received request to create internship for project ID {}", internshipCreationDto.getProjectId());
 
-        TeamMember mentor = internshipDtoValidator.validateCreationDtoAndGetMentor(internshipCreationDto);
+        TeamMember mentor = internshipValidator.validateCreationDtoAndGetMentor(internshipCreationDto);
         Internship internship = internshipMapper.toEntity(internshipCreationDto);
         Project project = mentor.getTeam().getProject();
 
@@ -77,7 +77,7 @@ public class InternshipService {
     @Transactional
     public InternshipUpdateRequestDto updateInternship(InternshipUpdateDto updateDto) {
         log.info("Received request to update internship status, internship ID {}", updateDto.getInternshipId());
-        Internship internship = internshipDtoValidator.validateUpdateDtoAndGetInternship(updateDto);
+        Internship internship = internshipValidator.validateUpdateDtoAndGetInternship(updateDto);
 
         List<TeamMember> interns = internship.getInterns();
         Team internsProjectTeam = interns.get(0).getTeam();
@@ -145,6 +145,10 @@ public class InternshipService {
                                 "There is no internship with ID (%d) in the database!".formatted(internshipId))
                         )
         );
+    }
+
+    public void removeInternsFromInternship(long internshipId, List<Long> internUserIdsToRemove) {
+
     }
 
     private Set<Long> getTeamMembersIds(Collection<TeamMember> teamMembers) {

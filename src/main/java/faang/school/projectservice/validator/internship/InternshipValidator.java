@@ -24,15 +24,17 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InternshipDtoValidator {
+public class InternshipValidator {
 
     private static final int MAX_INTERNSHIP_MONTHS_DURATION = 3;
-    private static final  String USER_SERVICE_URL = "http://localhost:8080/api/v1/users";
+    private static final String USER_SERVICE_URL = "http://localhost:8080/api/v1/users";
 
     private final RestTemplate restTemplate;
     private final InternshipRepository internshipRepository;
@@ -54,14 +56,37 @@ public class InternshipDtoValidator {
     }
 
     public Internship validateUpdateDtoAndGetInternship(InternshipUpdateDto updateDto) {
-        Internship internship = internshipRepository.findById(updateDto.getInternshipId())
-                .orElseThrow(
-                        () -> new DataValidationException("There is no internship with ID (%d) in the database!"
-                                .formatted(updateDto.getInternshipId())));
+        Internship internship = validateInternshipExistence(updateDto.getInternshipId());
 
         validateInternshipStatus(internship, updateDto.getInternshipId());
 
         return internship;
+    }
+
+    public Internship validateInternsRemoval(long internshipId, List<Long> internUserIdsToRemove) {
+        Internship internship = validateInternshipExistence(internshipId);
+
+        Set<Long> internUserIds = internship.getInterns().stream()
+                .map(TeamMember::getUserId)
+                .collect(Collectors.toSet());
+
+        for (Long removalInternUserId : internUserIdsToRemove) {
+            if (!internUserIds.contains(removalInternUserId)) {
+                throw new DataValidationException(
+                        "Intern with user ID %d is not part of the internship with ID %d."
+                                .formatted(removalInternUserId, internshipId)
+                );
+            }
+        }
+
+        return internship;
+    }
+
+    private Internship validateInternshipExistence(long internshipId) {
+        return internshipRepository.findById(internshipId)
+                .orElseThrow(
+                        () -> new DataValidationException("There is no internship with ID (%d) in the database!"
+                                .formatted(internshipId)));
     }
 
     private void validateInternshipStatus(Internship internship, long internshipId) {
@@ -129,7 +154,8 @@ public class InternshipDtoValidator {
         try {
             ResponseEntity<List<Long>> response = restTemplate.exchange(
                     request,
-                    new ParameterizedTypeReference<>() {}
+                    new ParameterizedTypeReference<>() {
+                    }
             );
             return response.getBody();
         } catch (RestClientException e) {
