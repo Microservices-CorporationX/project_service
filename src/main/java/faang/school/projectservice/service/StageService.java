@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -19,7 +18,6 @@ public class StageService {
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
     private final StageMapper stageMapper;
-    private final ProjectMapper projectMapper;
 
     public void setExecutor(Long stageId, Long executorId) {
         Stage stage = stageRepository.getById(stageId);
@@ -40,7 +38,7 @@ public class StageService {
 
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
-        Project project = projectMapper.toEntity(projectService.getById(stageDto.getProjectId()));
+        Project project = projectService.getProjectById(stageDto.getProjectId());
         stage.setProject(project);
         return stageMapper.toDto(stageRepository.save(stage));
     }
