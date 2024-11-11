@@ -1,33 +1,19 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.dto.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.user.UserIdsDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.ServiceCallException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.teammember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -35,135 +21,67 @@ import java.util.stream.Stream;
 public class InternshipValidator {
 
     private static final int MAX_INTERNSHIP_MONTHS_DURATION = 3;
-    private static final String USER_SERVICE_URL = "http://localhost:8080/api/v1/users";
 
-    private final RestTemplate restTemplate;
-    private final InternshipRepository internshipRepository;
-    private final ProjectService projectService;
-    private final TeamMemberService teamMemberService;
-
-    public TeamMember validateCreationDtoAndGetMentor(InternshipCreationDto creationDto) {
-        List<Long> allDtoUsers =
-                Stream.concat(
-                        creationDto.getInternUserIds().stream(),
-                        Stream.of(creationDto.getCreatorUserId(), creationDto.getMentorUserId())
-                ).toList();
-
-        validateUserIds(allDtoUsers);
-        validateInternshipDuration(creationDto.getStartDate(), creationDto.getEndDate());
-        validateProjectExistence(creationDto.getProjectId());
-
-        return getMentorForProject(creationDto.getMentorUserId(), creationDto.getProjectId());
-    }
-
-    public Internship validateUpdateDtoAndGetInternship(InternshipUpdateDto updateDto) {
-        Internship internship = validateInternshipExistence(updateDto.getInternshipId());
-
-        validateInternshipStatus(internship, updateDto.getInternshipId());
-
-        return internship;
-    }
-
-    public Internship validateInternsRemoval(long internshipId, List<Long> internUserIdsToRemove) {
-        Internship internship = validateInternshipExistence(internshipId);
-
-        Set<Long> internUserIds = internship.getInterns().stream()
-                .map(TeamMember::getUserId)
-                .collect(Collectors.toSet());
-
-        for (Long removalInternUserId : internUserIdsToRemove) {
-            if (!internUserIds.contains(removalInternUserId)) {
-                throw new DataValidationException(
-                        "Intern with user ID %d is not part of the internship with ID %d."
-                                .formatted(removalInternUserId, internshipId)
-                );
-            }
+    public void validateMentorRoles(TeamMember mentor) {
+        if (mentor.getRoles().contains(TeamRole.INTERN)) {
+            throw new DataValidationException("The mentor can't be intern.");
         }
-
-        return internship;
     }
 
-    private Internship validateInternshipExistence(long internshipId) {
-        return internshipRepository.findById(internshipId)
-                .orElseThrow(
-                        () -> new DataValidationException("There is no internship with ID (%d) in the database!"
-                                .formatted(internshipId)));
+    public void validateInternshipStarted(Internship internship) {
+        boolean isNotStartedStatus = internship.getStatus().equals(InternshipStatus.NOT_STARTED);
+        boolean isNotStartedDate = LocalDateTime.now().isAfter(internship.getStartDate());
+
+        if (isNotStartedStatus && isNotStartedDate) {
+            throw new DataValidationException(
+                    "The internship with ID (%d) has not started yet!".formatted(internship.getId())
+            );
+        }
     }
 
-    private void validateInternshipStatus(Internship internship, long internshipId) {
+    public void validateInternshipIncomplete(Internship internship) {
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
             throw new DataValidationException(
-                    "The internship with ID (%d) has been already completed!".formatted(internshipId)
-            );
-        }
-        if (internship.getStatus() != InternshipStatus.IN_PROGRESS
-                && LocalDateTime.now().isBefore(internship.getStartDate())) {
-            throw new DataValidationException(
-                    "The internship with ID (%d) has not started yet!".formatted(internshipId)
+                    "The internship with ID (%d) has been already completed!".formatted(internship.getId())
             );
         }
     }
 
-    private void validateUserIds(List<Long> userIds) {
-        List<Long> notExistingUserIds = getNotExistingUserIds(userIds);
-
+    public void validateNotExistingUserIds(List<Long> notExistingUserIds) {
         if (!notExistingUserIds.isEmpty()) {
             throw new DataValidationException(
-                    String.format("Not all user ids exist in database! Missing IDs: %s", notExistingUserIds)
+                    "Not all user ids exist in database! Missing IDs: %s".formatted(notExistingUserIds)
             );
         }
     }
 
-    private void validateInternshipDuration(LocalDateTime startDate, LocalDateTime endDate) {
+    public void validateInternshipDuration(LocalDateTime startDate, LocalDateTime endDate) {
         Period internshipDuration = Period.between(startDate.toLocalDate(), endDate.toLocalDate());
+        int monthsDuration = internshipDuration.getMonths();
+        int daysDuration = internshipDuration.getDays();
 
-        if (internshipDuration.getMonths() > MAX_INTERNSHIP_MONTHS_DURATION
-                || internshipDuration.getMonths() == MAX_INTERNSHIP_MONTHS_DURATION && internshipDuration.getDays() > 0
-        ) {
+        boolean isMonthsDurationExceeded = monthsDuration > MAX_INTERNSHIP_MONTHS_DURATION;
+        boolean isDaysDurationExceeded = internshipDuration.getMonths() == MAX_INTERNSHIP_MONTHS_DURATION &&  daysDuration > 0;
+
+        if (isMonthsDurationExceeded || isDaysDurationExceeded) {
             throw new DataValidationException(
                     "The internship should last no more than %d months!".formatted(MAX_INTERNSHIP_MONTHS_DURATION)
             );
         }
     }
 
-    private void validateProjectExistence(long projectId) {
-        if (!projectService.isProjectExists(projectId)) {
-            throw new DataValidationException("The project with ID %d does not exist in database!".formatted(projectId));
-        }
-    }
+    public void validateExistingInterns(long internshipId, List<TeamMember> interns, List<Long> internUserIdsToCheck) {
+        Set<Long> existingInternUserIds = interns.stream()
+                .map(TeamMember::getUserId)
+                .collect(Collectors.toSet());
 
-    private TeamMember getMentorForProject(long mentorUserId, long projectId) {
-        TeamMember mentor = teamMemberService.getByUserIdAndProjectId(mentorUserId, projectId);
-        if (mentor == null) {
-            throw new DataValidationException(
-                    "There is no mentor with user ID %d working with a project with ID %d in the database."
-                            .formatted(mentorUserId, projectId));
-        }
-        if (mentor.getRoles().contains(TeamRole.INTERN)) {
-            throw new DataValidationException("The mentor can't be intern.");
-        }
-        return mentor;
-    }
+        List<Long> invalidInternUserIds = internUserIdsToCheck.stream()
+                .filter(internUserId -> !existingInternUserIds.contains(internUserId))
+                .toList();
 
-    private List<Long> getNotExistingUserIds(List<Long> userIds) {
-        String url = String.format("%s/not-existing-ids", USER_SERVICE_URL);
-
-        UserIdsDto requestDto = new UserIdsDto();
-        requestDto.setUserIds(userIds);
-
-        RequestEntity<UserIdsDto> request = RequestEntity
-                .post(URI.create(url))
-                .body(requestDto);
-
-        try {
-            ResponseEntity<List<Long>> response = restTemplate.exchange(
-                    request,
-                    new ParameterizedTypeReference<>() {}
-            );
-            return response.getBody();
-        } catch (RestClientException e) {
-            log.error("An error occurred when requesting an external User Service!", e);
-            throw new ServiceCallException("An error occurred when requesting an external User Service!", e);
+        if (!invalidInternUserIds.isEmpty()) {
+            throw new DataValidationException("Some user IDs do not match any interns in internship with ID %d: %s"
+                    .formatted(internshipId, invalidInternUserIds));
         }
     }
 }
