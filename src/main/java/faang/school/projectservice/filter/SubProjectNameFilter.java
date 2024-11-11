@@ -19,7 +19,7 @@ public class SubProjectNameFilter implements SubProjectFilter {
         Objects.requireNonNull(filters, "Filters cannot be null");
 
         return projects.filter(project ->
-                filters.getName().toLowerCase().contains(project.getName().toLowerCase())
+                project.getName().toLowerCase().contains(filters.getName().toLowerCase())
         );
     }
 }
