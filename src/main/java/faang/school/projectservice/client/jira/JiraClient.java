@@ -22,6 +22,6 @@ public class JiraClient {
     @Bean
     public JiraRestClient jiraRestClient() throws URISyntaxException {
         return new AsynchronousJiraRestClientFactory()
-                .createWithBasicHttpAuthentication(URI.create(url), username, token);
+                .createWithBasicHttpAuthentication(new URI(url), username, token);
     }
 }

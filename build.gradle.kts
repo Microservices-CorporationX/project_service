@@ -50,19 +50,17 @@ dependencies {
     /**
      * Jira
      */
-    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4")
-    compileOnly ("io.atlassian.fugue:fugue:5.0.0")
-    implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
-    implementation("org.glassfish.jersey.core:jersey-client:2.34")
-    implementation("org.glassfish.jersey.core:jersey-common:2.34")
-    implementation("org.glassfish.jersey.media:jersey-media-json-jackson:2.34")
-    implementation("org.glassfish.jersey.inject:jersey-hk2:2.34")
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.2.4") {
+    exclude(group = "org.glassfish.jersey.core", module = "jersey-common")
+    }
+    implementation("com.atlassian.jira:jira-rest-java-client-api:6.0.1")
+    implementation("org.glassfish.jersey.core:jersey-common:2.27")
+    implementation("io.atlassian.fugue:fugue:5.0.2")
 
     /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-joda:2.14.2")
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.6")
     implementation("org.projectlombok:lombok:1.18.26")

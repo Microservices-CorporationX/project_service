@@ -33,7 +33,7 @@ public class RedisConfig {
     }
 
     @Bean(value = "projectViewChannel")
-    ChannelTopic projectViewChannelTopic(@Value("${spring.data.redis.project-view-channel.name}")String name) {
+    ChannelTopic projectViewChannelTopic(@Value("${spring.data.redis.channels.project-view-channel.name}")String name) {
         return new ChannelTopic(name);
     }
 }
