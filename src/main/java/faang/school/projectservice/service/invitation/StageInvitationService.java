@@ -64,7 +64,6 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(savedInvitation);
     }
 
-    @Transactional
     public StageInvitationDTO acceptInvitation(Long invitationId) {
         log.info("Принятие приглашения с ID: {}", invitationId);
 
@@ -101,7 +100,6 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(updatedInvitation);
     }
 
-    @Transactional(readOnly = true)
     public List<StageInvitationDTO> getAllInvitationsForUser(Long userId, StageInvitationStatus status, LocalDate dateFilter) {
         log.info("Получение всех приглашений для пользователя с ID: {}", userId);
 
