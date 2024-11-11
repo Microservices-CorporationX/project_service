@@ -35,10 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
-@ActiveProfiles("testcontainers")
+@ActiveProfiles("integrationtest")
 public class ProjectControllerTest {
     @Container
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     @Autowired
     private MockMvc mockMvc;
     private ObjectMapper objectMapper = new ObjectMapper();
