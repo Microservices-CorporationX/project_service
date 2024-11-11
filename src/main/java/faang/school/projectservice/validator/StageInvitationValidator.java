@@ -10,15 +10,12 @@ import org.springframework.stereotype.Component;
 public class StageInvitationValidator {
 
     public void validateInvitation(StageInvitationDto stageInvitationDto) {
-        if (stageInvitationDto.getStage() == null || stageInvitationDto.getAuthor() == null || stageInvitationDto.getInvited() == null) {
-            throw new DataValidationException(
-                    """
-                    Invitation is missing required information. Next information must not be null:
-                    - stage
-                    - author
-                    - invited
-                    """
-            );
+        if (stageInvitationDto.getStage() == null) {
+            throw new DataValidationException("Stage not specified");
+        } else if(stageInvitationDto.getAuthor() == null) {
+            throw new DataValidationException("Author not specified");
+        } else if (stageInvitationDto.getInvited() == null) {
+            throw new DataValidationException("Invited not specified");
         }
     }
 

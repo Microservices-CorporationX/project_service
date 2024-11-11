@@ -6,12 +6,10 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Component
 public class StageInvitationDto {
     private Long id;
     private String description;
