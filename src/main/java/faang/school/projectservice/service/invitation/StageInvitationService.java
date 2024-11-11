@@ -2,11 +2,10 @@ package faang.school.projectservice.service.invitation;
 
 import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
-import faang.school.projectservice.exceptions.invitation.InvitationNotFoundException;
-import faang.school.projectservice.filters.DateFilter;
-import faang.school.projectservice.filters.InvitationFilter;
-import faang.school.projectservice.filters.StatusFilter;
-import faang.school.projectservice.filters.UserIdFilter;
+import faang.school.projectservice.filters.Invitation.DateFilter;
+import faang.school.projectservice.filters.Invitation.InvitationFilter;
+import faang.school.projectservice.filters.Invitation.StatusFilter;
+import faang.school.projectservice.filters.Invitation.UserIdFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
