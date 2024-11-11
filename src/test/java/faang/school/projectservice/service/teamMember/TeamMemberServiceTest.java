@@ -110,9 +110,9 @@ class TeamMemberServiceTest {
     }
 
     @Test
-    void deleteTeamMembersTest() {
+    void deleteAllTeamMembersTest() {
         List<TeamMember> teamMembersToDelete = List.of(new TeamMember());
-        assertDoesNotThrow(() -> teamMemberService.delete(teamMembersToDelete));
+        assertDoesNotThrow(() -> teamMemberService.deleteAll(teamMembersToDelete));
         verify(teamMemberRepository, times(1)).deleteAll(teamMembersToDelete);
     }
 }
