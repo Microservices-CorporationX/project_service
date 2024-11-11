@@ -22,8 +22,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
@@ -116,7 +122,6 @@ class StageServiceTest {
                 .description("Description 1")
                 .build();
 
-
         stageDto = StageDto.builder()
                 .stageName("Stage 1")
                 .projectId(1L)
@@ -163,10 +168,10 @@ class StageServiceTest {
 
     @Test
     void testCreateStageThrowException() {
-        when(projectService.getById(1L)).thenThrow(new EntityNotFoundException(
+        when(projectService.getProjectById(1L)).thenThrow(new EntityNotFoundException(
                 String.format("Project not found by id: %s", 1L)));
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.getById(1L),
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(1L),
                 String.format("Project not found by id: %s", 1L));
     }
 
@@ -174,6 +179,7 @@ class StageServiceTest {
     void testCreateStageSuccessfully() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
         when(projectService.getProjectById(1L)).thenReturn(project);
+
         when(stageRepository.save(stage)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 

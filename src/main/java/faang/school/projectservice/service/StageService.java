@@ -21,7 +21,7 @@ public class StageService {
     private final ProjectService projectService;
     private final StageMapper stageMapper;
     private final StageValidator stageValidator;
-
+  
     public void setExecutor(Long stageId, Long executorId) {
         Stage stage = stageRepository.getById(stageId);
         List<TeamMember> executors = stage.getExecutors();

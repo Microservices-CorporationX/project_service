@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -58,6 +57,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         log.error("Entity not found exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotUniqueProjectException.class)
+    public ResponseEntity<String> notUniqueProjectException(NotUniqueProjectException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(InsufficientCandidatesException.class)
