@@ -40,7 +40,7 @@ public class TeamMemberService {
         teamMemberRepository.delete(teamMember);
     }
 
-    public void delete(List<TeamMember> teamMembers) {
+    public void deleteAll(List<TeamMember> teamMembers) {
         teamMemberRepository.deleteAll(teamMembers);
     }
 }

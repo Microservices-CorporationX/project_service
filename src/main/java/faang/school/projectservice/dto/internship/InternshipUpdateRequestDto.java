@@ -19,7 +19,7 @@ public class InternshipUpdateRequestDto {
 
     private Long id;
     private List<Long> completedInternUserIds;
-    private List<Long> sackedInternUserIds;
+    private List<Long> incompleteInternUserIds;
     private TeamRole internNewTeamRole;
     private InternshipStatus internshipStatus;
 }
