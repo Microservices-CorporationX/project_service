@@ -42,9 +42,6 @@ public class MomentService {
 
     public MomentDto updateMoment(MomentDto momentDto) {
         Moment updateMoment = findMomentById(momentDto.getId());
-//        List<Project> projects = projectService.findAllById(momentDto.getProjectsIds());
-//        updateMoment.getProjects().addAll(projects);
-//        momentRepository.save(updateMoment);
         momentMapper.update(momentDto,updateMoment);
         return momentMapper.toDto(momentRepository.save(updateMoment));
     }
