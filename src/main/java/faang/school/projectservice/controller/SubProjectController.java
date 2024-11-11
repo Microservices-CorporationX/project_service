@@ -20,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/project/{projectId}/sub-project")
+@RequestMapping("/projects/{projectId}/sub-projects")
 @RequiredArgsConstructor
 public class SubProjectController {
 
