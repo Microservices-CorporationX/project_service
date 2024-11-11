@@ -1,7 +1,6 @@
 package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.EntityNullException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -66,9 +66,14 @@ class TeamMemberServiceTest {
     }
 
     @Test
-    void saveNullTeamMemberTest() {
-        EntityNullException exception = assertThrows(EntityNullException.class, () -> teamMemberService.save(null));
-        assertEquals("Entity %s cannot be null".formatted(TEAM_MEMBER), exception.getMessage());
+    void saveTeamMembersTest() {
+        TeamMember teamMember = new TeamMember();
+        List<TeamMember> membersToSave = List.of(teamMember);
+        when(teamMemberRepository.saveAll(membersToSave)).thenReturn(membersToSave);
+
+        List<TeamMember> savedTeamMembers = assertDoesNotThrow(() -> teamMemberService.saveAll(membersToSave));
+        assertEquals(1, savedTeamMembers.size());
+        verify(teamMemberRepository, times(1)).saveAll(membersToSave);
     }
 
     @Test
@@ -95,5 +100,19 @@ class TeamMemberServiceTest {
 
         assertEquals("Entity %s with ID %s not found".formatted(TEAM_MEMBER, userId), exception.getMessage());
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(userId, projectId);
+    }
+
+    @Test
+    void deleteTeamMemberTest() {
+        TeamMember teamMember = new TeamMember();
+        assertDoesNotThrow(() -> teamMemberService.delete(teamMember));
+        verify(teamMemberRepository, times(1)).delete(teamMember);
+    }
+
+    @Test
+    void deleteTeamMembersTest() {
+        List<TeamMember> teamMembersToDelete = List.of(new TeamMember());
+        assertDoesNotThrow(() -> teamMemberService.delete(teamMembersToDelete));
+        verify(teamMemberRepository, times(1)).deleteAll(teamMembersToDelete);
     }
 }

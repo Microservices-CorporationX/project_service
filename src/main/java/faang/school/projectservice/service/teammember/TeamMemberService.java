@@ -1,12 +1,13 @@
 package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.EntityNullException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +24,23 @@ public class TeamMemberService {
     }
 
     public TeamMember save(TeamMember teamMember) {
-        if (teamMember == null) {
-            throw new EntityNullException(TEAM_MEMBER);
-        }
         return teamMemberRepository.save(teamMember);
+    }
+
+    public List<TeamMember> saveAll(List<TeamMember> teamMembers) {
+        return teamMemberRepository.saveAll(teamMembers);
     }
 
     public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
+    }
+
+    public void delete(TeamMember teamMember) {
+        teamMemberRepository.delete(teamMember);
+    }
+
+    public void delete(List<TeamMember> teamMembers) {
+        teamMemberRepository.deleteAll(teamMembers);
     }
 }
