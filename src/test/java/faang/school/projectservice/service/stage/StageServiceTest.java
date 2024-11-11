@@ -1,8 +1,6 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
@@ -47,13 +45,10 @@ class StageServiceTest {
     @Spy
     private StageMapper stageMapper;
 
-    @Spy
-    private ProjectMapper projectMapper;
-
     private Stage stage;
+    private Stage newStage;
     private TeamMember teamMember;
     private Project project;
-    private ProjectDto projectDto;
     private StageDto stageDto;
     private StageRoles stageRoles;
     private Task task;
@@ -67,12 +62,28 @@ class StageServiceTest {
         task = Task
                 .builder()
                 .status(TaskStatus.DONE)
+                .stage(stage)
                 .build();
 
         stage = Stage
                 .builder()
                 .stageId(1L)
                 .stageName("Stage 1")
+                .stageRoles(List.of(stageRoles))
+                .tasks(List.of(task))
+                .project(
+                        Project
+                                .builder()
+                                .id(1L)
+                                .build()
+                )
+                .executors(new ArrayList<>())
+                .build();
+
+        newStage = Stage
+                .builder()
+                .stageId(2L)
+                .stageName("Stage 2")
                 .stageRoles(List.of(stageRoles))
                 .tasks(List.of(task))
                 .project(
@@ -105,11 +116,6 @@ class StageServiceTest {
                 .description("Description 1")
                 .build();
 
-        projectDto = ProjectDto
-                .builder()
-                .name("Project 1")
-                .description("Description 1")
-                .build();
 
         stageDto = StageDto.builder()
                 .stageName("Stage 1")
@@ -167,8 +173,7 @@ class StageServiceTest {
     @Test
     void testCreateStageSuccessfully() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
-        when(projectService.getById(stageDto.getProjectId())).thenReturn(projectDto);
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
+        when(projectService.getProjectById(1L)).thenReturn(project);
         when(stageRepository.save(stage)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
@@ -221,4 +226,49 @@ class StageServiceTest {
                         stageService.getStagesBy(1L, "designer", "sleep"),
                 String.format("Invalid status: %s", "sleep"));
     }
+
+    @Test
+    void testDeleteStageSuccessfully() {
+        when(stageRepository.getById(1L)).thenReturn(stage);
+
+        stageService.deleteStage(1L);
+
+        verify(stageRepository, times(1)).getById(1L);
+        verify(stageRepository, times(1)).delete(stage);
+    }
+
+    @Test
+    void testDeleteStageAndMoveTasksSuccessfully() {
+        when(stageRepository.getById(1L)).thenReturn(stage);
+        when(stageRepository.getById(2L)).thenReturn(newStage);
+
+        stageService.deleteStageAndMoveTasks(1L, 2L);
+
+        assertEquals(stage.getTasks(), newStage.getTasks());
+        verify(stageRepository, times(1)).getById(1L);
+        verify(stageRepository, times(1)).getById(2L);
+        verify(stageRepository, times(1)).delete(stage);
+    }
+
+    @Test
+    void testDeleteStageAndMoveTasksIfNewStageThrowEntityNotFoundException() {
+        when(stageRepository.getById(1L)).thenReturn(stage);
+        when(stageRepository.getById(2L)).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", 2L)));
+
+        assertThrows(EntityNotFoundException.class, () ->
+                        stageService.deleteStageAndMoveTasks(1L, 2L),
+                String.format("Stage not found by id: %s", 2L));
+    }
+
+    @Test
+    void testDeleteStageAndMoveTasksIfStageThrowEntityNotFoundException2() {
+        when(stageRepository.getById(1L)).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", 1L)));
+
+        assertThrows(EntityNotFoundException.class, () ->
+                        stageService.deleteStageAndMoveTasks(1L, 2L),
+                String.format("Stage not found by id: %s", 1L));
+    }
+
 }

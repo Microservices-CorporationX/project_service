@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -21,7 +20,6 @@ public class StageService {
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
     private final StageMapper stageMapper;
-    private final ProjectMapper projectMapper;
     private final StageValidator stageValidator;
 
     public void setExecutor(Long stageId, Long executorId) {
@@ -43,12 +41,12 @@ public class StageService {
 
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
-        Project project = projectMapper.toEntity(projectService.getById(stageDto.getProjectId()));
+        Project project = projectService.getProjectById(stageDto.getProjectId());
         stage.setProject(project);
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
-    public List<StageDto> getStagesBy(Long projectId, String role, String status) {
+    public List<StageDto> getStagesBy(long projectId, String role, String status) {
         validateInput(projectId, role, status);
         return stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId().equals(projectId))
@@ -62,7 +60,19 @@ public class StageService {
                 .toList();
     }
 
-    private void validateInput(Long projectId, String role, String status) {
+    public void deleteStage(long stageId) {
+        Stage stage = stageRepository.getById(stageId);
+        stageRepository.delete(stage);
+    }
+
+    public void deleteStageAndMoveTasks(long stageId, long newStageId) {
+        Stage stage = stageRepository.getById(stageId);
+        Stage newStage = stageRepository.getById(newStageId);
+        newStage.setTasks(stage.getTasks());
+        stageRepository.delete(stage);
+    }
+
+    private void validateInput(long projectId, String role, String status) {
         if (projectService.existsById(projectId)) {
             stageValidator.validateStageRole(role);
             stageValidator.validateTaskStatus(status);
