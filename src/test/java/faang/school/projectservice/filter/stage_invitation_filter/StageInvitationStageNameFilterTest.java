@@ -45,6 +45,15 @@ class StageInvitationStageNameFilterTest {
     }
 
     @Test
+    public void filterIsNullTest() {
+        filterDto = null;
+
+        boolean result = stageNameFilter.isApplicable(filterDto);
+
+        assertFalse(result);
+    }
+
+    @Test
     public void filterDescriptionPatternIsBlankTest() {
         filterDto.setStageNamePattern("");
 

@@ -11,7 +11,9 @@ public class StageInvitationDescriptionFilter implements StageInvitationFilter {
 
     @Override
     public boolean isApplicable(StageInvitationFilterDto filter) {
-        return filter.getDescriptionPattern() != null && !filter.getDescriptionPattern().isBlank();
+        return filter != null &&
+                filter.getDescriptionPattern() != null &&
+                !filter.getDescriptionPattern().isBlank();
     }
 
     @Override

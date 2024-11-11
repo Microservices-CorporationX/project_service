@@ -46,6 +46,15 @@ class StageInvitationProjectNameFilterTest {
     }
 
     @Test
+    public void filterIsNullTest() {
+        filterDto = null;
+
+        boolean result = projectNameFilter.isApplicable(filterDto);
+
+        assertFalse(result);
+    }
+
+    @Test
     public void filterDescriptionPatternIsBlankTest() {
         filterDto.setProjectNamePattern("");
 

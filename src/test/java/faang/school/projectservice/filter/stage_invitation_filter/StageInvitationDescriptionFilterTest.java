@@ -35,6 +35,15 @@ class StageInvitationDescriptionFilterTest {
     }
 
     @Test
+    public void filterIsNullTest() {
+        filterDto = null;
+
+        boolean result = descriptionFilter.isApplicable(filterDto);
+
+        assertFalse(result);
+    }
+
+    @Test
     public void filterDescriptionPatternIsNullTest() {
         filterDto.setDescriptionPattern(null);
 
