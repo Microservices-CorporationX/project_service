@@ -72,7 +72,9 @@ public class ProjectService {
 
         List<ProjectDto> result = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(projects.stream(), filterDto))
+                .reduce(projects.stream(),
+                        (projectsStream, filter) -> filter.apply(projectsStream, filterDto),
+                        (s1, s2) -> s1)
                 .map(projectMapper::toDto)
                 .toList();
 
