@@ -34,7 +34,7 @@ public class SubProjectController {
         return projectService.updateSubProject(subProjectDto);
     }
 
-    @GetMapping("/{Id}/getSubProject")
+    @PostMapping("/{Id}/getSubProject")
     public List<ProjectDto> getSubProjects(@NotNull @Min(0) @RequestParam("Id") Long projectId, @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }

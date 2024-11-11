@@ -31,7 +31,9 @@ public class Validator {
         }
 
         if (project.getChildren() != null && !project.getChildren().isEmpty()) {
-            project.getChildren().forEach(subProject -> checkProjectContainsSubProject(subProject, subProjectName));
+            project.getChildren().forEach(subProject ->
+                    checkProjectContainsSubProject(subProject, subProjectName)
+            );
         }
     }
 
