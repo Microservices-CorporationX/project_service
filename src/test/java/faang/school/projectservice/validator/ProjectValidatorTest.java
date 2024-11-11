@@ -41,6 +41,7 @@ class ProjectValidatorTest {
     private Project project;
     private Long ownerId;
     private String projectName;
+    private Long projectId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -118,5 +119,29 @@ class ProjectValidatorTest {
         assertEquals("Project with id 1 doesn't exist", ex.getMessage());
 
         verify(projectRepository, times(1)).existsById(projectId);
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusInProgress() {
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertTrue(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusCompleted() {
+        project.setStatus(ProjectStatus.COMPLETED);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertFalse(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusCancelled() {
+        project.setStatus(ProjectStatus.CANCELLED);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertFalse(projectValidator.isOpenProject(projectId));
     }
 }

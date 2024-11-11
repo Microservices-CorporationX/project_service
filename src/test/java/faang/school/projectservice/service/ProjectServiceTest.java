@@ -244,6 +244,34 @@ class ProjectServiceTest {
                 projectService.getAccessibleProjectsById(project.getId(), ownerId));
     }
 
+    @Test
+    public void testFindAllByIdWhenProjectsExist() {
+        List<Long> ids = List.of(1L, 2L, 3L);
+        Project project1 = new Project();
+        project1.setId(1L);
+        Project project2 = new Project();
+        project2.setId(2L);
+        Project project3 = new Project();
+        project3.setId(3L);
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of(project1, project2, project3));
+
+        List<Project> result = projectService.findAllById(ids);
+
+        assertEquals(3, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+        assertEquals(3L, result.get(2).getId());
+    }
+
+    @Test
+    public void testFindAllByIdWhenNoProjectsFound() {
+        List<Long> ids = List.of(1L, 2L, 3L);
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of());
+
+        List<Project> result = projectService.findAllById(ids);
+        assertEquals(0, result.size());
+    }
+
     private List<Project> getProjectsList() {
         return List.of(
                 Project.builder()

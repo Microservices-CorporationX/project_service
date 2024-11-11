@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -37,5 +38,10 @@ public class ProjectValidator {
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
+    }
+
+    public boolean isOpenProject(Long projectId) {
+        ProjectStatus status = projectRepository.getProjectById(projectId).getStatus();
+        return status == ProjectStatus.CREATED || status == ProjectStatus.IN_PROGRESS;
     }
 }
