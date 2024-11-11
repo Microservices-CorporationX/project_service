@@ -189,7 +189,7 @@ class StageServiceTest {
         when(stageRepository.findAll()).thenReturn(List.of(stage));
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
-        List<StageDto> result = stageService.getStagesBy(1L, "designer", "done");
+        List<StageDto> result = stageService.getAllStagesBy(1L, "designer", "done");
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -201,29 +201,29 @@ class StageServiceTest {
         when(projectService.existsById(3L)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.getStagesBy(3L, "designer", "done"),
+                        stageService.getAllStagesBy(3L, "designer", "done"),
                 String.format("Project not found by id: %s", 3L));
     }
 
     @Test
     void testGetStagesByProjectIdRoleAndStatusInvalidRoleThrowIllegalArgumentException() {
         when(projectService.existsById(1L)).thenReturn(true);
-        when(stageService.getStagesBy(1L, "developer", "done"))
+        when(stageService.getAllStagesBy(1L, "developer", "done"))
                 .thenThrow(new IllegalArgumentException(String.format("Invalid role: %s", "developer")));
 
         assertThrows(IllegalArgumentException.class, () ->
-                        stageService.getStagesBy(1L, "developer", "done"),
+                        stageService.getAllStagesBy(1L, "developer", "done"),
                 String.format("Invalid role: %s", "developer"));
     }
 
     @Test
     void testGetStagesByProjectIdRoleAndStatusInvalidStatusThrowIllegalArgumentException() {
         when(projectService.existsById(1L)).thenReturn(true);
-        when(stageService.getStagesBy(1L, "designer", "sleep"))
+        when(stageService.getAllStagesBy(1L, "designer", "sleep"))
                 .thenThrow(new IllegalArgumentException(String.format("Invalid status: %s", "in progress")));
 
         assertThrows(IllegalArgumentException.class, () ->
-                        stageService.getStagesBy(1L, "designer", "sleep"),
+                        stageService.getAllStagesBy(1L, "designer", "sleep"),
                 String.format("Invalid status: %s", "sleep"));
     }
 
@@ -268,6 +268,50 @@ class StageServiceTest {
 
         assertThrows(EntityNotFoundException.class, () ->
                         stageService.deleteStageAndMoveTasks(1L, 2L),
+                String.format("Stage not found by id: %s", 1L));
+    }
+
+    @Test
+    void testGetAllStagesByProjectIdSuccessfully() {
+        when(projectService.getProjectById(1L)).thenReturn(project);
+        when(stageRepository.findAll()).thenReturn(List.of(stage));
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        List<StageDto> result = stageService.getAllStagesBy(1L);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Stage 1", result.get(0).getStageName());
+    }
+
+    @Test
+    void testGetAllStagesByProjectIdInvalidProjectIdThrowEntityNotFoundException() {
+        when(projectService.getProjectById(3L)).thenThrow(new EntityNotFoundException(
+                String.format("Project not found by id: %s", 3L)));
+
+        assertThrows(EntityNotFoundException.class, () ->
+                        stageService.getAllStagesBy(3L),
+                String.format("Project not found by id: %s", 3L));
+    }
+
+    @Test
+    void testGetStageSuccessfully() {
+        when(stageRepository.getById(1L)).thenReturn(stage);
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+
+        StageDto result = stageService.getStage(1L);
+
+        assertNotNull(result);
+        assertEquals("Stage 1", result.getStageName());
+    }
+
+    @Test
+    void testGetStageThrowEntityNotFoundException() {
+        when(stageRepository.getById(1L)).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", 1L)));
+
+        assertThrows(EntityNotFoundException.class, () ->
+                        stageService.getStage(1L),
                 String.format("Stage not found by id: %s", 1L));
     }
 

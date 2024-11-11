@@ -16,11 +16,21 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    @GetMapping("get/all/{projectId}/filter")
+    @GetMapping("/get/all/{projectId}/filter")
     public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId,
                                          @NonNull @RequestParam String role,
                                          @NonNull @RequestParam String status) {
-        return stageService.getStagesBy(projectId, role, status);
+        return stageService.getAllStagesBy(projectId, role, status);
+    }
+
+    @GetMapping("/get/all/{projectId}")
+    public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId) {
+        return stageService.getAllStagesBy(projectId);
+    }
+
+    @GetMapping("/get/{stageId}")
+    public StageDto getStage(@PathVariable @Positive long stageId) {
+        return stageService.getStage(stageId);
     }
 
     @PostMapping("/create")

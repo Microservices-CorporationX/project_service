@@ -46,7 +46,7 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
-    public List<StageDto> getStagesBy(long projectId, String role, String status) {
+    public List<StageDto> getAllStagesBy(long projectId, String role, String status) {
         validateInput(projectId, role, status);
         return stageRepository.findAll().stream()
                 .filter(stage -> stage.getProject().getId().equals(projectId))
@@ -56,6 +56,14 @@ public class StageService {
                 .filter(stage -> stage.getTasks().stream()
                         .map(task -> task.getStatus().toString())
                         .anyMatch(status.toLowerCase()::equals))
+                .map(stageMapper::toDto)
+                .toList();
+    }
+
+    public List<StageDto> getAllStagesBy(long projectId) {
+        Project project = projectService.getProjectById(projectId);
+        return stageRepository.findAll().stream()
+                .filter(stage -> stage.getProject().getId().equals(project.getId()))
                 .map(stageMapper::toDto)
                 .toList();
     }
@@ -70,6 +78,10 @@ public class StageService {
         Stage newStage = stageRepository.getById(newStageId);
         newStage.setTasks(stage.getTasks());
         stageRepository.delete(stage);
+    }
+
+    public StageDto getStage(long stageId) {
+        return stageMapper.toDto(stageRepository.getById(stageId));
     }
 
     private void validateInput(long projectId, String role, String status) {
