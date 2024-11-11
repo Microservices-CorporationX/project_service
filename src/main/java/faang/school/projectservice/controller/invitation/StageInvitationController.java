@@ -39,7 +39,7 @@ public class StageInvitationController {
     public StageInvitationDTO rejectInvitation(@PathVariable @NotNull Long invitationId,
                                                @Valid @RequestBody RejectionReasonDTO rejectionReason) {
         log.info("Received request to reject invitation with ID: {} for reason: {}", invitationId, rejectionReason.getReason());
-        return stageInvitationService.rejectInvitation(invitationId, rejectionReason.getReason());
+        return stageInvitationService.rejectInvitation(invitationId, rejectionReason);
     }
 
     @GetMapping

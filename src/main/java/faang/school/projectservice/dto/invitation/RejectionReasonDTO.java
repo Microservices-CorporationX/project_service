@@ -10,4 +10,7 @@ public class RejectionReasonDTO {
 
     @NotBlank(message = "Причина отклонения не может быть пустой")
     private String reason;
+
+    private String rejectionReason;
+
 }
