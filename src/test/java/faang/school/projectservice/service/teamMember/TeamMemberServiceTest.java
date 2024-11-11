@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.exception.EntityNullException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -56,32 +58,40 @@ class TeamMemberServiceTest {
     @Test
     void saveTeamMemberTest() {
         TeamMember teamMember = new TeamMember();
-        teamMemberService.save(teamMember);
+        when(teamMemberRepository.save(teamMember)).thenReturn(teamMember);
 
+        TeamMember savedTeamMember = assertDoesNotThrow(() -> teamMemberService.save(teamMember));
         verify(teamMemberRepository, times(1)).save(teamMember);
+        assertEquals(teamMember, savedTeamMember);
     }
 
     @Test
-    void getByUserIdAndProjectIdExistingMemberTest() {
+    void saveNullTeamMemberTest() {
+        EntityNullException exception = assertThrows(EntityNullException.class, () -> teamMemberService.save(null));
+        assertEquals("Entity %s cannot be null".formatted(TEAM_MEMBER), exception.getMessage());
+    }
+
+    @Test
+    void findByUserIdAndProjectIdFoundTest() {
         long userId = 1L;
         long projectId = 2L;
         TeamMember teamMember = new TeamMember();
         when(teamMemberRepository.findByUserIdAndProjectId(userId, projectId)).thenReturn(Optional.of(teamMember));
 
-        TeamMember result = teamMemberService.getByUserIdAndProjectId(userId, projectId);
+        TeamMember result = teamMemberService.findByUserIdAndProjectId(userId, projectId);
 
         assertEquals(teamMember, result);
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(userId, projectId);
     }
 
     @Test
-    void getByUserIdAndProjectIdNotExistingMemberTest() {
+    void findByUserIdAndProjectIdNotFoundTest() {
         long userId = 1L;
         long projectId = 2L;
         when(teamMemberRepository.findByUserIdAndProjectId(userId, projectId)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class, () -> teamMemberService.getByUserIdAndProjectId(userId, projectId));
+                EntityNotFoundException.class, () -> teamMemberService.findByUserIdAndProjectId(userId, projectId));
 
         assertEquals("Entity %s with ID %s not found".formatted(TEAM_MEMBER, userId), exception.getMessage());
         verify(teamMemberRepository, times(1)).findByUserIdAndProjectId(userId, projectId);
