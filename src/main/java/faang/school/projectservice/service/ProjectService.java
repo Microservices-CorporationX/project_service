@@ -25,6 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
 
+
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
         log.info("Creating project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
@@ -44,11 +45,9 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    @Transactional
     public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
         log.info("Updating project with ID: {}", projectId);
         Project project = projectRepository.getProjectById(projectId);
-
 
         project.setName(projectDto.getName());
         project.setDescription(projectDto.getDescription());
@@ -59,12 +58,10 @@ public class ProjectService {
         }
 
         project.setUpdatedAt(LocalDateTime.now());
-
         project = projectRepository.save(project);
         log.info("Project with ID: {} updated successfully", projectId);
         return projectMapper.toDto(project);
     }
-
     public List<ProjectDto> findProjects(String name, ProjectStatus status, ProjectVisibility visibility, Long userId) {
         log.info("Finding projects with filters - Name: {}, Status: {}, Visibility: {}", name, status, visibility);
         ProjectFilter filter = new ProjectFilter(name, status, visibility, userId);
@@ -92,11 +89,5 @@ public class ProjectService {
             log.warn("Project with name: {} already exists for owner ID: {}", name, ownerId);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Project with the same name already exists for this owner.");
         }
-    }
-
-    private void updateProjectDetails(Project project, String description, ProjectStatus status) {
-        project.setDescription(description);
-        project.setStatus(status);
-        project.setUpdatedAt(LocalDateTime.now());
     }
 }

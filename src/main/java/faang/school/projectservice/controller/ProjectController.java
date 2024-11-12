@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
-
+    private final Long userId = 1L;
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         log.info("Received request to create project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
@@ -35,7 +35,6 @@ public class ProjectController {
                                          @RequestParam(required = false) ProjectStatus status,
                                          @RequestParam(required = false) ProjectVisibility visibility) {
         log.info("Received request to find projects with filters - Name: {}, Status: {}, Visibility: {}", name, status, visibility);
-        Long userId = getUserIdFromContext();
         return projectService.findProjects(name, status, visibility, userId);
     }
 
@@ -49,9 +48,5 @@ public class ProjectController {
     public ProjectDto getProjectById(@PathVariable Long id) {
         log.info("Received request to retrieve project with ID: {}", id);
         return projectService.getProjectById(id);
-    }
-
-    private Long getUserIdFromContext() {
-        return 1L;
     }
 }

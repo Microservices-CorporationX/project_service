@@ -78,8 +78,7 @@ public class ProjectControllerTests {
 
         performPostRequest("/projects", projectDto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(projectDto.getName()))
-                .andExpect(jsonPath("$.ownerId").value(projectDto.getOwnerId()));
+                .andExpect(content().json(objectMapper.writeValueAsString(projectDto)));
     }
 
     @Test
@@ -88,8 +87,7 @@ public class ProjectControllerTests {
 
         performPostRequest("/projects/1", projectDto)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(projectDto.getId()))
-                .andExpect(jsonPath("$.name").value(projectDto.getName()));
+                .andExpect(content().json(objectMapper.writeValueAsString(projectDto)));
     }
 
     @Test
@@ -102,8 +100,7 @@ public class ProjectControllerTests {
                         .param("status", "CREATED")
                         .param("visibility", "PUBLIC"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value(projectDto.getName()));
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(projectDto))));
     }
 
     @Test
@@ -112,8 +109,7 @@ public class ProjectControllerTests {
 
         performGetRequest("/projects/all")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value(projectDto.getName()));
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(projectDto))));
     }
 
     @Test
@@ -122,17 +118,17 @@ public class ProjectControllerTests {
 
         performGetRequest("/projects/1")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(projectDto.getId()))
-                .andExpect(jsonPath("$.name").value(projectDto.getName()));
+                .andExpect(content().json(objectMapper.writeValueAsString(projectDto)));
     }
 
     @Test
     void createProject_ValidationError() throws Exception {
-        ProjectDto invalidDto = new ProjectDto(); // empty to trigger validation error
+        ProjectDto invalidDto = new ProjectDto();
 
         performPostRequest("/projects", invalidDto)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors").exists()); // Customize based on actual error response
+                .andExpect(jsonPath("$.errors.name").value("Project name is required"))
+                .andExpect(jsonPath("$.errors.ownerId").value("Owner ID is required"));
     }
 
     @Test
@@ -154,5 +150,5 @@ public class ProjectControllerTests {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Project not found"));
     }
-    //Added tes cannot make pull request
+
 }
