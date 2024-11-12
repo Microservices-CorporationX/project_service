@@ -6,31 +6,27 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class ProjectDto {
+public class UpdateProjectDto {
 
-    @Positive(message = "Id must be greater than 0.")
+    @NotNull(message = "ProjectId is required.")
+    @Positive(message = "ProjectId must be greater than 0.")
     private Long id;
 
-    @NotBlank(message = "Project name is required")
-    @Size(min = 3, max = 128, message = "Project name must be between 3 and 128 characters")
+    @NotBlank(message = "Project name must not be empty.")
+    @Size(min = 3, max = 128, message = "Name must be between 3 and 128 characters.")
     private String name;
-
-    @NotBlank(message = "Project description must not be empty.")
-    @Size(min = 10, max = 4096, message = "Description must be between 10 and 4096 characters.")
-    private String description;
 
     @NotNull(message = "OwnerId is required.")
     @Positive(message = "OwnerId must be greater than 0.")
     private Long ownerId;
+
+    @Size(min = 10, max = 4096, message = "Description must be between 10 and 4096 characters.")
+    private String description;
 
     private ProjectVisibility visibility;
     private ProjectStatus status;

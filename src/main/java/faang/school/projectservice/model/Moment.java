@@ -3,11 +3,14 @@ package faang.school.projectservice.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
+@Builder
 @Data
 @Entity
 @Table(name = "moment")
@@ -36,7 +39,7 @@ public class Moment {
             joinColumns = @JoinColumn(name = "moment_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<Project> projects;
+    private List<Project> projects = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
