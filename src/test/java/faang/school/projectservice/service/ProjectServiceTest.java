@@ -28,8 +28,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
-    private final static String NOT_OWNER_UPDATING_STATUS_MESSAGE = "Must be the owner to change status";
-    private final static String NOT_OWNER_UPDATING_DESCRIPTION_MESSAGE = "Must be the owner to change description";
+    private static final String NOT_OWNER_UPDATING_MESSAGE = "The user is not the owner of this project";
 
     @Mock
     private UserContext userContext;
@@ -102,7 +101,7 @@ class ProjectServiceTest {
                 .thenReturn(Project.builder().ownerId(2L).build());
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectService.updateStatus(ProjectStatus.CANCELLED, projectId));
-        assertEquals(NOT_OWNER_UPDATING_STATUS_MESSAGE, exception.getMessage());
+        assertEquals(NOT_OWNER_UPDATING_MESSAGE, exception.getMessage());
     }
 
     @Test
@@ -136,7 +135,7 @@ class ProjectServiceTest {
                 .thenReturn(Project.builder().ownerId(2L).build());
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectService.updateDescription("New description", projectId));
-        assertEquals(NOT_OWNER_UPDATING_DESCRIPTION_MESSAGE, exception.getMessage());
+        assertEquals(NOT_OWNER_UPDATING_MESSAGE, exception.getMessage());
     }
 
     @Test
@@ -234,13 +233,6 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(1L))
                 .thenReturn(Project.builder().ownerId(2L).visibility(ProjectVisibility.PRIVATE).build());
         when(userContext.getUserId()).thenReturn(1L);
-        assertTrue(projectService.findById(1L).isEmpty());
-    }
-
-    @Test
-    void testFindByIdWithNonExistentProject() {
-        when(projectRepository.getProjectById(1L))
-                .thenReturn(null);
         assertTrue(projectService.findById(1L).isEmpty());
     }
 

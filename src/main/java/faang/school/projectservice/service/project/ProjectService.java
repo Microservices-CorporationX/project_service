@@ -76,8 +76,11 @@ public class ProjectService {
 
     public Optional<ProjectDto> findById(long id) {
         Project project = projectRepository.getProjectById(id);
-        log.info("User with id {} requested project with id {}", userContext.getUserId(), id);
-        return Optional.of(projectMapper.toDto(project));
+        if (filterPrivate(project)) {
+            log.info("User with id {} requested project with id {}", userContext.getUserId(), id);
+            return Optional.of(projectMapper.toDto(project));
+        }
+        return Optional.empty();
     }
 
     private void validateName(String projectName, Long userId) {
@@ -110,11 +113,10 @@ public class ProjectService {
                         }
                         return Stream.of();
                     }).toList();
-            List<TeamMember> members;
-            members = teams.stream()
+            List<TeamMember> members = teams.stream()
                     .filter(team -> team.getTeamMembers() != null)
                     .flatMap(team -> team.getTeamMembers().stream()).toList();
-            Set<Long> memberIds = members.stream().map(TeamMember::getId).collect(Collectors.toSet());
+            Set<Long> memberIds = members.stream().map(TeamMember::getUserId).collect(Collectors.toSet());
             return userId.equals(project.getOwnerId()) || memberIds.contains(userId);
         }
         return true;
