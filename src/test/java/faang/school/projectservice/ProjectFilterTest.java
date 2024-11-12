@@ -1,6 +1,5 @@
-package faang.school.projectservice;
+package faang.school.projectservice.filter;
 
-import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -11,6 +10,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProjectFilterTest {
+
     @Test
     void testFilterAppliesCorrectly() {
         Project project = Project.builder()
@@ -23,16 +23,16 @@ public class ProjectFilterTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        ProjectFilter filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC, 100L);
+        ProjectFilter filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
         assertThat(filter.apply(project)).isTrue();
 
-        filter = new ProjectFilter("Other Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC, 100L);
+        filter = new ProjectFilter("Other Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
         assertThat(filter.apply(project)).isFalse();
 
-        filter = new ProjectFilter("Test Project", null, ProjectVisibility.PUBLIC, 100L);
+        filter = new ProjectFilter("Test Project", null, ProjectVisibility.PUBLIC);
         assertThat(filter.apply(project)).isTrue();
 
-        filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, null, 100L);
+        filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, null);
         assertThat(filter.apply(project)).isTrue();
     }
 }

@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
-    private final Long userId = 1L;
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         log.info("Received request to create project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
@@ -33,9 +32,9 @@ public class ProjectController {
     @GetMapping
     public List<ProjectDto> findProjects(@RequestParam(required = false) String name,
                                          @RequestParam(required = false) ProjectStatus status,
-                                         @RequestParam(required = false) ProjectVisibility visibility) {
+                                         @RequestParam(required = false, defaultValue = "PUBLIC") ProjectVisibility visibility) {
         log.info("Received request to find projects with filters - Name: {}, Status: {}, Visibility: {}", name, status, visibility);
-        return projectService.findProjects(name, status, visibility, userId);
+        return projectService.findProjects(name, status, visibility);
     }
 
     @GetMapping("/all")

@@ -10,12 +10,10 @@ public class ProjectFilter {
     private final String name;
     private final ProjectStatus status;
     private final ProjectVisibility visibility;
-    private final Long userId;
 
     public boolean apply(Project project) {
-        return (name == null || project.getName().equals(name) &&
+        return (name == null || project.getName().equals(name)) &&
                 (status == null || project.getStatus() == status) &&
-                (visibility == null || project.getVisibility() == visibility) &&
-                (project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId)));
+                (visibility == null || project.getVisibility() == visibility);
     }
 }

@@ -25,7 +25,6 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
 
-
     @Transactional
     public ProjectDto createProject(ProjectDto projectDto) {
         log.info("Creating project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
@@ -45,6 +44,7 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
+    @Transactional
     public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
         log.info("Updating project with ID: {}", projectId);
         Project project = projectRepository.getProjectById(projectId);
@@ -62,9 +62,10 @@ public class ProjectService {
         log.info("Project with ID: {} updated successfully", projectId);
         return projectMapper.toDto(project);
     }
-    public List<ProjectDto> findProjects(String name, ProjectStatus status, ProjectVisibility visibility, Long userId) {
+
+    public List<ProjectDto> findProjects(String name, ProjectStatus status, ProjectVisibility visibility) {
         log.info("Finding projects with filters - Name: {}, Status: {}, Visibility: {}", name, status, visibility);
-        ProjectFilter filter = new ProjectFilter(name, status, visibility, userId);
+        ProjectFilter filter = new ProjectFilter(name, status, visibility);
         return projectRepository.findAll().stream()
                 .filter(filter::apply)
                 .map(projectMapper::toDto)

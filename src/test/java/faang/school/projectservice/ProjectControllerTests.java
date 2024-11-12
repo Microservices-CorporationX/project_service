@@ -92,7 +92,7 @@ public class ProjectControllerTests {
 
     @Test
     void findProjects_Success() throws Exception {
-        when(projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC, 1L))
+        when(projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC))
                 .thenReturn(List.of(projectDto));
 
         mockMvc.perform(get("/projects")

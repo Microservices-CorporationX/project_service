@@ -19,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +59,6 @@ class ProjectServiceApplicationTests {
         projectDto.setStatus(ProjectStatus.CREATED);
         projectDto.setVisibility(ProjectVisibility.PUBLIC);
         projectDto.setCreatedAt(LocalDateTime.now());
-
 
         lenient().when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
     }
@@ -124,7 +122,7 @@ class ProjectServiceApplicationTests {
     void findProjects_PublicAndOwnedProjects() {
         when(projectRepository.findAll()).thenReturn(List.of(project));
 
-        List<ProjectDto> result = projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC, 100L);
+        List<ProjectDto> result = projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
 
         verify(projectRepository).findAll();
         assertThat(result).isNotEmpty();
