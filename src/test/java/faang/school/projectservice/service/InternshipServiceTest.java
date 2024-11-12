@@ -3,8 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
 import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.handler.InternshipCompletionHandler;
-import faang.school.projectservice.mapper.InternshipCreateMapper;
-import faang.school.projectservice.mapper.InternshipUpdateMapper;
+import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -37,17 +36,13 @@ public class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
-    private InternshipCreateMapper internShipCreateMapper;
-
-    @Mock
     private InternshipDurationValidator internshipDurationValidator;
-
-    @Mock
-    private InternshipUpdateMapper internShipUpdateMapper;
 
     @Mock
     private InternshipCompletionHandler completionHandler;
 
+    @Mock
+    private InternshipMapper internshipMapper;
 
     private InternshipCreatedDto createdDto;
     private InternshipUpdatedDto updatedDto;
@@ -70,36 +65,41 @@ public class InternshipServiceTest {
     }
 
     @Test
-    void testCreatValidateAndSaveNewInternship() {
-        when(internShipCreateMapper.toEntity(createdDto)).thenReturn(internship);
-        when(internShipCreateMapper.toDto(internship)).thenReturn(createdDto);
+    public void testCreateValidateAndSaveNewInternship() {
+        when(internshipMapper.createInternship(createdDto)).thenReturn(internship);
         when(internshipRepository.save(any(Internship.class))).thenReturn(internship);
+        when(internshipMapper.toCreatedDto(internship)).thenReturn(createdDto);
 
         InternshipCreatedDto result = internshipService.createInternship(createdDto);
 
         verify(internshipDurationValidator).durationValidate(createdDto);
         verify(projectService).getProjectTeamMembersIds(createdDto);
         verify(internshipRepository).save(internship);
+        verify(internshipMapper).toCreatedDto(internship);
+
         assertEquals(createdDto, result);
     }
 
     @Test
-    void testToUpdateInternshipInternshipAndHandleCompletion() {
+    public void testToUpdateInternshipAndHandleCompletion() {
         when(internshipRepository.findById(1L)).thenReturn(Optional.of(internship));
-        when(internShipUpdateMapper.toEntity(updatedDto)).thenReturn(internship);
-        when(internShipUpdateMapper.toDto(internship)).thenReturn(updatedDto);
+        when(internshipMapper.toEntity(updatedDto)).thenReturn(internship);
+        when(internshipMapper.toUpdatedDto(internship)).thenReturn(updatedDto);
         when(internshipRepository.save(any(Internship.class))).thenReturn(internship);
 
         InternshipUpdatedDto result = internshipService.updateInternship(updatedDto);
 
         verify(completionHandler).handleInternsCompletion(internship);
         verify(internshipRepository).save(internship);
+        verify(internshipMapper).toUpdatedDto(internship);
+
         assertEquals(updatedDto, result);
     }
 
     @Test
-    void updateInternship_ShouldThrowEntityNotFoundExceptionWhenInternshipNotFound() {
+    public void updateInternshipShouldThrowEntityNotFoundExceptionWhenInternshipNotFound() {
         when(internshipRepository.findById(1L)).thenReturn(Optional.empty());
+
         assertThrows(EntityNotFoundException.class, () -> internshipService.updateInternship(updatedDto));
     }
 }

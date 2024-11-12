@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class InternShipRoleFilter implements Filter <TeamMember, InternshipFilterDto> {
+public class InternshipRoleFilter implements Filter <TeamMember, InternshipFilterDto> {
     @Override
     public boolean isApplicable(InternshipFilterDto filter) {
         return filter.getTeamRole() != null;

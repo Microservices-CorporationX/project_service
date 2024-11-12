@@ -7,11 +7,7 @@ import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
 import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.handler.InternshipCompletionHandler;
-import faang.school.projectservice.mapper.InternshipCreateMapper;
-import faang.school.projectservice.mapper.InternshipFilterMapper;
-import faang.school.projectservice.mapper.InternshipGetAllMapper;
-import faang.school.projectservice.mapper.InternshipGetByIdMapper;
-import faang.school.projectservice.mapper.InternshipUpdateMapper;
+import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -30,11 +26,7 @@ import java.util.stream.Stream;
 public class InternshipService {
     private final ProjectService projectService;
     private final InternshipRepository internshipRepository;
-    private final InternshipCreateMapper internshipCreateMapper;
-    private final InternshipUpdateMapper internshipUpdateMapper;
-    private final InternshipGetAllMapper internshipGetAllMapper;
-    private final InternshipFilterMapper internshipFilterMapper;
-    private final InternshipGetByIdMapper internshipGetByIdMapper;
+    private final InternshipMapper internshipMapper;
     private final InternshipDurationValidator internshipDurationValidator;
     private final InternshipCompletionHandler completionHandler;
     private final List<Filter<TeamMember, InternshipFilterDto>> roleFilter;
@@ -44,7 +36,7 @@ public class InternshipService {
     public InternshipCreatedDto createInternship(InternshipCreatedDto internShipCreatedDto) {
         internshipDurationValidator.durationValidate(internShipCreatedDto);
         projectService.getProjectTeamMembersIds(internShipCreatedDto);
-        return internshipCreateMapper.toDto(internshipRepository.save(internshipCreateMapper.toEntity(internShipCreatedDto)));
+        return internshipMapper.toCreatedDto(internshipRepository.save(internshipMapper.createInternship(internShipCreatedDto)));
     }
 
     public InternshipUpdatedDto updateInternship(InternshipUpdatedDto internShipUpdatedDto) {
@@ -57,8 +49,8 @@ public class InternshipService {
             completionHandler.handleInternsCompletion(internship);
         }
 
-        Internship savedInternship = internshipRepository.save(internshipUpdateMapper.toEntity(internShipUpdatedDto));
-        return internshipUpdateMapper.toDto(savedInternship);
+        Internship savedInternship = internshipRepository.save(internshipMapper.toEntity(internShipUpdatedDto));
+        return internshipMapper.toUpdatedDto(savedInternship);
     }
 
     public List<InternshipFilterDto> filterInternship(InternshipFilterDto filters) {
@@ -67,8 +59,8 @@ public class InternshipService {
 
         List<InternshipFilterDto> result = new ArrayList<>();
 
-        filteredInternships.forEach(internship -> result.add(internshipFilterMapper.toDto(internship)));
-        filteredTeamMembers.forEach(teamMember -> result.add(internshipFilterMapper.toDto(teamMember)));
+        filteredInternships.forEach(internship -> result.add(internshipMapper.toFilterDto(internship)));
+        filteredTeamMembers.forEach(teamMember -> result.add(internshipMapper.toFilterDto(teamMember)));
 
         return result;
     }
@@ -77,7 +69,7 @@ public class InternshipService {
         List<Internship> allInternships = internshipRepository.findAll();
         List<InternshipGetAllDto> internshipGetAllDtos = new ArrayList<>();
 
-        allInternships.forEach(internship -> internshipGetAllDtos.add(internshipGetAllMapper.toDto(internship)));
+        allInternships.forEach(internship -> internshipGetAllDtos.add(internshipMapper.toGetAllDto(internship)));
 
         return internshipGetAllDtos;
     }
@@ -85,7 +77,7 @@ public class InternshipService {
     public InternshipGetByIdDto getByIdInternship(long internShipId) {
        Internship internship =  internshipRepository.findById(internShipId)
                .orElseThrow(() -> new EntityNotFoundException("InternShip not found"));
-       return internshipGetByIdMapper.toDto(internship);
+       return internshipMapper.toGetByIdDto(internship);
     }
 
 

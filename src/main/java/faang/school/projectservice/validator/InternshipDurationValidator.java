@@ -15,7 +15,9 @@ public class InternshipDurationValidator {
         LocalDateTime startDate = internShipCreatedDto.getStartDate();
         LocalDateTime endDate = internShipCreatedDto.getEndDate();
 
-        if (ChronoUnit.MONTHS.between(startDate, endDate) > 3 ) {
+        int durationMonths = 3;
+
+        if (ChronoUnit.MONTHS.between(startDate, endDate) > durationMonths ) {
             throw new InternshipDurationException("Internship duration cannot exceed 3 months");
         } else {
             log.info("End of Internship");

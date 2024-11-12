@@ -39,7 +39,7 @@ public class InternshipCompletionHandler {
 
     private void assignNewRole(TeamMember intern) {
         intern.getRoles().remove(TeamRole.INTERN);
-        intern.getRoles().add(TeamRole.values()[random.nextInt(TeamRole.values().length - 1)]);
+        intern.getRoles().add(TeamRole.DEVELOPER);
     }
 
     private void removeInternFromTeam(TeamMember intern) {

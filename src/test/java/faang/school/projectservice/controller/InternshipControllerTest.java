@@ -1,6 +1,9 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
 import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
@@ -9,8 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -38,4 +44,46 @@ public class InternshipControllerTest {
         assertEquals(internShipUpdatedDto, result);
     }
 
+    @Test
+    public void testFilterInternship() {
+        InternshipFilterDto filterDto = new InternshipFilterDto();
+        InternshipFilterDto resultDto = new InternshipFilterDto();
+        List<InternshipFilterDto> expected = List.of(resultDto);
+
+        when(internshipService.filterInternship(filterDto)).thenReturn(expected);
+
+        List<InternshipFilterDto> result = internshipService.filterInternship(filterDto);
+
+        verify(internshipService).filterInternship(filterDto);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetAllInternship() {
+        InternshipGetAllDto getAllDto = new InternshipGetAllDto();
+        List<InternshipGetAllDto> expected = List.of(getAllDto);
+
+        when(internshipService.getAllInternships()).thenReturn(expected);
+
+        List<InternshipGetAllDto> result = internshipService.getAllInternships();
+
+        verify(internshipService).getAllInternships();
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetInternshipById() {
+        long internshipId = 1L;
+        InternshipGetByIdDto getByIdDto = InternshipGetByIdDto.builder().build();
+
+        when(internshipService.getByIdInternship(internshipId)).thenReturn(getByIdDto);
+
+        InternshipGetByIdDto result = internshipService.getByIdInternship(internshipId);
+
+        verify(internshipService).getByIdInternship(internshipId);
+
+        assertEquals(getByIdDto, result);
+    }
 }

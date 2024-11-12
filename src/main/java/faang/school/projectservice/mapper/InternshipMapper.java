@@ -1,5 +1,9 @@
 package faang.school.projectservice.mapper;
 
+import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
 import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
@@ -12,7 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface InternshipUpdateMapper {
+public interface InternshipMapper {
+
+    @Mapping(source = "projectId", target = "project")
+    @Mapping(source = "mentorId", target = "mentorId")
+    Internship createInternship(InternshipCreatedDto dto);
+
     @Mapping(source = "projectId", target = "project")
     @Mapping(source = "mentorId", target = "mentorId")
     @Mapping(source = "interns", target = "interns")
@@ -20,31 +29,33 @@ public interface InternshipUpdateMapper {
 
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "mentorId.id", target = "mentorId")
-    @Mapping(source = "interns", target = "interns")
-    InternshipUpdatedDto toDto(Internship entity);
+    InternshipUpdatedDto toUpdatedDto(Internship entity);
+
+    @Mapping(source = "mentorId.id", target = "mentorId")
+    InternshipGetAllDto toGetAllDto(Internship internship);
+
+    InternshipGetByIdDto toGetByIdDto(Internship internship);
+
+    InternshipFilterDto toFilterDto(Internship internship);
+
+    InternshipFilterDto toFilterDto(TeamMember teamMember);
+
+    @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "mentorId.id", target = "mentorId")
+    InternshipCreatedDto toCreatedDto(Internship entity);
 
     default Project mapProject(Long projectId) {
-        if (projectId == null) {
-            return null;
-        }
+        if (projectId == null) return null;
         Project project = new Project();
         project.setId(projectId);
         return project;
     }
 
     default TeamMember mapMentor(Long mentorId) {
-        if (mentorId == null) {
-            return null;
-        }
+        if (mentorId == null) return null;
         TeamMember mentor = new TeamMember();
         mentor.setId(mentorId);
         return mentor;
-    }
-
-    default List<Long> mapTeamMembersToIds(List<TeamMember> teamMembers) {
-        return teamMembers != null ? teamMembers.stream()
-                .map(TeamMember::getId)
-                .collect(Collectors.toList()) : null;
     }
 
     default List<TeamMember> mapInternIdsToTeamMembers(List<Long> internIds) {
@@ -54,6 +65,12 @@ public interface InternshipUpdateMapper {
                     intern.setId(id);
                     return intern;
                 })
+                .collect(Collectors.toList()) : null;
+    }
+
+    default List<Long> mapTeamMembersToIds(List<TeamMember> teamMembers) {
+        return teamMembers != null ? teamMembers.stream()
+                .map(TeamMember::getId)
                 .collect(Collectors.toList()) : null;
     }
 }

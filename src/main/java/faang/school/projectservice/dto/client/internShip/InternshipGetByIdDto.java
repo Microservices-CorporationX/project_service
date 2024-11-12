@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InternshipGetByIdDto {
     private Long id;
+    private String title;
+    private String description;
 }

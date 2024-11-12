@@ -20,12 +20,10 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
     public InternshipCreatedDto createInternship(InternshipCreatedDto internShipCreatedDto) {
         return internshipService.createInternship(internShipCreatedDto);
     }
 
-    @PutMapping("/update")
     public InternshipUpdatedDto updateInternship(InternshipUpdatedDto InternShipUpdatedDto) {
         return internshipService.updateInternship(InternShipUpdatedDto);
     }
