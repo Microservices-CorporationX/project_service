@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.ProjectService;
@@ -19,6 +20,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -115,5 +119,61 @@ class ProjectControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
         verify(projectService, times(1)).getAccessibleProjectsById(projectDto.getId(), ownerId);
+    }
+
+    @Test
+    void getProjectsByIdsWhenProjectsExistShouldReturnProjectDtos() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectService.findAllById(ids)).thenReturn(List.of(projectDto));
+
+        List<ProjectDto> response = projectController.getProjectsByIds(ids);
+
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        assertEquals(projectDto.getId(), response.get(0).getId());
+        assertEquals(projectDto.getName(), response.get(0).getName());
+
+        verify(projectService, times(1)).findAllById(ids);
+    }
+
+    @Test
+    void getProjectsByIdsWhenNoProjectsExistShouldReturnEmptyList() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectService.findAllById(ids)).thenReturn(List.of());
+
+        List<ProjectDto> response = projectController.getProjectsByIds(ids);
+
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+
+        verify(projectService, times(1)).findAllById(ids);
+    }
+
+    @Test
+    void getProjectWhenProjectExistsShouldReturnProjectDto() {
+        long projectId = 1L;
+
+        when(projectService.findById(projectId)).thenReturn(projectDto);
+
+        ProjectDto response = projectController.getProject(projectId);
+
+        assertNotNull(response);
+        assertEquals(projectDto.getId(), response.getId());
+        assertEquals(projectDto.getName(), response.getName());
+
+        verify(projectService, times(1)).findById(projectId);
+    }
+
+    @Test
+    void getProjectWhenProjectDoesNotExistShouldThrowEntityNotFoundException() {
+        long projectId = 999L;
+
+        when(projectService.findById(projectId)).thenThrow(new EntityNotFoundException("Project not found"));
+
+        assertThrows(EntityNotFoundException.class, () -> projectController.getProject(projectId));
+
+        verify(projectService, times(1)).findById(projectId);
     }
 }

@@ -80,4 +80,14 @@ public class ProjectController {
 
         return ResponseEntity.ok(projectService.getAccessibleProjectsById(currentUserId, projectId));
     }
+
+    @PostMapping("/projects")
+    public List<ProjectDto> getProjectsByIds(@RequestBody List<Long> ids) {
+        return projectService.findAllById(ids);
+    }
+
+    @GetMapping("/{projectId}")
+    public ProjectDto getProject(@PathVariable long projectId) {
+        return projectService.findById(projectId);
+    }
 }
