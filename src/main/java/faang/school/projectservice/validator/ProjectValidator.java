@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoStatusChangeException;
+import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -31,8 +32,14 @@ public class ProjectValidator {
         }
     }
 
-    public boolean isProjectPublic(Project project) {
-        return project.getVisibility() == ProjectVisibility.PUBLIC;
+    public void validateProjectPublic(Project project) {
+        if (project.getVisibility() != ProjectVisibility.PUBLIC) {
+            throw new ProjectVisibilityException("Only public projects are allowed for this operation");
+        }
+    }
+
+    public boolean isPublicProject(Project subProject) {
+        return subProject.getVisibility() == ProjectVisibility.PUBLIC;
     }
 
     public boolean hasParentProject(Project project) {

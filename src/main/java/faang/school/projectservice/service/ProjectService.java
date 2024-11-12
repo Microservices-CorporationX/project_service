@@ -60,20 +60,17 @@ public class ProjectService {
     public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
 
         Project project = projectRepository.getProjectById(parentId);
-        Stream<Project> childrenProjectsStream;
+        projectValidator.validateProjectPublic(project);
 
-        if (projectValidator.isProjectPublic(project)) {
-            childrenProjectsStream = project
-                    .getChildren()
-                    .stream()
-                    .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC);
-        } else {
-            childrenProjectsStream = Stream.empty();
-        }
+        Stream<Project> childrenProjectsStream = project
+                .getChildren()
+                .stream()
+                .filter(projectValidator::isPublicProject);
 
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(childrenProjectsStream, filters))
+                .reduce(childrenProjectsStream, (streamProject, filter) -> filter.apply(streamProject, filters),
+                        (s1, s2) -> s1)
                 .map(projectMapper::toResponseDto)
                 .toList();
     }
