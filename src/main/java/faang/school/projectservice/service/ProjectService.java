@@ -110,10 +110,16 @@ public class ProjectService {
     }
 
     public ProjectDto findById(Long id) {
+        projectValidator.validateProjectExistsById(id);
+
         return projectMapper.toDto(projectRepository.getProjectById(id));
     }
 
     public List<ProjectDto> findAllById(List<Long> ids) {
+        if (projectRepository.findAllByIds(ids).isEmpty()) {
+            throw new EntityNotFoundException(String.format("Projects with ids %s not found", ids));
+        }
+        
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
