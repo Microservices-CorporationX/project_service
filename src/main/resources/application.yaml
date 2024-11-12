@@ -33,8 +33,8 @@ spring:
 
   jira:
     client:
-      username: ruslan-iovlev@mail.ru
-      url: https://crpx.atlassian.net
+      username: brilev-ruslan@rambler.ru
+      url: https://faang-school.atlassian.net
 
 server:
   port: 8082

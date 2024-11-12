@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,13 +31,16 @@ public class JiraServiceImpl implements JiraService {
     @Override
     public IssueDto createIssue(String projectKey, IssueDto issueDto) {
         try {
-            IssueInput issue = new IssueInputBuilder(projectKey, issueDto.issueTypeId())
+            IssueInput issueInput = new IssueInputBuilder(projectKey, issueDto.typeId())
                     .setSummary(issueDto.summary())
                     .setDescription(issueDto.description())
-                    .setDueDate(issueDto.deadline().toDateTime())
+                    .setDueDate(issueDto.dueDate().toDateTime())
+                    .setIssueType(mapper.toIssueType(issueDto.issueType()))
                     .build();
-            BasicIssue basicIssue = jiraRestClient.getIssueClient().createIssue(issue).claim();
-            return mapper.toIssueDto((Issue) basicIssue);
+            BasicIssue basicIssue = jiraRestClient.getIssueClient().createIssue(issueInput).claim();
+            log.info("The task was successfully created with the key: {}", basicIssue.getKey());
+            Issue issue = jiraRestClient.getIssueClient().getIssue(basicIssue.getKey()).claim();
+            return mapper.toIssueDto(issue);
         } catch (RestClientException e) {
             log.error(e.getMessage());
             throw e;
@@ -46,12 +49,12 @@ public class JiraServiceImpl implements JiraService {
 
     @Override
     public List<IssueDto> getAllIssueByFilter(String projectKey, IssueFilterDto filter) {
-        Optional<String> jql = issueFilter.stream()
+        String jql = issueFilter.stream()
                 .filter(filters -> filters.isApplicable(filter))
                 .map(filters -> filters.getJql(projectKey, filter))
-                .findFirst();
+                .collect(Collectors.joining(""));
         try {
-            SearchResult result = jiraRestClient.getSearchClient().searchJql(jql.get()).claim();
+            SearchResult result = jiraRestClient.getSearchClient().searchJql(jql).claim();
             return mapper.toIssueDtos((List<Issue>) result.getIssues());
         } catch (RestClientException e) {
             log.error(e.getMessage());

@@ -12,8 +12,8 @@ public class IssuePerformerFilter implements IssueFilter {
     }
 
     @Override
-    public String getJql(String projectKey,  IssueFilterDto filter) {
-        String jqlFormat = "project = '%s' AND assignee = '%s'";
+    public String getJql(String projectKey, IssueFilterDto filter) {
+        String jqlFormat = "project = %s AND assignee = %s";
         return String.format(jqlFormat, projectKey, filter.assignee());
     }
 }

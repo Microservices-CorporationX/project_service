@@ -13,7 +13,7 @@ public class IssueStatusFilter implements IssueFilter {
 
     @Override
     public String getJql(String projectKey, IssueFilterDto filter) {
-        String jqlFormat = "project = '%s' AND status = '%s'";
+        String jqlFormat = "project = %s AND status = %s";
         return String.format(jqlFormat, projectKey, filter.status());
     }
 }

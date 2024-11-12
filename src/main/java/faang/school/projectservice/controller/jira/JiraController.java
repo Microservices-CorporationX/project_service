@@ -3,14 +3,17 @@ package faang.school.projectservice.controller.jira;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.service.jira.JiraService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/jira")
+@Validated
+@RequestMapping("api/v1/jira")
 public class JiraController {
 
     private final JiraService jiraService;
@@ -23,11 +26,11 @@ public class JiraController {
 
     @GetMapping("/{projectKey}/filters")
     public List<IssueDto> getAllIssueByFilter(@PathVariable String projectKey,
-                                              @RequestBody IssueFilterDto filter) {
+                                              @Valid @RequestBody IssueFilterDto filter) {
         return jiraService.getAllIssueByFilter(projectKey, filter);
     }
 
-    @GetMapping("/{projectKey}")
+    @GetMapping("/all/{projectKey}")
     public List<IssueDto> getAllIssues(@PathVariable String projectKey) {
         return jiraService.getAllIssues(projectKey);
     }

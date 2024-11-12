@@ -7,11 +7,11 @@ import org.joda.time.LocalDateTime;
 
 @Builder
 public record IssueDto(String issueKey,
-                       long issueTypeId,
+                       long typeId,
+                       IssueTypeDto issueType,
                        @NonNull
                        String summary,
                        String description,
-                       @NonNull
                        @Future
-                       LocalDateTime deadline) {
+                       LocalDateTime dueDate) {
 }
