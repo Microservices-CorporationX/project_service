@@ -13,7 +13,6 @@ import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validator.vacancy.VacancyValidator;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,17 +49,14 @@ class VacancyServiceTest {
     private Vacancy expectedVacancy;
     private VacancyDto expectedVacancyDto;
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    void getVacancy_shouldReturnVacancy_whenItExists(){
+        // given
         expectedProject = getExpectedProject();
         expectedSupervisor = getExpectedSupervisor();
         expectedVacancy = getExpectedVacancy(expectedProject);
         expectedVacancyDto = getExpectedVacancyDto();
-    }
 
-    @Test
-    void getVacancy_shouldReturnVacancy_whenItExists(){
-        // given
         when(vacancyRepository.findById(expectedVacancy.getId())).thenReturn(Optional.of(expectedVacancy));
         when(vacancyDtoMapper.toDto(expectedVacancy)).thenReturn(expectedVacancyDto);
 
@@ -80,6 +76,11 @@ class VacancyServiceTest {
     @Test
     void createVacancy_shouldCreateVacancy() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
+
         when(projectService.findProject(expectedProject.getId())).thenReturn(Optional.of(expectedProject));
         when(vacancyDtoMapper.toEntity(expectedVacancyDto)).thenReturn(expectedVacancy);
         when(teamMemberService.findTeamMember(expectedSupervisor.getId())).thenReturn(Optional.of(expectedSupervisor));
@@ -104,6 +105,11 @@ class VacancyServiceTest {
     @Test
     void createVacancy_shouldThrowEntityNotFoundException_whenProjectNotFound() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
+
         when(projectService.findProject(expectedVacancyDto.projectId())).thenReturn(Optional.empty());
 
         // when
@@ -120,6 +126,11 @@ class VacancyServiceTest {
     @Test
     void createVacancy_shouldThrowEntityNotFoundException_whenTeamMemberNotFound(){
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
+
         when(projectService.findProject(expectedVacancyDto.projectId())).thenReturn(Optional.of(expectedProject));
         when(teamMemberService.findTeamMember(anyLong())).thenReturn(Optional.empty());
 
@@ -138,6 +149,9 @@ class VacancyServiceTest {
     @Test
     void createVacancy_shouldThrowVacancyDuplicationException_whenVacancyAlreadyExists(){
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancyDto = getExpectedVacancyDto();
         when(projectService.findProject(anyLong())).thenReturn(Optional.of(expectedProject));
         when(teamMemberService.findTeamMember(anyLong())).thenReturn(Optional.of(expectedSupervisor));
         doThrow(new VacancyDuplicationException("Vacancy  already exists")).when(vacancyValidator)
@@ -157,6 +171,9 @@ class VacancyServiceTest {
     @Test
     void createVacancy_shouldThrowIllegalArgumentException_whenSupervisorHasNotOwnerOrManagerRole(){
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancyDto = getExpectedVacancyDto();
         when(projectService.findProject(anyLong())).thenReturn(Optional.of(expectedProject));
         when(teamMemberService.findTeamMember(anyLong())).thenReturn(Optional.of(expectedSupervisor));
         doThrow(new IllegalArgumentException("Supervisor does not have the required role")).when(vacancyValidator)
@@ -176,6 +193,10 @@ class VacancyServiceTest {
     @Test
     void updateVacancy_shouldUpdateVacancy_whenDataIsValid() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
         VacancyDto vacancyDtoToUpdate = getVacancyDtoToUpdate(VacancyStatus.POSTPONED, TeamRole.OWNER);
 
         when(vacancyRepository.existsById(anyLong())).thenReturn(true);
@@ -203,6 +224,10 @@ class VacancyServiceTest {
     @Test
     void updateVacancy_shouldCloseVacancy_whenRequiredNumberOfCandidatesIsRight() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
         VacancyDto vacancyDtoToUpdate = getVacancyDtoToUpdate(VacancyStatus.CLOSED, TeamRole.OWNER);
 
         when(vacancyRepository.existsById(anyLong())).thenReturn(true);
@@ -230,6 +255,10 @@ class VacancyServiceTest {
     @Test
     void updateVacancy_shouldThrowIllegalArgumentException_whenRequiredNumberOfCandidatesIsWrong() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
         VacancyDto vacancyDtoToUpdate = getVacancyDtoToUpdate(VacancyStatus.CLOSED, TeamRole.MANAGER);
 
         when(vacancyRepository.existsById(anyLong())).thenReturn(true);
@@ -253,6 +282,11 @@ class VacancyServiceTest {
     @Test
     void deleteVacancy_shouldDeleteVacancy() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
+
         when(vacancyRepository.existsById(expectedVacancyDto.id())).thenReturn(true);
         when(candidateService.getAllCandidatesByVacancy(expectedVacancy.getId())).thenReturn(List.of(1L, 2L, 3L));
 
@@ -266,6 +300,10 @@ class VacancyServiceTest {
     @Test
     void getFilteredVacancies_shouldReturnFilteredVacanciesByName_whenFilteredByName() {
         // given
+        expectedProject = getExpectedProject();
+        expectedSupervisor = getExpectedSupervisor();
+        expectedVacancy = getExpectedVacancy(expectedProject);
+        expectedVacancyDto = getExpectedVacancyDto();
         VacancyFilter filterMock = Mockito.mock(VacancyFilter.class);
         List<VacancyFilter> filters = List.of(filterMock);
         Project project = getExpectedProjectWithVacancies();
