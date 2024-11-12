@@ -83,7 +83,8 @@ tasks.test {
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/service/**"
+    "**/service/**",
+    "**/validator/**"
 )
 val jacocoExcludePackAgeList = listOf(
     "**/controller/**",
