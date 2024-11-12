@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectsIdsDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
@@ -82,12 +83,16 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<List<ProjectDto>> getProjectsByIds(@RequestBody List<Long> ids) {
-        return ResponseEntity.ok(projectService.findAllById(ids));
+    public ResponseEntity<List<ProjectDto>> getProjectsByIds(@Valid @RequestBody ProjectsIdsDto projectsIdsDto) {
+        return ResponseEntity.ok(projectService.findAllById(projectsIdsDto.getIds()));
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ProjectDto> getProject(@PathVariable long projectId) {
+    public ResponseEntity<ProjectDto> getProject(
+            @Valid
+            @NotNull(message = "ProjectId is required.")
+            @Positive(message = "ProjectId must be greater than 0.")
+            @PathVariable long projectId) {
         return ResponseEntity.ok(projectService.findById(projectId));
     }
 }

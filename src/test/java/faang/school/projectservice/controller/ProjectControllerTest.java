@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectsIdsDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.ProjectStatus;
@@ -124,9 +125,9 @@ class ProjectControllerTest {
 
     @Test
     void getProjectsByIdsWhenProjectsExistShouldReturnProjectDtos() {
-        List<Long> ids = List.of(1L, 2L);
+        ProjectsIdsDto ids = new ProjectsIdsDto(List.of(1L, 2L));
 
-        when(projectService.findAllById(ids)).thenReturn(List.of(projectDto));
+        when(projectService.findAllById(ids.getIds())).thenReturn(List.of(projectDto));
 
         List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
 
@@ -135,21 +136,21 @@ class ProjectControllerTest {
         assertEquals(projectDto.getId(), response.get(0).getId());
         assertEquals(projectDto.getName(), response.get(0).getName());
 
-        verify(projectService, times(1)).findAllById(ids);
+        verify(projectService, times(1)).findAllById(ids.getIds());
     }
 
     @Test
     void getProjectsByIdsWhenNoProjectsExistShouldReturnEmptyList() {
-        List<Long> ids = List.of(1L, 2L);
+        ProjectsIdsDto ids = new ProjectsIdsDto(List.of(1L, 2L));
 
-        when(projectService.findAllById(ids)).thenReturn(List.of());
+        when(projectService.findAllById(ids.getIds())).thenReturn(List.of());
 
         List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
 
-        verify(projectService, times(1)).findAllById(ids);
+        verify(projectService, times(1)).findAllById(ids.getIds());
     }
 
     @Test
