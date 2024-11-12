@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

@@ -1,9 +1,11 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.project.ProjectFilter;
+import faang.school.projectservice.helpers.ProjectDfs;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -33,37 +36,25 @@ public class ProjectService {
         project.setCreatedAt(currentTime);
         project.setUpdatedAt(currentTime);
         project = projectRepository.save(project);
-        logUpdate(project);
+        log.info("User with id {} created a project {}", userContext.getUserId(), project);
         return projectMapper.toDto(project);
     }
 
     public ProjectDto updateStatus(ProjectStatus status, long projectId) {
-        try {
-            Project project = getProjectForOwner(projectId);
-            project.setStatus(status);
-            project.setUpdatedAt(LocalDateTime.now());
-            project = projectRepository.save(project);
-            logUpdate(project);
-            return projectMapper.toDto(project);
-        } catch (NotOwnerException e) {
-            log.info("User with id {} tried to change someone else's project status, project id is {}",
-                    userContext.getUserId(), projectId);
-            throw new DataValidationException("Must be the owner to change status");
-        }
+        Project project = getProjectForOwner(projectId);
+        project.setStatus(status);
+        project.setUpdatedAt(LocalDateTime.now());
+        project = projectRepository.save(project);
+        logUpdate(project);
+        return projectMapper.toDto(project);
     }
 
     public ProjectDto updateDescription(String description, long projectId) {
-        try {
-            Project project = getProjectForOwner(projectId);
-            project.setDescription(description);
-            project.setUpdatedAt(LocalDateTime.now());
-            logUpdate(project);
-            return projectMapper.toDto(projectRepository.save(project));
-        } catch (NotOwnerException e) {
-            log.info("User with id {} tried to change someone else's project description, project id is {}",
-                    userContext.getUserId(), projectId);
-            throw new DataValidationException("Must be the owner to change description");
-        }
+        Project project = getProjectForOwner(projectId);
+        project.setDescription(description);
+        project.setUpdatedAt(LocalDateTime.now());
+        logUpdate(project);
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     public List<ProjectDto> findWithFilters(ProjectFilterDto projectFilterDto) {
@@ -86,7 +77,7 @@ public class ProjectService {
     public Optional<ProjectDto> findById(long id) {
         Project project = projectRepository.getProjectById(id);
         log.info("User with id {} requested project with id {}", userContext.getUserId(), id);
-        return project == null || !filterPrivate(project) ? Optional.empty() : Optional.of(projectMapper.toDto(project));
+        return Optional.of(projectMapper.toDto(project));
     }
 
     private void validateName(String projectName, Long userId) {
@@ -97,11 +88,13 @@ public class ProjectService {
         }
     }
 
-    private Project getProjectForOwner(long projectId) throws NotOwnerException {
+    private Project getProjectForOwner(long projectId) {
         Long userId = userContext.getUserId();
         Project project = projectRepository.getProjectById(projectId);
         if (!Objects.equals(project.getOwnerId(), userId)) {
-            throw new NotOwnerException("The user is not the owner of this project");
+            log.info("User with id {} tried to change someone else's project description, project id is {}",
+                    userContext.getUserId(), projectId);
+            throw new DataValidationException("The user is not the owner of this project");
         }
         return project;
     }
@@ -109,30 +102,25 @@ public class ProjectService {
     private boolean filterPrivate(Project project) {
         if (project.getVisibility() == ProjectVisibility.PRIVATE) {
             Long userId = userContext.getUserId();
-            List<Team> teams = project.getTeams();
+            List<Project> allProjects = ProjectDfs.findAllProjects(project);
+            List<Team> teams = allProjects.stream()
+                    .flatMap(currentProject -> {
+                        if (currentProject.getTeams() != null) {
+                            return currentProject.getTeams().stream();
+                        }
+                        return Stream.of();
+                    }).toList();
             List<TeamMember> members;
-            if (teams != null) {
-                members = project.getTeams().stream()
-                        .filter(team -> team.getTeamMembers() != null)
-                        .flatMap(team -> team.getTeamMembers().stream()).toList();
-            } else {
-                members = new ArrayList<>();
-            }
-            Set<Long> memberIds = new HashSet<>();
-            memberIds.add(project.getOwnerId());
-            members.forEach(member -> memberIds.add(member.getUserId()));
-            return memberIds.contains(userId);
+            members = teams.stream()
+                    .filter(team -> team.getTeamMembers() != null)
+                    .flatMap(team -> team.getTeamMembers().stream()).toList();
+            Set<Long> memberIds = members.stream().map(TeamMember::getId).collect(Collectors.toSet());
+            return userId.equals(project.getOwnerId()) || memberIds.contains(userId);
         }
         return true;
     }
 
     private void logUpdate(Project project) {
         log.info("User with id {} updated project {}", userContext.getUserId(), project);
-    }
-
-    private static class NotOwnerException extends Exception {
-        public NotOwnerException(String msg) {
-            super(msg);
-        }
     }
 }
