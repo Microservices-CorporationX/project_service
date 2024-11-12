@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,10 +55,7 @@ public class StageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stageDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.getStageId()))
-                .andExpect(jsonPath("$.stageName").value(stageDto.getStageName()))
-                .andExpect(jsonPath("$.projectId").value(stageDto.getProjectId()))
-                .andExpect(jsonPath("$.stageRoles").isNotEmpty());
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
 
     @Test
@@ -82,10 +80,7 @@ public class StageControllerTest {
                         .param("teamRole", TeamRole.TESTER.name())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(stages.size()))
-                .andExpect(jsonPath("$[0].stageId").value(stageDto.getStageId()))
-                .andExpect(jsonPath("$[0].stageName").value(stageDto.getStageName()))
-                .andExpect(jsonPath("$[0].projectId").value(stageDto.getProjectId()));
+                .andExpect(content().json(objectMapper.writeValueAsString(stages)));
     }
 
     @Test
@@ -139,10 +134,7 @@ public class StageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stageDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.getStageId()))
-                .andExpect(jsonPath("$.stageName").value(stageDto.getStageName()))
-                .andExpect(jsonPath("$.projectId").value(stageDto.getProjectId()))
-                .andExpect(jsonPath("$.stageRoles").isNotEmpty());
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
 
     @Test
@@ -155,9 +147,7 @@ public class StageControllerTest {
         mockMvc.perform(get("/stages/projects/1/all")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(stages.size()))
-                .andExpect(jsonPath("$[0].stageId").value(stageDto.getStageId()))
-                .andExpect(jsonPath("$[0].stageName").value(stageDto.getStageName()));
+                .andExpect(content().json(objectMapper.writeValueAsString(stages)));
     }
 
     @Test
@@ -169,9 +159,7 @@ public class StageControllerTest {
         mockMvc.perform(get("/stages/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stageId").value(stageDto.getStageId()))
-                .andExpect(jsonPath("$.stageName").value(stageDto.getStageName()))
-                .andExpect(jsonPath("$.projectId").value(stageDto.getProjectId()));
+                .andExpect(content().json(objectMapper.writeValueAsString(stageDto)));
     }
 
     private StageDto createStageDto(Long stageId, String stageName, Long projectId, List<StageRolesDto> stageRoles) {
