@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
@@ -12,7 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface ProjectMapper {
+public interface SubProjectMapper {
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "ownerId", target = "ownerId")

@@ -1,10 +1,10 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
-import faang.school.projectservice.filter.SubProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -21,10 +21,10 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProjectService {
+public class SubProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
+    private final SubProjectMapper subProjectMapper;
     private final List<SubProjectFilter> subProjectFilters;
     private final SubProjectValidator subProjectValidator;
 
@@ -35,7 +35,7 @@ public class ProjectService {
                 .distinct()
                 .toList();
 
-        return projectMapper.toDtoList(subProjects);
+        return subProjectMapper.toDtoList(subProjects);
     }
 
     public ProjectDto createSubProject(Long parentId, CreateSubProjectDto dto) {
@@ -44,13 +44,13 @@ public class ProjectService {
         subProjectValidator.validateExistenceByOwnerIdAndName(dto.getOwnerId(), dto.getName());
         subProjectValidator.validateSubProjectVisibility(parentProject.getVisibility(), dto.getVisibility());
 
-        Project subProject = projectMapper.toEntity(dto);
+        Project subProject = subProjectMapper.toEntity(dto);
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
         subProject = projectRepository.save(subProject);
         log.info("Sub project with id = '{}' was created", subProject.getId());
 
-        return projectMapper.toDto(subProject);
+        return subProjectMapper.toDto(subProject);
     }
 
     public ProjectDto updateSubProject(Long parentId, Long childId, ProjectDto dto, Long userId) {
@@ -67,10 +67,10 @@ public class ProjectService {
             subProjectValidator.validateSubProjectVisibility(parentProject.getVisibility(), dto.getVisibility());
         }
 
-        projectMapper.partialUpdate(subProject, dto);
+        subProjectMapper.partialUpdate(subProject, dto);
         subProject = projectRepository.save(subProject);
 
-        return projectMapper.toDto(subProject);
+        return subProjectMapper.toDto(subProject);
     }
 
     private void makeSubProjectsPrivate(Project subProject) {

@@ -1,12 +1,12 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
-import faang.school.projectservice.filter.SubProjectFilter;
-import faang.school.projectservice.filter.SubProjectNameFilter;
-import faang.school.projectservice.filter.SubProjectStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
+import faang.school.projectservice.filter.subproject.SubProjectNameFilter;
+import faang.school.projectservice.filter.subproject.SubProjectStatusFilter;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -34,10 +34,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class SubProjectServiceTest {
 
     @Spy
-    private final ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+    private final SubProjectMapper subProjectMapper = Mappers.getMapper(SubProjectMapper.class);
 
     @Mock
     private ProjectRepository projectRepository;
@@ -46,7 +46,7 @@ public class ProjectServiceTest {
     private SubProjectValidator subProjectValidator;
 
     @InjectMocks
-    private ProjectService projectService;
+    private SubProjectService subProjectService;
 
     @BeforeEach
     public void setUp() {
@@ -54,7 +54,7 @@ public class ProjectServiceTest {
                 new SubProjectNameFilter(),
                 new SubProjectStatusFilter()
         );
-        ReflectionTestUtils.setField(projectService, "subProjectFilters", subProjectFilters);
+        ReflectionTestUtils.setField(subProjectService, "subProjectFilters", subProjectFilters);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectRepository.getProjectById(parentId)).thenReturn(project);
 
-        List<ProjectDto> result = projectService.findSubProjects(parentId, filters, userId);
+        List<ProjectDto> result = subProjectService.findSubProjects(parentId, filters, userId);
 
         assertEquals(1, result.size());
     }
@@ -87,7 +87,7 @@ public class ProjectServiceTest {
         SubProjectFilterDto filters = new SubProjectFilterDto();
         when(projectRepository.getProjectById(parentId)).thenThrow(EntityNotFoundException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.findSubProjects(parentId, filters, userId));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.findSubProjects(parentId, filters, userId));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectRepository.getProjectById(parentId)).thenReturn(project);
 
-        List<ProjectDto> result = projectService.findSubProjects(parentId, filters, userId);
+        List<ProjectDto> result = subProjectService.findSubProjects(parentId, filters, userId);
 
         assertEquals(1, result.size());
     }
@@ -119,7 +119,7 @@ public class ProjectServiceTest {
         Long parentId = 1L;
         Long subProjectId = 2L;
         Long userId = 2L;
-        SubProjectFilterDto filters = SubProjectFilterDto.builder().name("Dev").build();
+        SubProjectFilterDto filters = SubProjectFilterDto.builder().namePattern("Dev").build();
         Project subProject = Project.builder()
                 .id(subProjectId)
                 .teams(List.of(Team.builder().teamMembers(List.of(TeamMember.builder().userId(userId).build())).build()))
@@ -131,7 +131,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectRepository.getProjectById(parentId)).thenReturn(project);
 
-        List<ProjectDto> result = projectService.findSubProjects(parentId, filters, userId);
+        List<ProjectDto> result = subProjectService.findSubProjects(parentId, filters, userId);
 
         assertEquals(1, result.size());
     }
@@ -155,7 +155,7 @@ public class ProjectServiceTest {
                 .build();
         when(projectRepository.getProjectById(parentId)).thenReturn(project);
 
-        List<ProjectDto> result = projectService.findSubProjects(parentId, filters, userId);
+        List<ProjectDto> result = subProjectService.findSubProjects(parentId, filters, userId);
 
         assertEquals(0, result.size());
     }
@@ -183,7 +183,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
         when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto result = projectService.createSubProject(parentId, dto);
+        ProjectDto result = subProjectService.createSubProject(parentId, dto);
 
         assertEquals(dto.getOwnerId(), result.getOwnerId());
         assertEquals(dto.getName(), result.getName());
@@ -199,7 +199,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(parentId)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class,
-                () -> projectService.createSubProject(parentId, new CreateSubProjectDto()));
+                () -> subProjectService.createSubProject(parentId, new CreateSubProjectDto()));
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
         doThrow(EntityNotFoundException.class).when(subProjectValidator).validateOwnerExistence(dto.getOwnerId());
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
     }
 
     @Test
@@ -234,7 +234,7 @@ public class ProjectServiceTest {
         doThrow(EntityNotFoundException.class)
                 .when(subProjectValidator).validateExistenceByOwnerIdAndName(dto.getOwnerId(), dto.getName());
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
     }
 
     @Test
@@ -252,7 +252,7 @@ public class ProjectServiceTest {
         doThrow(EntityNotFoundException.class)
                 .when(subProjectValidator).validateSubProjectVisibility(parentProject.getVisibility(), dto.getVisibility());
 
-        assertThrows(EntityNotFoundException.class, () -> projectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
     }
 
     @Test
@@ -282,7 +282,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(subProjectId)).thenReturn(subProject);
         when(projectRepository.save(subProject)).thenReturn(subProject);
 
-        ProjectDto result = projectService.updateSubProject(parentId, subProjectId, dto, userId);
+        ProjectDto result = subProjectService.updateSubProject(parentId, subProjectId, dto, userId);
 
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getDescription(), result.getDescription());
@@ -301,7 +301,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(parentId)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class,
-                () -> projectService.updateSubProject(parentId, subProjectId, dto, userId));
+                () -> subProjectService.updateSubProject(parentId, subProjectId, dto, userId));
     }
 
     @Test
@@ -316,7 +316,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(subProjectId)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class,
-                () -> projectService.updateSubProject(parentId, subProjectId, dto, userId));
+                () -> subProjectService.updateSubProject(parentId, subProjectId, dto, userId));
     }
 
     @Test
@@ -334,7 +334,7 @@ public class ProjectServiceTest {
                 .when(subProjectValidator).validateSubProjectBelonging(parentId, subProject);
 
         assertThrows(IllegalArgumentException.class,
-                () -> projectService.updateSubProject(parentId, subProjectId, dto, userId));
+                () -> subProjectService.updateSubProject(parentId, subProjectId, dto, userId));
     }
 
     @Test
@@ -354,7 +354,7 @@ public class ProjectServiceTest {
                 .when(subProjectValidator).validateOwnership(userId, subProject.getOwnerId());
 
         assertThrows(IllegalArgumentException.class,
-                () -> projectService.updateSubProject(parentId, subProjectId, dto, userId));
+                () -> subProjectService.updateSubProject(parentId, subProjectId, dto, userId));
     }
 
     @Test
@@ -377,6 +377,6 @@ public class ProjectServiceTest {
                 .when(subProjectValidator).validateExistenceByOwnerIdAndName(dto.getOwnerId(), dto.getName());
 
         assertThrows(IllegalArgumentException.class,
-                () -> projectService.updateSubProject(parentId, subProjectId, dto, userId));
+                () -> subProjectService.updateSubProject(parentId, subProjectId, dto, userId));
     }
 }

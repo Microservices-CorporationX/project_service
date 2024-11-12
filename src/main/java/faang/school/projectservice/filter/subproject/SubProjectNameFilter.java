@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
@@ -10,7 +10,7 @@ public class SubProjectNameFilter implements SubProjectFilter {
 
     @Override
     public boolean isApplicable(SubProjectFilterDto filters) {
-        return filters != null && filters.getName() != null && !filters.getName().isBlank();
+        return filters != null && filters.getNamePattern() != null && !filters.getNamePattern().isBlank();
     }
 
     @Override
@@ -19,7 +19,7 @@ public class SubProjectNameFilter implements SubProjectFilter {
         Objects.requireNonNull(filters, "Filters cannot be null");
 
         return projects.filter(project ->
-                project.getName().toLowerCase().contains(filters.getName().toLowerCase())
+                project.getName().toLowerCase().contains(filters.getNamePattern().toLowerCase())
         );
     }
 }

@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +24,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubProjectController {
 
-    private final ProjectService projectService;
+    private final SubProjectService subProjectService;
 
     @GetMapping
     public ResponseEntity<List<ProjectDto>> findSubProjects(@PathVariable Long projectId,
                                                             SubProjectFilterDto filters,
                                                             @RequestHeader("x-user-id") Long userId) {
-        return ResponseEntity.ok(projectService.findSubProjects(projectId, filters, userId));
+        return ResponseEntity.ok(subProjectService.findSubProjects(projectId, filters, userId));
     }
 
     @PostMapping
@@ -39,7 +39,7 @@ public class SubProjectController {
         return ResponseEntity.created(
                 ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
-                        .buildAndExpand(projectService.createSubProject(projectId, dto).getId())
+                        .buildAndExpand(subProjectService.createSubProject(projectId, dto).getId())
                         .toUri()
         ).build();
     }
@@ -49,7 +49,7 @@ public class SubProjectController {
                                                  @PathVariable Long subProjectId,
                                                  @Valid @RequestBody ProjectDto dto,
                                                  @RequestHeader("x-user-id") Long userId) {
-        projectService.updateSubProject(projectId, subProjectId, dto, userId);
+        subProjectService.updateSubProject(projectId, subProjectId, dto, userId);
          return ResponseEntity.noContent().build();
     }
 }

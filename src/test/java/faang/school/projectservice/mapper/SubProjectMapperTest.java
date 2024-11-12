@@ -2,6 +2,8 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -14,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ProjectMapperTest {
+public class SubProjectMapperTest {
 
-    private final ProjectMapper mapper = new ProjectMapperImpl();
+    private final SubProjectMapper mapper = new SubProjectMapperImpl();
 
     @Test
     @DisplayName("Test creation dto to entity mapping")
