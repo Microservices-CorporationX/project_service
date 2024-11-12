@@ -42,10 +42,6 @@ public class StageInvitation {
     @JoinColumn(name = "invited")
     private TeamMember invited;
 
-    @OneToOne
-    @JoinColumn(name = "invitee")
-    private TeamMember invitee;
-
     @Column(name = "rejection_reason")
     private String rejectionReason;
 

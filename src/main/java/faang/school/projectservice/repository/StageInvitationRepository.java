@@ -26,8 +26,4 @@ public class StageInvitationRepository {
     public List<StageInvitation> findAll() {
         return repository.findAll();
     }
-
-    public List<StageInvitation> findByInvitedId(Long invitedId) {
-        return repository.findByInviteeId(invitedId); // Использование метода из StageInvitationJpaRepository
-    }
 }

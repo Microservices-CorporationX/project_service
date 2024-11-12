@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/invitations")
+@RequestMapping("/stage-invitations")
 @RequiredArgsConstructor
 public class StageInvitationController {
 
@@ -30,20 +30,20 @@ public class StageInvitationController {
     }
 
     @PatchMapping("/{invitationId}/accept")
-    public StageInvitationDTO acceptInvitation(@PathVariable @NotNull Long invitationId) {
+    public StageInvitationDTO acceptInvitation(@PathVariable Long invitationId) {
         log.info("Received request to accept invitation with ID: {}", invitationId);
         return stageInvitationService.acceptInvitation(invitationId);
     }
 
     @PatchMapping("/{invitationId}/reject")
-    public StageInvitationDTO rejectInvitation(@PathVariable @NotNull Long invitationId,
-                                               @Valid @RequestBody RejectionReasonDTO rejectionReason) {
-        log.info("Received request to reject invitation with ID: {} for reason: {}", invitationId, rejectionReason.getReason());
-        return stageInvitationService.rejectInvitation(invitationId, rejectionReason);
+    public StageInvitationDTO rejectInvitation(@PathVariable Long invitationId,
+                                               @Valid @RequestBody StageInvitationDTO stageInvitationDTO) {
+        log.info("Получен запрос на отклонение приглашения с ID: {} по причине: {}", invitationId, stageInvitationDTO.getRejectionReason());
+        return stageInvitationService.rejectInvitation(invitationId, stageInvitationDTO);
     }
 
-    @GetMapping
-    public List<StageInvitationDTO> getAllInvitations(@RequestParam @NotNull Long userId,
+    @GetMapping("{/users/{userId}")
+    public List<StageInvitationDTO> getAllInvitations(@PathVariable Long userId,
                                                       @RequestParam(required = false) StageInvitationStatus status,
                                                       @RequestParam(required = false) LocalDate dateFilter) {
         log.info("Received request to get all invitations for user ID: {}, with status: {}, dateFilter: {}", userId, status, dateFilter);

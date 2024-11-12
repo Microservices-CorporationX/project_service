@@ -1,27 +1,23 @@
 package faang.school.projectservice.service.invitation;
 
-import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.filters.Invitation.DateFilter;
 import faang.school.projectservice.filters.Invitation.InvitationFilter;
 import faang.school.projectservice.filters.Invitation.StatusFilter;
 import faang.school.projectservice.filters.Invitation.UserIdFilter;
-import faang.school.projectservice.jpa.StageInvitationJpaRepository;
-import faang.school.projectservice.jpa.StageJpaRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.mappers.invitation.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.exceptions.invitation.RejectionReasonMissingException;
 import faang.school.projectservice.exceptions.invitation.InvalidInvitationDataException;
-import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,31 +28,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StageInvitationService {
 
-    private final StageInvitationJpaRepository stageInvitationRepository;
-    private final StageJpaRepository stageRepository;
-    private final TeamMemberJpaRepository teamMemberRepository;
+    private final StageInvitationRepository stageInvitationRepository;
+    private final StageRepository stageRepository;
+    private final TeamMemberRepository teamMemberRepository;
     private final StageInvitationMapper stageInvitationMapper;
 
     public StageInvitationDTO sendInvitation(StageInvitationDTO invitationDto) {
         log.info("Получен запрос на отправку приглашения: {}", invitationDto);
 
-        Stage stage = stageRepository.findById(invitationDto.getStageId())
-            .orElseThrow(() -> new EntityNotFoundException("Этап не найден"));
+        Stage stage = stageRepository.getById(invitationDto.getStageId());
+        TeamMember invited = teamMemberRepository.findById(invitationDto.getInviteeId());
 
-        TeamMember invitee = teamMemberRepository.findById(invitationDto.getInviteeId())
-            .orElseThrow(() -> new EntityNotFoundException("Участник команды не найден"));
-
-        if (!stage.getProject().equals(invitee.getTeam().getProject())) {
+        if (!stage.getProject().equals(invited.getTeam().getProject())) {
             log.warn("Приглашение не может быть отправлено: участник не принадлежит проекту этапа");
             throw new InvalidInvitationDataException("Участник не принадлежит проекту этапа");
         }
 
-
-        // Создание и сохранение приглашения
         StageInvitation invitation = stageInvitationMapper.toEntity(invitationDto);
         invitation.setStatus(StageInvitationStatus.PENDING);
         invitation.setStage(stage);
-        invitation.setInvitee(invitee);
+        invitation.setInvited(invited);
 
         StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отправлено: {}", savedInvitation);
@@ -72,7 +63,7 @@ public class StageInvitationService {
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
 
-        invitation.getStage().getExecutors().add(invitation.getInvitee());
+        invitation.getStage().getExecutors().add(invitation.getInvited());
 
         StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно принято: {}", updatedInvitation);
@@ -80,20 +71,14 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(updatedInvitation);
     }
 
-    public StageInvitationDTO rejectInvitation(Long invitationId, RejectionReasonDTO rejectionReasonDto) {
-        log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, rejectionReasonDto.getRejectionReason());
+    public StageInvitationDTO rejectInvitation(Long invitationId, StageInvitationDTO stageInvitationDto) {
+        log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, stageInvitationDto.getRejectionReason());
 
         StageInvitation invitation = stageInvitationRepository.findById(invitationId)
             .orElseThrow(() -> new InvalidInvitationDataException("Приглашение не найдено"));
 
-        if (rejectionReasonDto.getRejectionReason() == null || rejectionReasonDto.getRejectionReason().isBlank()) {
-            log.warn("Причина отклонения обязательна");
-            throw new RejectionReasonMissingException("Причина отклонения обязательна");
-        }
-
         invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitation.setRejectionReason(rejectionReasonDto.getRejectionReason());
-
+        invitation.setRejectionReason(stageInvitationDto.getRejectionReason());
         StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отклонено: {}", updatedInvitation);
 
