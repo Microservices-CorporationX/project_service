@@ -26,6 +26,7 @@ import faang.school.projectservice.validator.internship.InternshipValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,10 @@ import java.util.stream.Stream;
 public class InternshipService {
 
     private static final String INTERNSHIP = "Internship";
-    private static final String USER_SERVICE_URL = "http://localhost:8080/api/v1/users";
+    private static final String NOT_EXISTING_IDS_ENDPOINT = "/users/not-existing-ids";
+
+    @Value("${services.user-service.host}:${services.user-service.port}${spring.mvc.servlet.path}")
+    private String baseUserServiceUrl;
 
     private final InternshipRepository internshipRepository;
     private final InternshipValidator internshipValidator;
@@ -134,12 +138,13 @@ public class InternshipService {
                         (internships, filter) -> filter.apply(internships, filterDto),
                         (s1, s2) -> s2
                 )
-                .peek(internship -> log.debug("Filtered internship: ID={}, Status={}",
-                        internship.getId(), internship.getStatus()))
-                .toList();
+                .collect(Collectors.toList());
+
+        filteredInternships.forEach(internship ->
+                log.debug("Filtered internship: ID={}, Status={}", internship.getId(), internship.getStatus())
+        );
 
         log.info("Filtered internships: total={}, matching criteria={}", allInternships.size(), filteredInternships.size());
-
         return internshipMapper.toDto(filteredInternships);
     }
 
@@ -225,7 +230,7 @@ public class InternshipService {
     }
 
     private List<Long> getNotExistingUserIds(List<Long> userIds) {
-        String url = String.format("%s/not-existing-ids", USER_SERVICE_URL);
+        String url = String.format("%s%s", baseUserServiceUrl, NOT_EXISTING_IDS_ENDPOINT);
 
         UserIdsDto requestDto = new UserIdsDto();
         requestDto.setUserIds(userIds);

@@ -3,6 +3,7 @@ package faang.school.projectservice.service.teammember;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,12 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, id));
     }
 
+    @Transactional
     public TeamMember save(TeamMember teamMember) {
         return teamMemberRepository.save(teamMember);
     }
 
+    @Transactional
     public List<TeamMember> saveAll(List<TeamMember> teamMembers) {
         return teamMemberRepository.saveAll(teamMembers);
     }
@@ -36,10 +39,12 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
     }
 
+    @Transactional
     public void delete(TeamMember teamMember) {
         teamMemberRepository.delete(teamMember);
     }
 
+    @Transactional
     public void deleteAll(List<TeamMember> teamMembers) {
         teamMemberRepository.deleteAll(teamMembers);
     }
