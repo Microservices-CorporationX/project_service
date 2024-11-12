@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -127,7 +128,7 @@ class ProjectControllerTest {
 
         when(projectService.findAllById(ids)).thenReturn(List.of(projectDto));
 
-        List<ProjectDto> response = projectController.getProjectsByIds(ids);
+        List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
 
         assertNotNull(response);
         assertEquals(1, response.size());
@@ -143,7 +144,7 @@ class ProjectControllerTest {
 
         when(projectService.findAllById(ids)).thenReturn(List.of());
 
-        List<ProjectDto> response = projectController.getProjectsByIds(ids);
+        List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
@@ -157,7 +158,7 @@ class ProjectControllerTest {
 
         when(projectService.findById(projectId)).thenReturn(projectDto);
 
-        ProjectDto response = projectController.getProject(projectId);
+        ProjectDto response = projectController.getProject(projectId).getBody();
 
         assertNotNull(response);
         assertEquals(projectDto.getId(), response.getId());

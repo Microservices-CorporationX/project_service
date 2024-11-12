@@ -82,12 +82,12 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    public List<ProjectDto> getProjectsByIds(@RequestBody List<Long> ids) {
-        return projectService.findAllById(ids);
+    public ResponseEntity<List<ProjectDto>> getProjectsByIds(@RequestBody List<Long> ids) {
+        return ResponseEntity.ok(projectService.findAllById(ids));
     }
 
     @GetMapping("/{projectId}")
-    public ProjectDto getProject(@PathVariable long projectId) {
-        return projectService.findById(projectId);
+    public ResponseEntity<ProjectDto> getProject(@PathVariable long projectId) {
+        return ResponseEntity.ok(projectService.findById(projectId));
     }
 }
