@@ -137,8 +137,7 @@ public class InternshipService {
                         allInternships.stream(),
                         (internships, filter) -> filter.apply(internships, filterDto),
                         (s1, s2) -> s2
-                )
-                .collect(Collectors.toList());
+                ).collect(Collectors.toList());
 
         filteredInternships.forEach(internship ->
                 log.debug("Filtered internship: ID={}, Status={}", internship.getId(), internship.getStatus())
