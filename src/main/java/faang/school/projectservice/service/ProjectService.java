@@ -109,8 +109,12 @@ public class ProjectService {
         return projectRepository.getProjectById(projectId);
     }
 
-    public List<Project> findAllById(List<Long> ids) {
-        return projectRepository.findAllByIds(ids);
+    public ProjectDto findById(Long id) {
+        return projectMapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    public List<ProjectDto> findAllById(List<Long> ids) {
+        return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
