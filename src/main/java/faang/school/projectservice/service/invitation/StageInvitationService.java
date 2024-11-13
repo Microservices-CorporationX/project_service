@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.filters.Invitation.DateFilter;
 import faang.school.projectservice.filters.Invitation.InvitationFilter;
 import faang.school.projectservice.filters.Invitation.StatusFilter;
-import faang.school.projectservice.filters.Invitation.UserIdFilter;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -58,11 +58,14 @@ public class StageInvitationService {
     public StageInvitationDTO acceptInvitation(Long invitationId) {
         log.info("Принятие приглашения с ID: {}", invitationId);
 
-        StageInvitation invitation = stageInvitationRepository.findById(invitationId)
-            .orElseThrow(() -> new InvalidInvitationDataException("Приглашение не найдено"));
+        Optional<StageInvitation> invitationOpt = Optional.ofNullable(stageInvitationRepository.findById(invitationId));
+        if (!invitationOpt.isPresent()) {
+            log.warn("Приглашение с ID {} не найдено", invitationId);
+            throw new InvalidInvitationDataException("Приглашение не найдено");
+        }
 
+        StageInvitation invitation = invitationOpt.get();
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
-
         invitation.getStage().getExecutors().add(invitation.getInvited());
 
         StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
@@ -74,11 +77,16 @@ public class StageInvitationService {
     public StageInvitationDTO rejectInvitation(Long invitationId, StageInvitationDTO stageInvitationDto) {
         log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, stageInvitationDto.getRejectionReason());
 
-        StageInvitation invitation = stageInvitationRepository.findById(invitationId)
-            .orElseThrow(() -> new InvalidInvitationDataException("Приглашение не найдено"));
+        Optional<StageInvitation> invitationOpt = Optional.ofNullable(stageInvitationRepository.findById(invitationId));
+        if (!invitationOpt.isPresent()) {
+            log.warn("Приглашение с ID {} не найдено", invitationId);
+            throw new InvalidInvitationDataException("Приглашение не найдено");
+        }
 
+        StageInvitation invitation = invitationOpt.get();
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setRejectionReason(stageInvitationDto.getRejectionReason());
+
         StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отклонено: {}", updatedInvitation);
 
@@ -88,10 +96,9 @@ public class StageInvitationService {
     public List<StageInvitationDTO> getAllInvitationsForUser(Long userId, StageInvitationStatus status, LocalDate dateFilter) {
         log.info("Получение всех приглашений для пользователя с ID: {}", userId);
 
-        List<StageInvitation> invitations = stageInvitationRepository.findByInviteeId(userId);
+        List<StageInvitation> invitations = stageInvitationRepository.findAll();
 
         List<InvitationFilter> filters = new ArrayList<>();
-        filters.add(new UserIdFilter(userId));
 
         if (status != null) {
             filters.add(new StatusFilter(status));
@@ -101,7 +108,8 @@ public class StageInvitationService {
         }
 
         return invitations.stream()
-            .filter(invitation -> filters.stream().allMatch(filter -> filter.apply(invitation)))
+            .filter(invitation -> invitation.getInvited().getId().equals(userId))
+            .filter(invitation -> filters.stream().allMatch(filter -> filter.matches(invitation)))
             .map(stageInvitationMapper::toDto)
             .collect(Collectors.toList());
     }

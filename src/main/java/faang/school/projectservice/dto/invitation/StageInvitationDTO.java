@@ -23,7 +23,6 @@ public class StageInvitationDTO {
     @NotNull(message = "Идентификатор приглашенного не может быть null")
     private Long inviteeId;
     private StageInvitationStatus status;
-    @NotBlank(message = "Причина отклонения обязательна")
     @Size(max = 255, message = "Причина отклонения слишком длинная")
     private String rejectionReason;
 }

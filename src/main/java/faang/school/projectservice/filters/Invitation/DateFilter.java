@@ -9,7 +9,7 @@ public class DateFilter implements InvitationFilter {
     private final LocalDate date;
 
     @Override
-    public boolean apply(StageInvitation invitation) {
+    public boolean matches(StageInvitation invitation) {
         return invitation.getCreatedDate().toLocalDate().equals(date);
     }
 }

@@ -1,6 +1,8 @@
 package faang.school.projectservice.exceptions.invitation;
 
-public class InvitationNotFoundException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class InvitationNotFoundException extends EntityNotFoundException {
     public InvitationNotFoundException(String message) {
         super(message);
     }

@@ -9,7 +9,7 @@ public class StatusFilter implements InvitationFilter {
     private final StageInvitationStatus status;
 
     @Override
-    public boolean apply(StageInvitation invitation) {
+    public boolean matches(StageInvitation invitation) {
         return invitation.getStatus().equals(status);
     }
 }

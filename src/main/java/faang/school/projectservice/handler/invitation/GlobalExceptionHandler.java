@@ -1,7 +1,6 @@
 package faang.school.projectservice.handler.invitation;
 
 import faang.school.projectservice.exceptions.invitation.InvitationNotFoundException;
-import faang.school.projectservice.exceptions.invitation.RejectionReasonMissingException;
 import faang.school.projectservice.exceptions.invitation.InvalidInvitationDataException;
 import faang.school.projectservice.exceptions.invitation.StageNotFoundException;
 import faang.school.projectservice.exceptions.invitation.TeamMemberNotFoundException;
@@ -9,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Component(value = "globalExceptionHandler")
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -25,13 +25,6 @@ public class GlobalExceptionHandler {
         log.error("Приглашение не найдено: ", ex);
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), "INVITATION_NOT_FOUND");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(RejectionReasonMissingException.class)
-    public ResponseEntity<ErrorResponse> handleRejectionReasonMissing(RejectionReasonMissingException ex) {
-        log.warn("Причина отклонения отсутствует: ", ex);
-        ErrorResponse errorResponse = new ErrorResponse("Причина отклонения обязательна", "REJECTION_REASON_MISSING");
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidInvitationDataException.class)

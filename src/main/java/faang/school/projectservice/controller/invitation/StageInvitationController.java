@@ -37,7 +37,7 @@ public class StageInvitationController {
 
     @PatchMapping("/{invitationId}/reject")
     public StageInvitationDTO rejectInvitation(@PathVariable Long invitationId,
-                                               @Valid @RequestBody StageInvitationDTO stageInvitationDTO) {
+                                               @RequestBody StageInvitationDTO stageInvitationDTO) {
         log.info("Получен запрос на отклонение приглашения с ID: {} по причине: {}", invitationId, stageInvitationDTO.getRejectionReason());
         return stageInvitationService.rejectInvitation(invitationId, stageInvitationDTO);
     }
