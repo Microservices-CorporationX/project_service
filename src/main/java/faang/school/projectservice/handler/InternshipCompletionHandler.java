@@ -1,6 +1,7 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -9,11 +10,14 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Random;
 
 @Component
 public class InternshipCompletionHandler {
-    private final Random random = new Random();
+    public void processInternshipCompletion(Internship internship, InternshipStatus status) {
+        if (status == InternshipStatus.COMPLETED) {
+            handleInternsCompletion(internship);
+        }
+    }
 
     public void handleInternsCompletion(Internship internship) {
         for (TeamMember intern : internship.getInterns()) {
@@ -27,9 +31,10 @@ public class InternshipCompletionHandler {
 
     public void internsToDismissal(List<@Positive Long> interns) {
         if (interns != null && !interns.isEmpty()) {
-            interns.forEach(interns::remove);
+            interns.clear();
         }
     }
+
 
     private boolean hasCompletedAllTasks(TeamMember intern) {
         return intern.getStages().stream()

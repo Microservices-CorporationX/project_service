@@ -1,18 +1,17 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
-import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
+import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.internShip.InternshipGetByIdDto;
+import faang.school.projectservice.dto.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.handler.InternshipCompletionHandler;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.validator.InternshipDurationValidator;
+import faang.school.projectservice.validator.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,14 +26,13 @@ public class InternshipService {
     private final ProjectService projectService;
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
-    private final InternshipDurationValidator internshipDurationValidator;
+    private final InternshipValidator internshipValidator;
     private final InternshipCompletionHandler completionHandler;
     private final List<Filter<TeamMember, InternshipFilterDto>> roleFilter;
     private final List<Filter<Internship, InternshipFilterDto>> statusFilter;
 
-
     public InternshipCreatedDto createInternship(InternshipCreatedDto internShipCreatedDto) {
-        internshipDurationValidator.durationValidate(internShipCreatedDto);
+        internshipValidator.durationValidate(internShipCreatedDto);
         projectService.getProjectTeamMembersIds(internShipCreatedDto);
         return internshipMapper.toCreatedDto(internshipRepository.save(internshipMapper.createInternship(internShipCreatedDto)));
     }
@@ -43,19 +41,18 @@ public class InternshipService {
         Internship internship = internshipRepository.findById(internShipUpdatedDto.getId())
                 .orElseThrow(EntityNotFoundException::new);
 
-        completionHandler.internsToDismissal(internShipUpdatedDto.getInternToDismissal());
-
-        if (internShipUpdatedDto.getStatus() == InternshipStatus.COMPLETED) {
-            completionHandler.handleInternsCompletion(internship);
-        }
+        completionHandler.internsToDismissal(internShipUpdatedDto.getInterns());
+        completionHandler.processInternshipCompletion(internship, internship.getStatus());
 
         Internship savedInternship = internshipRepository.save(internshipMapper.toEntity(internShipUpdatedDto));
         return internshipMapper.toUpdatedDto(savedInternship);
     }
 
     public List<InternshipFilterDto> filterInternship(InternshipFilterDto filters) {
-        List<Internship> filteredInternships = filterByStatus(filters);
-        List<TeamMember> filteredTeamMembers = filterByRole(filters);
+        List<Internship> allInternships = internshipRepository.findAll();
+
+        List<Internship> filteredInternships = filterByStatus(allInternships, filters);
+        List<TeamMember> filteredTeamMembers = filterByRole(allInternships, filters);
 
         List<InternshipFilterDto> result = new ArrayList<>();
 
@@ -81,18 +78,17 @@ public class InternshipService {
     }
 
 
-    private List<Internship> filterByStatus(InternshipFilterDto filters) {
-        Stream<Internship> internship = internshipRepository.findAll().stream();
+    private List<Internship> filterByStatus(List<Internship> internships, InternshipFilterDto filters) {
+        Stream<Internship> internshipStream = internships.stream();
         return statusFilter.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(internship, filters))
+                .flatMap(filter -> filter.apply(internshipStream, filters))
                 .toList();
     }
 
-
-    private List<TeamMember> filterByRole(InternshipFilterDto filters) {
-        List<Internship> interns = internshipRepository.findAll();
-        Stream<TeamMember> teamMembers = interns.stream().flatMap(member -> member.getInterns().stream());
+    private List<TeamMember> filterByRole(List<Internship> internships, InternshipFilterDto filters) {
+        Stream<TeamMember> teamMembers = internships.stream()
+                .flatMap(internship -> internship.getInterns().stream());
         return roleFilter.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .flatMap(filter -> filter.apply(teamMembers, filters))

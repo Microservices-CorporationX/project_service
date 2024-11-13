@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
-import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
+import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.internShip.InternshipGetByIdDto;
+import faang.school.projectservice.dto.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.service.InternshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

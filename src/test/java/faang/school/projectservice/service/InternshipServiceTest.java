@@ -1,13 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
+import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.internShip.InternshipGetByIdDto;
+import faang.school.projectservice.dto.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.handler.InternshipCompletionHandler;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.validator.InternshipDurationValidator;
+import faang.school.projectservice.validator.InternshipValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +39,7 @@ public class InternshipServiceTest {
     private InternshipRepository internshipRepository;
 
     @Mock
-    private InternshipDurationValidator internshipDurationValidator;
+    private InternshipValidator internshipValidator;
 
     @Mock
     private InternshipCompletionHandler completionHandler;
@@ -72,7 +75,7 @@ public class InternshipServiceTest {
 
         InternshipCreatedDto result = internshipService.createInternship(createdDto);
 
-        verify(internshipDurationValidator).durationValidate(createdDto);
+        verify(internshipValidator).durationValidate(createdDto);
         verify(projectService).getProjectTeamMembersIds(createdDto);
         verify(internshipRepository).save(internship);
         verify(internshipMapper).toCreatedDto(internship);
@@ -81,25 +84,63 @@ public class InternshipServiceTest {
     }
 
     @Test
-    public void testToUpdateInternshipAndHandleCompletion() {
-        when(internshipRepository.findById(1L)).thenReturn(Optional.of(internship));
+    void testUpdateInternship() {
+        InternshipUpdatedDto updatedDto = new InternshipUpdatedDto();
+        updatedDto.setId(1L);
+
+        Internship internship = new Internship();
+        Internship savedInternship = new Internship();
+
+        when(internshipRepository.findById(updatedDto.getId())).thenReturn(Optional.of(internship));
         when(internshipMapper.toEntity(updatedDto)).thenReturn(internship);
-        when(internshipMapper.toUpdatedDto(internship)).thenReturn(updatedDto);
-        when(internshipRepository.save(any(Internship.class))).thenReturn(internship);
+        when(internshipRepository.save(internship)).thenReturn(savedInternship);
+        when(internshipMapper.toUpdatedDto(savedInternship)).thenReturn(updatedDto);
 
         InternshipUpdatedDto result = internshipService.updateInternship(updatedDto);
 
-        verify(completionHandler).handleInternsCompletion(internship);
+        verify(completionHandler).internsToDismissal(updatedDto.getInterns());
+        verify(completionHandler).processInternshipCompletion(internship, internship.getStatus());
         verify(internshipRepository).save(internship);
-        verify(internshipMapper).toUpdatedDto(internship);
-
         assertEquals(updatedDto, result);
     }
 
     @Test
-    public void updateInternshipShouldThrowEntityNotFoundExceptionWhenInternshipNotFound() {
-        when(internshipRepository.findById(1L)).thenReturn(Optional.empty());
+    void testGetAllInternships() {
+        List<Internship> internships = List.of(new Internship());
+        InternshipGetAllDto dto = new InternshipGetAllDto();
 
-        assertThrows(EntityNotFoundException.class, () -> internshipService.updateInternship(updatedDto));
+        when(internshipRepository.findAll()).thenReturn(internships);
+        when(internshipMapper.toGetAllDto(any(Internship.class))).thenReturn(dto);
+
+        List<InternshipGetAllDto> result = internshipService.getAllInternships();
+
+        verify(internshipRepository).findAll();
+        assertEquals(1, result.size());
+        assertEquals(dto, result.get(0));
     }
+
+    @Test
+    void testGetByIdInternship() {
+        long internshipId = 1L;
+        Internship internship = new Internship();
+        InternshipGetByIdDto dto = new InternshipGetByIdDto();
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
+        when(internshipMapper.toGetByIdDto(internship)).thenReturn(dto);
+
+        InternshipGetByIdDto result = internshipService.getByIdInternship(internshipId);
+
+        verify(internshipRepository).findById(internshipId);
+        assertEquals(dto, result);
+    }
+
+    @Test
+    void testGetByIdInternship_NotFound() {
+        long internshipId = 1L;
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> internshipService.getByIdInternship(internshipId));
+    }
+
 }

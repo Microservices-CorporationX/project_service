@@ -1,10 +1,10 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.internShip.InternshipCreatedDto;
-import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetAllDto;
-import faang.school.projectservice.dto.client.internShip.InternshipGetByIdDto;
-import faang.school.projectservice.dto.client.internShip.InternshipUpdatedDto;
+import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.internShip.InternshipGetAllDto;
+import faang.school.projectservice.dto.internShip.InternshipGetByIdDto;
+import faang.school.projectservice.dto.internShip.InternshipUpdatedDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -22,16 +22,11 @@ public interface InternshipMapper {
     @Mapping(source = "mentorId", target = "mentorId")
     Internship createInternship(InternshipCreatedDto dto);
 
-    @Mapping(source = "projectId", target = "project")
-    @Mapping(source = "mentorId", target = "mentorId")
     @Mapping(source = "interns", target = "interns")
     Internship toEntity(InternshipUpdatedDto dto);
 
-    @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "mentorId.id", target = "mentorId")
     InternshipUpdatedDto toUpdatedDto(Internship entity);
 
-    @Mapping(source = "mentorId.id", target = "mentorId")
     InternshipGetAllDto toGetAllDto(Internship internship);
 
     InternshipGetByIdDto toGetByIdDto(Internship internship);

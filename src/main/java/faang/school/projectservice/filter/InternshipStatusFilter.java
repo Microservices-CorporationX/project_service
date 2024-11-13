@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter;
 
-import faang.school.projectservice.dto.client.internShip.InternshipFilterDto;
+import faang.school.projectservice.dto.internShip.InternshipFilterDto;
 import faang.school.projectservice.model.Internship;
 import org.springframework.stereotype.Component;
 
