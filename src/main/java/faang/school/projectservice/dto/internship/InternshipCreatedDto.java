@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.internShip;
+package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -26,6 +26,7 @@ public class InternshipCreatedDto {
     @Builder.Default()
     private LocalDateTime startDate = LocalDateTime.now();
 
+    @NotNull(message = "End date can not be null")
     private LocalDateTime endDate;
 
     @NotNull(message = "Internship status can not be null")

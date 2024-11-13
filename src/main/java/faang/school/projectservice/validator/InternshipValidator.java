@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.exception.InternshipDurationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

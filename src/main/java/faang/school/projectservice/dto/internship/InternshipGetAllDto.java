@@ -1,18 +1,22 @@
-package faang.school.projectservice.dto.internShip;
+package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Builder
-public class InternshipGetByIdDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class InternshipGetAllDto {
     private Long id;
-    private String title;
-    private String description;
+
+    @NotNull
+    private String name;
+
+    @NotNull
     private InternshipStatus status;
 }

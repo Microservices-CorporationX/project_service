@@ -1,13 +1,12 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
-import faang.school.projectservice.dto.internShip.InternshipFilterDto;
-import faang.school.projectservice.dto.internShip.InternshipGetAllDto;
-import faang.school.projectservice.dto.internShip.InternshipGetByIdDto;
-import faang.school.projectservice.dto.internShip.InternshipUpdatedDto;
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipGetAllDto;
+import faang.school.projectservice.dto.internship.InternshipGetByIdDto;
+import faang.school.projectservice.dto.internship.InternshipUpdatedDto;
 import faang.school.projectservice.service.InternshipService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;

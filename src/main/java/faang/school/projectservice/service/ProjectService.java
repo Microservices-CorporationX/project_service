@@ -8,7 +8,7 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
-import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Team;

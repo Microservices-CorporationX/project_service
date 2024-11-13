@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.internShip;
+package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.NotNull;

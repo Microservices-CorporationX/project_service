@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.exception.InternshipDurationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

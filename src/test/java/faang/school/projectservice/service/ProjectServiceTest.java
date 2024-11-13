@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.internShip.InternshipCreatedDto;
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
@@ -34,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -57,9 +56,6 @@ class ProjectServiceTest {
 
     @Mock
     List<Filter<Project, ProjectFilterDto>> filters;
-
-    @Mock
-    private ProjectValidator projectServiceValidator;
 
     @InjectMocks
     private ProjectService projectService;

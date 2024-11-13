@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.internShip;
+package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
 import jakarta.validation.constraints.NotNull;
@@ -7,18 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class InternshipGetAllDto {
+public class InternshipGetByIdDto {
+    @NotNull
     private Long id;
-
-    @NotNull
-    private String name;
-
-    @NotNull
+    private String title;
+    private String description;
     private InternshipStatus status;
 }
