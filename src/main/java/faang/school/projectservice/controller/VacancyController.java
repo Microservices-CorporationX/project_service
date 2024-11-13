@@ -30,8 +30,9 @@ public class VacancyController {
         vacancyService.createVacancy(vacancyDto);
     }
 
-    @PutMapping
-    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
+    @PutMapping("/{vacancyId}")
+    public VacancyDto updateVacancy(@PathVariable Long vacancyId, @RequestBody VacancyDto vacancyDto) {
+        validateId(vacancyId);
         validateVacancy(vacancyDto);
         validateNameVacancy(vacancyDto.getName());
         return vacancyService.updateVacancy(vacancyDto);
