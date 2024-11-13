@@ -41,7 +41,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleNonExistentDeletionType(NonExistentDeletionTypeException e) {
         log.error("Unknown deletion type", e);
         return new ErrorResponse("Invalid target stage ID", e.getMessage());
-      
+    }
+
     @ExceptionHandler(VacancyDuplicationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception){
