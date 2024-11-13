@@ -102,7 +102,7 @@ public class VacancyServiceTest {
         vacancy.setCandidates(List.of(new Candidate()));
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
 
-        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(vacancyDto));
+        assertThrows(DataValidationException.class, () -> vacancyService.updateVacancy(1L, vacancyDto));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class VacancyServiceTest {
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
 
-        VacancyDto updateVacancy = vacancyService.updateVacancy(vacancyDto);
+        VacancyDto updateVacancy = vacancyService.updateVacancy(1L, vacancyDto);
 
         assertEquals(vacancy.getId(), updateVacancy.getId());
         assertEquals(vacancy.getCount(), updateVacancy.getCount());
@@ -133,7 +133,7 @@ public class VacancyServiceTest {
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyRepository.save(vacancy)).thenReturn(vacancy);
 
-        VacancyDto updateVacancy = vacancyService.updateVacancy(vacancyDto);
+        VacancyDto updateVacancy = vacancyService.updateVacancy(1L, vacancyDto);
 
         assertEquals(vacancy.getId(), updateVacancy.getId());
         assertEquals(vacancy.getCount(), updateVacancy.getCount());
