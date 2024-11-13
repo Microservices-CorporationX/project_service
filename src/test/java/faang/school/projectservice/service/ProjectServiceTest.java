@@ -33,6 +33,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -133,6 +135,19 @@ class ProjectServiceTest {
     }
 
     @Test
+    void testCreateProjectSuccessful() {
+        doNothing().when(projectValidator).validateUniqueProject(projectDto);
+        when(projectRepository.save(project)).thenReturn(project);
+        project.setStatus(ProjectStatus.CREATED);
+
+        projectService.createProject(projectDto);
+
+        verify(projectRepository, times(1)).save(captor.capture());
+        Project result = captor.getValue();
+        assertEquals(result, project);
+    }
+
+    @Test
     void testUpdateProjectShouldNotUpdateIfValuesNull() {
         when(projectRepository.getProjectById(projectId)).thenReturn(mockProject);
         when(projectRepository.save(mockProject)).thenReturn(mockProject);
@@ -215,9 +230,23 @@ class ProjectServiceTest {
     }
 
     @Test
+    void testGetAccessibleProjectsByIdSuccess() {
+        project.setId(1L);
+        project.setStatus(ProjectStatus.CREATED);
+        projectDto.setId(1L);
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(true);
+
+        ProjectDto result = projectService.getAccessibleProjectsById(project.getId(), ownerId);
+
+        assertEquals(projectDto, result);
+    }
+
+    @Test
     void testGetAccessibleProjectsByIdShouldThrowException() {
         project.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () ->
                 projectService.getAccessibleProjectsById(project.getId(), ownerId));
@@ -349,5 +378,65 @@ class ProjectServiceTest {
                         .status(ProjectStatus.IN_PROGRESS)
                         .build()
         );
+    }
+
+    @Test
+    void findByIdWhenProjectExistsShouldReturnProjectDto() {
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
+
+        ProjectDto result = projectService.findById(1L);
+
+        assertNotNull(result);
+        assertEquals(projectDto.getId(), result.getId());
+        assertEquals(projectDto.getName(), result.getName());
+
+        verify(projectRepository).getProjectById(1L);
+        verify(projectMapper).toDto(project);
+    }
+
+    @Test
+    void findByIdWhenProjectDoesNotExistShouldThrowException() {
+        when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found"));
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            projectService.findById(1L);
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+
+        verify(projectRepository).getProjectById(1L);
+    }
+
+    @Test
+    void findAllById_whenProjectsExist_shouldReturnProjectDtos() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of(project));
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
+
+        List<ProjectDto> result = projectService.findAllById(ids);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(projectDto.getId(), result.get(0).getId());
+        assertEquals(projectDto.getName(), result.get(0).getName());
+
+        verify(projectRepository).findAllByIds(ids);
+        verify(projectMapper).toDto(project);
+    }
+
+    @Test
+    void findAllById_whenNoProjectsExist_shouldReturnEmptyList() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of());
+
+        List<ProjectDto> result = projectService.findAllById(ids);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(projectRepository).findAllByIds(ids);
     }
 }
