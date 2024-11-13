@@ -1,15 +1,13 @@
 package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.exeption.DataValidationException;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
-
 import faang.school.projectservice.service.team_member.TeamMemberService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 
 @Slf4j
 @Component
