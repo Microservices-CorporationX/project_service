@@ -20,8 +20,10 @@ public class SwaggerConfig {
                                 .description("Main Server"))
                 )
                 .info(new Info()
-                        .title("Project API")
+                        .title("API documentation for Project Service")
                         .version("1.0.0")
-                        .description("Documentation  for Project Managing"));
+                        .description("This service is responsible for managing clients," +
+                                " projects,stages,stageInvitations ,internships ,meets, " +
+                                "donations,teams,tasks,moments"));
     }
 }

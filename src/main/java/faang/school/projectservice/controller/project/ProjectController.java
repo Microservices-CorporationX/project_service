@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,19 +30,23 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @Operation(summary = "Create a new project", description = "Creates a new project with the provided details.")
+    @Operation(summary = "Create a new project",
+            description = "Creates a new project with the provided details.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Project created successfully"),
+            @ApiResponse(responseCode = "200", description = "Project created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
 
     @PostMapping
     public ProjectDto createProject(@RequestBody @Valid ProjectDto projectDto,
+                                    @Parameter(description = "User ID of the requester." +
+                                            " Must be a positive number.")
                                     @RequestHeader("x-user-id") @Positive Long userId) {
         return projectService.createProject(projectDto, userId);
     }
 
-    @Operation(summary = "Get project details", description = "Fetches the project details based on the project ID.")
+    @Operation(summary = "Get project details",
+            description = "Fetches the project details based on the project ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Project found successfully"),
             @ApiResponse(responseCode = "404", description = "Project not found")
@@ -52,7 +57,8 @@ public class ProjectController {
         return projectService.findById(projectId);
     }
 
-    @Operation(summary = "Get list of projects", description = "Fetches a list of projects based on the applied filters.")
+    @Operation(summary = "Get list of projects",
+            description = "Fetches a list of projects based on the applied filters.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of projects fetched successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid filter data")
@@ -60,11 +66,14 @@ public class ProjectController {
 
     @PostMapping("/filter")
     public List<ProjectDto> findAllProjects(@RequestBody @Valid ProjectFilterDto filters,
+                                            @Parameter(description = "User ID of the requester. " +
+                                                    "Must be a positive number.")
                                             @RequestHeader("x-user-id") @Positive Long userId) {
         return projectService.findAllProjects(filters, userId);
     }
 
-    @Operation(summary = "Update project details", description = "Updates an existing project's details with the provided information.")
+    @Operation(summary = "Update project details",
+            description = "Updates an existing project's details with the provided information.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Project updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
