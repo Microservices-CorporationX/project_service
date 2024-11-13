@@ -57,7 +57,15 @@ public class StageInvitationService {
 
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(Long invitedId) {
         List<StageInvitationDto> stages = new ArrayList<>();
-        // фильтрация на уровне базы данных попробовать
+        // фильтрация на уровне базы данных попробовать, НАПИСАЛ
+
+        //мне нужно взять айди инвайтнутого пройтись по всем приглашениям где он есть как приглашенный, фильтр по командам, по статусу операции по этапу, отклоненные и не отклоненные
+        stages = stageInvitationRepository.findByInvited_UserId(invitedId).stream()
+                .map(stageInvitation -> stageInvitationMapper.toDto(stageInvitation))
+                .toList();
+
+
+
         return stages;
     }
 
