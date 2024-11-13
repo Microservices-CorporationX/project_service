@@ -58,9 +58,6 @@ class ProjectServiceTest {
     @Mock
     List<Filter<Project, ProjectFilterDto>> filters;
 
-    @Mock
-    private ProjectValidator projectServiceValidator;
-
     @InjectMocks
     private ProjectService projectService;
 
