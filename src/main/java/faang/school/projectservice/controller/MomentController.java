@@ -27,7 +27,7 @@ public class MomentController {
 
     @PostMapping("/update")
     public MomentDto updateMoment(MomentDto momentDto) {
-        if (momentDto == null || momentDto.getId() == null) {
+        if (momentDto.getId() == null) {
             return momentDto;
         }
 
@@ -36,20 +36,16 @@ public class MomentController {
 
     @GetMapping
     public List<MomentDto> getProjectMoments(ProjectDto projectDto, MomentFilterDto momentFilterDto) {
-        if (projectDto == null || momentFilterDto == null) {
+        if (projectDto.getId() == null) {
             return List.of();
+        }
+
+        // if the filter isn't specified then return all project moments
+        if (momentFilterDto == null) {
+            return momentService.getProjectMoments(projectDto);
         }
 
         return momentService.getProjectMoments(projectDto, momentFilterDto);
-    }
-
-    @GetMapping
-    public List<MomentDto> getProjectMoments(ProjectDto projectDto) {
-        if (projectDto == null) {
-            return List.of();
-        }
-
-        return momentService.getProjectMoments(projectDto);
     }
 
     @GetMapping("/{id}")
