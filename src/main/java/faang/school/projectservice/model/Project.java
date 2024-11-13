@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import faang.school.projectservice.model.stage.Stage;
@@ -40,8 +41,8 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
@@ -90,4 +91,55 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    public void setPrivateVisibility() {
+        setVisibility(ProjectVisibility.PRIVATE);
+
+        if (children != null) {
+            children.forEach(Project::setPrivateVisibility);
+        }
+    }
+
+    public void addMoment(Moment moment) {
+        if (moments == null) {
+            moments = new ArrayList<>();
+        }
+        moments.add(moment);
+    }
+
+    public void addChildren(Project subProject) {
+        if (children == null) {
+            children = new ArrayList<>();
+        }
+        children.add(subProject);
+    }
+
+
+    public boolean hasChildren() {
+        return children != null && !children.isEmpty();
+    }
+
+    public boolean isProjectInactive() {
+        return isCompleted() || isOnHold() || isCancelled();
+    }
+
+    public boolean isCompleted() {
+        return status.equals(ProjectStatus.COMPLETED);
+    }
+
+    public boolean isNotCompleted() {
+        return !status.equals(ProjectStatus.COMPLETED);
+    }
+
+    public boolean isOnHold() {
+        return status.equals(ProjectStatus.ON_HOLD);
+    }
+
+    public boolean isCancelled() {
+        return status.equals(ProjectStatus.CANCELLED);
+    }
+
+    public boolean isPrivate() {
+        return visibility.equals(ProjectVisibility.PRIVATE);
+    }
 }
