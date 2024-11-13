@@ -28,6 +28,15 @@ public class MomentController {
         return momentService.createMoment(momentDto);
     }
 
+    @PostMapping("/update")
+    public MomentDto updateMoment(MomentDto momentDto) {
+        if (momentDto == null || momentDto.getId() == null) {
+            return momentDto;
+        }
+
+        return momentService.updateMoment(momentDto);
+    }
+
     @GetMapping
     public List<MomentDto> getProjectMoments(ProjectDto projectDto, MomentFilterDto momentFilterDto) {
         if (projectDto == null || momentFilterDto == null) {
@@ -38,10 +47,7 @@ public class MomentController {
     }
 
     @GetMapping
-    public List<MomentDto> getMoments(ProjectDto projectDto) {
-        /**
-         * Получаем все моменты по id их проекта
-         */
+    public List<MomentDto> getProjectMoments(ProjectDto projectDto) {
         if (projectDto == null) {
             return List.of();
         }

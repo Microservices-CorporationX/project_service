@@ -57,4 +57,20 @@ public class MomentService {
                 .map(momentMapper::toDto)
                 .toList();
     }
+
+    public MomentDto updateMoment(MomentDto momentDto) {
+        // checks if the moment exist
+        if (!momentRepository.existsById(momentDto.getId())) {
+            throw new DataValidationException(String.format(
+                    "A moment with id %s doesn't exist",
+                    momentDto.getId()
+            ));
+        }
+
+        Moment moment = momentRepository.findById(momentDto.getId()).get();
+
+        Moment updatedMoment = momentMapper.updateEntityFromDto(momentDto, moment);
+
+        return momentMapper.toDto(momentRepository.save(updatedMoment));
+    }
 }
