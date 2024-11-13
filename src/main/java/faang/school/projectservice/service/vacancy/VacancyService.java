@@ -42,7 +42,7 @@ public class VacancyService {
         return vacancyMapper.toDto(saveVacancy);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(Long vacancyId, VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
 
         VacancyStatus status = vacancy.getStatus();
@@ -50,9 +50,9 @@ public class VacancyService {
             throw new DataValidationException("The required number of candidates was not recruited");
         }
 
-        Vacancy updateVacancy = vacancyRepository.save(vacancy);
-        log.info("Update vacancy with ID {}", updateVacancy.getId());
-        return vacancyMapper.toDto(updateVacancy);
+        Vacancy updatedVacancy = vacancyRepository.save(vacancy);
+        log.info("Update vacancy with ID {}", vacancyId);
+        return vacancyMapper.toDto(updatedVacancy);
     }
 
     public void deleteVacancy(Long id) {

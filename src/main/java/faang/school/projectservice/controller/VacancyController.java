@@ -35,7 +35,7 @@ public class VacancyController {
         validateId(vacancyId);
         validateVacancy(vacancyDto);
         validateNameVacancy(vacancyDto.getName());
-        return vacancyService.updateVacancy(vacancyDto);
+        return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }
 
     @DeleteMapping("/{vacancyId}")
