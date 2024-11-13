@@ -4,6 +4,7 @@ import faang.school.projectservice.exception.InvalidStageTransferException;
 import faang.school.projectservice.exception.NonExistentDeletionTypeException;
 import faang.school.projectservice.exception.ProjectStatusValidationException;
 import jakarta.persistence.EntityNotFoundException;
+import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,5 +41,18 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleNonExistentDeletionType(NonExistentDeletionTypeException e) {
         log.error("Unknown deletion type", e);
         return new ErrorResponse("Invalid target stage ID", e.getMessage());
+      
+    @ExceptionHandler(VacancyDuplicationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception){
+        log.error("Vacancy Creation Error: {}", exception.getMessage());
+        return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception){
+        log.error("Illegal Argument Error: {}", exception.getMessage());
+        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
     }
 }
