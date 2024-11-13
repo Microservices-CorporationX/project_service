@@ -1,19 +1,39 @@
-package faang.school.projectservice.handler;
 
-import faang.school.projectservice.exceptions.invitation.InvitationNotFoundException;
-import faang.school.projectservice.exceptions.invitation.RejectionReasonMissingException;
-import faang.school.projectservice.exceptions.invitation.InvalidInvitationDataException;
+import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Slf4j
+@Data
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    private void logError(Exception ex, String logLevel) {
+    @ExceptionHandler(VacancyDuplicationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception){
+        log.error("Vacancy Creation Error: {}", exception.getMessage());
+        return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleVacancyCreation(EntityNotFoundException exception){
+        log.error("Entity Not Found Error: {}", exception.getMessage());
+        return new ErrorResponse("Entity Not Found Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception){
+        log.error("Illegal Argument Error: {}", exception.getMessage());
+        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
+    }
+  private void logError(Exception ex, String logLevel) {
         String message = String.format("[%s] Ошибка: %s", ex.getClass().getSimpleName(), ex.getMessage());
         if ("error".equalsIgnoreCase(logLevel)) {
             log.error(message, ex);
@@ -44,5 +64,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         logError(ex, "error");
         return new ResponseEntity<>("Произошла непредвиденная ошибка: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 }
