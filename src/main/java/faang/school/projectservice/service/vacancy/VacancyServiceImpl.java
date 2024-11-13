@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Service
@@ -102,11 +105,13 @@ public class VacancyServiceImpl implements VacancyService {
             return vacancyMapper.toDto(vacancyRepository.findAll());
         }
 
-        Stream<Vacancy> vacancyStream = vacancyRepository.findAll().stream();
+        List<Vacancy> vacancies = vacancyRepository.findAll();
 
         return vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(vacancyStream, filters))
+                .reduce(vacancies.stream(),
+                        (stream, filter) -> filter.apply(stream, filters),
+                        (s1, s2) -> s1)
                 .map(vacancyMapper::toDto)
                 .toList();
     }

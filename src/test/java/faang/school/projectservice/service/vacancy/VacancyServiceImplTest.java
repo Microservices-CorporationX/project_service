@@ -147,6 +147,12 @@ class VacancyServiceImplTest {
     }
 
     @Test
+    void getVacanciesNullFilterFields() {
+        Mockito.lenient().when(vacancyRepository.findAll()).thenReturn(getVacancies());
+        assertEquals(vacancyMapper.toDto(getVacancies()), vacancyService.getVacancies(new VacancyFilterDto(null, null)));
+    }
+
+    @Test
     void getVacanciesProjectFilter() {
         Mockito.lenient().when(vacancyRepository.findAll()).thenReturn(getVacancies());
         VacancyDto vacancyDto = getVacancyDto();
