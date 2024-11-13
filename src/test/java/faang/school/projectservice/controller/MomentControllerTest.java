@@ -1,6 +1,5 @@
-package faang.school.projectservice;
+package faang.school.projectservice.controller;
 
-import faang.school.projectservice.controller.MomentController;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.ProjectDto;
 import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
@@ -12,12 +11,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.w3c.dom.ls.LSInput;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.apache.logging.log4j.ThreadContext.isEmpty;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)

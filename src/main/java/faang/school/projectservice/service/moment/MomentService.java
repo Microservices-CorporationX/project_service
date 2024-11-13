@@ -28,7 +28,14 @@ public class MomentService {
     public MomentDto createMoment(MomentDto momentDto) {
         for (ProjectDto projectDto : momentDto.getProjectDtos()) {
             if (projectDto.getStatus() == ProjectStatus.CANCELLED) {
-                return momentDto;
+                throw new DataValidationException(String.format(
+                        "Project with id %s is canceled",
+                        projectDto.getId()
+                ));
+            }
+
+            if (projectDto.getId() == null) {
+                throw new DataValidationException("Project doesn't have an id");
             }
         }
 
@@ -37,6 +44,13 @@ public class MomentService {
     }
 
     public List<MomentDto> getProjectMoments(ProjectDto projectDto, MomentFilterDto userMomentFilters) {
+        if (!projectRepository.existsById(projectDto.getId())) {
+            throw new DataValidationException(String.format(
+                    "A project with id %s doesn't exist",
+                    projectDto.getId()
+            ));
+        }
+
         Stream<Moment> projectMomentsStream = momentRepository.findAllByProjectId(projectDto.getId()).stream();
         return filters.stream()
                 .filter(filter -> filter.isApplicable(userMomentFilters))

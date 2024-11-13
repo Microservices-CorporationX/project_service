@@ -10,5 +10,6 @@ public class MomentDto {
     private Long id;
     private String name;
     private LocalDateTime date;
+    private String description;
     private List<ProjectDto> projectDtos;
 }

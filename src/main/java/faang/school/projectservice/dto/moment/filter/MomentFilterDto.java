@@ -14,6 +14,7 @@ public class MomentFilterDto {
     private LocalDateTime createdAt;
     private LocalDateTime createdAtMin;
     private LocalDateTime createdAtMax;
+    private String momentDescriptionPattern;
 
     //    partner-projects filter patterns
     private String projectNamePattern;
