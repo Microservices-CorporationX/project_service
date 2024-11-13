@@ -73,4 +73,15 @@ public class MomentService {
 
         return momentMapper.toDto(momentRepository.save(updatedMoment));
     }
+
+    public MomentDto getMomentById(Long momentId) {
+        if (!momentRepository.existsById(momentId)) {
+            throw new DataValidationException(String.format(
+                    "A moment with id %s doesn't exist",
+                    momentId
+            ));
+        }
+
+        return momentMapper.toDto(momentRepository.findById(momentId).get());
+    }
 }

@@ -5,10 +5,7 @@ import faang.school.projectservice.dto.moment.ProjectDto;
 import faang.school.projectservice.dto.moment.filter.MomentFilterDto;
 import faang.school.projectservice.service.moment.MomentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,5 +50,10 @@ public class MomentController {
         }
 
         return momentService.getProjectMoments(projectDto);
+    }
+
+    @GetMapping("/{id}")
+    public MomentDto getMomentById(@PathVariable Long id) {
+        return momentService.getMomentById(id);
     }
 }
