@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -180,10 +181,10 @@ public class MomentServiceTest {
                 .thenReturn(expectedMoments);
 
         Mockito.when(momentFilters.stream())
-                        .thenReturn(Stream.of(
-                                new MomentDescriptionPatternFilter(),
-                                new CreatedAtFilter()
-                        ));
+                .thenReturn(Stream.of(
+                        new MomentDescriptionPatternFilter(),
+                        new CreatedAtFilter()
+                ));
 
         Mockito.when(momentMapper.toDto(expectedMoments.get(0)))
                 .thenReturn(expectedMomentDto);
@@ -214,7 +215,7 @@ public class MomentServiceTest {
         );
 
         Mockito.when(projectRepository.existsById(expectedProjectDto.getId()))
-                        .thenReturn(true);
+                .thenReturn(true);
 
         Mockito.when(momentRepository.findAllByProjectId(expectedProjectDto.getId()))
                 .thenReturn(List.of(expectedMoment));
@@ -265,4 +266,120 @@ public class MomentServiceTest {
 
 
     }
+
+    @Test
+    public void updateMomentTest() {
+        Moment expectedUpdatedMoment = new Moment();
+        MomentDto expectedUpdatedMomentDto = new MomentDto();
+
+        Mockito.when(momentRepository.existsById(expectedMomentDto.getId()))
+                .thenReturn(true);
+        Mockito.when(momentRepository.findById(expectedMomentDto.getId()))
+                .thenReturn(Optional.ofNullable(expectedMoment));
+        Mockito.when(momentRepository.save(expectedUpdatedMoment))
+                .thenReturn(expectedUpdatedMoment);
+
+        Mockito.when(momentMapper.updateEntityFromDto(expectedMomentDto, expectedMoment))
+                .thenReturn(expectedUpdatedMoment);
+        Mockito.when(momentMapper.toDto(expectedUpdatedMoment))
+                .thenReturn(expectedUpdatedMomentDto);
+
+        MomentDto actualUpdatedMomentDto = momentService.updateMoment(expectedMomentDto);
+
+        assertEquals(expectedUpdatedMomentDto, actualUpdatedMomentDto);
+
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .existsById(expectedMomentDto.getId());
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .findById(expectedMomentDto.getId());
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .save(expectedUpdatedMoment);
+
+        Mockito.verify(momentMapper, Mockito.times(1))
+                .toDto(expectedUpdatedMoment);
+        Mockito.verify(momentMapper, Mockito.times(1))
+                .updateEntityFromDto(expectedMomentDto, expectedMoment);
+    }
+
+    @Test
+    public void updateMomentThrowsDataValidationExceptionTest() {
+        String expectedExceptionMessage = String.format(
+                "A moment with id %s doesn't exist",
+                expectedMomentDto.getId()
+        );
+
+        Mockito.when(momentRepository.existsById(expectedMomentDto.getId()))
+                .thenReturn(false);
+
+        String actualExceptionMessage = assertThrows(DataValidationException.class,
+                () -> momentService.updateMoment(expectedMomentDto))
+                .getMessage();
+
+        assertEquals(expectedExceptionMessage, actualExceptionMessage);
+
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .existsById(expectedMomentDto.getId());
+        Mockito.verify(momentRepository, Mockito.times(0))
+                .findById(expectedMomentDto.getId());
+        Mockito.verify(momentRepository, Mockito.times(0))
+                .save(Mockito.any(Moment.class));
+
+        Mockito.verify(momentMapper, Mockito.times(0))
+                .toDto(Mockito.any(Moment.class));
+        Mockito.verify(momentMapper, Mockito.times(0))
+                .updateEntityFromDto(expectedMomentDto, expectedMoment);
+
+    }
+
+    @Test
+    public void getMomentByIdTest() {
+
+        Mockito.when(momentRepository.existsById(expectedMomentDto.getId()))
+                .thenReturn(true);
+        Mockito.when(momentRepository.findById(expectedMomentDto.getId()))
+                        .thenReturn(Optional.ofNullable(expectedMoment));
+
+        Mockito.when(momentMapper.toDto(expectedMoment))
+                .thenReturn(expectedMomentDto);
+
+        MomentDto actualMomentDto = momentService.getMomentById(expectedMomentDto.getId());
+
+        assertEquals(expectedMomentDto, actualMomentDto);
+
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .existsById(expectedMomentDto.getId());
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .findById(expectedMomentDto.getId());
+
+        Mockito.verify(momentMapper, Mockito.times(1))
+                .toDto(expectedMoment);
+    }
+
+    @Test
+    public void getMomentByIdThrowsDataValidationExceptionTest() {
+        Long expectedId = 42L;
+
+        String expectedExceptionMessage = String.format(
+                "A moment with id %s doesn't exist",
+                expectedId
+        );
+
+        Mockito.when(momentRepository.existsById(expectedId))
+                .thenReturn(false);
+
+        String actualExceptionMessage = assertThrows(DataValidationException.class,
+                () -> momentService.getMomentById(expectedId))
+                .getMessage();
+
+        assertEquals(expectedExceptionMessage, actualExceptionMessage);
+
+        Mockito.verify(momentRepository, Mockito.times(1))
+                .existsById(expectedId);
+        Mockito.verify(momentRepository, Mockito.times(0))
+                .findById(expectedId);
+
+        Mockito.verify(momentMapper, Mockito.times(0))
+                .toDto(Mockito.any(Moment.class));
+    }
+
 }
