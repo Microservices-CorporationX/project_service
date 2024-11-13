@@ -80,11 +80,13 @@ jacoco {
 }
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 val jacocoIncludePackagesList = listOf(
     "**/controller/**",
     "**/service/**",
+    "**/validator/**",
     "**/mapper/**"
 )
 val jacocoExcludePackAgeList = listOf(
@@ -97,7 +99,7 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
     reports {
-        xml.required.set(true)
+        xml.required.set(false)
         csv.required.set(false)
         html.required.set(true)
     }
@@ -113,17 +115,16 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    include(jacocoIncludePackagesList)
+                    exclude(jacocoExcludePackAgeList)
+                }
+            )
             limit {
-                counter = "BRANCH"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = BigDecimal.valueOf(0.7)
             }
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
-            }
-
         }
     }
 }
