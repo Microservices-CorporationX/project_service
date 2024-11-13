@@ -8,7 +8,6 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ public class ProjectService {
     private final UserContext userContext;
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
-    private final List<ProjectUpdate> projectUpdates;
     private final List<ProjectFilter> projectFilters;
 
     public ProjectDto getProjectById(long id) {
@@ -54,12 +52,10 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(ProjectDto projectDto) {
+        projectValidator.validate(projectDto, this::existsByOwnerUserIdAndName, userContext.getUserId());
         Project project = projectRepository.getProjectById(projectDto.getId());
 
-        projectUpdates.stream()
-                .filter(update -> update.isApplicable(projectDto))
-                .forEach(update -> update.apply(projectDto, project));
-
+        projectMapper.update(projectDto, project);
         project.setUpdatedAt(LocalDateTime.now());
 
         return projectMapper.toDto(projectRepository.save(project));
