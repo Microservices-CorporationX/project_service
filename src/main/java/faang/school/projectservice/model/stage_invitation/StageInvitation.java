@@ -48,10 +48,4 @@ public class StageInvitation {
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
-    @PrePersist
-    public void prePersist() {
-        if (createdDate == null) {
-            createdDate = LocalDateTime.now();
-        }
-    }
 }

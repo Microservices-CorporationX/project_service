@@ -1,11 +1,9 @@
 package faang.school.projectservice.controller.invitation;
 
-import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.invitation.StageInvitationService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalDate;
