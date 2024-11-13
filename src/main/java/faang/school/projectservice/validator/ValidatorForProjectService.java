@@ -5,7 +5,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 
 
-public class Validator {
+public class ValidatorForProjectService {
 
     public static void checkValidId(Long id) {
         if (id == null || id < 0) {

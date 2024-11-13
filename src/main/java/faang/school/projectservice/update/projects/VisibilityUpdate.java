@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.client.ProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.update.ProjectUpdate;
-import faang.school.projectservice.validator.Validator;
+import faang.school.projectservice.validator.ValidatorForProjectService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +17,7 @@ public class VisibilityUpdate implements ProjectUpdate {
     @Override
     public void apply(Project project, ProjectDto projectDto) {
         if (project.getParentProject().getVisibility() != null) {
-            Validator.checkVisibility(project.getParentProject().getVisibility(), projectDto.getVisibility());
+            ValidatorForProjectService.checkVisibility(project.getParentProject().getVisibility(), projectDto.getVisibility());
         }
 
         project.setVisibility(projectDto.getVisibility());

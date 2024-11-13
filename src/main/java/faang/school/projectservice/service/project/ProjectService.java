@@ -13,7 +13,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.update.ProjectUpdate;
-import faang.school.projectservice.validator.Validator;
+import faang.school.projectservice.validator.ValidatorForProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +35,11 @@ public class ProjectService {
     public ProjectDto createSubProject(Long projectId, CreateSubProjectDto createSubProjectDto) {
         Project mainProject = getProject(projectId);
 
-        Validator.checkVisibility(
+        ValidatorForProjectService.checkVisibility(
                 mainProject.getVisibility(),
                 createSubProjectDto.getVisibility()
         );
-        Validator.checkProjectContainsSubProject(mainProject, createSubProjectDto.getName());
+        ValidatorForProjectService.checkProjectContainsSubProject(mainProject, createSubProjectDto.getName());
 
         Project subProject = subProjectMapper.toProject(createSubProjectDto);
         addDependency(mainProject, subProject);
@@ -50,11 +50,11 @@ public class ProjectService {
     }
 
     public ProjectDto updateSubProject(ProjectDto subProjectDto) {
-        Validator.checkValidId(subProjectDto.getId());
+        ValidatorForProjectService.checkValidId(subProjectDto.getId());
         Project subProject = getProject(subProjectDto.getId());
 
         boolean isAllSubProjectCancelled = checkCancelledStatus(subProjectDto);
-        Validator.checkSubProjectStatus(subProject.getStatus(), isAllSubProjectCancelled);
+        ValidatorForProjectService.checkSubProjectStatus(subProject.getStatus(), isAllSubProjectCancelled);
 
         projectUpdates.stream()
                 .filter(projectUpdate -> projectUpdate.isApplicable(subProjectDto))
@@ -73,7 +73,7 @@ public class ProjectService {
     public List<ProjectDto> getSubProjects(Long projectId, ProjectFilterDto projectFilterDto) {
         Project project = getProject(projectId);
 
-        Validator.checkProjectContainsChild(project);
+        ValidatorForProjectService.checkProjectContainsChild(project);
         List<Project> projects = project.getChildren().stream()
                 .filter(subProject -> isPrivateProjectInPublic(project, subProject))
                 .collect(Collectors.toList());
