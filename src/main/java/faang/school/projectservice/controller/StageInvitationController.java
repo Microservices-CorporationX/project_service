@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.dto.StageInvitationFilterDto;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -21,28 +22,28 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api/projects")
+@RequestMapping("/api/projects/stage-invitations")
 @RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    @PostMapping("/invite")
-    public void sendInvitation(@RequestBody @Valid StageInvitationDto stageInvitationDto) {
-        stageInvitationService.sendInvitation(stageInvitationDto);
+    @PostMapping
+    public StageInvitationDto sendInvitation(@RequestBody @Valid StageInvitationDto stageInvitationDto) {
+        return stageInvitationService.sendInvitation(stageInvitationDto);
     }
 
     @PatchMapping("/{stageInvitationId}/accept")
-    public void acceptInvitation(@PathVariable @Positive Long stageInvitationId) {
-        stageInvitationService.acceptInvitation(stageInvitationId);
+    public StageInvitationDto acceptInvitation(@PathVariable @Positive Long stageInvitationId) {
+        return stageInvitationService.acceptInvitation(stageInvitationId);
     }
 
     @PatchMapping("/{stageInvitationId}/reject")
-    public void rejectInvitation(@PathVariable @Positive Long stageInvitationId,
-                                 @NotBlank String reason) {
-        stageInvitationService.rejectInvitation(stageInvitationId, reason);
+    public StageInvitationDto rejectInvitation(@PathVariable @Positive Long stageInvitationId,
+                                               @RequestParam @NotBlank String reason) {
+        return stageInvitationService.rejectInvitation(stageInvitationId, reason);
     }
 
-    @GetMapping("/search")
+    @GetMapping
     public List<StageInvitationDto> getUserAllFilteredInvitations(@RequestParam @Positive Long invitedId,
                                                                   @RequestBody StageInvitationFilterDto filter) {
         return stageInvitationService.getAllFilteredInvitations(invitedId, filter);

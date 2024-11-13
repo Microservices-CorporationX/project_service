@@ -26,29 +26,32 @@ public class StageInvitationService {
     private final List<StageInvitationFilter> stageInvitationFilters;
 
     @Transactional
-    public void sendInvitation(StageInvitationDto stageInvitationDto) {
+    public StageInvitationDto sendInvitation(StageInvitationDto stageInvitationDto) {
         log.info("Trying to send stage invitation: {}", stageInvitationDto);
         StageInvitation stageInvitation = mapToFullStageInvitation(stageInvitationDto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
         stageInvitationRepository.save(stageInvitation);
         log.info("Successfully sent stage invitation: {}", stageInvitation);
+        return stageInvitationMapper.toDto(stageInvitation);
     }
 
     @Transactional
-    public void acceptInvitation(long stageInvitationId) {
+    public StageInvitationDto acceptInvitation(long stageInvitationId) {
         log.info("Trying to accept invitation under id: {}", stageInvitationId);
         StageInvitation stageInvitation = getStageInvitation(stageInvitationId);
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         log.info("Successfully accepted invitation: {}", stageInvitation);
+        return stageInvitationMapper.toDto(stageInvitation);
     }
 
     @Transactional
-    public void rejectInvitation(long stageInvitationId, String reason) {
+    public StageInvitationDto rejectInvitation(long stageInvitationId, String reason) {
         log.info("Trying to reject invitation under id: {}", stageInvitationId);
         StageInvitation stageInvitation = getStageInvitation(stageInvitationId);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(reason);
         log.info("Successfully rejected invitation: {}", stageInvitation);
+        return stageInvitationMapper.toDto(stageInvitation);
     }
 
     @Transactional
