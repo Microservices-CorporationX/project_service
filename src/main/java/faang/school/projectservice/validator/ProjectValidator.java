@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
@@ -9,9 +10,6 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +32,18 @@ public class ProjectValidator {
         }
 
         log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
+    }
+
+    public void validateUniqueProject(CreateProjectDto dto) {
+        Long ownerId = dto.getOwnerId();
+        String name = dto.getName();
+
+        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
+            log.error("SubProject '{}' with ownerId #{} already exists.", name, ownerId);
+            throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
+                    name, ownerId));
+        }
+        log.info("SubProject '{}' with ownerId #{} unique and can be created.", name, ownerId);
     }
 
     public boolean canUserAccessProject(Project project, Long currentUserId) {
@@ -92,5 +102,16 @@ public class ProjectValidator {
                 child.getStatus() == ProjectStatus.COMPLETED) || project.getStatus() == ProjectStatus.CANCELLED) {
             throw new NoStatusChangeException("All subprojects should be completed or cancelled first");
         }
+    }
+
+    public void validateCreateSubprojectBasedOnVisibility(Project parentProject, CreateProjectDto projectDto) {
+        if (parentProject.getVisibility() != projectDto.getVisibility()) {
+            throw new ProjectVisibilityException("The parent project and subproject must have the same visibility");
+        }
+    }
+
+    public boolean validateHasChildrenProjectsClosed(Project project) {
+        return project.getChildren().stream()
+                .allMatch(child -> child.getStatus() == ProjectStatus.COMPLETED || child.getStatus() == ProjectStatus.CANCELLED);
     }
 }

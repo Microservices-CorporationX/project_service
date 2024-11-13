@@ -1,4 +1,4 @@
-package faang.school.projectservice.statusUpdater;
+package faang.school.projectservice.statusupdator;
 
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
@@ -10,21 +10,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class OnHoldStatusUpdate implements StatusUpdater {
+public class InProgressStatusUpdate implements StatusUpdater {
     private final ProjectValidator projectValidator;
     private final ProjectRepository projectRepository;
 
     @Override
     public boolean isApplicable(UpdateSubProjectDto updateSubProjectDto) {
-        return updateSubProjectDto.getStatus() == ProjectStatus.ON_HOLD;
+        return updateSubProjectDto.getStatus() == ProjectStatus.IN_PROGRESS;
     }
 
     @Override
     public void changeStatus(Project project) {
-        projectValidator.validateProjectStatusValidToHold(project);
-        project.setStatus(ProjectStatus.ON_HOLD);
-        if (projectValidator.hasChildrenProjects(project)) {
-            project.getChildren().forEach(this::changeStatus);
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+        if (projectValidator.hasParentProject(project)) {
+            Project parentProject = project.getParentProject();
+            changeStatus(parentProject);
         }
         projectRepository.save(project);
     }

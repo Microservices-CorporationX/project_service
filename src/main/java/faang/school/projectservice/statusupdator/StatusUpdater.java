@@ -1,4 +1,4 @@
-package faang.school.projectservice.statusUpdater;
+package faang.school.projectservice.statusupdator;
 
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;

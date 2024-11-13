@@ -1,26 +1,23 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.dto.project.CreateProjectDto;
-import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.statusUpdater.StatusUpdater;
-import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.statusupdator.StatusUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -45,6 +39,7 @@ public class ProjectService {
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
     private final List<StatusUpdater> statusUpdates;
+    private final MomentService momentService;
 
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
@@ -134,9 +129,21 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
     public ProjectResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
+        Project parentProject = projectRepository.getProjectById(parentId);
+        projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, createProjectDto);
+        projectValidator.validateUniqueProject(createProjectDto);
 
-        return null;
+        Project project = projectMapper.toEntity(createProjectDto);
+        project.setParentProject(parentProject);
+        project.setStatus(ProjectStatus.CREATED);
+        parentProject.getChildren().add(project);
+
+        Project savedProject = projectRepository.save(project);
+        projectRepository.save(parentProject);
+        log.info("Subproject #{} created successfully for parent project #{}.", savedProject.getId(), parentId);
+        return projectMapper.toResponseDto(savedProject);
     }
 
     @Transactional
@@ -145,9 +152,23 @@ public class ProjectService {
         Project project = getProjectById(updateSubProjectDto.getId());
         changeStatus(project, updateSubProjectDto);
         changeVisibility(project, updateSubProjectDto);
-        // add Moment
-        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
 
+        if (projectValidator.validateHasChildrenProjectsClosed(project)) {
+            MomentDto momentDto = MomentDto.builder()
+                    .name("All subprojects completed!")
+                    .date(LocalDateTime.now(ZoneId.of("UTC")))
+                    .userIds(project.getTeams().stream()
+                            .map(Team::getTeamMembers)
+                            .flatMap(List::stream)
+                            .map(TeamMember::getUserId)
+                            .toList())
+                    .projectsIds(new ArrayList<>(List.of(project.getId())))
+                    .build();
+            momentService.saveMoment(momentDto);
+            log.info("Moment #All subprojects completed! successfully created for project #{}", project.getId());
+        }
+
+        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         return projectMapper.toResponseDto(project);
     }
 

@@ -1,4 +1,4 @@
-package faang.school.projectservice.statusUpdater;
+package faang.school.projectservice.statusupdator;
 
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
@@ -10,19 +10,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CompletedStatusUpdate implements StatusUpdater {
+public class CancelledStatusUpdate implements StatusUpdater {
     private final ProjectValidator projectValidator;
     private final ProjectRepository projectRepository;
 
     @Override
     public boolean isApplicable(UpdateSubProjectDto updateSubProjectDto) {
-        return updateSubProjectDto.getStatus() == ProjectStatus.COMPLETED;
+        return updateSubProjectDto.getStatus() == ProjectStatus.CANCELLED;
     }
 
     @Override
     public void changeStatus(Project project) {
-        projectValidator.validateProjectIsValidToComplete(project);
-        project.setStatus(ProjectStatus.COMPLETED);
+        project.setStatus(ProjectStatus.CANCELLED);
+        if (projectValidator.hasChildrenProjects(project)) {
+            project.getChildren().forEach(this::changeStatus);
+        }
         projectRepository.save(project);
     }
 }
