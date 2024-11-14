@@ -139,10 +139,6 @@ public class InternshipService {
                         (s1, s2) -> s2
                 ).collect(Collectors.toList());
 
-        filteredInternships.forEach(internship ->
-                log.debug("Filtered internship: ID={}, Status={}", internship.getId(), internship.getStatus())
-        );
-
         log.info("Filtered internships: total={}, matching criteria={}", allInternships.size(), filteredInternships.size());
         return internshipMapper.toDto(filteredInternships);
     }
