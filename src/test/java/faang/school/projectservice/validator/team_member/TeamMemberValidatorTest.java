@@ -6,27 +6,21 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
 class TeamMemberValidatorTest {
 
     private final TeamMemberValidator teamMemberValidator = new TeamMemberValidator();
 
     @Test
     public void teamMemberParticipantOfProjectTest() {
-        ArgumentCaptor<TeamMember> captor = ArgumentCaptor.forClass(TeamMember.class);
-        long memberId = 1L;
         long projectId = 10L;
+
         Project project = new Project();
         project.setId(projectId);
 
@@ -35,25 +29,24 @@ class TeamMemberValidatorTest {
 
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setStage(stage);
-
         TeamMember teamMember = new TeamMember();
         teamMember.setStages(new ArrayList<>(List.of(stage)));
 
-        teamMemberValidator.validateIsTeamMemberParticipantOfProject(captor.capture(), stageInvitation);
-        TeamMember result = captor.getValue();  //???
-        assertEquals(teamMember, result);
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(teamMember, stageInvitation);
+
+        assertDoesNotThrow(() -> teamMemberValidator.validateIsTeamMemberParticipantOfProject(
+                teamMember, stageInvitation));
     }
 
     @Test
-    public void teamMemberIsNotParticipantOfProjectTest() {
-        ArgumentCaptor<TeamMember> captor = ArgumentCaptor.forClass(TeamMember.class);
-        long memberId = 1L;
-        long projectId = 10L;
-        long secondProjectId = 15L;
+    public void teamMemberIsNotParticipantOfProjectThrowExceptionTest() {
+        Long projectId = 10L;
+        Long secondProjectId = 15L;
+
         Project project = new Project();
         project.setId(projectId);
         Project anotherProject = new Project();
-        project.setId(secondProjectId);
+        anotherProject.setId(secondProjectId);
 
         Stage stage = new Stage();
         stage.setProject(project);
@@ -62,19 +55,11 @@ class TeamMemberValidatorTest {
 
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setStage(stage);
-        StageInvitation anotherStageInvitation = new StageInvitation();
-        anotherStageInvitation.setStage(anotherStage);
-
         TeamMember teamMember = new TeamMember();
-        teamMember.setStages(new ArrayList<>(List.of(stage)));
-        TeamMember anotherTeamMember = new TeamMember();
-        anotherTeamMember.setStages(new ArrayList<>(List.of(anotherStage)));
+        teamMember.setStages(new ArrayList<>(List.of(anotherStage)));
 
-        teamMemberValidator.validateIsTeamMemberParticipantOfProject(captor.capture(), stageInvitation);
-        TeamMember result = captor.getValue();
-        assertNotEquals(anotherTeamMember, result);
         assertThrows(DataValidationException.class,
                 () -> teamMemberValidator.validateIsTeamMemberParticipantOfProject(
-                        teamMember, anotherStageInvitation)); //?????
+                        teamMember, stageInvitation));
     }
 }

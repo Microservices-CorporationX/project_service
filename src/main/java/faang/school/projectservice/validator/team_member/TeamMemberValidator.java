@@ -15,7 +15,7 @@ public class TeamMemberValidator {
         Project invitationProject = invitation.getStage().getProject();
 
         boolean isNotParticipant = teamMember.getStages().stream()
-                .noneMatch(stage -> stage.getProject().equals(invitationProject));
+                .noneMatch(stage -> stage.getProject().getId().equals(invitationProject.getId()));
 
         if (isNotParticipant) {
             throw new DataValidationException("This team member is not participant of this project");

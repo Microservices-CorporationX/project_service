@@ -41,7 +41,6 @@ class StageInvitationValidatorTest {
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setInvited(teamMember);
 
-
         assertThrows(DataValidationException.class,
                 () -> stageInvitationValidator.validateIsInvitationSentToThisTeamMember(
                         secondTeamMemberId, stageInvitation));

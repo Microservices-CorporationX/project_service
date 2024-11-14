@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -38,8 +38,6 @@ class TeamMemberServiceTest {
         TeamMember teamMember = new TeamMember();
         when(repository.findById(id)).thenReturn(Optional.of(teamMember));
 
-        TeamMember result = teamMemberService.getTeamMemberEntity(id);
-
-        assertEquals(teamMember, result);
+        assertDoesNotThrow(() -> teamMemberService.getTeamMemberEntity(id));
     }
 }

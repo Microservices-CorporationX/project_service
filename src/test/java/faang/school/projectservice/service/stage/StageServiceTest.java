@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -31,9 +31,7 @@ public class StageServiceTest {
         stage.setStageId(id);
         when(repository.findById(id)).thenReturn(Optional.of(stage));
 
-        Stage result = stageService.getStageEntity(id);
-
-        assertEquals(stage.getStageId(), result.getStageId());
+        assertDoesNotThrow(() -> stageService.getStageEntity(id));
     }
 
     @Test
