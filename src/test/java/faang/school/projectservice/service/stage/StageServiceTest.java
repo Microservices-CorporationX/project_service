@@ -9,7 +9,6 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
-import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,14 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class StageServiceTest {
@@ -45,9 +38,6 @@ class StageServiceTest {
     @Mock
     private TeamMemberService teamMemberService;
 
-    @Mock
-    private StageValidator stageValidator;
-
     @Spy
     private StageMapper stageMapper;
 
@@ -58,6 +48,10 @@ class StageServiceTest {
     private StageDto stageDto;
     private StageRoles stageRoles;
     private Task task;
+    private final long stageId = 1L;
+    private final long userId = 1L;
+    private final long projectId = 1L;
+    private final long invalidProjectId = 0L;
 
     @BeforeEach
     public void setUp() {
@@ -131,23 +125,23 @@ class StageServiceTest {
 
     @Test
     public void setExecutor() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
-        when(teamMemberService.getTeamMemberByUserId(1L)).thenReturn(teamMember);
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+        when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
 
-        stageService.setExecutor(1L, 1L);
+        stageService.setExecutor(stageId, userId);
 
-        verify(stageRepository, times(1)).getById(1L);
+        verify(stageRepository, times(1)).getById(stageId);
         verify(stageRepository, times(1)).save(stage);
     }
 
     @Test
     public void getById() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
+        when(stageRepository.getById(stageId)).thenReturn(stage);
 
-        Stage stage = stageService.getById(1L);
+        Stage stage = stageService.getById(stageId);
         assertEquals(1L, stage.getStageId());
 
-        verify(stageRepository, times(1)).getById(1L);
+        verify(stageRepository, times(1)).getById(stageId);
     }
 
     @Test
@@ -168,157 +162,115 @@ class StageServiceTest {
 
     @Test
     void testCreateStageThrowException() {
-        when(projectService.getProjectById(1L)).thenThrow(new EntityNotFoundException(
-                String.format("Project not found by id: %s", 1L)));
+        when(projectService.getProjectById(projectId)).thenThrow(new EntityNotFoundException(
+                String.format("Project not found by id: %s", projectId)));
 
         assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(1L),
-                String.format("Project not found by id: %s", 1L));
+                String.format("Project not found by id: %s", projectId));
     }
 
     @Test
-    void testCreateStageSuccessfully() {
+    void testCreateStage_Successfully() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
-        when(projectService.getProjectById(1L)).thenReturn(project);
-
+        when(projectService.getProjectById(projectId)).thenReturn(project);
         when(stageRepository.save(stage)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
         StageDto result = stageService.createStage(stageDto);
 
         assertNotNull(result);
-        assertEquals("Stage 1", result.getStageName());
+        assertEquals(stageDto, result);
     }
 
     @Test
-    void testGetStagesByProjectIdRoleAndStatusSuccessfully() {
-        when(projectService.existsById(1L)).thenReturn(true);
-        when(stageRepository.findAll()).thenReturn(List.of(stage));
+    void testGetAllStagesByProjectId_ShouldReturnExpectedStages_WhenProjectExists() {
+        List<Stage> expectedStages = List.of(stage);
+
+        when(stageRepository.findAllByProjectId(stage.getProject().getId())).thenReturn(expectedStages);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
-        List<StageDto> result = stageService.getAllStagesBy(1L, "designer", "done");
+        List<StageDto> actualStageDtos = stageService.getAllStagesBy(stage.getProject().getId());
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Stage 1", result.get(0).getStageName());
+        assertEquals(expectedStages.size(), actualStageDtos.size());
+        assertEquals(stageDto, actualStageDtos.get(0));
+        verify(stageMapper, times(expectedStages.size())).toDto(stage);
+        verify(stageRepository, times(1)).findAllByProjectId(stage.getProject().getId());
     }
 
     @Test
-    void testGetStagesByProjectIdRoleAndStatusInvalidProjectIdThrowEntityNotFoundException() {
-        when(projectService.existsById(3L)).thenReturn(false);
+    void testDeleteStage_Successfully() {
+        when(stageRepository.getById(stageId)).thenReturn(stage);
 
-        assertThrows(EntityNotFoundException.class, () ->
-                        stageService.getAllStagesBy(3L, "designer", "done"),
-                String.format("Project not found by id: %s", 3L));
-    }
+        stageService.deleteStage(stageId);
 
-    @Test
-    void testGetStagesByProjectIdRoleAndStatusInvalidRoleThrowIllegalArgumentException() {
-        when(projectService.existsById(1L)).thenReturn(true);
-        when(stageService.getAllStagesBy(1L, "developer", "done"))
-                .thenThrow(new IllegalArgumentException(String.format("Invalid role: %s", "developer")));
-
-        assertThrows(IllegalArgumentException.class, () ->
-                        stageService.getAllStagesBy(1L, "developer", "done"),
-                String.format("Invalid role: %s", "developer"));
-    }
-
-    @Test
-    void testGetStagesByProjectIdRoleAndStatusInvalidStatusThrowIllegalArgumentException() {
-        when(projectService.existsById(1L)).thenReturn(true);
-        when(stageService.getAllStagesBy(1L, "designer", "sleep"))
-                .thenThrow(new IllegalArgumentException(String.format("Invalid status: %s", "in progress")));
-
-        assertThrows(IllegalArgumentException.class, () ->
-                        stageService.getAllStagesBy(1L, "designer", "sleep"),
-                String.format("Invalid status: %s", "sleep"));
-    }
-
-    @Test
-    void testDeleteStageSuccessfully() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
-
-        stageService.deleteStage(1L);
-
-        verify(stageRepository, times(1)).getById(1L);
+        verify(stageRepository, times(1)).getById(stageId);
         verify(stageRepository, times(1)).delete(stage);
     }
 
     @Test
-    void testDeleteStageAndMoveTasksSuccessfully() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
-        when(stageRepository.getById(2L)).thenReturn(newStage);
+    void testDeleteStageAndMoveTasks_Successfully() {
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+        when(stageRepository.getById(newStage.getStageId())).thenReturn(newStage);
 
-        stageService.deleteStageAndMoveTasks(1L, 2L);
+        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId());
 
         assertEquals(stage.getTasks(), newStage.getTasks());
-        verify(stageRepository, times(1)).getById(1L);
-        verify(stageRepository, times(1)).getById(2L);
+        verify(stageRepository, times(1)).getById(stageId);
+        verify(stageRepository, times(1)).getById(newStage.getStageId());
         verify(stageRepository, times(1)).delete(stage);
     }
 
     @Test
-    void testDeleteStageAndMoveTasksIfNewStageThrowEntityNotFoundException() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
-        when(stageRepository.getById(2L)).thenThrow(new EntityNotFoundException(
-                String.format("Stage not found by id: %s", 2L)));
+    void testDeleteStageAndMoveTasks_IfNewStageDoesNotExist_ThrowEntityNotFoundException() {
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+        when(stageRepository.getById(newStage.getStageId())).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", newStage.getStageId())));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStageAndMoveTasks(1L, 2L),
-                String.format("Stage not found by id: %s", 2L));
+                        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId()),
+                String.format("Stage not found by id: %s", newStage.getStageId()));
     }
 
     @Test
-    void testDeleteStageAndMoveTasksIfStageThrowEntityNotFoundException2() {
-        when(stageRepository.getById(1L)).thenThrow(new EntityNotFoundException(
-                String.format("Stage not found by id: %s", 1L)));
+    void testDeleteStageAndMoveTasks_IfStageDoesNotExist_ThrowEntityNotFoundException() {
+        when(stageRepository.getById(stageId)).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", stageId)));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStageAndMoveTasks(1L, 2L),
-                String.format("Stage not found by id: %s", 1L));
+                        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId()),
+                String.format("Stage not found by id: %s", stageId));
     }
 
     @Test
-    void testGetAllStagesByProjectIdSuccessfully() {
-        when(projectService.getProjectById(1L)).thenReturn(project);
-        when(stageRepository.findAll()).thenReturn(List.of(stage));
+    void testGetAllStagesByProjectId_ShouldThrowEntityNotFoundException_WhenProjectDoesNotExist() {
+        when(stageRepository.findAllByProjectId(invalidProjectId)).thenThrow(new EntityNotFoundException(
+                String.format("Project not found by id: %s", invalidProjectId)));
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () ->
+                stageService.getAllStagesBy(invalidProjectId));
+
+        assertEquals(String.format("Project not found by id: %s", invalidProjectId), exception.getMessage());
+        verify(stageRepository, times(1)).findAllByProjectId(invalidProjectId);
+    }
+
+    @Test
+    void testGetStage_Successfully() {
+        when(stageRepository.getById(stageId)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
-        List<StageDto> result = stageService.getAllStagesBy(1L);
+        StageDto result = stageService.getStage(stageId);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Stage 1", result.get(0).getStageName());
+        assertEquals(stageDto, result);
     }
 
     @Test
-    void testGetAllStagesByProjectIdInvalidProjectIdThrowEntityNotFoundException() {
-        when(projectService.getProjectById(3L)).thenThrow(new EntityNotFoundException(
-                String.format("Project not found by id: %s", 3L)));
+    void testGetStage_ThrowEntityNotFoundException() {
+        when(stageRepository.getById(stageId)).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", stageId)));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.getAllStagesBy(3L),
-                String.format("Project not found by id: %s", 3L));
-    }
-
-    @Test
-    void testGetStageSuccessfully() {
-        when(stageRepository.getById(1L)).thenReturn(stage);
-        when(stageMapper.toDto(stage)).thenReturn(stageDto);
-
-        StageDto result = stageService.getStage(1L);
-
-        assertNotNull(result);
-        assertEquals("Stage 1", result.getStageName());
-    }
-
-    @Test
-    void testGetStageThrowEntityNotFoundException() {
-        when(stageRepository.getById(1L)).thenThrow(new EntityNotFoundException(
-                String.format("Stage not found by id: %s", 1L)));
-
-        assertThrows(EntityNotFoundException.class, () ->
-                        stageService.getStage(1L),
-                String.format("Stage not found by id: %s", 1L));
+                        stageService.getStage(stageId),
+                String.format("Stage not found by id: %s", stage));
     }
 
 }

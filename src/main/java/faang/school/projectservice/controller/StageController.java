@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -16,36 +17,42 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    @GetMapping("/get/all/{projectId}/filter")
+    @GetMapping("{projectId}/filter")
     public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId,
-                                         @NonNull @RequestParam String role,
-                                         @NonNull @RequestParam String status) {
-        return stageService.getAllStagesBy(projectId, role, status);
+                                         @RequestBody StageFilterDto stageFilterDto) {
+        return stageService.getAllStagesBy(projectId, stageFilterDto);
     }
 
-    @GetMapping("/get/all/{projectId}")
+    @GetMapping("{projectId}")
     public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId) {
         return stageService.getAllStagesBy(projectId);
     }
 
-    @GetMapping("/get/{stageId}")
+    @GetMapping("{stageId}")
     public StageDto getStage(@PathVariable @Positive long stageId) {
         return stageService.getStage(stageId);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
         return stageService.createStage(stageDto);
     }
 
-    @DeleteMapping("/delete/{stageId}")
+    @PatchMapping("{stageId}/role")
+    public void updateStage(@PathVariable @Positive long stageId,
+                            @NonNull @RequestParam String role) {
+        stageService.updateStage(stageId, role);
+    }
+
+
+    @DeleteMapping("{stageId}")
     public void deleteStage(@PathVariable @Positive long stageId) {
         stageService.deleteStage(stageId);
     }
 
-    @DeleteMapping("/delete/{stageId}/move/tasks/{newStageId}")
+    @DeleteMapping("{stageId}/move/tasks/to/{anotherStageId}")
     public void deleteStageAndMoveTasks(@PathVariable @Positive long stageId,
-                                        @PathVariable @Positive long newStageId) {
-        stageService.deleteStageAndMoveTasks(stageId, newStageId);
+                                        @PathVariable @Positive long anotherStageId) {
+        stageService.deleteStageAndMoveTasks(stageId, anotherStageId);
     }
 }

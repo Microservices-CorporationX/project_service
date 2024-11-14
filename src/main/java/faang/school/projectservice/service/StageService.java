@@ -1,17 +1,18 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.validator.StageValidator;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +21,8 @@ public class StageService {
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
     private final StageMapper stageMapper;
-    private final StageValidator stageValidator;
-  
+    private final List<Filter<Stage, StageFilterDto>> stageFilters;
+
     public void setExecutor(Long stageId, Long executorId) {
         Stage stage = stageRepository.getById(stageId);
         List<TeamMember> executors = stage.getExecutors();
@@ -31,14 +32,6 @@ public class StageService {
         stageRepository.save(stage);
     }
 
-    public Stage getById(Long stageId) {
-        return stageRepository.getById(stageId);
-    }
-
-    public boolean existsById(Long stageId) {
-        return stageRepository.existsById(stageId);
-    }
-
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toEntity(stageDto);
         Project project = projectService.getProjectById(stageDto.getProjectId());
@@ -46,24 +39,25 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
-    public List<StageDto> getAllStagesBy(long projectId, String role, String status) {
-        validateInput(projectId, role, status);
-        return stageRepository.findAll().stream()
-                .filter(stage -> stage.getProject().getId().equals(projectId))
-                .filter(stage -> stage.getStageRoles().stream()
-                        .map(stageRole -> stageRole.getTeamRole().toString())
-                        .anyMatch(role.toLowerCase()::equals))
-                .filter(stage -> stage.getTasks().stream()
-                        .map(task -> task.getStatus().toString())
-                        .anyMatch(status.toLowerCase()::equals))
+    public void updateStage(long stageId, String role) {
+
+
+    }
+
+    public List<StageDto> getAllStagesBy(long projectId, StageFilterDto filters) {
+        Stream<Stage> stage = stageRepository.findAllByProjectId(projectId).stream();
+        return stageFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .reduce(stage,
+                        (currentStream, filter) ->
+                                filter.apply(currentStream, filters),
+                        (s1, s2) -> s1)
                 .map(stageMapper::toDto)
                 .toList();
     }
 
     public List<StageDto> getAllStagesBy(long projectId) {
-        Project project = projectService.getProjectById(projectId);
-        return stageRepository.findAll().stream()
-                .filter(stage -> stage.getProject().getId().equals(project.getId()))
+        return stageRepository.findAllByProjectId(projectId).stream()
                 .map(stageMapper::toDto)
                 .toList();
     }
@@ -73,9 +67,9 @@ public class StageService {
         stageRepository.delete(stage);
     }
 
-    public void deleteStageAndMoveTasks(long stageId, long newStageId) {
+    public void deleteStageAndMoveTasks(long stageId, long anotherStageId) {
         Stage stage = stageRepository.getById(stageId);
-        Stage newStage = stageRepository.getById(newStageId);
+        Stage newStage = stageRepository.getById(anotherStageId);
         newStage.setTasks(stage.getTasks());
         stageRepository.delete(stage);
     }
@@ -84,12 +78,12 @@ public class StageService {
         return stageMapper.toDto(stageRepository.getById(stageId));
     }
 
-    private void validateInput(long projectId, String role, String status) {
-        if (projectService.existsById(projectId)) {
-            stageValidator.validateStageRole(role);
-            stageValidator.validateTaskStatus(status);
-        } else {
-            throw new EntityNotFoundException("Project with id " + projectId + " not found");
-        }
+    public boolean existsById(Long stageId) {
+        return stageRepository.existsById(stageId);
+    }
+
+    public Stage getById(Long stageId) {
+        return stageRepository.getById(stageId);
     }
 }
+
