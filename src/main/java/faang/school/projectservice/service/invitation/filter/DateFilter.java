@@ -1,4 +1,4 @@
-package faang.school.projectservice.filters.Invitation;
+package faang.school.projectservice.service.invitation.filter;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import lombok.AllArgsConstructor;

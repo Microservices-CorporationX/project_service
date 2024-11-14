@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.invitation;
 
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
-import faang.school.projectservice.filters.Invitation.DateFilter;
-import faang.school.projectservice.filters.Invitation.InvitationFilter;
-import faang.school.projectservice.filters.Invitation.StatusFilter;
+import faang.school.projectservice.service.invitation.filter.DateFilter;
+import faang.school.projectservice.service.invitation.filter.InvitationFilter;
+import faang.school.projectservice.service.invitation.filter.StatusFilter;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
