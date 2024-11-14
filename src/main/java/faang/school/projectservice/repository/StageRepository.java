@@ -30,4 +30,12 @@ public class StageRepository {
     public List<Stage> findAll() {
         return jpaRepository.findAll();
     }
+
+    public List<Stage> findAllStagesByProjectId(Long projectId) {
+        return jpaRepository.findByProjectId(projectId);
+    }
+
+    public void deleteById(Long stageId) {
+        jpaRepository.deleteById(stageId);
+    }
 }
