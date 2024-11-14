@@ -16,7 +16,6 @@ public interface ProjectMapper {
 
     @Mapping(source = "parentProject.id", target = "parentProjectId")
     @Mapping(source = "teams", target = "teamIds")
-    @Mapping(source = "owner.id", target = "owner")
     ProjectDto toDto(Project project);
 
     Project toEntity(ProjectDto projectDto);

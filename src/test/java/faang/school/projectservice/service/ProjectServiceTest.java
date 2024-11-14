@@ -10,7 +10,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,14 +49,10 @@ public class ProjectServiceTest {
     private ProjectMapperImpl projectMapper;
 
     @Mock
-    private ProjectUpdate update;
-
-    @Mock
     private ProjectFilter filter;
 
     @BeforeEach
     public void setUp() {
-        List<ProjectUpdate> projectUpdates = List.of(update, update);
         List<ProjectFilter> projectFilters = List.of(filter, filter);
 
         projectService = new ProjectService(
@@ -65,7 +60,6 @@ public class ProjectServiceTest {
                 userContext,
                 projectValidator,
                 projectMapper,
-                projectUpdates,
                 projectFilters
         );
     }
@@ -121,12 +115,12 @@ public class ProjectServiceTest {
         ProjectDto dto = new ProjectDto();
         Project project = new Project();
 
+        doNothing().when(projectValidator).validate(any(), any(), any());
         when(projectRepository.getProjectById(dto.getId())).thenReturn(project);
-        when(update.isApplicable(dto)).thenReturn(true);
 
         projectService.updateProject(dto);
 
-        verify(update, times(2)).apply(any(), any());
+        verify(projectMapper, times(1)).update(any(), any());
         verify(projectRepository).save(project);
     }
 
