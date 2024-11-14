@@ -13,9 +13,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.validator.StageInvitationValidator;
-import faang.school.projectservice.validator.StageValidator;
-import faang.school.projectservice.validator.TeamMemberValidator;
+import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.service.team_member.TeamMemberService;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
+import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +54,10 @@ class StageInvitationServiceTest {
     TeamMemberValidator teamMemberValidator;
 
     @Mock
-    StageValidator stageValidator;
+    StageService stageService;
+
+    @Mock
+    TeamMemberService teamMemberService;
 
     private StageInvitationService service;
     private StageInvitationFilter mockDescriptionFilter;
@@ -68,7 +73,7 @@ class StageInvitationServiceTest {
                 List.of(mockDescriptionFilter, mockStageNameFilter));
 
         service = new StageInvitationService(filters, stageInvitationMapper, repository,
-                stageInvValidator, teamMemberValidator, stageValidator);
+                stageInvValidator, teamMemberValidator,teamMemberService,stageService);
     }
 
     @Test
@@ -91,23 +96,23 @@ class StageInvitationServiceTest {
         invitation.setInvited(invited);
         invitation.setStage(stage);
 
-        doNothing().when(stageInvValidator).
-                validateStageInvitationExists(dto.getId());
-        when(teamMemberValidator.validateTeamMemberExists(dto.getAuthorId())).
+//        doNothing().when(stageInvValidator).
+//                validateStageInvitationExists(dto.getId());
+        when(teamMemberService.getTeamMemberEntity(dto.getAuthorId())).
                 thenReturn(author);
-        when(teamMemberValidator.validateTeamMemberExists(dto.getInvitedId())).
+        when(teamMemberService.getTeamMemberEntity(dto.getInvitedId())).
                 thenReturn(invited);
-        when(stageValidator.validateStageExists(dto.getStageId())).
+        when(stageService.getStageEntity(dto.getStageId())).
                 thenReturn(stage);
 
         service.sendStageInvitation(dto.getAuthorId(), dto);
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
-        verify(stageInvValidator).validateStageInvitationExists(dto.getId());
-        verify(teamMemberValidator).validateTeamMemberExists(dto.getAuthorId());
-        verify(teamMemberValidator).validateTeamMemberExists(dto.getInvitedId());
-        verify(stageValidator).validateStageExists(dto.getStageId());
+//        verify(stageInvValidator).validateStageInvitationExists(dto.getId());
+        verify(teamMemberService).getTeamMemberEntity(dto.getAuthorId());
+        verify(teamMemberService).getTeamMemberEntity(dto.getInvitedId());
+        verify(stageService).getStageEntity(dto.getStageId());
         verify(repository).save(captor.capture());
 
         StageInvitation capturedInvitation = captor.getValue();
@@ -126,21 +131,22 @@ class StageInvitationServiceTest {
         StageInvitation invitation = new StageInvitation();
         invitation.setStage(stage);
 
-        when(stageInvValidator.validateStageInvitationNotExists(stageInvId)).
-                thenReturn(invitation);
+        when(repository.findById(stageInvId)).
+                thenReturn(Optional.of( invitation));
         doNothing().when(stageInvValidator).
-                validateIsInvitationSentToThisTeamMember(invitedId, stageInvId);
-        when(teamMemberValidator.validateIsTeamMemberParticipantOfProject(invitedId, invitation)).
-                thenReturn(teamMember);
+                validateIsInvitationSentToThisTeamMember(invitedId, invitation);
+        when(teamMemberService.getTeamMemberEntity(invitedId)).thenReturn(teamMember);
+        doNothing().when(teamMemberValidator)
+                .validateIsTeamMemberParticipantOfProject(teamMember, invitation);
 
         service.acceptStageInvitation(invitedId, stageInvId);
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
-        verify(stageInvValidator).validateStageInvitationNotExists(stageInvId);
-        verify(stageInvValidator).validateIsInvitationSentToThisTeamMember(invitedId, stageInvId);
+        verify(repository).findById(stageInvId);
+        verify(stageInvValidator).validateIsInvitationSentToThisTeamMember(invitedId, invitation);
         verify(teamMemberValidator)
-                .validateIsTeamMemberParticipantOfProject(invitedId, invitation);
+                .validateIsTeamMemberParticipantOfProject(teamMember, invitation);
         verify(repository).save(captor.capture());
 
         StageInvitation capturedInvitation = captor.getValue();
@@ -178,17 +184,17 @@ class StageInvitationServiceTest {
         StageInvitation invitation = new StageInvitation();
         invitation.setId(stageInvId);
 
-        when(stageInvValidator.validateStageInvitationNotExists(stageInvId)).
-                thenReturn(invitation);
+        when(repository.findById(stageInvId)).
+                thenReturn(Optional.of( invitation));
         doNothing().when(stageInvValidator).
-                validateIsInvitationSentToThisTeamMember(invitedId, stageInvId);
+                validateIsInvitationSentToThisTeamMember(invitedId, invitation);
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
         service.rejectStageInvitation(invitedId, stageInvId, reason);
 
-        verify(stageInvValidator).validateStageInvitationNotExists(stageInvId);
-        verify(stageInvValidator).validateIsInvitationSentToThisTeamMember(invitedId, stageInvId);
+        verify(repository).findById(stageInvId);
+        verify(stageInvValidator).validateIsInvitationSentToThisTeamMember(invitedId, invitation);
         verify(repository).save(captor.capture());
 
         StageInvitation capturedInvitation = captor.getValue();
@@ -233,4 +239,31 @@ class StageInvitationServiceTest {
         assertEquals(dto1, result.get(0));
         assertEquals(dto2, result.get(1));
     }
+
+    //    @Test
+//    public void dontThrowAlreadyExistsExceptionTest() {
+//        long id = 1L;
+//        when(repository.findById(id)).thenReturn(Optional.of(new StageInvitation()));
+//
+//        assertDoesNotThrow(() -> stageInvitationValidator.validateStageInvitationExists(id));
+//    }
+//
+//    @Test
+//    public void throwEntityNotFoundExceptionTest() {
+//        long id = 1L;
+//
+//        assertThrows(EntityNotFoundException.class,
+//                () -> stageInvitationValidator.validateStageInvitationNotExists(id));
+//    }
+
+//    @Test
+//    public void dontThrowEntityNotFoundExceptionTest() {
+//        long id = 1L;
+//        StageInvitation stageInvitation = new StageInvitation();
+//        stageInvitation.setId(id);
+//        when(repository.findById(id)).thenReturn(Optional.of(stageInvitation));
+//
+//        StageInvitation result = stageInvitationValidator.validateStageInvitationNotExists(id);
+//        assertEquals(id, result.getId());
+//    }
 }

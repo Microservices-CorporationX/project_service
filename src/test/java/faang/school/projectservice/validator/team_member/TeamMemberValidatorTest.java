@@ -1,57 +1,30 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.team_member;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TeamMemberValidatorTest {
 
-    @Mock
-    TeamMemberJpaRepository repository;
-
-    @InjectMocks
-    TeamMemberValidator validator;
-
-    @Test
-    public void teamMemberNotExistsTest() {
-        long id = 1L;
-
-        assertThrows(EntityNotFoundException.class,
-                () -> validator.validateTeamMemberExists(id));
-    }
-
-    @Test
-    public void teamMemberExistsTest() {
-        long id = 1L;
-        TeamMember teamMember = new TeamMember();
-        when(repository.findById(id)).thenReturn(Optional.of(teamMember));
-
-        TeamMember result = validator.validateTeamMemberExists(id);
-
-        assertEquals(teamMember, result);
-    }
+    private final TeamMemberValidator teamMemberValidator = new TeamMemberValidator();
 
     @Test
     public void teamMemberParticipantOfProjectTest() {
+        ArgumentCaptor<TeamMember> captor = ArgumentCaptor.forClass(TeamMember.class);
         long memberId = 1L;
         long projectId = 10L;
         Project project = new Project();
@@ -66,15 +39,14 @@ class TeamMemberValidatorTest {
         TeamMember teamMember = new TeamMember();
         teamMember.setStages(new ArrayList<>(List.of(stage)));
 
-        when(repository.findById(memberId)).thenReturn(Optional.of(teamMember));
-
-        TeamMember result = validator.validateIsTeamMemberParticipantOfProject(memberId, stageInvitation);
-
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(captor.capture(), stageInvitation);
+        TeamMember result = captor.getValue();  //???
         assertEquals(teamMember, result);
     }
 
     @Test
     public void teamMemberIsNotParticipantOfProjectTest() {
+        ArgumentCaptor<TeamMember> captor = ArgumentCaptor.forClass(TeamMember.class);
         long memberId = 1L;
         long projectId = 10L;
         long secondProjectId = 15L;
@@ -98,12 +70,11 @@ class TeamMemberValidatorTest {
         TeamMember anotherTeamMember = new TeamMember();
         anotherTeamMember.setStages(new ArrayList<>(List.of(anotherStage)));
 
-        when(repository.findById(memberId)).thenReturn(Optional.of(teamMember));
-
-        TeamMember result = validator.validateIsTeamMemberParticipantOfProject(memberId, stageInvitation);
-
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(captor.capture(), stageInvitation);
+        TeamMember result = captor.getValue();
         assertNotEquals(anotherTeamMember, result);
         assertThrows(DataValidationException.class,
-                () -> validator.validateIsTeamMemberParticipantOfProject(memberId, anotherStageInvitation));
+                () -> teamMemberValidator.validateIsTeamMemberParticipantOfProject(
+                        teamMember, anotherStageInvitation)); //?????
     }
 }

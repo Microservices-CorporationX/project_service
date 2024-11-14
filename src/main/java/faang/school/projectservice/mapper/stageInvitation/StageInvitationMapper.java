@@ -15,5 +15,4 @@ public interface StageInvitationMapper {
     @Mapping(source = "author.id",target = "authorId")
     @Mapping(source = "invited.id",target = "invitedId")
     StageInvitationDto toDto(StageInvitation entity);
-
 }

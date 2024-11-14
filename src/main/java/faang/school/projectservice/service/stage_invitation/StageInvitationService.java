@@ -3,6 +3,7 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
@@ -10,9 +11,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.validator.StageInvitationValidator;
-import faang.school.projectservice.validator.StageValidator;
-import faang.school.projectservice.validator.TeamMemberValidator;
+import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.service.team_member.TeamMemberService;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
+import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,13 +32,13 @@ public class StageInvitationService {
     private final StageInvitationJpaRepository repository;
     private final StageInvitationValidator stageInvValidator;
     private final TeamMemberValidator teamMemberValidator;
-    private final StageValidator stageValidator;
+    private final TeamMemberService teamMemberService;
+    private final StageService stageService;
 
     public void sendStageInvitation(long invitorId, StageInvitationDto dto) {
-        stageInvValidator.validateStageInvitationExists(dto.getId());
-        TeamMember author = teamMemberValidator.validateTeamMemberExists(invitorId);
-        TeamMember invited = teamMemberValidator.validateTeamMemberExists(dto.getInvitedId());
-        Stage stageToInvite = stageValidator.validateStageExists(dto.getStageId());
+        TeamMember author = teamMemberService.getTeamMemberEntity(invitorId);
+        TeamMember invited = teamMemberService.getTeamMemberEntity(dto.getInvitedId());
+        Stage stageToInvite = stageService.getStageEntity(dto.getStageId());
 
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(dto);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
@@ -50,9 +52,11 @@ public class StageInvitationService {
     }
 
     public void acceptStageInvitation(long invitedId, long stageInvitationId) {
-        StageInvitation invitation = stageInvValidator.validateStageInvitationNotExists(stageInvitationId);
-        stageInvValidator.validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
-        TeamMember teamMember = teamMemberValidator.validateIsTeamMemberParticipantOfProject(invitedId, invitation);
+        StageInvitation invitation = getStageInvitation(stageInvitationId);
+        stageInvValidator.validateIsInvitationSentToThisTeamMember(invitedId, invitation);
+
+        TeamMember teamMember = teamMemberService.getTeamMemberEntity(invitedId);
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(teamMember, invitation);
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
         invitation.getStage().getExecutors().add(teamMember);
@@ -63,9 +67,10 @@ public class StageInvitationService {
     }
 
     public void rejectStageInvitation(long invitedId, long stageInvitationId, String rejectReason) {
+        StageInvitation invitation = getStageInvitation(stageInvitationId);
+
         validateRejectReasonIsNullOrEmpty(rejectReason);
-        StageInvitation invitation = stageInvValidator.validateStageInvitationNotExists(stageInvitationId);
-        stageInvValidator.validateIsInvitationSentToThisTeamMember(invitedId, stageInvitationId);
+        stageInvValidator.validateIsInvitationSentToThisTeamMember(invitedId, invitation);
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setDescription(rejectReason);
@@ -79,8 +84,8 @@ public class StageInvitationService {
         List<StageInvitation> invitations = repository.findAll();
         Stream<StageInvitation> invitationsForUser = invitations.stream()
                 .filter(invitation -> invitation.getInvited().getId().equals(invitedId));
-        log.info("Founding filtered stage invitations for team member with ID: {}", invitedId);
 
+        log.info("Founding filtered stage invitations for team member with ID: {}", invitedId);
         return filter(invitationsForUser, filter);
     }
 
@@ -99,5 +104,10 @@ public class StageInvitationService {
         if (rejectReason == null || rejectReason.isBlank()) {
             throw new DataValidationException("Reject reason can't be empty");
         }
+    }
+
+    private StageInvitation getStageInvitation(long id) {
+        return repository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("StageInvitation", id));
     }
 }
