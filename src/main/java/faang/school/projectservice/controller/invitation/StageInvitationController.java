@@ -40,7 +40,7 @@ public class StageInvitationController {
         return stageInvitationService.rejectInvitation(invitationId, stageInvitationDTO);
     }
 
-    @GetMapping("{/users/{userId}")
+    @GetMapping("/users/{userId}")
     public List<StageInvitationDTO> getAllInvitations(@PathVariable Long userId,
                                                       @RequestParam(required = false) StageInvitationStatus status,
                                                       @RequestParam(required = false) LocalDate dateFilter) {
