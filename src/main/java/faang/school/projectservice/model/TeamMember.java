@@ -36,4 +36,8 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    public boolean isCurator() {
+        return roles.contains(TeamRole.OWNER) || roles.contains(TeamRole.MANAGER);
+    }
 }
