@@ -1,10 +1,13 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +52,21 @@ public class ProjectValidator {
 
     public boolean isMentorPresent(List<Long> memberIds, long mentorId) {
         return memberIds.stream().anyMatch(id -> id == mentorId);
+    }
+
+    public void validateMentorPresenceInProjectTeam(InternshipCreatedDto internShipCreatedDto) {
+        Long projectId = internShipCreatedDto.getProjectId();
+        Project project = projectRepository.getProjectById(projectId);
+        List<Team> teams = project.getTeams();
+        List<Long> teamMembersId = teams.stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .map(TeamMember::getId)
+                .toList();
+
+        TeamMember mentorId = internShipCreatedDto.getMentorId();
+
+        if (!isMentorPresent(teamMembersId, mentorId.getId())) {
+            throw new IllegalArgumentException("Mentor is not present in project team");
+        }
     }
 }

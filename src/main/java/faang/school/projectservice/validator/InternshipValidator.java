@@ -18,9 +18,8 @@ public class InternshipValidator {
 
         long internshipDuration = ChronoUnit.MONTHS.between(startDate, endDate);
         if (internshipDuration > maxDurationMonths) {
+            log.error("Out of duration Internship");
             throw new InternshipDurationException("Internship duration cannot exceed " + maxDurationMonths + " months");
-        } else {
-            log.info("Internship duration is valid and within the limit of {} months.", maxDurationMonths);
         }
     }
 }

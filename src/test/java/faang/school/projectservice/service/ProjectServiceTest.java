@@ -274,66 +274,6 @@ class ProjectServiceTest {
         assertEquals(0, result.size());
     }
 
-    @Test
-    public void testGetProjectTeamMembersIdsWithMentorAbsent() {
-        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
-        Project project = mock(Project.class);
-        Team team = mock(Team.class);
-        TeamMember teamMember = mock(TeamMember.class);
-        TeamMember mentor = mock(TeamMember.class);
-
-        when(internShipCreatedDto.getProjectId()).thenReturn(1L);
-        when(internShipCreatedDto.getMentorId()).thenReturn(mentor);
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
-
-        when(project.getTeams()).thenReturn(List.of(team));
-        when(team.getTeamMembers()).thenReturn(List.of(teamMember));
-        when(teamMember.getId()).thenReturn(2L);
-        when(mentor.getId()).thenReturn(3L);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> projectService.getProjectTeamMembersIds(internShipCreatedDto));
-        assertEquals("Mentor is not present in project team", exception.getMessage());
-    }
-
-    @Test
-    public void testGetProjectTeamMembersIdsWithEmptyTeams() {
-        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
-        Project project = mock(Project.class);
-        TeamMember mentor = mock(TeamMember.class);
-
-        when(internShipCreatedDto.getProjectId()).thenReturn(1L);
-        when(internShipCreatedDto.getMentorId()).thenReturn(mentor);
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
-        when(project.getTeams()).thenReturn(Collections.emptyList());
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            projectService.getProjectTeamMembersIds(internShipCreatedDto);
-        });
-        assertEquals("Mentor is not present in project team", exception.getMessage());
-    }
-
-    @Test
-    public void testGetProjectTeamMembersIdsWithEmptyTeamMembers() {
-        InternshipCreatedDto internShipCreatedDto = mock(InternshipCreatedDto.class);
-        Project project = mock(Project.class);
-        Team team = mock(Team.class);
-        TeamMember mentor = mock(TeamMember.class);
-
-        when(internShipCreatedDto.getProjectId()).thenReturn(1L);
-        when(internShipCreatedDto.getMentorId()).thenReturn(mentor);
-        when(projectRepository.getProjectById(1L)).thenReturn(project);
-        when(project.getTeams()).thenReturn(List.of(team));
-        when(team.getTeamMembers()).thenReturn(Collections.emptyList());
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            projectService.getProjectTeamMembersIds(internShipCreatedDto);
-        });
-
-        assertEquals("Mentor is not present in project team", exception.getMessage());
-    }
-
-
     private List<Project> getProjectsList() {
         return List.of(
                 Project.builder()

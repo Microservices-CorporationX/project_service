@@ -12,8 +12,12 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.validator.InternshipValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,30 +25,34 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
+@Valid
 @RequiredArgsConstructor
 public class InternshipService {
-    private final ProjectService projectService;
     private final InternshipRepository internshipRepository;
     private final InternshipMapper internshipMapper;
     private final InternshipValidator internshipValidator;
+    private final ProjectValidator projectValidator;
     private final InternshipCompletionHandler completionHandler;
     private final List<Filter<TeamMember, InternshipFilterDto>> roleFilter;
     private final List<Filter<Internship, InternshipFilterDto>> statusFilter;
 
-    public InternshipCreatedDto createInternship(InternshipCreatedDto internShipCreatedDto) {
-        internshipValidator.durationValidate(internShipCreatedDto);
-        projectService.getProjectTeamMembersIds(internShipCreatedDto);
-        return internshipMapper.toCreatedDto(internshipRepository.save(internshipMapper.createInternship(internShipCreatedDto)));
+    public InternshipCreatedDto createInternship(InternshipCreatedDto createInternship) {
+        internshipValidator.durationValidate(createInternship);
+        projectValidator.validateMentorPresenceInProjectTeam(createInternship);
+        return internshipMapper.toCreatedDto(internshipRepository.save(internshipMapper.createInternship(createInternship)));
     }
 
-    public InternshipUpdatedDto updateInternship(InternshipUpdatedDto internShipUpdatedDto) {
-        Internship internship = internshipRepository.findById(internShipUpdatedDto.getId())
+    @Transactional
+    public InternshipUpdatedDto updateInternship(InternshipUpdatedDto updateInternship) {
+        Internship internship = internshipRepository.findById(updateInternship.getId())
                 .orElseThrow(EntityNotFoundException::new);
+        log.error("Internship with ID {} not found", updateInternship.getId());
 
-        completionHandler.internsToDismissal(internShipUpdatedDto.getInterns());
+        completionHandler.internsToDismissal(updateInternship.getInterns());
         completionHandler.processInternshipCompletion(internship, internship.getStatus());
 
-        Internship savedInternship = internshipRepository.save(internshipMapper.toEntity(internShipUpdatedDto));
+        Internship savedInternship = internshipRepository.save(internshipMapper.toEntity(updateInternship));
         return internshipMapper.toUpdatedDto(savedInternship);
     }
 
@@ -71,18 +79,17 @@ public class InternshipService {
         return internshipGetAllDtos;
     }
 
-    public InternshipGetByIdDto getByIdInternship(long internShipId) {
-       Internship internship =  internshipRepository.findById(internShipId)
+    public InternshipGetByIdDto getByIdInternship(long internshipId) {
+       Internship internship =  internshipRepository.findById(internshipId)
                .orElseThrow(() -> new EntityNotFoundException("InternShip not found"));
        return internshipMapper.toGetByIdDto(internship);
     }
 
 
     private List<Internship> filterByStatus(List<Internship> internships, InternshipFilterDto filters) {
-        Stream<Internship> internshipStream = internships.stream();
         return statusFilter.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(internshipStream, filters))
+                .flatMap(filter -> filter.apply(internships.stream(), filters))
                 .toList();
     }
 

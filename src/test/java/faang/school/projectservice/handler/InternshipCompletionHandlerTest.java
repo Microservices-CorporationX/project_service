@@ -1,13 +1,18 @@
 package faang.school.projectservice.handler;
 
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipCompletionHandlerTest {
@@ -36,46 +43,65 @@ public class InternshipCompletionHandlerTest {
     @Mock
     private Team team;
 
-    @Mock
-    private Task taskDone;
 
-    @Mock
-    private Task taskNotDone;
+    private List<Task> tasks;
+    private List<Stage> stages;
 
     @BeforeEach
     public void setUp() {
+        Task taskDone1 = new Task();
+        taskDone1.setStatus(TaskStatus.DONE);
 
-        taskDone = mock(Task.class);
-        taskNotDone = mock(Task.class);
+        Task taskDone2 = new Task();
+        taskDone2.setStatus(TaskStatus.DONE);
 
+        Task taskNotDone = new Task();
+        taskNotDone.setStatus(TaskStatus.IN_PROGRESS);
+
+        tasks = new ArrayList<>();
+        tasks.add(taskDone1);
+        tasks.add(taskDone2);
+
+        Stage stage = new Stage();
+        stage.setTasks(tasks);
+        stages = List.of(stage);
     }
 
     @Test
-    public void testHandleInternsCompletionAllTasksDone_AssignNewRole() {
-        internshipCompletionHandler.handleInternsCompletion(internship);
+    public void testProcessInternshipCompletionWithCompletedStatus_ChangesRoleOrRemovesFromTeam() {
+        when(intern.getStages()).thenReturn(stages);
+        when(intern.getRoles()).thenReturn(new ArrayList<>(List.of(TeamRole.INTERN)));
+        when(internship.getInterns()).thenReturn(List.of(intern));
 
-        assertFalse(intern.getRoles().contains(TeamRole.INTERN), "Intern role should have been changed from INTERN.");
+        internshipCompletionHandler.processInternshipCompletion(internship, InternshipStatus.COMPLETED);
+
+        assertFalse(intern.getRoles().contains(TeamRole.INTERN), "Role should have been changed from INTERN.");
+        assertTrue(intern.getRoles().contains(TeamRole.DEVELOPER), "Role should be DEVELOPER.");
+        verify(team, never()).getTeamMembers();
     }
 
     @Test
-    public void testHandleInternsCompletionNotAllTasksDone_RemoveFromTeam() {
-        internshipCompletionHandler.handleInternsCompletion(internship);
-        assertFalse(team.getTeamMembers().contains(intern), "Intern should be removed from the team.");
+    public void testProcessInternshipCompletionWithCompletedStatus_RemovesInternFromTeamIfTasksIncomplete() {
+        tasks.get(1).setStatus(TaskStatus.IN_PROGRESS);
+        when(intern.getStages()).thenReturn(stages);
+        when(intern.getTeam()).thenReturn(team);
+
+        List<TeamMember> teamMembers = new ArrayList<>(List.of(intern));
+        List<TeamMember> mockTeamMembers = mock(List.class);
+
+        when(team.getTeamMembers()).thenReturn(mockTeamMembers);
+        when(internship.getInterns()).thenReturn(List.of(intern));
+
+        internshipCompletionHandler.processInternshipCompletion(internship, InternshipStatus.COMPLETED);
+
+        verify(mockTeamMembers).remove(intern);
     }
 
-
     @Test
-    public void testInternsToDismissalNullOrEmptyList() {
-        internshipCompletionHandler.internsToDismissal(null);
+    public void testProcessInternshipCompletionWithNonCompletedStatus_NoActionTaken() {
+        internshipCompletionHandler.processInternshipCompletion(internship, InternshipStatus.IN_PROGRESS);
 
-        List<Long> internIds = new ArrayList<>();
-        internshipCompletionHandler.internsToDismissal(internIds);
-        assertTrue(internIds.isEmpty(), "Interns list should remain empty when passed an empty list.");
-    }
-
-    @Test
-    public void testRemoveInternFromTeamWhenTeamIsNull() {
-        internshipCompletionHandler.handleInternsCompletion(internship);
-        verify(intern, never()).getTeam();
+        verify(intern, never()).getStages();
+        verify(team, never()).getTeamMembers();
     }
 }

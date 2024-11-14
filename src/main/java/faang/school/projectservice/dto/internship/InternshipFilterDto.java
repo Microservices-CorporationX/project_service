@@ -15,10 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class InternshipFilterDto {
-    @Enumerated(EnumType.STRING)
     @NotNull(message = "Internship status can not be null")
     private InternshipStatus internshipStatus;
-
-    @Enumerated(EnumType.STRING)
     private TeamRole teamRole;
 }

@@ -1,9 +1,9 @@
 package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +16,6 @@ import java.util.List;
 @Data
 @Builder
 public class InternshipUpdatedDto {
-    @PositiveOrZero
     private Long id;
 
     private Long projectId;
@@ -24,5 +23,6 @@ public class InternshipUpdatedDto {
     @NotNull(message = "Internship status can not be null")
     private InternshipStatus status;
 
+    @NotEmpty(message = "Interns list cannot be empty")
     private List<@Positive Long> interns;
 }

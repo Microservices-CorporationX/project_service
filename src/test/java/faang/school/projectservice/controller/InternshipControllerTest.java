@@ -30,18 +30,18 @@ public class InternshipControllerTest {
 
     @Test
     public void testExistingInternshipCreating() {
-        InternshipCreatedDto internShipCreatedDto = InternshipCreatedDto.builder().build();
-        when(internshipService.createInternship(any(InternshipCreatedDto.class))).thenReturn(internShipCreatedDto);
-        InternshipCreatedDto result = internshipController.createInternship(internShipCreatedDto);
-        assertEquals(internShipCreatedDto, result);
+        InternshipCreatedDto internshipCreatedDto = InternshipCreatedDto.builder().build();
+        when(internshipService.createInternship(any(InternshipCreatedDto.class))).thenReturn(internshipCreatedDto);
+        InternshipCreatedDto result = internshipController.createInternship(internshipCreatedDto);
+        assertEquals(internshipCreatedDto, result);
     }
 
     @Test
     public void testExistingInternshipUpdating() {
-        InternshipUpdatedDto internShipUpdatedDto = InternshipUpdatedDto.builder().build();
-        when(internshipService.updateInternship(any(InternshipUpdatedDto.class))).thenReturn(internShipUpdatedDto);
-        InternshipUpdatedDto result = internshipController.updateInternship(internShipUpdatedDto);
-        assertEquals(internShipUpdatedDto, result);
+        InternshipUpdatedDto internshipUpdatedDto = InternshipUpdatedDto.builder().build();
+        when(internshipService.updateInternship(any(InternshipUpdatedDto.class))).thenReturn(internshipUpdatedDto);
+        InternshipUpdatedDto result = internshipController.updateInternship(internshipUpdatedDto);
+        assertEquals(internshipUpdatedDto, result);
     }
 
     @Test

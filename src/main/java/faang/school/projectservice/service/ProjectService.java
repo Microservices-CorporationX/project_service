@@ -126,20 +126,5 @@ public class ProjectService {
                 .toList();
     }
 
-    public void getProjectTeamMembersIds(InternshipCreatedDto internShipCreatedDto) {
-        Long projectId = internShipCreatedDto.getProjectId();
-        Project project = projectRepository.getProjectById(projectId);
-        List<Team> teams = project.getTeams();
-        List<Long> teamMembersId = teams.stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getId)
-                .toList();
-
-        TeamMember mentorId = internShipCreatedDto.getMentorId();
-
-        if (!projectValidator.isMentorPresent(teamMembersId, mentorId.getId())) {
-            throw new IllegalArgumentException("Mentor is not present in project team");
-        }
-    }
 }
 

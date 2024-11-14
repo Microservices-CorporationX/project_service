@@ -36,7 +36,6 @@ public class InternshipCreatedDto {
     private String description;
 
     @NotBlank(message = "Internship name can not be blank")
-    @NotNull(message = "Internship name can not be null")
     private String name;
 
     @Positive(message = "Internship duration can not be negative")

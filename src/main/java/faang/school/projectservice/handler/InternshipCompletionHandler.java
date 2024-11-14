@@ -19,7 +19,13 @@ public class InternshipCompletionHandler {
         }
     }
 
-    public void handleInternsCompletion(Internship internship) {
+    public void internsToDismissal(List<@Positive Long> interns) {
+        if (interns != null && !interns.isEmpty()) {
+            interns.clear();
+        }
+    }
+
+    private void handleInternsCompletion(Internship internship) {
         for (TeamMember intern : internship.getInterns()) {
             if (hasCompletedAllTasks(intern)) {
                 assignNewRole(intern);
@@ -28,13 +34,6 @@ public class InternshipCompletionHandler {
             }
         }
     }
-
-    public void internsToDismissal(List<@Positive Long> interns) {
-        if (interns != null && !interns.isEmpty()) {
-            interns.clear();
-        }
-    }
-
 
     private boolean hasCompletedAllTasks(TeamMember intern) {
         return intern.getStages().stream()

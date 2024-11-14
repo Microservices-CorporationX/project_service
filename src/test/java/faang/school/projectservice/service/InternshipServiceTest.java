@@ -10,6 +10,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.validator.InternshipValidator;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class InternshipServiceTest {
 
     @Mock
     private InternshipRepository internshipRepository;
+
+    @Mock
+    private ProjectValidator projectValidator;
 
     @Mock
     private InternshipValidator internshipValidator;
@@ -75,8 +79,8 @@ public class InternshipServiceTest {
 
         InternshipCreatedDto result = internshipService.createInternship(createdDto);
 
+        verify(projectValidator).validateMentorPresenceInProjectTeam(createdDto);
         verify(internshipValidator).durationValidate(createdDto);
-        verify(projectService).getProjectTeamMembersIds(createdDto);
         verify(internshipRepository).save(internship);
         verify(internshipMapper).toCreatedDto(internship);
 
