@@ -1,7 +1,8 @@
-package faang.school.projectservice.service.filter.moment;
+package faang.school.projectservice.filter.moment;
 
 import faang.school.projectservice.dto.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
@@ -10,11 +11,16 @@ import java.util.stream.Stream;
 public class MomentProjectsFilter implements MomentFilter {
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
-        return filters.getProjectsPattern() != null;
+        return filters != null && !filters.getProjectsPattern().isBlank();
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> moments, MomentFilterDto filters) {
-        return moments.filter(moment -> moment.getProjects().contains(filters.getProjectsPattern()));
+        return moments.filter(moment ->
+                moment.getProjects().stream()
+                        .map(Project::getName)
+                        .anyMatch(name -> name.equals(filters.getProjectsPattern()))
+        );
     }
+
 }

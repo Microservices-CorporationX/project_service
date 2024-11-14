@@ -69,6 +69,15 @@ public class ProjectService {
         return projectMapper.toDto(savedProject);
     }
 
+    @Transactional
+    public List<Project> findProjectsById(List<Long> projectIds) {
+        return projectIds.stream()
+                .map(id -> projectRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(PROJECT, id)))
+                .collect(Collectors.toList());
+    }
+
+
     private boolean isProjectVisibleForUser(Project project, Long userId) {
         return project.getVisibility() == ProjectVisibility.PUBLIC
                 || project.getOwnerId().equals(userId);

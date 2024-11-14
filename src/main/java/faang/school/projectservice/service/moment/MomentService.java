@@ -2,11 +2,11 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.service.filter.moment.MomentFilter;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,7 @@ public class MomentService {
     public MomentDto createMoment(MomentDto momentDto) {
         Moment moment = momentMapper.toEntity(momentDto);
         validateProjectIsActive(moment);
+        moment.setProjects(projectService.findProjectsById(momentDto.getProjectIds()));
         momentRepository.save(moment);
         return momentMapper.toDto(moment);
     }
@@ -38,7 +39,7 @@ public class MomentService {
         validateProjectIsActive(updatedMoment);
 
         momentMapper.updateEntity(momentToUpdate, updatedMomentDto);
-        momentToUpdate.setProjects(projectService.findAllById(updatedMomentDto.getProjectIds()));
+        momentToUpdate.setProjects(projectService.findProjectsById(updatedMomentDto.getProjectIds()));
         momentToUpdate.setUpdatedAt(LocalDateTime.now());
         momentRepository.save(momentToUpdate);
 
@@ -49,7 +50,7 @@ public class MomentService {
         Stream<Moment> moments = momentRepository.findAll().stream();
         return momentFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(moments, filters))
+                .reduce(moments, (stream, filter) -> filter.apply(stream, filters), (s1, s2) -> s1)
                 .map(momentMapper::toDto)
                 .toList();
     }
@@ -69,12 +70,13 @@ public class MomentService {
         if (moment.getName() == null || moment.getName().isEmpty()) {
             throw new IllegalArgumentException("Moment name cannot be empty");
         }
-        if (moment.getProjects().stream().anyMatch(
+        if (moment.getProjects() != null && moment.getProjects().stream().anyMatch(
                 project -> project.getStatus().equals(ProjectStatus.COMPLETED)
                         || project.getStatus().equals(ProjectStatus.ON_HOLD)
                         || project.getStatus().equals(ProjectStatus.CANCELLED))) {
             throw new IllegalArgumentException("Moment can only be created for active projects");
         }
     }
+
 
 }

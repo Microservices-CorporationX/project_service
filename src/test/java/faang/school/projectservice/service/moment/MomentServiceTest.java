@@ -2,12 +2,13 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.MomentDto;
 import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
+import faang.school.projectservice.mapper.moment.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
-import faang.school.projectservice.service.filter.moment.MomentFilter;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +42,7 @@ public class MomentServiceTest {
     private MomentRepository momentRepository;
 
     @Spy
-    private MomentMapper momentMapper;
+    private MomentMapper momentMapper = new MomentMapperImpl();
 
     @Mock
     private ProjectService projectService;
@@ -57,31 +59,41 @@ public class MomentServiceTest {
     void createMomentProjectStatusDoesNotMatchTest() {
         MomentDto momentDto = new MomentDto();
         Moment moment = new Moment();
+
         Project project = new Project();
         project.setStatus(ProjectStatus.CANCELLED);
         List<Project> projects = List.of(project);
         moment.setProjects(projects);
+
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         assertThrows(IllegalArgumentException.class, () -> momentService.createMoment(momentDto));
-
     }
 
     @Test
     void createMomentTest() {
         Moment moment = new Moment();
-        MomentDto momentDto = new MomentDto();
         moment.setName("Test");
+
+        MomentDto momentDto = new MomentDto();
+        momentDto.setName("Test");
+        momentDto.setProjectIds(List.of(1L));
+
         Project project = new Project();
+        project.setId(1L);
         project.setStatus(ProjectStatus.IN_PROGRESS);
         moment.setProjects(List.of(project));
 
-        when(momentMapper.toEntity(momentDto)).thenReturn(moment);
+        when(projectService.findProjectsById(momentDto.getProjectIds())).thenReturn(List.of(project));
 
-        momentService.createMoment(momentDto);
+        MomentDto result = momentService.createMoment(momentDto);
 
         verify(momentMapper, times(1)).toEntity(momentDto);
         verify(momentMapper, times(1)).toDto(moment);
         verify(momentRepository, times(1)).save(moment);
+
+        assertEquals(momentDto.getName(), result.getName());
+        assertEquals(momentDto.getProjectIds(), result.getProjectIds());
+        assertTrue(result.getProjectIds().containsAll(List.of(1L)));
     }
 
     @Test
@@ -102,17 +114,13 @@ public class MomentServiceTest {
         Moment momentToUpdate = new Moment();
         momentToUpdate.setName("Test 2");
 
-        Moment updatedMoment = new Moment();
-        updatedMoment.setName("Test 3");
-
         Project project = new Project();
         project.setStatus(ProjectStatus.IN_PROGRESS);
-        updatedMoment.setProjects(List.of(project));
+        momentToUpdate.setProjects(List.of(project));
 
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentToUpdate));
-        when(momentMapper.toEntity(updatedMomentDto)).thenReturn(updatedMoment);
-        doNothing().when(momentMapper).updateEntity(momentToUpdate, updatedMomentDto);
-        when(projectService.findAllById(updatedMomentDto.getProjectIds())).thenReturn(List.of(new Project(), new Project()));
+        when(projectService.findProjectsById(updatedMomentDto.getProjectIds()))
+                .thenReturn(List.of(new Project(), new Project()));
 
         momentService.updateMoment(updatedMomentDto, momentId);
 
@@ -122,7 +130,11 @@ public class MomentServiceTest {
 
     @Test
     void getMomentsByFilter() {
-        List<Moment> moments = Arrays.asList(new Moment(), new Moment());
+        Moment moment1 = new Moment();
+        Moment moment2 = new Moment();
+        moment1.setProjects(List.of(new Project()));
+        moment2.setProjects(List.of(new Project()));
+        List<Moment> moments = Arrays.asList(moment1, moment2);
         when(momentRepository.findAll()).thenReturn(moments);
 
         MomentFilter filterMock = Mockito.mock(MomentFilter.class);
@@ -140,7 +152,9 @@ public class MomentServiceTest {
 
     @Test
     void getAllMomentsTest() {
-        List<Moment> moments = List.of(new Moment());
+        Moment moment = new Moment();
+        moment.setProjects(List.of(new Project()));
+        List<Moment> moments = List.of(moment);
         when(momentRepository.findAll()).thenReturn(moments);
         momentService.getAllMoments();
         verify(momentRepository, times(1)).findAll();
@@ -158,15 +172,13 @@ public class MomentServiceTest {
     void getMomentByIdTest() {
         Long momentId = 1L;
         Moment moment = new Moment();
-        MomentDto momentDto = new MomentDto();
+        moment.setProjects(List.of(new Project()));
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(moment));
-        when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
         momentService.getMomentById(momentId);
 
         verify(momentRepository, times(1)).findById(momentId);
         verify(momentMapper, times(1)).toDto(moment);
     }
-
 
 }
