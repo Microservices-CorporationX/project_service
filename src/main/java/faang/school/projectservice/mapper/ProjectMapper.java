@@ -14,4 +14,5 @@ public interface ProjectMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Project mapToEntity(ProjectDto projectDto);
+    //Juri ne vidit obnovlenija
 }
