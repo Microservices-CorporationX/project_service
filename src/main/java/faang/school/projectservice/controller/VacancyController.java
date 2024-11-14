@@ -5,39 +5,54 @@ import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/vacancies")
 @RequiredArgsConstructor
 public class VacancyController {
+
     private final VacancyService vacancyService;
 
-    public void createVacancy(VacancyDto vacancyDto) {
+    @PostMapping
+    public void createVacancy(@RequestBody VacancyDto vacancyDto) {
         validateVacancy(vacancyDto);
         validateNameVacancy(vacancyDto.getName());
         vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+    @PutMapping("/{vacancyId}")
+    public VacancyDto updateVacancy(@PathVariable Long vacancyId, @RequestBody VacancyDto vacancyDto) {
+        validateId(vacancyId);
         validateVacancy(vacancyDto);
         validateNameVacancy(vacancyDto.getName());
-        return vacancyService.updateVacancy(vacancyDto);
+        return vacancyService.updateVacancy(vacancyId, vacancyDto);
     }
 
-    public void deleteVacancy(Long id) {
-        validateId(id);
-        vacancyService.deleteVacancy(id);
+    @DeleteMapping("/{vacancyId}")
+    public void deleteVacancy(@PathVariable Long vacancyId) {
+        validateId(vacancyId);
+        vacancyService.deleteVacancy(vacancyId);
     }
 
-    public List<VacancyDto> getVacanciesByFilter(VacancyFilterDto filters) {
+    @PostMapping("/filter")
+    public List<VacancyDto> getVacanciesByFilter(@RequestBody VacancyFilterDto filters) {
         return vacancyService.getVacanciesByFilter(filters);
     }
 
-    public VacancyDto getVacancyById(Long id) {
-        validateId(id);
-        return vacancyService.findById(id);
+    @GetMapping("/{vacancyId}")
+    public VacancyDto getVacancyById(Long vacancyId) {
+        validateId(vacancyId);
+        return vacancyService.findById(vacancyId);
     }
 
     private void validateVacancy(VacancyDto vacancyDto) {
