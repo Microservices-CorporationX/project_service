@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,7 @@ public class MomentServiceTest {
 
         MomentDto result = momentService.create(momentDto);
 
-        verify(projectRepository, times(1)).findAllByIds(momentDto.getProjectIds());
+        verify(projectRepository, times(2)).findAllByIds(momentDto.getProjectIds());
         verify(momentRepository, times(1)).save(moment);
         verifyNoMoreInteractions(momentRepository, projectRepository);
 
@@ -173,8 +174,8 @@ public class MomentServiceTest {
         MomentDto secondMomentDto = createMomentDto(2L, "Moment2");
         firstMomentDto.setProjectIds(filter.getProjectIds());
         secondMomentDto.setProjectIds(filter.getProjectIds());
-        firstMomentDto.setDate(filter.getDate());
-        secondMomentDto.setDate(filter.getDate());
+        firstMomentDto.setDate(filter.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        secondMomentDto.setDate(filter.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         Moment firstMoment = createMoment(1L, "Moment1");
         Moment secondMoment = createMoment(2L, "Moment2");

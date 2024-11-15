@@ -26,9 +26,9 @@ public class MomentController {
         return momentService.create(momentDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping()
     @ResponseStatus(HttpStatus.OK)
-    public MomentDto update(@PathVariable Long id, Long userId, Long projectId) {
+    public MomentDto update(@RequestParam Long id, @RequestParam Long userId, @RequestParam Long projectId) {
         log.info("Received a request to update a moment with ID: {}", id);
         return momentService.update(id, userId, projectId);
     }

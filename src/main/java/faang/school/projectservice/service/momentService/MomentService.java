@@ -38,7 +38,10 @@ public class MomentService {
             log.error("Received a request to create a moment with cancelled projects!");
             throw new DataValidationException("Moment's related project doesn't have to be Cancelled!");
         }
-        Moment result = momentRepository.save(momentMapper.toEntity(momentDto));
+        Moment moment = momentMapper.toEntity(momentDto);
+        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
+        moment.setProjects(projects);
+        Moment result = momentRepository.save(moment);
         return momentMapper.toDto(result);
     }
 
