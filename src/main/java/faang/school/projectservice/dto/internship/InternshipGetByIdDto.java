@@ -17,4 +17,5 @@ public class InternshipGetByIdDto {
     private String title;
     private String description;
     private InternshipStatus status;
+    private Long createdBy;
 }

@@ -18,4 +18,6 @@ public class InternshipFilterDto {
     @NotNull(message = "Internship status can not be null")
     private InternshipStatus internshipStatus;
     private TeamRole teamRole;
+    @NotNull(message = "Created by can not be null")
+    private Long createdBy;
 }

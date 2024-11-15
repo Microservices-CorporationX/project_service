@@ -20,4 +20,6 @@ public class InternshipGetAllDto {
 
     @NotNull
     private InternshipStatus status;
+
+    private Long createdBy;
 }

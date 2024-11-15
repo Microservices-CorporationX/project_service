@@ -18,6 +18,8 @@ import java.util.List;
 public class InternshipUpdatedDto {
     private Long id;
 
+    private String name;
+
     private Long projectId;
 
     @NotNull(message = "Internship status can not be null")
@@ -25,4 +27,5 @@ public class InternshipUpdatedDto {
 
     @NotEmpty(message = "Interns list cannot be empty")
     private List<@Positive Long> interns;
+    private Long createdBy;
 }
