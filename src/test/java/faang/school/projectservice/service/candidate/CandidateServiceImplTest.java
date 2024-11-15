@@ -38,8 +38,8 @@ class CandidateServiceImplTest {
     }
 
     @Test
-    void getCandidates() {
-        List<Candidate> candidates = candidateRepository.findAllByVacancyId(1L);
+    void findAllByVacancyId() {
+        List<Candidate> candidates = candidateService.findAllByVacancyId(1L);
         assertEquals(getCandidateList(), candidates);
         Mockito.verify(candidateRepository).findAllByVacancyId(1L);
     }
