@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.project;
+package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.jpa.StageJpaRepository;

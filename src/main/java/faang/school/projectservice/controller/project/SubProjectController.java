@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
-import faang.school.projectservice.service.project.SubProjectService;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
