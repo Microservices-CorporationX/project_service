@@ -52,8 +52,15 @@ public class ProjectValidator {
         if (project.getChildren().stream().allMatch(e -> e.getStatus().equals(ProjectStatus.COMPLETED))){
             return true;
         } else {
-            log.error("Project id:{} has unfinished subprojects", project.getId());
+            log.warn("Project id:{} has unfinished subprojects", project.getId());
             throw new DataValidationException("Project id: " + project.getId() + " has unfinished subprojects");
+        }
+    }
+
+    public void validateProjectExists(CreateSubProjectDto dto) {
+        if (!projectRepository.existsById(dto.getId())) {
+            log.warn("Project with id {} does not exist", dto.getId());
+            throw new DataValidationException("Project with id " + dto.getId() + " does not exist");
         }
     }
 

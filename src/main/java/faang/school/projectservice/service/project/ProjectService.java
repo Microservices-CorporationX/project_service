@@ -55,8 +55,9 @@ public class ProjectService {
         return createSubProjectMapper.toDto(project);
     }
 
-    public CreateSubProjectDto update(Long id, CreateSubProjectDto dto) {
-        Project project = projectRepository.getProjectById(id);
+    public CreateSubProjectDto update(CreateSubProjectDto dto) {
+        projectValidator.validateProjectExists(dto);
+        Project project = projectRepository.getProjectById(dto.getId());
         List<Project> children = project.getChildren();
 
         if (projectValidator.needToUpdateVisibility(project, dto)) {

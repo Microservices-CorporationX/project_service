@@ -178,13 +178,14 @@ public class ProjectServiceTests {
                 .visibility(ProjectVisibility.PRIVATE)
                 .status(ProjectStatus.ON_HOLD).build();
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
+                .id(projectId)
                 .visibility(ProjectVisibility.PUBLIC)
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(projectValidator.needToUpdateVisibility(project, dto)).thenReturn(true);
         when(projectValidator.needToUpdateStatus(project, dto)).thenReturn(true);
-        projectService.update(projectId, dto);
+        projectService.update(dto);
 
         verify(projectRepository, times(1)).save(project);
         assertEquals(ProjectVisibility.PUBLIC, project.getVisibility());

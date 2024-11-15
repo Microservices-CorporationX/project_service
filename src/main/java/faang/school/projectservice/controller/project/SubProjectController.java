@@ -8,29 +8,33 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class SubProjectController {
 
     private final ProjectService projectService;
 
-    public ResponseEntity<ProjectDto> createProject(ProjectDto projectDto) {
+    @PostMapping("/project")
+    public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
         return ResponseEntity.ok(projectService.createProject(projectDto));
     }
 
-    public ResponseEntity<CreateSubProjectDto> createSubProject(@Positive @NotNull Long parentId, CreateSubProjectDto createSubProjectDto) {
-        return ResponseEntity.ok(projectService.createSubProject(parentId, createSubProjectDto));
+    @PostMapping("/project/{parentProjectId}")
+    public ResponseEntity<CreateSubProjectDto> createSubProject(@PathVariable @Positive @NotNull Long parentProjectId, @RequestBody CreateSubProjectDto createSubProjectDto) {
+        return ResponseEntity.ok(projectService.createSubProject(parentProjectId, createSubProjectDto));
     }
 
-    public ResponseEntity<CreateSubProjectDto> update(@Positive @NotNull Long id, CreateSubProjectDto dto){
-        return ResponseEntity.ok(projectService.update(id, dto));
+    @PutMapping("project")
+    public ResponseEntity<CreateSubProjectDto> update(@RequestBody CreateSubProjectDto dto){
+        return ResponseEntity.ok(projectService.update(dto));
     }
 
-    public List<CreateSubProjectDto> getProjectsByFilters(ProjectFilterDto filterDto, @Positive @NotNull Long projectId){
+    @GetMapping("/project/{projectId}/subprojects")
+    public List<CreateSubProjectDto> getProjectsByFilters(@RequestBody ProjectFilterDto filterDto, @PathVariable@Positive @NotNull Long projectId){
         return projectService.getProjectsByFilters(projectId, filterDto);
     }
 

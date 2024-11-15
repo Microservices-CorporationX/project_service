@@ -81,6 +81,15 @@ public class ProjectValidatorTests {
     }
 
     @Test
+    public void testValidateProjectExists(){
+        CreateSubProjectDto dto = CreateSubProjectDto.builder().id(1L).build();
+        Mockito.when(projectRepository.existsById(Mockito.anyLong())).thenReturn(false);
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> projectValidator.validateProjectExists(dto));
+        assertEquals("Project with id " + dto.getId() + " does not exist", exception.getMessage());
+    }
+
+    @Test
     public void testNeedToUpdateVisibility() {
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
                 .visibility(ProjectVisibility.PRIVATE)

@@ -40,8 +40,8 @@ public class SubProjectControllerTests {
     @Test
     void testUpdate() {
         CreateSubProjectDto createSubProjectDto = new CreateSubProjectDto();
-        subProjectController.update(1L, createSubProjectDto);
-        verify(projectService, times(1)).update(1L, createSubProjectDto);
+        subProjectController.update(createSubProjectDto);
+        verify(projectService, times(1)).update(createSubProjectDto);
     }
 
     @Test
