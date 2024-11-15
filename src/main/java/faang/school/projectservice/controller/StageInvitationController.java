@@ -31,6 +31,7 @@ public class StageInvitationController {
 
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(StageInvitationDto stageInvitationDto){
         log.info("A request has been received to view all invitations with filters for {}", stageInvitationDto.getInvitedId());
+        //TODO взять диму для помощи
         return stageInvitationService.viewAllInvitationsForOneParticipant(stageInvitationDto.getInvitedId());
     }
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.stage;
 
 
-import faang.school.projectservice.dto.stage_invitation.StageDto;
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
