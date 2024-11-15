@@ -23,7 +23,7 @@ public class SwaggerConfig {
                         .title("API documentation for Project Service")
                         .version("1.0.0")
                         .description("This service is responsible for managing clients," +
-                                " projects,stages,stageInvitations ,internships ,meets, " +
+                                "projects,stages,stageInvitations,internships,meets," +
                                 "donations,teams,tasks,moments"));
     }
 }
