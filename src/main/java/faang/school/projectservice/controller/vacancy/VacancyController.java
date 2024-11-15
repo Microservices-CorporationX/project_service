@@ -3,50 +3,54 @@ package faang.school.projectservice.controller.vacancy;
 import faang.school.projectservice.dto.client.vacancy.VacancyDto;
 import faang.school.projectservice.dto.client.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
+import faang.school.projectservice.validator.vacancy.VacancyControllerValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/api/v1/project/vacancy")
 @RequiredArgsConstructor
 public class VacancyController {
 
+    private final VacancyControllerValidator validator;
+
     private final VacancyService vacancyService;
 
-    public VacancyDto createVacancy(VacancyDto vacancyDto) {
-        validateValidateVacancy(vacancyDto);
+    @PostMapping
+    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
+        validator.validateVacancyDto(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
 
-    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
-        validateValidateVacancy(vacancyDto);
+    @PutMapping
+    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
+        validator.validateVacancyDto(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
 
-    public void deleteVacancy(Long vacancyId) {
-        validateVacancyId(vacancyId);
+    @DeleteMapping("/{vacancyId}")
+    public void deleteVacancy(@PathVariable Long vacancyId) {
+        validator.validateVacancyId(vacancyId);
         vacancyService.deleteVacancy(vacancyId);
     }
 
-    public List<VacancyDto> getVacancies(VacancyFilterDto vacancyFilterDto) {
+    @PostMapping("/filtered")
+    public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getVacancies(vacancyFilterDto);
     }
 
-    public VacancyDto getVacancy(Long vacancyId) {
-        validateVacancyId(vacancyId);
+    @GetMapping("/{vacancyId}")
+    public VacancyDto getVacancy(@PathVariable Long vacancyId) {
+        validator.validateVacancyId(vacancyId);
         return vacancyService.getVacancy(vacancyId);
-    }
-
-    private void validateValidateVacancy(VacancyDto vacancyDto) {
-        if (vacancyDto == null) {
-            throw new IllegalArgumentException("Vacancy cannot be null");
-        }
-    }
-
-    private void validateVacancyId(Long vacancyId) {
-        if (vacancyId == null) {
-            throw new IllegalArgumentException("Vacancy Id cannot be null");
-        }
     }
 }

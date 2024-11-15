@@ -16,10 +16,18 @@ public class VacancyServiceValidator {
     private final TeamService teamService;
 
     public void validateCreateVacancy(VacancyDto vacancyDto) {
-        Optional<TeamMember> teamMember = teamService.findMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
+        Optional<TeamMember> teamMember = teamService
+                .findMemberByUserIdAndProjectId(vacancyDto.getCreatedBy(), vacancyDto.getProjectId());
 
         if (teamMember.isPresent()) {
-            if (!teamMember.get().getRoles().contains(TeamRole.OWNER) || teamMember.get().getRoles().contains(TeamRole.MANAGER)) {
+            if (!teamMember
+                    .get()
+                    .getRoles()
+                    .contains(TeamRole.OWNER) ||
+                    teamMember
+                            .get()
+                            .getRoles()
+                            .contains(TeamRole.MANAGER)) {
                 throw new IllegalArgumentException("Team member id %s dont have needed role".formatted(vacancyDto.getCreatedBy()));
             }
         } else {
