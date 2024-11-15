@@ -18,8 +18,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class InternshipCreatedDto {
     private Long projectId;
-
-    @NotNull(message = "Mentor is can not be null")
     private TeamMember mentorId;
 
     @NotNull(message = "Start date can not be null")
