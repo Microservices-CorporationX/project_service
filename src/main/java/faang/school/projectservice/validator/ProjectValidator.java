@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.repository.ProjectRepository;
