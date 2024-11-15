@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller.project;
+package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;

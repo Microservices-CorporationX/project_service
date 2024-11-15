@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.controller.subproject.SubProjectController;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
