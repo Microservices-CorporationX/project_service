@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Validated
-public class ProjectServiceValidate {
+public class SubProjectServiceValidate {
     private final TeamRepository teamRepository;
     private final StageJpaRepository stageRepository;
 

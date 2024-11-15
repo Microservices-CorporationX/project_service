@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class ProjectService {
+public class SubProjectService {
     private final ProjectRepository projectRepository;
     private final SubProjectMapper subProjectMapper;
     private final MomentService momentService;
-    private final ProjectServiceValidate projectValidator;
-    private final List<Filter<FilterProjectDto, Project>> filters;
+    private final SubProjectServiceValidate projectValidator;
+    private final List<SubProjectFilter<FilterProjectDto, Project>> subProjectFilters;
 
     @Transactional
     public CreateSubProjectDto createSubProject(@NotNull @Positive Long parentId,
@@ -72,7 +72,7 @@ public class ProjectService {
     public List<CreateSubProjectDto> getProjectsByFilter(@NotNull @Positive Long projectId,
                                                          FilterProjectDto filterDto) {
         Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
-        return filters.stream()
+        return subProjectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
                 .flatMap(filter -> filter.apply(projectStream, filterDto))
                 .distinct()

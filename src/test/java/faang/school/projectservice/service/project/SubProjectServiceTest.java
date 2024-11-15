@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -25,16 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProjectServiceTest {
+class SubProjectServiceTest {
     @InjectMocks
-    private ProjectService projectService;
+    private SubProjectService subProjectService;
 
     @Mock
     private ProjectRepository projectRepository;
     @Mock
     private SubProjectMapperImpl subProjectMapper;
     @Mock
-    private ProjectServiceValidate projectValidator;
+    private SubProjectServiceValidate projectValidator;
     @Mock
     private MomentService momentService;
 
@@ -51,7 +51,7 @@ class ProjectServiceTest {
         when(projectRepository.getProjectById(any())).thenReturn(parentProject);
         when(subProjectMapper.toEntity(any())).thenReturn(childProject);
 
-        projectService.createSubProject(1L, subProjectDto);
+        subProjectService.createSubProject(1L, subProjectDto);
         assertEquals(childProject.getParentProject(), parentProject);
         verify(projectRepository, times(1)).save(childProject);
         verify(projectRepository, times(1)).save(parentProject);
@@ -71,7 +71,7 @@ class ProjectServiceTest {
         when(subProjectMapper.toEntity(any())).thenReturn(childProject);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> projectService.createSubProject(1L, subProjectDto));
+                () -> subProjectService.createSubProject(1L, subProjectDto));
         assertTrue(exception.getMessage().contains("Sub project can't be private in public project"));
     }
 
@@ -114,7 +114,7 @@ class ProjectServiceTest {
         when(projectValidator.isVisibilityDtoAndProjectNotEquals(any(), any())).thenReturn(true);
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
-        projectService.updateProject(1L, parentDto, 1L);
+        subProjectService.updateProject(1L, parentDto, 1L);
         verify(projectRepository, times(1)).save(parentProject);
         assertEquals(parentProject.getStatus(), parentDto.getStatus());
         assertEquals(parentProject.getVisibility(), parentDto.getVisibility());
@@ -155,7 +155,7 @@ class ProjectServiceTest {
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
-        projectService.updateProject(1L, parentDto, 1L);
+        subProjectService.updateProject(1L, parentDto, 1L);
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
     }
 
@@ -178,7 +178,7 @@ class ProjectServiceTest {
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(parentProject.getChildren());
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
-        projectService.updateProject(1L, parentDto, 1L);
+        subProjectService.updateProject(1L, parentDto, 1L);
         assertEquals(parentDto.getStatus(), parentProject.getStatus());
     }
 
@@ -217,16 +217,16 @@ class ProjectServiceTest {
         when(projectValidator.isStatusDtoAndProjectNotEquals(any(), any())).thenReturn(true);
 
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> projectService.updateProject(2L, parentDto, 1L));
+                () -> subProjectService.updateProject(2L, parentDto, 1L));
         assertTrue(exception.getMessage().contains("Current project has unfinished subprojects"));
     }
 
     @Test
     public void testGetProjectByFiltersSuccess() {
-        Filter<FilterProjectDto, Project> mockFilter = mock(Filter.class);
-        Filter<FilterProjectDto, Project> mockFilter2 = mock(Filter.class);
-        List<Filter<FilterProjectDto, Project>> filters = List.of(mockFilter,mockFilter2);
-        projectService = new ProjectService(projectRepository, subProjectMapper, momentService, projectValidator, filters);
+        SubProjectFilter<FilterProjectDto, Project> mockSubProjectFilter = mock(SubProjectFilter.class);
+        SubProjectFilter<FilterProjectDto, Project> mockSubProjectFilter2 = mock(SubProjectFilter.class);
+        List<SubProjectFilter<FilterProjectDto, Project>> subProjectFilters = List.of(mockSubProjectFilter, mockSubProjectFilter2);
+        subProjectService = new SubProjectService(projectRepository, subProjectMapper, momentService, projectValidator, subProjectFilters);
 
         CreateSubProjectDto projectDto = CreateSubProjectDto.builder().name("Second project").build();
         Long id = 1L;
@@ -240,12 +240,12 @@ class ProjectServiceTest {
         Stream<Project> projectStream = projects.subList(1, projects.size()).stream();
 
         when(projectRepository.getSubProjectsByParentId(any())).thenReturn(projects);
-        when(filters.get(0).isApplicable(any())).thenReturn(true);
-        when(filters.get(0).apply(any(), any())).thenReturn(projectStream);
+        when(subProjectFilters.get(0).isApplicable(any())).thenReturn(true);
+        when(subProjectFilters.get(0).apply(any(), any())).thenReturn(projectStream);
 
         when(subProjectMapper.toDto(any())).thenReturn(projectDto);
 
-        List<CreateSubProjectDto> resultProjects = projectService.getProjectsByFilter(id, filterDto);
+        List<CreateSubProjectDto> resultProjects = subProjectService.getProjectsByFilter(id, filterDto);
         assertTrue(resultProjects.get(0).getName().contains(projectDto.getName()));
         assertEquals(2, resultProjects.size());
     }

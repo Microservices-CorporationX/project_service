@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProjectServiceValidateTest {
+class SubSubProjectServiceValidateTest {
     @InjectMocks
-    private ProjectServiceValidate serviceValidate;
+    private SubProjectServiceValidate serviceValidate;
     @Mock
     private TeamRepository teamRepository;
     @Mock

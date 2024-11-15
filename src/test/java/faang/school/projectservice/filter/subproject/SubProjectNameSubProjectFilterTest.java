@@ -12,27 +12,27 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class NameFilterTest {
-    private final NameFilter nameFilter = new NameFilter();
+class SubProjectNameSubProjectFilterTest {
+    private final SubProjectNameSubProjectFilter subProjectNameFilter = new SubProjectNameSubProjectFilter();
 
     @Test
     void testIsApplicableNotNullNotEmptyTrue() {
         FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
-        boolean result = nameFilter.isApplicable(filterDto);
+        boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertTrue(result);
     }
 
     @Test
     void testIsApplicableWithEmptyFalse() {
         FilterProjectDto filterDto = FilterProjectDto.builder().name("").build();
-        boolean result = nameFilter.isApplicable(filterDto);
+        boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
     @Test
     void testIsApplicableWithNullFalse() {
         FilterProjectDto filterDto = FilterProjectDto.builder().build();
-        boolean result = nameFilter.isApplicable(filterDto);
+        boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -45,7 +45,7 @@ class NameFilterTest {
         );
         List<Project> projectsFiltered = List.of(Project.builder().name("Second project").build());
 
-        Stream<Project> result = nameFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectNameFilter.apply(projectStream.stream(), filterDto);
         assertEquals(result.toList(), projectsFiltered);
     }
 
@@ -53,7 +53,7 @@ class NameFilterTest {
     void testApplyReturnFalseNullName() {
         FilterProjectDto filterDto = FilterProjectDto.builder().build();
 
-        boolean result = nameFilter.isApplicable(filterDto);
+        boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -64,7 +64,7 @@ class NameFilterTest {
                 Project.builder().name("First").build()
         );
 
-        Stream<Project> result = nameFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectNameFilter.apply(projectStream.stream(), filterDto);
         assertTrue(result.toList().isEmpty());
     }
 }

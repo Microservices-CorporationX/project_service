@@ -13,14 +13,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class StatusFilterTest {
-    private final StatusFilter statusFilter = new StatusFilter();
+class SubProjectStatusSubProjectFilterTest {
+    private final SubProjectStatusSubProjectFilter subProjectStatusFilter = new SubProjectStatusSubProjectFilter();
 
     @Test
     void testIsApplicableFilterNotNull() {
         FilterProjectDto filterDto = FilterProjectDto.builder().status(ProjectStatus.COMPLETED).build();
 
-        boolean result = statusFilter.isApplicable(filterDto);
+        boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertTrue(result);
     }
 
@@ -28,7 +28,7 @@ class StatusFilterTest {
     void testIsApplicableFilterNull() {
         FilterProjectDto filterDto = FilterProjectDto.builder().build();
 
-        boolean result = statusFilter.isApplicable(filterDto);
+        boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -41,7 +41,7 @@ class StatusFilterTest {
         );
         List<Project> projectsFiltered = List.of(Project.builder().status(ProjectStatus.COMPLETED).build());
 
-        Stream<Project> result = statusFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectStatusFilter.apply(projectStream.stream(), filterDto);
         assertEquals(result.toList(), projectsFiltered);
     }
 
@@ -49,7 +49,7 @@ class StatusFilterTest {
     void testApplyReturnFalseWithFilterNull() {
         FilterProjectDto filterDto = FilterProjectDto.builder().build();
 
-        boolean result = statusFilter.isApplicable(filterDto);
+        boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -60,7 +60,7 @@ class StatusFilterTest {
                 Project.builder().status(ProjectStatus.IN_PROGRESS).build()
         );
 
-        Stream<Project> result = statusFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectStatusFilter.apply(projectStream.stream(), filterDto);
         assertTrue(result.toList().isEmpty());
     }
 }

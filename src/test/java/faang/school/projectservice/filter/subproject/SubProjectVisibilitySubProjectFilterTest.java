@@ -13,14 +13,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class VisibilityFilterTest {
-    private final VisibilityFilter visibilityFilter = new VisibilityFilter();
+class SubProjectVisibilitySubProjectFilterTest {
+    private final SubProjectVisibilitySubProjectFilter subProjectVisibilityFilter = new SubProjectVisibilitySubProjectFilter();
 
     @Test
     void testIsApplicableFilterNotNullAndPUBLIC() {
         FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
 
-        boolean result = visibilityFilter.isApplicable(filterDto);
+        boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertTrue(result);
     }
 
@@ -28,7 +28,7 @@ class VisibilityFilterTest {
     void testIsApplicableFilterNotNullAndPRIVATE() {
         FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
 
-        boolean result = visibilityFilter.isApplicable(filterDto);
+        boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -36,7 +36,7 @@ class VisibilityFilterTest {
     void testIsApplicableFilterNull() {
         FilterProjectDto filterDto = FilterProjectDto.builder().build();
 
-        boolean result = visibilityFilter.isApplicable(filterDto);
+        boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
@@ -50,7 +50,7 @@ class VisibilityFilterTest {
         );
         List<Project> projectsFiltered = List.of(Project.builder().visibility(ProjectVisibility.PUBLIC).build());
 
-        Stream<Project> result = visibilityFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectVisibilityFilter.apply(projectStream.stream(), filterDto);
         assertEquals(result.toList(), projectsFiltered);
     }
 
@@ -59,8 +59,8 @@ class VisibilityFilterTest {
         FilterProjectDto filterDtoNull = FilterProjectDto.builder().build();
         FilterProjectDto filterDtoPRIVATE = FilterProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
 
-        boolean resultNull = visibilityFilter.isApplicable(filterDtoNull);
-        boolean resultPRIVATE = visibilityFilter.isApplicable(filterDtoPRIVATE);
+        boolean resultNull = subProjectVisibilityFilter.isApplicable(filterDtoNull);
+        boolean resultPRIVATE = subProjectVisibilityFilter.isApplicable(filterDtoPRIVATE);
         assertFalse(resultNull);
         assertFalse(resultPRIVATE);
     }
@@ -72,7 +72,7 @@ class VisibilityFilterTest {
                 Project.builder().visibility(ProjectVisibility.PRIVATE).build()
         );
 
-        Stream<Project> result = visibilityFilter.apply(projectStream.stream(), filterDto);
+        Stream<Project> result = subProjectVisibilityFilter.apply(projectStream.stream(), filterDto);
         assertTrue(result.toList().isEmpty());
     }
 }

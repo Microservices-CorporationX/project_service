@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.FilterProjectDto;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.project.SubProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -21,14 +21,14 @@ import java.util.List;
 @RequestMapping("api/v1/sub-projects")
 @Validated
 public class SubProjectController {
-    private final ProjectService projectService;
+    private final SubProjectService subProjectService;
     private final UserContext userContext;
 
     @PostMapping("/project/{parentProjectId}")
     @Operation(summary = "Create sub project in DB")
     public CreateSubProjectDto createSubProject(@PathVariable @Positive @NotNull Long parentProjectId,
                                                 @RequestBody @Valid CreateSubProjectDto subProjectDto) {
-        return projectService.createSubProject(parentProjectId, subProjectDto);
+        return subProjectService.createSubProject(parentProjectId, subProjectDto);
     }
 
     @PutMapping("/project/{projectId}")
@@ -38,7 +38,7 @@ public class SubProjectController {
     public CreateSubProjectDto updateProject(@PathVariable @Positive @NotNull Long projectId,
                                              @RequestBody @Valid CreateSubProjectDto subProjectDto) {
         long userId = userContext.getUserId();
-        return projectService.updateProject(projectId, subProjectDto, userId);
+        return subProjectService.updateProject(projectId, subProjectDto, userId);
     }
 
     @GetMapping("/project/{projectId}/projects")
@@ -46,7 +46,7 @@ public class SubProjectController {
     public List<CreateSubProjectDto> getProjectsByFilters(@PathVariable @Positive @NotNull Long projectId,
                                                           @RequestBody @Valid FilterProjectDto filterDto
     ) {
-        return projectService.getProjectsByFilter(projectId, filterDto);
+        return subProjectService.getProjectsByFilter(projectId, filterDto);
     }
 }
 
