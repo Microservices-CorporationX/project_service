@@ -1,6 +1,7 @@
 package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.exeption.DataValidationException;
+import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import faang.school.projectservice.service.team_member.TeamMemberService;
 
@@ -14,10 +15,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ServiceStageInvitationValidator {
     private TeamMemberService teamMemberService;
-    private StageInvitationService stageInvitationService;
+    private StageInvitationRepository stageInvitationRepository;
 
     public void checkWhetherThisRequestExists(Long stageInvitationId) {
-        boolean existedStageInvitation = stageInvitationService.stageInvitationExist(stageInvitationId);
+        boolean existedStageInvitation = stageInvitationRepository.stageInvitationExist(stageInvitationId);
         if (existedStageInvitation) {
             throw new DataValidationException("This invitation already exists");
         }
@@ -27,6 +28,12 @@ public class ServiceStageInvitationValidator {
         boolean existedTeamMember = teamMemberService.existedTeamMember(invitedId);
         if (!existedTeamMember) {
             throw new DataValidationException("This team member does not exist");
+        }
+    }
+
+    public void checkTheReasonForTheFailure(String rejection) {
+        if (rejection.isBlank() || rejection.isEmpty()) {
+            throw new DataValidationException("The reason for the refusal must be indicated");
         }
     }
 }

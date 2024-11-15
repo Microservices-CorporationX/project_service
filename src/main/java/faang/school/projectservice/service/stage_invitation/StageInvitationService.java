@@ -28,8 +28,6 @@ public class StageInvitationService {
     private ServiceStageInvitationValidator serviceStageInvitationValidator;
 
     public StageInvitationDto sendAnInvitation(StageInvitationDto stageInvitationDto) {
-        //TODO зачем дана инфа об авторе и статусе, нужно создать новую dto? POSTMAN
-
         serviceStageInvitationValidator.checkWhetherThisRequestExists(stageInvitationDto.getId());
         serviceStageInvitationValidator.checkTheExistenceOfTheInvitee(stageInvitationDto.getInvitedId());
 
@@ -50,8 +48,9 @@ public class StageInvitationService {
     }
 
     public StageInvitationDto rejectAnInvitation(StageInvitationDto stageInvitationDto) {
-        //TODO как указать причину отказа? ГЛЯНУТЬ В БД
+        serviceStageInvitationValidator.checkTheReasonForTheFailure(stageInvitationDto.getRejection());
         stageInvitationDto = StageInvitationDto.builder().status(REJECTED).build();
+
         return stageInvitationDto;
     }
 
@@ -67,9 +66,5 @@ public class StageInvitationService {
 
 
         return stages;
-    }
-
-    public boolean stageInvitationExist(Long stageInvitationId) {
-        return stageInvitationRepository.stageInvitationExist(stageInvitationId);
     }
 }
