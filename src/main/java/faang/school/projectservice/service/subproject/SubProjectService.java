@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.moment.MomentRequestDto;
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -33,7 +33,7 @@ public class SubProjectService {
     private final SubProjectMapper subProjectMapper;
     private final MomentService momentService;
     private final SubProjectServiceValidate projectValidator;
-    private final List<SubProjectFilter<FilterProjectDto, Project>> subProjectFilters;
+    private final List<SubProjectFilter<FilterSubProjectDto, Project>> subProjectFilters;
 
     @Transactional
     public CreateSubProjectDto createSubProject(@NotNull @Positive Long parentId,
@@ -70,7 +70,7 @@ public class SubProjectService {
     }
 
     public List<CreateSubProjectDto> getProjectsByFilter(@NotNull @Positive Long projectId,
-                                                         FilterProjectDto filterDto) {
+                                                         FilterSubProjectDto filterDto) {
         Stream<Project> projectStream = projectRepository.getSubProjectsByParentId(projectId).stream();
         return subProjectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.subproject;
 
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,28 +17,28 @@ class SubProjectNameSubProjectFilterTest {
 
     @Test
     void testIsApplicableNotNullNotEmptyTrue() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().name("project").build();
         boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertTrue(result);
     }
 
     @Test
     void testIsApplicableWithEmptyFalse() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("").build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().name("").build();
         boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
     @Test
     void testIsApplicableWithNullFalse() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
         boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
     }
 
     @Test
     void testApplySuccess() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().name("project").build();
         List<Project> projectStream = List.of(
                 Project.builder().name("First").build(),
                 Project.builder().name("Second project").build()
@@ -51,7 +51,7 @@ class SubProjectNameSubProjectFilterTest {
 
     @Test
     void testApplyReturnFalseNullName() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
 
         boolean result = subProjectNameFilter.isApplicable(filterDto);
         assertFalse(result);
@@ -59,7 +59,7 @@ class SubProjectNameSubProjectFilterTest {
 
     @Test
     void testApplyReturnEmptyProjectNotMatch() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("Second project").build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().name("Second project").build();
         List<Project> projectStream = List.of(
                 Project.builder().name("First").build()
         );

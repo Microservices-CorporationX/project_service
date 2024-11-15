@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.subproject;
 
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class SubProjectStatusSubProjectFilterTest {
 
     @Test
     void testIsApplicableFilterNotNull() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().status(ProjectStatus.COMPLETED).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().status(ProjectStatus.COMPLETED).build();
 
         boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertTrue(result);
@@ -26,7 +26,7 @@ class SubProjectStatusSubProjectFilterTest {
 
     @Test
     void testIsApplicableFilterNull() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
 
         boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertFalse(result);
@@ -34,7 +34,7 @@ class SubProjectStatusSubProjectFilterTest {
 
     @Test
     void testApplySuccess() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().status(ProjectStatus.COMPLETED).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().status(ProjectStatus.COMPLETED).build();
         List<Project> projectStream = List.of(
                 Project.builder().status(ProjectStatus.COMPLETED).build(),
                 Project.builder().status(ProjectStatus.IN_PROGRESS).build()
@@ -47,7 +47,7 @@ class SubProjectStatusSubProjectFilterTest {
 
     @Test
     void testApplyReturnFalseWithFilterNull() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
 
         boolean result = subProjectStatusFilter.isApplicable(filterDto);
         assertFalse(result);
@@ -55,7 +55,7 @@ class SubProjectStatusSubProjectFilterTest {
 
     @Test
     void testApplyReturnEmptyProjectNotMatch() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().status(ProjectStatus.COMPLETED).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().status(ProjectStatus.COMPLETED).build();
         List<Project> projectStream = List.of(
                 Project.builder().status(ProjectStatus.IN_PROGRESS).build()
         );

@@ -1,6 +1,6 @@
 package faang.school.projectservice.filter.subproject;
 
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testIsApplicableFilterNotNullAndPUBLIC() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
 
         boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertTrue(result);
@@ -26,7 +26,7 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testIsApplicableFilterNotNullAndPRIVATE() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
 
         boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertFalse(result);
@@ -34,7 +34,7 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testIsApplicableFilterNull() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
 
         boolean result = subProjectVisibilityFilter.isApplicable(filterDto);
         assertFalse(result);
@@ -43,7 +43,7 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testApplySuccess() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
         List<Project> projectStream = List.of(
                 Project.builder().visibility(ProjectVisibility.PUBLIC).build(),
                 Project.builder().visibility(ProjectVisibility.PRIVATE).build()
@@ -56,8 +56,8 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testApplyReturnFalseWithFilterNullOrPRIVATE() {
-        FilterProjectDto filterDtoNull = FilterProjectDto.builder().build();
-        FilterProjectDto filterDtoPRIVATE = FilterProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
+        FilterSubProjectDto filterDtoNull = FilterSubProjectDto.builder().build();
+        FilterSubProjectDto filterDtoPRIVATE = FilterSubProjectDto.builder().visibility(ProjectVisibility.PRIVATE).build();
 
         boolean resultNull = subProjectVisibilityFilter.isApplicable(filterDtoNull);
         boolean resultPRIVATE = subProjectVisibilityFilter.isApplicable(filterDtoPRIVATE);
@@ -67,7 +67,7 @@ class SubProjectVisibilitySubProjectFilterTest {
 
     @Test
     void testApplyReturnEmptyProjectNotMatch() {
-        FilterProjectDto filterDto = FilterProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().visibility(ProjectVisibility.PUBLIC).build();
         List<Project> projectStream = List.of(
                 Project.builder().visibility(ProjectVisibility.PRIVATE).build()
         );

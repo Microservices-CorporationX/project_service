@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;

@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,7 +44,7 @@ public class SubProjectController {
     @GetMapping("/project/{projectId}/projects")
     @Operation(summary = "Get sub projects by parent project id and filters")
     public List<CreateSubProjectDto> getProjectsByFilters(@PathVariable @Positive @NotNull Long projectId,
-                                                          @RequestBody @Valid FilterProjectDto filterDto
+                                                          @RequestBody @Valid FilterSubProjectDto filterDto
     ) {
         return subProjectService.getProjectsByFilter(projectId, filterDto);
     }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.subproject;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
@@ -223,15 +223,15 @@ class SubProjectServiceTest {
 
     @Test
     public void testGetProjectByFiltersSuccess() {
-        SubProjectFilter<FilterProjectDto, Project> mockSubProjectFilter = mock(SubProjectFilter.class);
-        SubProjectFilter<FilterProjectDto, Project> mockSubProjectFilter2 = mock(SubProjectFilter.class);
-        List<SubProjectFilter<FilterProjectDto, Project>> subProjectFilters = List.of(mockSubProjectFilter, mockSubProjectFilter2);
+        SubProjectFilter<FilterSubProjectDto, Project> mockSubProjectFilter = mock(SubProjectFilter.class);
+        SubProjectFilter<FilterSubProjectDto, Project> mockSubProjectFilter2 = mock(SubProjectFilter.class);
+        List<SubProjectFilter<FilterSubProjectDto, Project>> subProjectFilters = List.of(mockSubProjectFilter, mockSubProjectFilter2);
         subProjectService = new SubProjectService(projectRepository, subProjectMapper, momentService, projectValidator, subProjectFilters);
 
         CreateSubProjectDto projectDto = CreateSubProjectDto.builder().name("Second project").build();
         Long id = 1L;
 
-        FilterProjectDto filterDto = FilterProjectDto.builder().name("project").status(ProjectStatus.COMPLETED).build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().name("project").status(ProjectStatus.COMPLETED).build();
         List<Project> projects = List.of(
                 Project.builder().name("First").status(ProjectStatus.COMPLETED).build(),
                 Project.builder().name("Second project").status(ProjectStatus.COMPLETED).build(),

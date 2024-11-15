@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.project;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -15,16 +15,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateSubProjectDto {
-    @Schema(description = "Identifier of the project", example = "1")
+@Builder
+public class SubProjectDto {
+
+    @Schema(description = "Unique identifier of the project", example = "1")
+    @NotNull
     @Positive
     private Long id;
 
-    @Schema(description = "name of the project", example = "Project Name")
-    @NotBlank(message = "Project name cannot be blank")
+    @Schema(description = "Name of the project", example = "Project name")
+    @NotBlank(message = "Project name cannot be blank and not null")
     private String name;
 
     @Schema(description = "List of child project ids", example = "[1, 2, 3]", nullable = true)
@@ -35,7 +37,7 @@ public class CreateSubProjectDto {
     private ProjectStatus status = ProjectStatus.CREATED;
 
     @Builder.Default
-    @Schema(description = "Status of the project", example = "PUBLIC", defaultValue = "PUBLIC")
+    @Schema(description = "Visibility of the project", example = "PUBLIC", defaultValue = "PUBLIC")
     private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
 
     @Schema(description = "Date and time creating the project", example = "2022-01-01 00:00:00Z", nullable = true)
@@ -49,12 +51,4 @@ public class CreateSubProjectDto {
 
     @Schema(description = "List of teams ids", example = "[1, 2, 3]", nullable = true)
     private List<@Positive Long> teamsIds;
-
-    @Schema(description = "Parent project id", example = "1")
-    @NotNull
-    @Positive
-    private Long parentProjectId;
-
-    @Schema(description = "List of moments ids", example = "[1, 2, 3]", nullable = true)
-    private List<@Positive Long> momentsIds;
 }

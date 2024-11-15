@@ -1,8 +1,8 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.controller.subproject.SubProjectController;
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.FilterProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class SubProjectControllerTest {
 
     @Test
     public void testGetProjectsByFilters(){
-        FilterProjectDto filterDto = FilterProjectDto.builder().build();
+        FilterSubProjectDto filterDto = FilterSubProjectDto.builder().build();
         subProjectService.getProjectsByFilter(1L, filterDto);
         verify(subProjectService,times(1)).getProjectsByFilter(1L, filterDto);
     }

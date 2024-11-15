@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.project;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.dto.FilterDto;
 import faang.school.projectservice.model.ProjectStatus;
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Schema(description = "Filter for projects")
 @Data
 @Builder
-public class FilterProjectDto extends FilterDto {
+public class FilterSubProjectDto extends FilterDto {
     @Schema(description = "Filter for project name", example = "Project name", nullable = true)
     private String name;
 
