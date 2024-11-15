@@ -46,8 +46,10 @@ public class InternshipService {
     @Transactional
     public InternshipUpdatedDto updateInternship(InternshipUpdatedDto updateInternship) {
         Internship internship = internshipRepository.findById(updateInternship.getId())
-                .orElseThrow(EntityNotFoundException::new);
-        log.error("Internship with ID {} not found", updateInternship.getId());
+                .orElseThrow(() -> {
+                    log.error("Internship with ID {} not found", updateInternship.getId());
+                    return new EntityNotFoundException();
+                });
 
         completionHandler.internsToDismissal(updateInternship.getInterns());
         completionHandler.processInternshipCompletion(internship, internship.getStatus());
