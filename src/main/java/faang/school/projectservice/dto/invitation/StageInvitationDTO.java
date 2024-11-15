@@ -2,7 +2,6 @@ package faang.school.projectservice.dto.invitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +21,5 @@ public class StageInvitationDTO {
     @NotNull(message = "Идентификатор приглашенного не может быть null")
     private Long inviteeId;
     private StageInvitationStatus status;
-    @Size(max = 255, message = "Причина отклонения слишком длинная")
     private String rejectionReason;
 }
