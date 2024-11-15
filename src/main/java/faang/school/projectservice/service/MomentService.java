@@ -2,13 +2,13 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.client.MomentFilterDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.validator.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

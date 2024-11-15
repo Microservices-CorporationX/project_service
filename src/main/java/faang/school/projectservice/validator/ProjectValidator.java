@@ -11,6 +11,7 @@ import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

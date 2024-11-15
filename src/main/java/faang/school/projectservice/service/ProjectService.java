@@ -8,7 +8,6 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.validator.ProjectValidator;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
@@ -18,6 +17,8 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
@@ -120,8 +121,12 @@ public class ProjectService {
         return projectRepository.getProjectById(projectId);
     }
 
-    public List<Project> findAllById(List<Long> ids) {
-        return projectRepository.findAllByIds(ids);
+    public ProjectDto findById(Long id) {
+        return projectMapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    public List<ProjectDto> findAllById(List<Long> ids) {
+        return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
     private List<Project> getAllAccessibleProjects(Long currentUserId) {

@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -15,6 +14,7 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import faang.school.projectservice.validator.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -262,7 +263,7 @@ class ProjectServiceTest {
         project3.setId(3L);
         when(projectRepository.findAllByIds(ids)).thenReturn(List.of(project1, project2, project3));
 
-        List<Project> result = projectService.findAllById(ids);
+        List<ProjectDto> result = projectService.findAllById(ids);
 
         assertEquals(3, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -275,7 +276,7 @@ class ProjectServiceTest {
         List<Long> ids = List.of(1L, 2L, 3L);
         when(projectRepository.findAllByIds(ids)).thenReturn(List.of());
 
-        List<Project> result = projectService.findAllById(ids);
+        List<ProjectDto> result = projectService.findAllById(ids);
         assertEquals(0, result.size());
     }
 
@@ -317,5 +318,65 @@ class ProjectServiceTest {
                         .status(ProjectStatus.IN_PROGRESS)
                         .build()
         );
+    }
+
+    @Test
+    void findByIdWhenProjectExistsShouldReturnProjectDto() {
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
+
+        ProjectDto result = projectService.findById(1L);
+
+        assertNotNull(result);
+        assertEquals(projectDto.getId(), result.getId());
+        assertEquals(projectDto.getName(), result.getName());
+
+        verify(projectRepository).getProjectById(1L);
+        verify(projectMapper).toDto(project);
+    }
+
+    @Test
+    void findByIdWhenProjectDoesNotExistShouldThrowException() {
+        when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found"));
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            projectService.findById(1L);
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+
+        verify(projectRepository).getProjectById(1L);
+    }
+
+    @Test
+    void findAllById_whenProjectsExist_shouldReturnProjectDtos() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of(project));
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
+
+        List<ProjectDto> result = projectService.findAllById(ids);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(projectDto.getId(), result.get(0).getId());
+        assertEquals(projectDto.getName(), result.get(0).getName());
+
+        verify(projectRepository).findAllByIds(ids);
+        verify(projectMapper).toDto(project);
+    }
+
+    @Test
+    void findAllById_whenNoProjectsExist_shouldReturnEmptyList() {
+        List<Long> ids = List.of(1L, 2L);
+
+        when(projectRepository.findAllByIds(ids)).thenReturn(List.of());
+
+        List<ProjectDto> result = projectService.findAllById(ids);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(projectRepository).findAllByIds(ids);
     }
 }
