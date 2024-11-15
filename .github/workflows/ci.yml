@@ -2,8 +2,8 @@ name: CI Pipeline Cyclop
 
 on:
   pull_request:
-    branches:
-      - cyclop-master-stream7
+    branches: [ "Cyclop-master-stream7" ]
+
 jobs:
   test:
     runs-on: ubuntu-latest
