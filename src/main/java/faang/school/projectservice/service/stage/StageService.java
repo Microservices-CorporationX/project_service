@@ -3,15 +3,15 @@ package faang.school.projectservice.service.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.stage.StageFilter;
-import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.task.TaskService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,21 +21,22 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class StageService {
-    private final StageJpaRepository stageJpaRepository;
+    private final StageRepository stageRepository;
     private final StageMapper stageMapper;
     private final List<StageFilter> stageFilterList;
     private final TaskService taskService;
+    private final ProjectService projectService;
     private final StageInvitationService stageInvitationService;
 
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toStage(stageDto);
 
-        return stageMapper.toStageDto(stageJpaRepository.save(stage));
+        return stageMapper.toStageDto(stageRepository.save(stage));
     }
 
     public List<StageDto> getAllStagesByFilters(StageFilterDto stageFilterDto) {
 
-        Stream<Stage> stageStream = stageJpaRepository.findAll().stream();
+        Stream<Stage> stageStream = stageRepository.findAll().stream();
 
         return stageFilterList.stream()
                 .filter(filter -> filter.isApplicable(stageFilterDto))
@@ -48,20 +49,18 @@ public class StageService {
 
     public void deleteStageById(Long id) {
 
-        Stage stage = stageJpaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
+        Stage stage = stageRepository.getById(id);
 
         taskService.saveAll(stage.getTasks().stream()
                 .peek(task -> task.setStatus(TaskStatus.CANCELLED))
                 .toList());
 
-        stageJpaRepository.deleteById(id);
+        stageRepository.delete(stage);
     }
 
     public StageDto updateStage(Long stageId) {
 
-        Stage stage = stageJpaRepository.findById(stageId)
-                .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
+        Stage stage = stageRepository.getById(stageId);
 
         stage.getStageRoles()
                 .forEach(role -> {
@@ -76,7 +75,15 @@ public class StageService {
                                 });
                     }
                 });
-        return stageMapper.toStageDto(stageJpaRepository.save(stage));
+        return stageMapper.toStageDto(stageRepository.save(stage));
+    }
+
+    public List<StageDto> getAllStagesOfProject(Long projectId) {
+        return stageMapper.toStageDtos(projectService.getProject(projectId).getStages());
+    }
+
+    public StageDto getStageById(Long id) {
+        return stageMapper.toStageDto(stageRepository.getById(id));
     }
 
     private Long getAbsenceTeamMembersByRole(Stage stage, StageRoles stageRoles) {

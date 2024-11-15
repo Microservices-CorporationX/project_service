@@ -33,6 +33,14 @@ public class StageController {
         return stageService.updateStage(stageId);
     }
 
+    public List<StageDto> getAllStages(Long projectId) {
+        return stageService.getAllStagesOfProject(projectId);
+    }
+
+    public StageDto getStageById(Long id) {
+        return stageService.getStageById(id);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public void handleValidationExceptions(MethodArgumentNotValidException ex) {
         throw new IllegalArgumentException("Validation failed", ex);
