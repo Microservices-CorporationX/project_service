@@ -31,15 +31,11 @@ public class ProjectRepository {
         return projectJpaRepository.existsByOwnerIdAndName(userId, name);
     }
 
-    public Project save(Project project){
+    public Project save(Project project) {
         return projectJpaRepository.save(project);
     }
 
-    public void saveAll(List<Project> projects) {
-        projectJpaRepository.saveAll(projects);
-    }
-
-    public boolean existsById(Long id){
+    public boolean existsById(Long id) {
         return projectJpaRepository.existsById(id);
     }
 
@@ -49,5 +45,9 @@ public class ProjectRepository {
 
     public List<Project> getSubProjectsByParentId(Long Id) {
             return projectJpaRepository.findAllSubProjectsByParentId(Id);
+    }
+
+    public void saveAll(List<Project> projects) {
+        projectJpaRepository.saveAll(projects);
     }
 }
