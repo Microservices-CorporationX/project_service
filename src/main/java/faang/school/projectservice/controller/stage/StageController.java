@@ -25,12 +25,12 @@ public class StageController {
        return stageService.getAllStagesByFilters(stageFilterDto);
     }
 
-    public StageDto deleteStageById(Long id) {
-        return stageService.deleteStageById(id);
+    public void deleteStageById(Long id) {
+        stageService.deleteStageById(id);
     }
 
-    public StageDto updateStage(StageDto stageDto) {
-        return stageService.updateStage(stageDto);
+    public StageDto updateStage(Long stageId) {
+        return stageService.updateStage(stageId);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

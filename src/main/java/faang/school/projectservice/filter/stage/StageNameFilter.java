@@ -1,6 +1,5 @@
 package faang.school.projectservice.filter.stage;
 
-import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.model.stage.Stage;
 import org.springframework.stereotype.Component;

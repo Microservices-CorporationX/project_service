@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.TeamMember;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -24,5 +24,8 @@ public class StageDto {
 
     @NotEmpty(message = "Список ролей не может быть пустым")
     private List<StageRolesDto> stageRolesDto;
+
+    @NotEmpty(message = "Список участников команды не может быть пустым")
+    private List<TeamMember> executors;
 
 }
