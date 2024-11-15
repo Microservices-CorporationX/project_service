@@ -76,7 +76,7 @@ class ProjectControllerTest {
     void testUpdateProjectSuccessful() {
         when(projectService.updateProject(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectDescription(updateProjectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProject(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateProjectDto, response.getBody());

@@ -37,7 +37,7 @@ public class ProjectController {
     }
 
     @PutMapping
-    public ResponseEntity<UpdateProjectDto> updateProjectDescription(@Valid @RequestBody UpdateProjectDto dto) {
+    public ResponseEntity<UpdateProjectDto> updateProject(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.ok(projectService.updateProject(dto));

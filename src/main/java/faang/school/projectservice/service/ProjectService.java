@@ -1,11 +1,12 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.MomentDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
@@ -31,7 +32,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor()
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
@@ -39,7 +40,7 @@ public class ProjectService {
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
     private final List<StatusUpdater> statusUpdates;
-    private final MomentService momentService;
+    private final MomentRepository momentRepository;
 
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
@@ -136,12 +137,10 @@ public class ProjectService {
         projectValidator.validateUniqueProject(createProjectDto);
 
         Project project = projectMapper.toEntity(createProjectDto);
-        project.setParentProject(parentProject);
-        project.setStatus(ProjectStatus.CREATED);
-        parentProject.getChildren().add(project);
+        initializeSubProject(project, parentProject);
 
-        Project savedProject = projectRepository.save(project);
         projectRepository.save(parentProject);
+        Project savedProject = projectRepository.save(project);
         log.info("Subproject #{} created successfully for parent project #{}.", savedProject.getId(), parentId);
         return projectMapper.toResponseDto(savedProject);
     }
@@ -152,24 +151,14 @@ public class ProjectService {
         Project project = getProjectById(updateSubProjectDto.getId());
         changeStatus(project, updateSubProjectDto);
         changeVisibility(project, updateSubProjectDto);
+        Project parentProject = project.getParentProject();
 
-        if (projectValidator.validateHasChildrenProjectsClosed(project)) {
-            MomentDto momentDto = MomentDto.builder()
-                    .name("All subprojects completed!")
-                    .date(LocalDateTime.now(ZoneId.of("UTC")))
-                    .userIds(project.getTeams().stream()
-                            .map(Team::getTeamMembers)
-                            .flatMap(List::stream)
-                            .map(TeamMember::getUserId)
-                            .toList())
-                    .projectsIds(new ArrayList<>(List.of(project.getId())))
-                    .build();
-            momentService.saveMoment(momentDto);
+        if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
+            createMomentAllSubProjectsCompleted(parentProject);
             log.info("Moment #All subprojects completed! successfully created for project #{}", project.getId());
         }
-
         project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
-        return projectMapper.toResponseDto(project);
+        return projectMapper.toResponseDto(projectRepository.save(project));
     }
 
     public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
@@ -203,6 +192,28 @@ public class ProjectService {
         if (updateSubProjectDto.getVisibility() != null) {
             project.setVisibility(updateSubProjectDto.getVisibility());
         }
+    }
+
+    private void createMomentAllSubProjectsCompleted(Project project) {
+        Moment moment = Moment.builder()
+                .name("All subprojects completed!")
+                .date(LocalDateTime.now(ZoneId.of("UTC")))
+                .userIds(project.getTeams().stream()
+                        .map(Team::getTeamMembers)
+                        .flatMap(List::stream)
+                        .map(TeamMember::getUserId)
+                        .toList())
+                .projects(new ArrayList<>(List.of(project)))
+                .build();
+        project.getMoments().add(moment);
+        momentRepository.save(moment);
+        projectRepository.save(project);
+    }
+
+    private void initializeSubProject(Project project, Project parentProject) {
+        project.setParentProject(parentProject);
+        project.setStatus(ProjectStatus.CREATED);
+        parentProject.getChildren().add(project);
     }
 }
 

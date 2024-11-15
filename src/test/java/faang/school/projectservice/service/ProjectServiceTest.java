@@ -11,7 +11,9 @@ import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.statusupdator.StatusUpdater;
 import faang.school.projectservice.validator.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +46,7 @@ class ProjectServiceTest {
     @Mock
     private ProjectValidator projectValidator;
 
+
     @Spy
     private ProjectMapperImpl projectMapper;
 
@@ -52,6 +55,9 @@ class ProjectServiceTest {
 
     @Mock
     List<Filter<Project, ProjectFilterDto>> filters;
+
+    @Mock
+    MomentRepository momentRepository;
 
     @InjectMocks
     private ProjectService projectService;
@@ -67,6 +73,7 @@ class ProjectServiceTest {
     private ProjectFilterDto filterDto;
     private Long projectId;
     private Long ownerId;
+    private List<StatusUpdater> statusUpdates;
 
     @BeforeEach
     void setUp() {
@@ -196,7 +203,7 @@ class ProjectServiceTest {
         filters = List.of(statusFilter);
         projectValidator = new ProjectValidator(projectRepository);
         projectService = new ProjectService(projectRepository, projectValidator,
-                projectMapper, updateProjectMapper, filters);
+                projectMapper, updateProjectMapper, filters, statusUpdates, momentRepository);
         when(projectRepository.findAll()).thenReturn(notFilteredProjects);
 
         List<ProjectDto> result = projectService.getProjectsByFilter(filterDto, ownerId);
@@ -212,7 +219,7 @@ class ProjectServiceTest {
         List<ProjectDto> availableProjectDtos = getProjectDtosList();
         projectValidator = new ProjectValidator(projectRepository);
         projectService = new ProjectService(projectRepository, projectValidator,
-                projectMapper, updateProjectMapper, filters);
+                projectMapper, updateProjectMapper, filters, statusUpdates, momentRepository);
 
         when(projectRepository.findAll()).thenReturn(allProjects);
 

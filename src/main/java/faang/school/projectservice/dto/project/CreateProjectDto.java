@@ -32,9 +32,6 @@ public class CreateProjectDto {
     @Positive(message = "Owner id must be positive")
     private Long ownerId;
 
-    @Positive(message = "Id must be positive")
-    private int parentProjectId;
-
     @NotNull(message = "Visibility must not be empty")
     private ProjectVisibility visibility;
 

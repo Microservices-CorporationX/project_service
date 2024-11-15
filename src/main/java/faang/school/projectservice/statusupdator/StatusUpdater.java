@@ -5,7 +5,7 @@ import faang.school.projectservice.model.Project;
 
 public interface StatusUpdater {
 
-    public boolean isApplicable(UpdateSubProjectDto updateSubProjectDto);
+    boolean isApplicable(UpdateSubProjectDto updateSubProjectDto);
 
-    public void changeStatus(Project project);
+    void changeStatus(Project project);
 }

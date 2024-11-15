@@ -32,6 +32,7 @@ public class ProjectDto {
     @Positive(message = "OwnerId must be greater than 0.")
     private Long ownerId;
 
+    @NotNull(message = "Visibility is required.")
     private ProjectVisibility visibility;
     private ProjectStatus status;
 }

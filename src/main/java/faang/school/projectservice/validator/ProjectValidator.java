@@ -86,7 +86,7 @@ public class ProjectValidator {
     }
 
     public void validateProjectStatusCompletedOrCancelled(Project project) {
-        if(project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
+        if (project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
             throw new NoStatusChangeException("Status can't change since project is completed or cancelled");
         }
     }
