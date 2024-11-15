@@ -25,5 +25,6 @@ public class ProjectDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProjectStatus status;
+    @NotNull(message = "Project visibility must not be null")
     private ProjectVisibility visibility;
 }

@@ -2,19 +2,15 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.ObjectError;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -33,11 +29,11 @@ public class ProjectController {
     }
 
     @PatchMapping("/update-description/{id}")
-    public ResponseEntity<ProjectDto> updateDescription(@PathVariable @NonNull Long id, @RequestBody @NonNull String description) {
+    public ResponseEntity<ProjectDto> updateDescription(@PathVariable long id, @RequestBody @NonNull String description) {
         return ResponseEntity.ok(projectService.updateDescription(description, id));
     }
 
-    @GetMapping("/filtered")
+    @PostMapping("/filtered")
     public List<ProjectDto> findWithFilters(@RequestBody @NonNull ProjectFilterDto filters) {
         return projectService.findWithFilters(filters);
     }
@@ -50,15 +46,5 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull Long id) {
         return projectService.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    private void validateRecommendation(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult()
-                .getAllErrors()
-                .stream()
-                .map(ObjectError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
-        throw new DataValidationException(errorMessage);
     }
 }
