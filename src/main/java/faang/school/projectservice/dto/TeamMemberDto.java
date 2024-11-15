@@ -1,6 +1,5 @@
-package faang.school.projectservice.dto.stage;
+package faang.school.projectservice.dto;
 
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,10 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class StageFilterDto {
+public class TeamMemberDto {
+    private Long userId;
     private TeamRole teamRole;
-    private TaskStatus taskStatus;
 }

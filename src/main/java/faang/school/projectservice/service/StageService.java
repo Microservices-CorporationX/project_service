@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -7,6 +8,7 @@ import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,24 +41,21 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stage));
     }
 
-    public void updateStage(long stageId, String role) {
-
-
+    public void updateStage(long stageId, TeamMemberDto teamMemberDto) {
     }
 
-    public List<StageDto> getAllStagesBy(long projectId, StageFilterDto filters) {
+    public List<StageDto> getStagesByProjectIdFiltered(long projectId, StageFilterDto filters) {
         Stream<Stage> stage = stageRepository.findAllByProjectId(projectId).stream();
         return stageFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
-                .reduce(stage,
-                        (currentStream, filter) ->
+                .reduce(stage, (currentStream, filter) ->
                                 filter.apply(currentStream, filters),
                         (s1, s2) -> s1)
                 .map(stageMapper::toDto)
                 .toList();
     }
 
-    public List<StageDto> getAllStagesBy(long projectId) {
+    public List<StageDto> getStagesByProjectId(long projectId) {
         return stageRepository.findAllByProjectId(projectId).stream()
                 .map(stageMapper::toDto)
                 .toList();
@@ -84,6 +83,20 @@ public class StageService {
 
     public Stage getById(Long stageId) {
         return stageRepository.getById(stageId);
+    }
+
+    private boolean isParticipantWithRoleExist(Stage stage, String role) {
+        return stage.getExecutors().stream()
+                .flatMap(teamMember -> teamMember.getRoles().stream())
+                .anyMatch(teamRole -> teamRole.toString().equalsIgnoreCase(role));
+    }
+
+    private int countOfStageUsersWithRole(Stage stage, String role) {
+        return stage.getStageRoles().stream()
+                .filter(stageRoles -> stageRoles.getTeamRole().toString().equalsIgnoreCase(role))
+                .mapToInt(StageRoles::getCount)
+                .findFirst()
+                .orElse(0);
     }
 }
 

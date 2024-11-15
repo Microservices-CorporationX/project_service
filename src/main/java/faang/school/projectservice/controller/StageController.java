@@ -1,11 +1,11 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +20,12 @@ public class StageController {
     @GetMapping("{projectId}/filter")
     public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId,
                                          @RequestBody StageFilterDto stageFilterDto) {
-        return stageService.getAllStagesBy(projectId, stageFilterDto);
+        return stageService.getStagesByProjectIdFiltered(projectId, stageFilterDto);
     }
 
     @GetMapping("{projectId}")
     public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId) {
-        return stageService.getAllStagesBy(projectId);
+        return stageService.getStagesByProjectId(projectId);
     }
 
     @GetMapping("{stageId}")
@@ -38,12 +38,11 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @PatchMapping("{stageId}/role")
+    @PatchMapping("{stageId}/executor")
     public void updateStage(@PathVariable @Positive long stageId,
-                            @NonNull @RequestParam String role) {
-        stageService.updateStage(stageId, role);
+                            @RequestBody TeamMemberDto teamMemberDto) {
+        stageService.updateStage(stageId, teamMemberDto);
     }
-
 
     @DeleteMapping("{stageId}")
     public void deleteStage(@PathVariable @Positive long stageId) {

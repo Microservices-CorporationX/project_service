@@ -1,6 +1,9 @@
 package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.stage.StageTaskStatusFilter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.model.stage.Stage;
@@ -20,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -41,6 +45,9 @@ class StageServiceTest {
     @Spy
     private StageMapper stageMapper;
 
+    @Mock
+    private List<Filter> stageFilters;
+
     private Stage stage;
     private Stage newStage;
     private TeamMember teamMember;
@@ -48,6 +55,7 @@ class StageServiceTest {
     private StageDto stageDto;
     private StageRoles stageRoles;
     private Task task;
+    private StageFilterDto filters;
     private final long stageId = 1L;
     private final long userId = 1L;
     private final long projectId = 1L;
@@ -121,6 +129,8 @@ class StageServiceTest {
                 .projectId(1L)
                 .stageRoles(new ArrayList<>())
                 .build();
+
+        filters = new StageFilterDto();
     }
 
     @Test
@@ -183,13 +193,37 @@ class StageServiceTest {
     }
 
     @Test
+    public void testGetStagesByProjectIdFiltered_Success() {
+        when(stageRepository.findAllByProjectId(projectId)).thenReturn(setUpStageList());
+        Filter filter = mock(StageTaskStatusFilter.class);
+        when(filter.isApplicable(filters)).thenReturn(true);
+        when(filter.apply(any(Stream.class), eq(filters))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stageFilters.stream()).thenReturn(Stream.of(filter));
+        when(stageMapper.toDto(stage)).thenReturn(stageDto);
+        when(stageMapper.toDto(newStage)).thenReturn(new StageDto());
+
+        List<StageDto> result = stageService.getStagesByProjectIdFiltered(projectId, filters);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetStagesByProjectIdFiltered_EmptyProject() {
+        when(stageRepository.findAllByProjectId(projectId)).thenReturn(List.of());
+
+        List<StageDto> result = stageService.getStagesByProjectIdFiltered(projectId, filters);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void testGetAllStagesByProjectId_ShouldReturnExpectedStages_WhenProjectExists() {
         List<Stage> expectedStages = List.of(stage);
 
         when(stageRepository.findAllByProjectId(stage.getProject().getId())).thenReturn(expectedStages);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
-        List<StageDto> actualStageDtos = stageService.getAllStagesBy(stage.getProject().getId());
+        List<StageDto> actualStageDtos = stageService.getStagesByProjectId(stage.getProject().getId());
 
         assertEquals(expectedStages.size(), actualStageDtos.size());
         assertEquals(stageDto, actualStageDtos.get(0));
@@ -247,7 +281,7 @@ class StageServiceTest {
                 String.format("Project not found by id: %s", invalidProjectId)));
 
         Exception exception = assertThrows(EntityNotFoundException.class, () ->
-                stageService.getAllStagesBy(invalidProjectId));
+                stageService.getStagesByProjectId(invalidProjectId));
 
         assertEquals(String.format("Project not found by id: %s", invalidProjectId), exception.getMessage());
         verify(stageRepository, times(1)).findAllByProjectId(invalidProjectId);
@@ -271,6 +305,10 @@ class StageServiceTest {
         assertThrows(EntityNotFoundException.class, () ->
                         stageService.getStage(stageId),
                 String.format("Stage not found by id: %s", stage));
+    }
+
+    private List<Stage> setUpStageList() {
+        return List.of(stage, newStage);
     }
 
 }
