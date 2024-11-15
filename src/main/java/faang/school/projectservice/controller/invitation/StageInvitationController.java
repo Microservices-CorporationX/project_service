@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.invitation;
 
+import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.invitation.StageInvitationService;
@@ -35,9 +36,9 @@ public class StageInvitationController {
 
     @PatchMapping("/{invitationId}/reject")
     public StageInvitationDTO rejectInvitation(@PathVariable Long invitationId,
-                                               @RequestBody StageInvitationDTO stageInvitationDTO) {
-        log.info("Получен запрос на отклонение приглашения с ID: {} по причине: {}", invitationId, stageInvitationDTO.getRejectionReason());
-        return stageInvitationService.rejectInvitation(invitationId, stageInvitationDTO);
+                                               @Valid @RequestBody RejectionReasonDTO rejectionReasonDTO) {
+        log.info("Получен запрос на отклонение приглашения с ID: {} по причине: {}", invitationId, rejectionReasonDTO.getReason());
+        return stageInvitationService.rejectInvitation(invitationId, rejectionReasonDTO.getReason());
     }
 
     @GetMapping("/users/{userId}/all-invitations")

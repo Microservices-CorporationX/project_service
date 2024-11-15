@@ -13,6 +13,7 @@ import faang.school.projectservice.exceptions.invitation.InvalidInvitationDataEx
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalDate;
@@ -37,7 +38,18 @@ public class StageInvitationService {
         log.info("Получен запрос на отправку приглашения: {}", invitationDto);
 
         Stage stage = stageRepository.getById(invitationDto.getStageId());
+
         TeamMember invited = teamMemberRepository.findById(invitationDto.getInviteeId());
+        if (invited == null) {
+            log.warn("Приглашаемый участник не найден: {}", invitationDto.getInviteeId());
+            throw new EntityNotFoundException("Приглашаемый участник не найден");
+        }
+
+        TeamMember author = teamMemberRepository.findById(invitationDto.getAuthorId());
+        if (author == null) {
+            log.warn("Автор не найден: {}", invitationDto.getAuthorId());
+            throw new EntityNotFoundException("Автор не найден");
+        }
 
         if (!stage.getProject().equals(invited.getTeam().getProject())) {
             log.warn("Приглашение не может быть отправлено: участник не принадлежит проекту этапа");
@@ -48,6 +60,8 @@ public class StageInvitationService {
         invitation.setStatus(StageInvitationStatus.PENDING);
         invitation.setStage(stage);
         invitation.setInvited(invited);
+        invitation.setAuthor(author);
+
 
         StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отправлено: {}", savedInvitation);
@@ -74,8 +88,8 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(updatedInvitation);
     }
 
-    public StageInvitationDTO rejectInvitation(Long invitationId, StageInvitationDTO stageInvitationDto) {
-        log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, stageInvitationDto.getRejectionReason());
+    public StageInvitationDTO rejectInvitation(Long invitationId, String rejectionReason) {
+        log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, rejectionReason);
 
         Optional<StageInvitation> invitationOpt = Optional.ofNullable(stageInvitationRepository.findById(invitationId));
         if (!invitationOpt.isPresent()) {
@@ -85,7 +99,7 @@ public class StageInvitationService {
 
         StageInvitation invitation = invitationOpt.get();
         invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitation.setRejectionReason(stageInvitationDto.getRejectionReason());
+        invitation.setRejectionReason(rejectionReason);
 
         StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отклонено: {}", updatedInvitation);

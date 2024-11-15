@@ -1,6 +1,7 @@
 package faang.school.projectservice.invitation;
 
 import faang.school.projectservice.controller.invitation.StageInvitationController;
+import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.invitation.StageInvitationService;
@@ -31,11 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {StageInvitationController.class, StageInvitationService.class})
 public class StageInvitationControllerTest {
 
+    private static final String URL_SEND_INVITATION = "/stage-invitations";
+    private static final String URL_ACCEPT_INVITATION = "/stage-invitations/{invitationId}/accept";
+    private static final String URL_REJECT_INVITATION = "/stage-invitations/{invitationId}/reject";
+    private static final String URL_GET_ALL_INVITATIONS = "/stage-invitations/users/{userId}/all-invitations";
 
-    private final static String POST_URL = "/stage-invitations";
-    private final static String POST_URL_ACCEPT = "/stage-invitations/{invitationId}/accept";
-    private final static String POST_URL_REJECT = "/stage-invitations/{invitationId}/reject";
-    private final static String POST_URL_ALL = "/stage-invitations/users/{userId}/all-invitations";
 
 
 
@@ -70,7 +71,7 @@ public class StageInvitationControllerTest {
 
         when(stageInvitationService.sendInvitation(invitationDTO)).thenReturn(expectedDTO);
 
-        mockMvc.perform(post(POST_URL)
+        mockMvc.perform(post(URL_SEND_INVITATION)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(invitationDTO)))
             .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
@@ -107,7 +108,7 @@ public class StageInvitationControllerTest {
     @MethodSource("invalidSendInvitationDTO")
     @DisplayName("Тест с некорректными данными: обязательные поля отсутствуют")
     void negativeSendInvitationNoRequestArgument(StageInvitationDTO invitationDTO) throws Exception {
-        mockMvc.perform(post(POST_URL)
+        mockMvc.perform(post(URL_SEND_INVITATION)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(invitationDTO)))
             .andExpect(status().isBadRequest());
@@ -129,19 +130,23 @@ public class StageInvitationControllerTest {
 
         when(stageInvitationService.acceptInvitation(invitationId)).thenReturn(expectedDTO);
 
-        mockMvc.perform(patch(POST_URL_ACCEPT, invitationId)
+        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
             .andExpect(status().isOk());
     }
 
+
+    //не могу понять что не так
+
+
     @Test
     @DisplayName("Тест успешного отклонения приглашения")
     void positiveTestRejectInvitation() throws Exception {
-        Long invitationId = 1L;
 
-        StageInvitationDTO rejectionDTO = StageInvitationDTO.builder()
-            .rejectionReason("Some rejection reason")
+        Long invitationId = 1L;
+        RejectionReasonDTO rejectionReasonDTO = RejectionReasonDTO.builder()
+            .reason("Not interested")
             .build();
 
         StageInvitationDTO expectedDTO = StageInvitationDTO.builder()
@@ -150,17 +155,19 @@ public class StageInvitationControllerTest {
             .authorId(3L)
             .inviteeId(4L)
             .status(StageInvitationStatus.REJECTED)
-            .rejectionReason("Some rejection reason")
+            .rejectionReason("Not interested")
             .build();
 
-        when(stageInvitationService.rejectInvitation(invitationId, rejectionDTO)).thenReturn(expectedDTO);
+        when(stageInvitationService.rejectInvitation(invitationId, rejectionReasonDTO.getReason()))
+            .thenReturn(expectedDTO);
 
-        mockMvc.perform(patch(POST_URL_REJECT, invitationId)
+        mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(rejectionDTO)))
+                .content(OBJECT_MAPPER.writeValueAsString(rejectionReasonDTO)))
             .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
             .andExpect(status().isOk());
     }
+
 
     @Test
     @DisplayName("Тест успешного получения всех приглашений для пользователя")
@@ -188,9 +195,74 @@ public class StageInvitationControllerTest {
 
         when(stageInvitationService.getAllInvitationsForUser(userId, null, null)).thenReturn(expectedInvitations);
 
-        mockMvc.perform(get(POST_URL_ALL, userId)
+        mockMvc.perform(get(URL_GET_ALL_INVITATIONS, userId)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedInvitations)))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Тест ошибки при принятии приглашения")
+    void negativeTestAcceptInvitation() throws Exception {
+        Long invitationId = 1L;
+
+        when(stageInvitationService.acceptInvitation(invitationId))
+            .thenThrow(new Exception("Invitation not found"));
+
+        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Invitation not found"));
+    }
+
+    @Test
+    @DisplayName("Тест получения приглашений с фильтрацией по статусу")
+    void testGetAllInvitationsWithStatusFilter() throws Exception {
+        Long userId = 1L;
+        String status = "PENDING";
+
+        List<StageInvitationDTO> filteredInvitations = List.of(
+            StageInvitationDTO.builder()
+                .id(1L)
+                .stageId(2L)
+                .authorId(3L)
+                .inviteeId(4L)
+                .status(StageInvitationStatus.PENDING)
+                .rejectionReason(null)
+                .build()
+        );
+
+        when(stageInvitationService.getAllInvitationsForUser(userId,
+            StageInvitationStatus.valueOf(status),
+            null)).thenReturn(filteredInvitations);
+
+        mockMvc.perform(get(URL_GET_ALL_INVITATIONS, userId)
+                .queryParam("status", status)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(filteredInvitations)));
+    }
+
+    @Test
+    @DisplayName("Тест ошибки при отсутствии причины отклонения")
+    void negativeTestRejectInvitationWithEmptyReason() throws Exception {
+        Long invitationId = 1L;
+        RejectionReasonDTO invalidDTO = RejectionReasonDTO.builder().reason("").build();
+
+        mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(invalidDTO)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Тест ошибки при некорректном JSON для отправки приглашения")
+    void negativeTestSendInvitationWithInvalidJson() throws Exception {
+        String invalidJson = "{invalid}";
+
+        mockMvc.perform(post(URL_SEND_INVITATION)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+            .andExpect(status().isBadRequest());
     }
 }
