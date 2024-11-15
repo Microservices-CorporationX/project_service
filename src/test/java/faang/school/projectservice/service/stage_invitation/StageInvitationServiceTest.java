@@ -2,6 +2,7 @@ package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationRejectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationDescriptionFilter;
@@ -78,7 +79,7 @@ class StageInvitationServiceTest {
     }
 
     @Test
-    public void sendStageInvitation() {
+    public void sendStageInvitationTest() {
         StageInvitationDto dto = StageInvitationDto.builder()
                 .id(505L)
                 .description("description")
@@ -104,7 +105,7 @@ class StageInvitationServiceTest {
         when(stageService.getStageEntity(dto.getStageId())).
                 thenReturn(stage);
 
-        service.sendStageInvitation(dto.getAuthorId(), dto);
+        service.sendStageInvitation(dto);
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
@@ -123,10 +124,15 @@ class StageInvitationServiceTest {
         long stageInvitationId = 1L;
         long invitedId = 1L;
 
+        StageInvitationDto dto = StageInvitationDto.builder()
+                .id(stageInvitationId)
+                .invitedId(invitedId)
+                .build();
+
         when(repository.findById(stageInvitationId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> service.acceptStageInvitation(invitedId, stageInvitationId));
+                () -> service.acceptStageInvitation(dto));
     }
 
     @Test
@@ -140,6 +146,11 @@ class StageInvitationServiceTest {
         StageInvitation invitation = new StageInvitation();
         invitation.setStage(stage);
 
+        StageInvitationDto dto = StageInvitationDto.builder()
+                .id(stageInvId)
+                .invitedId(invitedId)
+                .build();
+
         when(repository.findById(stageInvId)).
                 thenReturn(Optional.of(invitation));
         doNothing().when(stageInvValidator).
@@ -148,7 +159,7 @@ class StageInvitationServiceTest {
         doNothing().when(teamMemberValidator)
                 .validateIsTeamMemberParticipantOfProject(teamMember, invitation);
 
-        service.acceptStageInvitation(invitedId, stageInvId);
+        service.acceptStageInvitation(dto);
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
@@ -171,10 +182,16 @@ class StageInvitationServiceTest {
         long invitedId = 1L;
         String reason = null;
 
+        StageInvitationRejectDto dto = StageInvitationRejectDto.builder()
+                .stageInvitationId(stageInvId)
+                .invitedId(invitedId)
+                .rejectReason(reason)
+                .build();
+
         when(repository.findById(stageInvId)).thenReturn(Optional.of(new StageInvitation()));
 
         assertThrows(DataValidationException.class,
-                () -> service.rejectStageInvitation(invitedId, stageInvId, reason));
+                () -> service.rejectStageInvitation(dto));
         verify(repository).findById(stageInvId);
     }
 
@@ -184,10 +201,16 @@ class StageInvitationServiceTest {
         long invitedId = 1L;
         String reason = "";
 
+        StageInvitationRejectDto dto = StageInvitationRejectDto.builder()
+                .stageInvitationId(stageInvId)
+                .invitedId(invitedId)
+                .rejectReason(reason)
+                .build();
+
         when(repository.findById(stageInvId)).thenReturn(Optional.of(new StageInvitation()));
 
         assertThrows(DataValidationException.class,
-                () -> service.rejectStageInvitation(invitedId, stageInvId, reason));
+                () -> service.rejectStageInvitation(dto));
         verify(repository).findById(stageInvId);
     }
 
@@ -199,6 +222,12 @@ class StageInvitationServiceTest {
         StageInvitation invitation = new StageInvitation();
         invitation.setId(stageInvId);
 
+        StageInvitationRejectDto dto = StageInvitationRejectDto.builder()
+                .stageInvitationId(stageInvId)
+                .invitedId(invitedId)
+                .rejectReason(reason)
+                .build();
+
         when(repository.findById(stageInvId)).
                 thenReturn(Optional.of(invitation));
         doNothing().when(stageInvValidator).
@@ -206,7 +235,7 @@ class StageInvitationServiceTest {
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
-        service.rejectStageInvitation(invitedId, stageInvId, reason);
+        service.rejectStageInvitation(dto);
 
         verify(repository).findById(stageInvId);
         verify(stageInvValidator).validateIsInvitationSentToThisTeamMember(invitedId, invitation);

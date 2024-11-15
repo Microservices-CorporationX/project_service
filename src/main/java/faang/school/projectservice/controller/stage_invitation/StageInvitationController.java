@@ -2,14 +2,14 @@ package faang.school.projectservice.controller.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationRejectDto;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,20 +20,19 @@ public class StageInvitationController {
 
     private final StageInvitationService stageInvitationService;
 
-    @PostMapping("/send/{invitorId}")
-    public void sendStageInvitation(@PathVariable long invitorId, @RequestBody @Valid StageInvitationDto dto) {
-        stageInvitationService.sendStageInvitation(invitorId, dto);
+    @PostMapping("/send")
+    public void sendStageInvitation(@RequestBody @Valid StageInvitationDto dto) {
+        stageInvitationService.sendStageInvitation(dto);
     }
 
-    @PutMapping("/accept/{teamMemberId}")
-    public void acceptStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId) {
-        stageInvitationService.acceptStageInvitation(teamMemberId, stageInvitationId);
+    @PatchMapping("/accept")
+    public void acceptStageInvitation(@RequestBody @Valid StageInvitationDto dto) {
+        stageInvitationService.acceptStageInvitation(dto);
     }
 
-    @PutMapping("/reject/{teamMemberId}")
-    public void rejectStageInvitation(@PathVariable long teamMemberId, @RequestParam long stageInvitationId,
-                                      @RequestBody String rejectReason) {
-        stageInvitationService.rejectStageInvitation(teamMemberId, stageInvitationId, rejectReason);
+    @PatchMapping("/reject")
+    public void rejectStageInvitation(@RequestBody @Valid StageInvitationRejectDto rejectDto) {
+        stageInvitationService.rejectStageInvitation(rejectDto);
     }
 
     @PostMapping("/{teamMemberId}")
