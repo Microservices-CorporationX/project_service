@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.candidate;
 
 import faang.school.projectservice.model.Candidate;
+import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.CandidateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,9 @@ class CandidateServiceImplTest {
 
     @Test
     void getCandidates() {
-        assertEquals(getCandidateList(), candidateRepository.findAllByVacancyId(Mockito.anyLong()));
+        List<Candidate> candidates = candidateRepository.findAllByVacancyId(1L);
+        assertEquals(getCandidateList(), candidates);
+        Mockito.verify(candidateRepository).findAllByVacancyId(1L);
     }
 
     private List<Candidate> getCandidateList() {

@@ -80,7 +80,9 @@ public class VacancyServiceImpl implements VacancyService {
                 .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.ACCEPTED))
                 .forEach(candidate -> {
                     TeamMember teamMember = teamService.findMemberByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Member not found by project id %s and user id %s".formatted(vacancy.getProject().getId(), candidate.getUserId())));
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Member not found by project id %s and user id %s".formatted(vacancy.getProject().getId(), candidate.getUserId()))
+                            );
                     teamMember.getRoles().add(TeamRole.DEVELOPER);
                 });
 
@@ -90,7 +92,12 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public void deleteVacancy(Long vacancyId) {
         List<Candidate> candidates = candidateService.findAllByVacancyId(vacancyId).stream()
-                .filter(candidate -> candidate.getCandidateStatus().equals(CandidateStatus.WAITING_RESPONSE) || candidate.getCandidateStatus().equals(CandidateStatus.REJECTED))
+                .filter(candidate -> candidate
+                        .getCandidateStatus()
+                        .equals(CandidateStatus.WAITING_RESPONSE) ||
+                        candidate
+                                .getCandidateStatus()
+                                .equals(CandidateStatus.REJECTED))
                 .toList();
 
         candidates.forEach(candidate -> candidateService.deleteById(candidate.getId()));
