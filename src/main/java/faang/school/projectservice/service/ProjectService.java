@@ -92,7 +92,7 @@ public class ProjectService {
         return result;
     }
 
-    public ProjectDto getAccessibleProjectsById(Long currentUserId, Long projectId) {
+    public ProjectDto getAccessibleProjectById(Long currentUserId, Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
         if (!projectValidator.canUserAccessProject(project, currentUserId)) {
