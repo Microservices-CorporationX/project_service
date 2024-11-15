@@ -25,7 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
 
-    @Transactional
+
     public ProjectDto createProject(ProjectDto projectDto) {
         log.info("Creating project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
         validateProjectNameUniqueness(projectDto.getOwnerId(), projectDto.getName());
@@ -44,7 +44,7 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    @Transactional
+
     public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
         log.info("Updating project with ID: {}", projectId);
         Project project = projectRepository.getProjectById(projectId);
