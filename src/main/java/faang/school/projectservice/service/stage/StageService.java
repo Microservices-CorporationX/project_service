@@ -9,6 +9,7 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.service.task.TaskService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class StageService {
     private final StageMapper stageMapper;
     private final List<StageFilter> stageFilterList;
     private final TaskService taskService;
+    private final StageInvitationService stageInvitationService;
 
     public StageDto createStage(StageDto stageDto) {
         Stage stage = stageMapper.toStage(stageDto);
@@ -69,11 +71,12 @@ public class StageService {
                                 .flatMap(team -> team.getTeamMembers().stream())
                                 .filter(teamMember -> teamMember.getRoles().contains(role.getTeamRole()))
                                 .limit(absenceByRole)
-                                .forEach(teamMember -> {});
+                                .forEach(teamMember -> {
+                                    stageInvitationService.sendInvitation(StageInvitation.builder().stage(stage).build());
+                                });
                     }
                 });
-
-        return null;
+        return stageMapper.toStageDto(stageJpaRepository.save(stage));
     }
 
     private Long getAbsenceTeamMembersByRole(Stage stage, StageRoles stageRoles) {
