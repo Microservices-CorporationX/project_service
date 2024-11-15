@@ -1,23 +1,12 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.internship.InternshipCreationDto;
-import faang.school.projectservice.dto.internship.InternshipDto;
-import faang.school.projectservice.dto.internship.InternshipFilterDto;
-import faang.school.projectservice.dto.internship.InternshipUpdateDto;
-import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
+import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.dto.user.UserIdsDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ServiceCallException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.InternshipMapper;
-import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.team.TeamService;
@@ -94,11 +83,11 @@ public class InternshipService {
     }
 
     @Transactional
-    public InternshipUpdateRequestDto updateInternship(InternshipUpdateDto updateDto) {
-        log.info("Received a request to update internship status, internship ID {}", updateDto.getInternshipId());
+    public InternshipUpdateRequestDto updateInternship(long internshipId, InternshipUpdateDto updateDto) {
+        log.info("Received a request to update internship status, internship ID {}", internshipId);
 
-        Internship internship = internshipRepository.findById(updateDto.getInternshipId())
-                .orElseThrow(() -> new EntityNotFoundException(INTERNSHIP, updateDto.getInternshipId()));
+        Internship internship = internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new EntityNotFoundException(INTERNSHIP, internshipId));
         internshipValidator.validateInternshipStarted(internship);
         internshipValidator.validateInternshipIncomplete(internship);
 
@@ -117,7 +106,7 @@ public class InternshipService {
 
         internshipRepository.save(internship);
 
-        log.info("The status of an internship with ID {} and the project team were updated.", updateDto.getInternshipId());
+        log.info("The status of an internship with ID {} and the project team were updated.", internshipId);
         return InternshipUpdateRequestDto.builder()
                 .id(internship.getId())
                 .completedInternUserIds(getTeamMembersIds(completedInterns))

@@ -180,10 +180,9 @@ class InternshipServiceTest {
     void updateNotExistingInternshipTest() {
         long internshipId = 1L;
         InternshipUpdateDto updateDto = new InternshipUpdateDto();
-        updateDto.setInternshipId(internshipId);
         when(internshipRepository.findById(internshipId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> internshipService.updateInternship(updateDto));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> internshipService.updateInternship(internshipId, updateDto));
         assertEquals("Entity %s with ID %s not found".formatted(INTERNSHIP, internshipId), exception.getMessage());
     }
 
@@ -409,13 +408,12 @@ class InternshipServiceTest {
         internship.setEndDate(isAfterEndDate ? LocalDateTime.now().minusDays(1) : LocalDateTime.now().plusDays(4));
 
         InternshipUpdateDto updateDto = InternshipUpdateDto.builder()
-                .internshipId(internshipId)
                 .internNewTeamRole(internNewRole)
                 .build();
 
         when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
 
-        InternshipUpdateRequestDto requestDto = assertDoesNotThrow(() -> internshipService.updateInternship(updateDto));
+        InternshipUpdateRequestDto requestDto = assertDoesNotThrow(() -> internshipService.updateInternship(internshipId, updateDto));
 
         assertEquals(internshipId, requestDto.getId());
         assertEquals(expectedCompletedInternUserIds, requestDto.getCompletedInternUserIds());

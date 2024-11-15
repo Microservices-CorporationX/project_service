@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
 import faang.school.projectservice.service.internship.InternshipService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,22 +25,25 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @Tag(name = "Internships.", description = "API for managing internships.")
-@RequestMapping("/internship")
+@RequestMapping("/internships")
 @RestController
 @RequiredArgsConstructor
 public class InternshipController {
 
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<InternshipDto> createInternship(@RequestBody @Valid InternshipCreationDto internshipCreationDto) {
         InternshipDto internshipDto = internshipService.createInternship(internshipCreationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(internshipDto);
     }
 
-    @PatchMapping("/update")
-    public ResponseEntity<InternshipUpdateRequestDto> updateInternship(@RequestBody @Valid InternshipUpdateDto updateDto) {
-        InternshipUpdateRequestDto internshipDto = internshipService.updateInternship(updateDto);
+    @PatchMapping("/{internshipId}")
+    public ResponseEntity<InternshipUpdateRequestDto> updateInternship(
+            @PathVariable @Min(1) long internshipId,
+            @RequestBody @Valid InternshipUpdateDto updateDto
+    ) {
+        InternshipUpdateRequestDto internshipDto = internshipService.updateInternship(internshipId, updateDto);
         return ResponseEntity.ok(internshipDto);
     }
 

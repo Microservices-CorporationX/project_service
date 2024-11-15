@@ -8,17 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class InternshipUpdateDto {
-
-    @NotNull
-    private Long internshipId;
 
     @NotNull
     private TeamRole internNewTeamRole;
