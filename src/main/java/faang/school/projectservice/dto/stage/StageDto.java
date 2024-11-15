@@ -12,5 +12,4 @@ public class StageDto {
     private String stageName;
     private Long projectId;
     private List<StageRolesDto> stageRolesDto;
-//    private List<Long> tasksIds;
 }

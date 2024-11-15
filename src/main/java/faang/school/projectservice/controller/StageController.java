@@ -3,12 +3,9 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageService;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -27,11 +24,11 @@ public class StageController {
         return stageService.create(stage);
     }
 
-    public StageDto getByRole(StageDto stage, @NonNull TeamRole role) {
+    public List<StageDto> getByRole(StageDto stage, TeamRole role) {
         return stageService.getByRole(stage, role);
     }
 
-    public StageDto getByStatus(StageDto stage, TaskStatus status) {
+    public List<StageDto> getByStatus(StageDto stage, TaskStatus status) {
         return stageService.getByStatus(stage, status);
     }
 
@@ -39,8 +36,8 @@ public class StageController {
         return stageService.deleteCascade(stage);
     }
 
-    public StageDto postponeLinked(StageDto stage, Long anotherStageId){
-        return stageService.postponeLinked(stage, anotherStageId);
+    public StageDto postponeTasks(StageDto stage, Long nextStageId){
+        return stageService.postponeTasks(stage, nextStageId);
     }
 
     public StageDto update(StageDto stage){

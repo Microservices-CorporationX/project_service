@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class StageRolesDto {
-
     private TeamRole teamRole;
     private Integer count;
 }

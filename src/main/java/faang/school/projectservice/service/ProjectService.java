@@ -10,7 +10,16 @@ import org.springframework.stereotype.Service;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    public boolean existsById (Long projectId){
+    public boolean existsById (Long projectId) {
         return projectRepository.existsById(projectId);
     }
+
+    public Project getById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public void save(Project project) {
+        projectRepository.save(project);
+    }
+
 }
