@@ -26,7 +26,7 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{parentId}/subprojects")
-    public ResponseEntity<ProjectResponseDto>  createSubProject(
+    public ResponseEntity<ProjectResponseDto> createSubProject(
             @PathVariable
             @NotNull(message = "Parent project Id must not be empty")
             @Positive(message = "Parent project Id must be positive integer")

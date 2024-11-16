@@ -1,7 +1,11 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -14,6 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -118,7 +125,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusInProgress() {
+    void testIsOpenProjectWhenStatusInProgress() {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
@@ -126,7 +133,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusCompleted() {
+    void testIsOpenProjectWhenStatusCompleted() {
         project.setStatus(ProjectStatus.COMPLETED);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
@@ -134,10 +141,187 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusCancelled() {
+    void testIsOpenProjectWhenStatusCancelled() {
         project.setStatus(ProjectStatus.CANCELLED);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         assertFalse(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    @DisplayName("Validate project public throws exception if private")
+    void testValidateProjectPublicThrowsExceptionIfPrivate() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PRIVATE);
+
+        ProjectVisibilityException exception = assertThrows(ProjectVisibilityException.class,
+                () -> projectValidator.validateProjectPublic(project));
+
+        assertEquals("Only public projects are allowed for this operation", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate project public doesn't throw exception if public")
+    void testValidateProjectPublicDoesNotThrowExceptionIfPublic() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PUBLIC);
+
+        assertDoesNotThrow(() -> projectValidator.validateProjectPublic(project));
+    }
+
+    @Test
+    @DisplayName("Is public project returns true for public project")
+    void testIsPublicProjectReturnsTrueForPublicProject() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PUBLIC);
+
+        assertTrue(projectValidator.isPublicProject(project));
+    }
+
+    @Test
+    @DisplayName("Is public project returns false for private project")
+    void testIsPublicProjectReturnsFalseForPrivateProject() {
+        Project project = new Project();
+        project.setVisibility(ProjectVisibility.PRIVATE);
+
+        assertFalse(projectValidator.isPublicProject(project));
+    }
+
+    @Test
+    @DisplayName("Has parent project returns true if parent exists")
+    void testHasParentProjectReturnsTrueIfParentExists() {
+        Project project = new Project();
+        project.setParentProject(new Project());
+
+        assertTrue(projectValidator.hasParentProject(project));
+    }
+
+    @Test
+    @DisplayName("Has parent project returns false if parent does not exist")
+    void testHasParentProjectReturnsFalseIfParentDoesNotExist() {
+        Project project = new Project();
+
+        assertFalse(projectValidator.hasParentProject(project));
+    }
+
+    @Test
+    @DisplayName("Has children projects returns true if children exist")
+    void testHasChildrenProjectsReturnsTrueIfChildrenExist() {
+        Project project = new Project();
+        project.setChildren(new ArrayList<>(List.of(new Project())));
+
+        assertTrue(projectValidator.hasChildrenProjects(project));
+    }
+
+    @Test
+    @DisplayName("Has children projects returns false if children do not exist")
+    void testHasChildrenProjectsReturnsFalseIfChildrenDoNotExist() {
+        Project project = new Project();
+        project.setChildren(new ArrayList<>());
+
+        assertFalse(projectValidator.hasChildrenProjects(project));
+    }
+
+    @Test
+    @DisplayName("Validate same project status throws exception if same")
+    void testValidateSameProjectStatusThrowsExceptionIfSame() {
+        Project project = new Project();
+        project.setStatus(ProjectStatus.CREATED);
+        UpdateSubProjectDto dto = new UpdateSubProjectDto();
+        dto.setStatus(ProjectStatus.CREATED);
+
+        NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
+                () -> projectValidator.validateSameProjectStatus(project, dto));
+
+        assertEquals("Project status can't be the same", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate project status completed or cancelled throws exception if status completed")
+    void testValidateProjectStatusCompletedOrCancelledThrowsExceptionIfStatusCompleted() {
+        Project project = new Project();
+        project.setStatus(ProjectStatus.COMPLETED);
+
+        NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
+                () -> projectValidator.validateProjectStatusCompletedOrCancelled(project));
+
+        assertEquals("Status can't change since project is completed or cancelled", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate project status valid to hold throws exception if not in progress")
+    void testValidateProjectStatusValidToHoldThrowsExceptionIfNotInProgress() {
+        Project project = new Project();
+        project.setStatus(ProjectStatus.CREATED);
+
+        NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
+                () -> projectValidator.validateProjectStatusValidToHold(project));
+
+        assertEquals("To hold project it must be in progress first", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate project is valid to complete throws exception if not in progress")
+    void testValidateProjectIsValidToCompleteThrowsExceptionIfNotInProgress() {
+        Project project = Project.builder()
+                .status(ProjectStatus.CREATED)
+                .build();
+        Project childProject = Project.builder()
+                .status(ProjectStatus.CREATED)
+                .build();
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+        project.setChildren(new ArrayList<>(List.of(childProject)));
+
+        NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
+                () -> projectValidator.validateProjectIsValidToComplete(project));
+
+        assertEquals("All subprojects should be completed or cancelled first", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate create subproject based on visibility throws exception if visibility different")
+    void testValidateCreateSubprojectBasedOnVisibilityThrowsExceptionIfVisibilityDifferent() {
+        Project parentProject = new Project();
+        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+
+        CreateProjectDto dto = new CreateProjectDto();
+        dto.setVisibility(ProjectVisibility.PUBLIC);
+
+        ProjectVisibilityException exception = assertThrows(ProjectVisibilityException.class,
+                () -> projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, dto));
+
+        assertEquals("The parent project and subproject must have the same visibility", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Validate has children projects closed returns true if all children closed")
+    void testValidateHasChildrenProjectsClosedReturnsTrueIfAllChildrenClosed() {
+        Project project = new Project();
+        project.setChildren(new ArrayList<>(List.of(
+                Project.builder()
+                        .status(ProjectStatus.COMPLETED)
+                        .build(),
+                Project.builder()
+                        .status(ProjectStatus.CANCELLED)
+                        .build()
+        )));
+
+        assertTrue(projectValidator.validateHasChildrenProjectsClosed(project));
+    }
+
+    @Test
+    @DisplayName("Validate has children projects closed returns false if not all children closed")
+    void testValidateHasChildrenProjectsClosedReturnsFalseIfNotAllChildrenClosed() {
+        Project project = new Project();
+        project.setChildren(new ArrayList<>(List.of(
+                Project.builder()
+                        .status(ProjectStatus.COMPLETED)
+                        .build(),
+                Project.builder()
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build()
+        )));
+
+        assertFalse(projectValidator.validateHasChildrenProjectsClosed(project));
     }
 }

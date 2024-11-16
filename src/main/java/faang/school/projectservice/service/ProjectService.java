@@ -159,7 +159,7 @@ public class ProjectService {
 
         if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
             createMomentAllSubProjectsCompleted(parentProject);
-            log.info("Moment #All subprojects completed! successfully created for project #{}", project.getId());
+            log.info("Moment #All subprojects completed! successfully created for project #{}", parentProject.getId());
         }
         project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         return projectMapper.toResponseDto(projectRepository.save(project));
