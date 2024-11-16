@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.intership;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.InternshipStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InternshipDto {
+    @NotNull
     private Long id;
     private String name;
     private String description;
