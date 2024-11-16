@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.ActionWithTask;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -43,7 +44,7 @@ public class StageService {
         log.info("Start of the stage creation process. ID: {} Name: {}", stageDto.getStageId(), stageDto.getStageName());
 
         Stage stageEntity = stageMapper.toEntity(stageDto);
-        stageRepository.save(stageEntity);
+        save(stageEntity);
 
         log.info("The stage is saved in the database. ID: {} Name: {}", stageDto.getStageId(), stageDto.getStageName());
 
@@ -58,7 +59,7 @@ public class StageService {
         log.debug("Stage filter DTO validation passed");
 
         log.debug("Retrieving all stages from repository");
-        List<Stage> allStages = stageRepository.findAll();
+        List<Stage> allStages = findAll();
         log.info("Retrieved {} stages from repository", allStages.size());
 
         Stream<Stage> stageStream = allStages.stream();
@@ -90,37 +91,39 @@ public class StageService {
     }
 
     public void deleteStage(Long stageId, ActionWithTask actionWithTask, Long transferStageId) {
-        log.info("Starting delete process for stage. ID: {}, Action: {}, Transfer Stage ID: {}", stageId, actionWithTask, transferStageId);
+        log.info("Starting stage deletion process. ID: {}, Action: {}, Transfer Stage ID: {}",
+                stageId, actionWithTask, transferStageId);
 
         stageValidator.validationNumOnNullAndLessThanZero(stageId, "Stage ID cannot be null or less than zero");
         stageValidator.validationOnNull(actionWithTask, "Action with task cannot be null");
 
-        log.debug("Fetching stage with ID: {}", stageId);
-        Stage stage = stageRepository.getById(stageId);
-        log.debug("Stage fetched successfully. Name: {}", stage.getStageName());
+        log.debug("Retrieving stage with ID: {}", stageId);
+        Stage stage = getById(stageId);
+        log.debug("Stage successfully retrieved. Name: {}", stage.getStageName());
 
         switch (actionWithTask) {
-            case CASCADE:
-                log.info("Performing CASCADE delete for stage: {}", stageId);
+            case CASCADE -> {
+                log.info("Performing cascade deletion for stage: {}", stageId);
                 performCascadeDelete(stage);
-                break;
-            case CLOSE:
-                log.info("Performing CLOSE action for stage: {}", stageId);
+            }
+            case CLOSE -> {
+                log.info("Performing close action for stage: {}", stageId);
                 performCloseAction(stage);
-                break;
-            case TRANSFER:
-                log.info("Performing TRANSFER action for stage: {} to stage: {}", stageId, transferStageId);
-                stageValidator.validationNumOnNullAndLessThanZero(transferStageId, "Transfer stage ID cannot be null or less than zero");
+            }
+            case TRANSFER -> {
+                log.info("Performing transfer action for stage {} to stage: {}", stageId, transferStageId);
+                stageValidator.validationNumOnNullAndLessThanZero(transferStageId,
+                        "Transfer stage ID cannot be null or less than zero");
                 performTransferAction(stage, transferStageId);
-                break;
-            default:
-                log.error("Unknown task action: {}", actionWithTask);
-                throw new DataValidationException("Unknown task action: " + actionWithTask);
+            }
+            default -> {
+                log.error("Unknown action with task: {}", actionWithTask);
+                throw new DataValidationException("Unknown action with task: " + actionWithTask);
+            }
         }
 
         log.info("Stage {} successfully deleted", stageId);
     }
-
 
     public StageDto updateStage(StageDto stageDto) {
         log.info("Starting update process for stage with ID: {}", stageDto.getStageId());
@@ -128,7 +131,7 @@ public class StageService {
         stageValidator.validationOnNull(stageDto, "Stage DTO cannot be null");
 
         log.debug("Fetching stage with ID: {}", stageDto.getStageId());
-        Stage stage = stageRepository.getById(stageDto.getStageId());
+        Stage stage = getById(stageDto.getStageId());
         log.debug("Stage fetched successfully. Current name: {}", stage.getStageName());
 
         log.debug("Fetching project team members");
@@ -150,7 +153,7 @@ public class StageService {
         stage.setStageName(stageDto.getStageName());
 
         log.debug("Saving updated stage");
-        Stage updatedStage = stageRepository.save(stage);
+        Stage updatedStage = save(stage);
         log.info("Stage successfully updated and saved. ID: {}, New name: {}", updatedStage.getStageId(), updatedStage.getStageName());
 
         StageDto updatedStageDto = stageMapper.toDto(updatedStage);
@@ -167,7 +170,7 @@ public class StageService {
         stageValidator.validationNumOnNullAndLessThanZero(projectId, "Project ID must be a positive number");
 
         log.debug("Retrieving all stages from repository");
-        List<Stage> stages = projectRepository.getProjectById(projectId).getStages();
+        List<Stage> stages = getProjectById(projectId).getStages();
         log.debug("Successfully fetched project");
 
         stageValidator.validationOnNullOrEmptyList(stages, "No stages found for project");
@@ -187,7 +190,7 @@ public class StageService {
         stageValidator.validationNumOnNullAndLessThanZero(stageId, "Stage ID must be a positive number");
 
         log.debug("Attempting to retrieve stage from repository");
-        Stage stage = stageRepository.getById(stageId);
+        Stage stage = getById(stageId);
 
         log.info("Stage found. ID: {}, Name: {}", stage.getStageId(), stage.getStageName());
 
@@ -218,7 +221,7 @@ public class StageService {
         log.info("All tasks cleared from stage: {}", stage.getStageId());
 
         log.debug("Deleting stage from repository: {}", stage.getStageId());
-        stageRepository.delete(stage);
+        delete(stage);
         log.info("Stage successfully deleted: {}", stage.getStageId());
 
         log.info("CASCADE delete completed for stage: {}", stage.getStageId());
@@ -242,7 +245,7 @@ public class StageService {
         log.info("All tasks updated to CANCELLED status for stage: {}", stage.getStageId());
 
         log.debug("Deleting stage from repository: {}", stage.getStageId());
-        stageRepository.delete(stage);
+        delete(stage);
         log.info("Stage successfully deleted: {}", stage.getStageId());
 
         log.info("CLOSE action completed for stage: {}", stage.getStageId());
@@ -256,7 +259,7 @@ public class StageService {
         stageValidator.validationNumOnNullAndLessThanZero(transferStageId, "Transfer stage ID must be a positive number");
 
         log.debug("Fetching transfer stage with ID: {}", transferStageId);
-        Stage transferStage = stageRepository.getById(transferStageId);
+        Stage transferStage = getById(transferStageId);
         stageValidator.validationOnNull(transferStage, "Transfer stage not found for ID: " + transferStageId);
         log.debug("Transfer stage fetched successfully. Name: {}", transferStage.getStageName());
 
@@ -278,11 +281,11 @@ public class StageService {
         });
 
         log.info("All tasks transferred. Saving updated transfer stage");
-        stageRepository.save(transferStage);
+        save(transferStage);
         log.info("Successfully saved updated transfer stage {}", transferStageId);
 
         log.debug("Preparing to delete original stage {}", stage.getStageId());
-        stageRepository.delete(stage);
+        delete(stage);
         log.info("Successfully deleted original stage {}", stage.getStageId());
 
         log.info("Completed TRANSFER action. {} tasks moved from stage {} to stage {}", taskCount, stage.getStageId(), transferStageId);
@@ -432,10 +435,76 @@ public class StageService {
                     .invited(candidate)
                     .status(StageInvitationStatus.PENDING)
                     .build();
-            stageInvitationRepository.save(invitation);
+            save(invitation);
             log.debug("Sent invitation to member: {} for stage: {}", candidate.getId(), stage.getStageId());
         });
 
         log.info("Finished sending invitations for stage: {}", stage.getStageId());
+    }
+
+    private StageInvitation save(StageInvitation stageInvitation) {
+        log.info("Saving stage invitation: {}", stageInvitation);
+
+        stageValidator.validationOnNull(stageInvitation, "Stage invitation cannot be null");
+
+        StageInvitation savedInvitation = stageInvitationRepository.save(stageInvitation);
+
+        log.info("Successfully saved stage invitation with ID: {}", savedInvitation.getId());
+        return savedInvitation;
+    }
+
+    private List<Stage> findAll() {
+        log.info("Retrieving all stages");
+
+        List<Stage> stages = stageRepository.findAll();
+
+        log.info("Retrieved {} stages", stages.size());
+        return stages;
+    }
+
+    private Stage save(Stage stage) {
+        log.info("Saving stage: {}", stage);
+
+        stageValidator.validationOnNull(stage, "Stage cannot be null");
+
+        Stage savedStage = stageRepository.save(stage);
+
+        log.info("Successfully saved stage with ID: {}", savedStage.getStageId());
+        return savedStage;
+    }
+
+    private Stage getById(Long stageId) {
+        log.info("Retrieving stage by ID: {}", stageId);
+
+        stageValidator.validationOnNull(stageId, "Stage ID cannot be null");
+
+        Stage stage = stageRepository.getById(stageId);
+
+        stageValidator.validationOnNull(stage, "Stage not found for ID: " + stageId);
+
+        log.info("Retrieved stage: {}", stage);
+        return stage;
+    }
+
+    private Project getProjectById(Long projectId) {
+        log.info("Retrieving project by ID: {}", projectId);
+
+        stageValidator.validationOnNull(projectId, "Project ID cannot be null");
+
+        Project project = projectRepository.getProjectById(projectId);
+
+        stageValidator.validationOnNull(project, "Project not found for ID: " + projectId);
+
+        log.info("Retrieved project: {}", project);
+        return project;
+    }
+
+    private void delete(Stage stage) {
+        log.info("Deleting stage: {}", stage);
+
+        stageValidator.validationOnNull(stage, "Stage cannot be null");
+
+        stageRepository.delete(stage);
+        log.info("Successfully deleted stage with ID: {}", stage.getStageId());
     }
 }

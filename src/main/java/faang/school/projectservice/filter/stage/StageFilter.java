@@ -8,5 +8,5 @@ import java.util.stream.Stream;
 public interface StageFilter {
     boolean isApplicable(StageFilterDto stageDto);
 
-    Stream<Stage> apply(Stream<Stage> stage, StageFilterDto stageFilterDto);
+    Stream<Stage> apply(Stream<Stage> stages, StageFilterDto stageFilterDto);
 }

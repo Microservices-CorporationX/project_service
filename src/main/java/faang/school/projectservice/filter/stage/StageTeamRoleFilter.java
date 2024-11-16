@@ -2,23 +2,27 @@ package faang.school.projectservice.filter.stage;
 
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.model.stage.Stage;
-import org.springframework.stereotype.Controller;
+import io.micrometer.common.util.StringUtils;
 
 import java.util.stream.Stream;
 
-@Controller
-public class StageRolesFilter implements StageFilter {
+public class StageTeamRoleFilter implements StageFilter {
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
-        return stageFilterDto.getStageRoles() != null;
+        return stageFilterDto != null && StringUtils.isNotBlank(stageFilterDto.getTeamRolePattern());
     }
 
     @Override
     public Stream<Stage> apply(Stream<Stage> stage, StageFilterDto stageFilterDto) {
+        if (stageFilterDto == null || StringUtils.isBlank(stageFilterDto.getTeamRolePattern())) {
+            return stage;
+        }
+
+        String teamRolePattern = stageFilterDto.getTeamRolePattern().toLowerCase();
         return stage.filter(stage1 ->
                 stage1.getStageRoles().stream()
                         .anyMatch(stageRole ->
-                                stageRole.getTeamRole().equals(stageFilterDto.getStageRoles())
+                                stageRole.getTeamRole().name().toLowerCase().contains(teamRolePattern)
                         )
         );
     }

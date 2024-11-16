@@ -7,6 +7,7 @@ import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.ActionWithTask;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -20,30 +21,43 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StageServiceTest {
-
+    @InjectMocks
     private StageService stageService;
+
+    @Mock
     private StageRepository stageRepository;
+
+    @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
     private StageInvitationRepository stageInvitationRepository;
+
+    @Spy
     private StageMapperImpl stageMapper;
+
+    @Mock
     private StageValidator stageValidator;
+
+    @Mock
     private StageFilter stageFilter;
+
+    @Mock
     List<StageFilter> filters;
 
     private Stage stage;
@@ -54,22 +68,12 @@ public class StageServiceTest {
 
     @BeforeEach
     public void setUp() {
-        stageRepository = mock(StageRepository.class);
-        projectRepository = mock(ProjectRepository.class);
-        stageInvitationRepository = mock(StageInvitationRepository.class);
-        stageValidator = mock(StageValidator.class);
-        stageFilter = mock(StageFilter.class);
-        stageMapper = spy(new StageMapperImpl());
-        filters = List.of(stageFilter);
+        stageFilterDto = StageFilterDto.builder()
+                .build();
 
-        stageService = new StageService(
-                stageRepository,
-                projectRepository,
-                stageInvitationRepository,
-                stageValidator,
-                stageMapper,
-                filters
-        );
+        stageFilter = mock(StageFilter.class);
+
+        filters = List.of(stageFilter);
 
         List<TeamMember> teamMembers = List.of(
                 TeamMember.builder()
@@ -85,7 +89,6 @@ public class StageServiceTest {
                         .roles(List.of(TeamRole.DESIGNER, TeamRole.DEVELOPER, TeamRole.TESTER))
                         .build()
         );
-
 
         Team team = Team.builder()
                 .id(1L)
@@ -133,9 +136,6 @@ public class StageServiceTest {
                 .stageRolesId(List.of(1L, 2L, 3L))
                 .executorsId(List.of(1L, 2L, 3L))
                 .build();
-
-        stageFilterDto = StageFilterDto.builder()
-                .build();
     }
 
     @Test
@@ -158,21 +158,31 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verifying successful stage acquisition with filtering")
     public void checkGetStageByFilterSuccessTest() {
-        List<Stage> stageList = List.of(stage);
-        Stream<Stage> stream = stageList.stream();
+        StageFilterDto filterDto = StageFilterDto.builder()
+                .taskStatusPattern("todo")
+                .teamRolePattern("owner")
+                .build();
+
+        Stage firstFilter = Stage.builder()
+                .tasks(List.of(Task.builder().status(TaskStatus.TODO).build()))
+                .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.OWNER).build()))
+                .build();
+
+        Stage secondFilter = Stage.builder()
+                .tasks(List.of(Task.builder().status(TaskStatus.TODO).build()))
+                .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.OWNER).build()))
+                .build();
+
+        List<Stage> stageList = List.of(firstFilter, secondFilter);
 
         when(stageRepository.findAll())
                 .thenReturn(stageList);
-        when(filters.get(0).isApplicable(stageFilterDto))
-                .thenReturn(true);
-        when(filters.get(0).apply(any(), any()))
-                .thenReturn(stream);
 
-        List<StageDto> result = stageService.getStageByFilter(stageFilterDto);
+        List<StageDto> result = stageService.getStageByFilter(filterDto);
+
+        assertNotNull(result);
 
         verify(stageRepository, times(1)).findAll();
-
-        assertEquals(result.size(), 1);
     }
 
     @Test

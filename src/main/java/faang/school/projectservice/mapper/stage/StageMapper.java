@@ -1,7 +1,9 @@
 package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -24,6 +26,13 @@ public interface StageMapper {
 
     Stage toEntity(StageDto stageDto);
 
+
+    @Mapping(target = "teamRolePattern", source = "stageRoles", qualifiedByName = "stageRolesToPattern")
+    @Mapping(target = "taskStatusPattern", source = "tasks", qualifiedByName = "taskStatusToPattern")
+    StageFilterDto toFilterDto(Stage stage);
+
+    Stage toEntityFromFilter(StageFilterDto stageFilterDto);
+
     @Named("mapStageToIds")
     default List<Long> mapStageToIds(List<StageRoles> stages) {
         return stages.stream().map(StageRoles::getId).toList();
@@ -37,5 +46,27 @@ public interface StageMapper {
     @Named("mapProjectToIds")
     default Long mapProjectToId(Project project) {
         return project != null ? project.getId() : null;
+    }
+
+    @Named("stageRolesToPattern")
+    default String stageRolesToPattern(List<StageRoles> stageRoles) {
+        if (stageRoles == null || stageRoles.isEmpty()) {
+            return null;
+        }
+
+        return stageRoles.stream()
+                .map(role -> role.getTeamRole().name())
+                .collect(Collectors.joining(","));
+    }
+
+    @Named("taskStatusToPattern")
+    default String taskStatusToPattern(List<Task> taskStatus) {
+        if (taskStatus == null || taskStatus.isEmpty()) {
+            return null;
+        }
+
+        return taskStatus.stream()
+                .map(task -> task.getStatus().name())
+                .collect(Collectors.joining(","));
     }
 }
