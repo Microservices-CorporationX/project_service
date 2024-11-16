@@ -60,9 +60,13 @@ public class StageInvitationService {
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(Long invitedId, StageInvitationFilterDto stageInvitationFilterDto) {
         Stream<StageInvitation> stageInvitations = stageInvitationRepository.findByInvited_UserId(invitedId).stream();
 
+        if(stageInvitationFilterDto == null){
+            return stageInvitations.map(stageInvitationMapper::toDto).toList();
+        }
+
         return stageInvitationFilters.stream()
                 .filter(stageInvitationFilter -> stageInvitationFilter.isApplicable(stageInvitationFilterDto))
-                .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitations,stageInvitationFilterDto))
+                .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitations, stageInvitationFilterDto))
                 .map(stageInvitationMapper::toDto).toList();
     }
 }

@@ -15,6 +15,7 @@ public class StageInvitationAuthorFilter implements StageInvitationFilter {
 
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitations, StageInvitationFilterDto filters){
-        return stageInvitations.filter(stageInvitation -> stageInvitation.getAuthor().equals(filters.getAuthor()));
+        return stageInvitations.filter(stageInvitation ->
+                stageInvitation.getAuthor().getId().equals(filters.getAuthor()));
     }
 }

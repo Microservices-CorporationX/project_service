@@ -31,7 +31,10 @@ public class ServiceStageInvitationValidator {
     }
 
     public void checkTheReasonForTheFailure(String rejection) {
-        if (rejection.isBlank() || rejection.isEmpty()) {
+        if (rejection == null) {
+            throw new DataValidationException("The reason for the refusal must exist");
+        }
+        if (rejection.isBlank()) {
             throw new DataValidationException("The reason for the refusal must be indicated");
         }
     }
