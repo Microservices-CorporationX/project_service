@@ -78,21 +78,16 @@ jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
 }
+
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
     finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
+//  "**/controller/**",
     "**/service/**",
     "**/validator/**",
-    "**/mapper/**"
-)
-val jacocoExcludePackAgeList = listOf(
-    "**/model/**",
-    "**/repository/**",
-    "**/dto/**"
 )
 
 tasks.jacocoTestReport {
@@ -107,7 +102,6 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             include(jacocoIncludePackagesList)
-            exclude(jacocoExcludePackAgeList)
         }
     )
 }
@@ -119,7 +113,6 @@ tasks.jacocoTestCoverageVerification {
             classDirectories.setFrom(
                 sourceSets.main.get().output.asFileTree.matching {
                     include(jacocoIncludePackagesList)
-                    exclude(jacocoExcludePackAgeList)
                 }
             )
             limit {
