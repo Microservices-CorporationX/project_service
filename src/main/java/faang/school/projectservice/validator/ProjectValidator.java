@@ -40,9 +40,12 @@ public class ProjectValidator {
     }
 
     public void validateProjectExistsById(Long projectId) {
+        log.info("Validating project existence by id #{}", projectId);
         if (!projectRepository.existsById(projectId)) {
+            log.error("Project with id #{} doesn't exist", projectId);
             throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
+        log.info("Project with id #{} exists", projectId);
     }
 
     public boolean isOpenProject(Long projectId) {
@@ -66,6 +69,7 @@ public class ProjectValidator {
         TeamMember mentorId = internShipCreatedDto.getMentorId();
 
         if (!isMentorPresent(teamMembersId, mentorId.getId())) {
+            log.error("Mentor with id #{} is not present in project team", mentorId.getId());
             throw new IllegalArgumentException("Mentor is not present in project team");
         }
     }

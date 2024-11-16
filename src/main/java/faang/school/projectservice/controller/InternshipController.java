@@ -36,17 +36,17 @@ public class InternshipController {
 
     @PutMapping("/internship")
     public InternshipUpdatedDto updateInternship(@Valid @RequestBody InternshipUpdatedDto internship) {
-        log.info("Updating internship '{}' by UserId #{}.", internship.getId(), internship.getCreatedBy());
+        log.info("Updating internship '{}' by UserId: {}.", internship.getId(), internship.getCreatedBy());
         return internshipService.updateInternship(internship);
     }
 
     @GetMapping("/internship/filter")
     public List<InternshipFilterDto> getAllInternshipsByFilter(@RequestParam InternshipFilterDto filterInternship) {
-        log.info("Filtering all internships by User #{}.", filterInternship.getCreatedBy());
+        log.info("Filtering all internships by User {}.", filterInternship.getCreatedBy());
         return internshipService.filterInternship(filterInternship);
     }
 
-    @GetMapping("/internships")
+    @GetMapping("/internship")
     public List<InternshipGetAllDto> getAllInternship() {
         log.info("Getting all internships.");
         List<InternshipGetAllDto> result = internshipService.getAllInternships();
@@ -55,8 +55,8 @@ public class InternshipController {
     }
 
     @GetMapping("/internship/{internshipId}")
-    public InternshipGetByIdDto getInternshipById(@Valid @PathVariable @Positive long internshipId) {
-        log.info("Getting internship by Id #{}", internshipId);
+    public InternshipGetByIdDto getInternshipById(@PathVariable @Positive long internshipId) {
+        log.info("Getting internship by Id {}", internshipId);
         return internshipService.getByIdInternship(internshipId);
     }
 }

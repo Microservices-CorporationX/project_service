@@ -15,7 +15,6 @@ import faang.school.projectservice.validator.InternshipValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import java.util.stream.Stream;
 
 @Service
 @Slf4j
-@Valid
 @RequiredArgsConstructor
 public class InternshipService {
     private final InternshipRepository internshipRepository;
@@ -83,7 +81,11 @@ public class InternshipService {
 
     public InternshipGetByIdDto getByIdInternship(long internshipId) {
        Internship internship =  internshipRepository.findById(internshipId)
-               .orElseThrow(() -> new EntityNotFoundException("InternShip not found"));
+               .orElseThrow(() -> {
+                   log.error("Internship not found by id {}", internshipId);
+                   return new EntityNotFoundException("InternShip not found");
+               });
+        log.info("Internship found by id {}", internshipId);
        return internshipMapper.toGetByIdDto(internship);
     }
 
