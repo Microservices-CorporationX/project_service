@@ -2,9 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageFilterDto;
-import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -36,18 +40,10 @@ public class StageController {
 
     @GetMapping("/filter")
     public ResponseEntity<List<StageDto>> getStagesByRolesAndTaskStatuses(
-            @RequestParam List<TeamRole> roles,
-            @RequestParam List<TaskStatus> taskStatuses) {
-        List<StageDto> stages = stageService.getStagesByRolesAndTaskStatuses(roles, taskStatuses);
+            StageFilterDto filter) {
+        List<StageDto> stages = stageService.getStagesByRolesAndTaskStatuses(filter);
         return ResponseEntity.ok(stages);
     }
-
-//    @GetMapping("/filter")
-//    public ResponseEntity<List<StageDto>> getStagesByRolesAndTaskStatuses(
-//            @RequestParam @Validated StageFilterDto filters) {
-//        List<StageDto> stages = stageService.getStagesByRolesAndTaskStatuses(filters);
-//        return ResponseEntity.ok(stages);
-//    }
 
 
     @GetMapping
