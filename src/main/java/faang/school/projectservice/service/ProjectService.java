@@ -3,18 +3,18 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -41,6 +41,7 @@ public class ProjectService {
 
         return projectMapper.toDto(savedProject);
     }
+
 
     @Transactional
     public UpdateProjectDto updateProject(UpdateProjectDto dto) {
@@ -121,5 +122,6 @@ public class ProjectService {
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
+
 }
 

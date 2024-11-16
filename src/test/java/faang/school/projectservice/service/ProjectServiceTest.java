@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
@@ -10,6 +11,8 @@ import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,13 +27,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -129,7 +132,6 @@ class ProjectServiceTest {
 
     @Test
     void testCreateProjectSuccessful() {
-        doNothing().when(projectValidator).validateUniqueProject(projectDto);
         when(projectRepository.save(project)).thenReturn(project);
         project.setStatus(ProjectStatus.CREATED);
 
@@ -239,7 +241,6 @@ class ProjectServiceTest {
     void testGetAccessibleProjectByIdShouldThrowException() {
         project.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
-        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () ->
                 projectService.getAccessibleProjectById(project.getId(), ownerId));
