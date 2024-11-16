@@ -43,13 +43,6 @@ public class MomentServiceTest {
     private MomentFilter mockMomentFilter;
 
     List<MomentFilter> momentFilters;
-
-    @Test
-    public void testCreateMomentNameEmpty() {
-        MomentDto momentDto = createMomentDto(1L, " ");
-        assertThrows(DataValidationException.class, () -> momentService.create(momentDto));
-    }
-
     @Test
     public void testCreateProjectCancelled() {
         Project firstProject = createProject(1L, "Project 1", ProjectStatus.CANCELLED);

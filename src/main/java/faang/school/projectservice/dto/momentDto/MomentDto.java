@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class MomentDto {
-    @NotNull
+    @NotNull(groups = {After.class})
     private Long id;
 
     @NotNull
@@ -31,4 +31,6 @@ public class MomentDto {
     private String createdAt;
     private String updatedAt;
     private Long createdBy;
+
+    public interface After {}
 }

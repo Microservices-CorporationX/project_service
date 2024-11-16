@@ -126,17 +126,6 @@ public class MomentControllerTest {
         return Stream.of(
                 new Object[]{
                         MomentDto.builder()
-                                .name("Moment")
-                                .description("Perhaps, best moments")
-                                .date("2024-01-24 12:00:23")
-                                .projectIds(List.of(1L, 2L, 3L))
-                                .userIds(List.of(1L, 2L))
-                                .createdAt(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                                .updatedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                                .createdBy(1L).build()
-                },
-                new Object[]{
-                        MomentDto.builder()
                                 .id(1L)
                                 .description("Perhaps, best moments")
                                 .date("2024-01-24 12:00:23")

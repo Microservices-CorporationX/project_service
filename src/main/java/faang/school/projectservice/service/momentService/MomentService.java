@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -29,15 +30,14 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     public MomentDto create(MomentDto momentDto) {
-        if (isMomentNameEmpty(momentDto)) {
-            log.error("Received a request to create a moment with an empty name!");
-            throw new DataValidationException("Moment must have a Name!");
-        }
-
-        if (isProjectNotCancelled(momentDto)) {
-            log.error("Received a request to create a moment with cancelled projects!");
-            throw new DataValidationException("Moment's related project doesn't have to be Cancelled!");
-        }
+        projectRepository.findAllByIds(momentDto.getProjectIds())
+                .stream()
+                .filter(project -> project.getStatus() == ProjectStatus.CANCELLED)
+                .findFirst()
+                .ifPresent(project -> {
+                    log.info("Received a request to create a moment with cancelled projects!");
+                    throw new DataValidationException("Moment's related project doesn't have to be Cancelled!");
+                });
         Moment moment = momentMapper.toEntity(momentDto);
         List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
         moment.setProjects(projects);
@@ -50,8 +50,10 @@ public class MomentService {
                 .orElseThrow(() -> {
                     throw new MomentNotFoundException("Moment by id {} not found");
                 });
-        if (moment.getProjects().stream().anyMatch(pr -> pr.getId() == projectId)
-                || moment.getUserIds().contains(userId)) {
+        if (Stream.concat(
+                moment.getProjects().stream().map(Project::getId),
+                moment.getUserIds().stream()
+        ).anyMatch(entityId -> entityId == projectId || entityId.equals(userId))) {
             log.info("Received a request to update a moment with an existing project or user!");
             throw new DataValidationException("Moment cannot be updated because either user or project is already in this moment!");
         }
@@ -92,14 +94,5 @@ public class MomentService {
                     throw new MomentNotFoundException("Moment not found!");
                 });
         return momentMapper.toDto(moment);
-    }
-
-    private boolean isMomentNameEmpty(MomentDto momentDto) {
-        return momentDto.getName().isBlank();
-    }
-
-    private boolean isProjectNotCancelled(MomentDto momentDto) {
-        List<Project> projects = projectRepository.findAllByIds(momentDto.getProjectIds());
-        return projects.stream().anyMatch(project -> project.getStatus() == ProjectStatus.CANCELLED);
     }
 }
