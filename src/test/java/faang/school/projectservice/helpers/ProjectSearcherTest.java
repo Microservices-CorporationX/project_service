@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-class ProjectDfsTest {
+class ProjectSearcherTest {
     @Test
     void testFindAllProjectsWithEveryPossibleStart() {
         Project anubis = Project.builder().name("Anubis").build();
@@ -32,7 +32,7 @@ class ProjectDfsTest {
 
         List<Project> projects = List.of(anubis, hades, zeus, serapis, apollo, sekhmet);
         for (Project start : projects) {
-            List<Project> actual = ProjectDfs.findAllProjects(start);
+            List<Project> actual = ProjectSearcher.findAllProjects(start);
             assertArrayEquals(projects.stream().sorted(Comparator.comparing(Project::getName)).toArray(),
                     actual.stream().sorted(Comparator.comparing(Project::getName)).toArray());
         }
@@ -41,7 +41,7 @@ class ProjectDfsTest {
     @Test
     void testFindAllProjectsWithSingleProject() {
         Project project = Project.builder().name("Project").build();
-        List<Project> actual = ProjectDfs.findAllProjects(project);
+        List<Project> actual = ProjectSearcher.findAllProjects(project);
         assertEquals(1, actual.size());
         assertEquals(project, actual.get(0));
     }

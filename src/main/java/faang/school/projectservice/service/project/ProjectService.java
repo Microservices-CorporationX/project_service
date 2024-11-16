@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.project.ProjectFilter;
-import faang.school.projectservice.helpers.ProjectDfs;
+import faang.school.projectservice.helpers.ProjectSearcher;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -105,7 +105,7 @@ public class ProjectService {
     private boolean filterPrivate(Project project) {
         if (project.getVisibility() == ProjectVisibility.PRIVATE) {
             Long userId = userContext.getUserId();
-            List<Project> allProjects = ProjectDfs.findAllProjects(project);
+            List<Project> allProjects = ProjectSearcher.findAllProjects(project);
             List<Team> teams = allProjects.stream()
                     .flatMap(currentProject -> {
                         if (currentProject.getTeams() != null) {

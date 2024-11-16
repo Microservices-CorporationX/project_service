@@ -4,7 +4,7 @@ import faang.school.projectservice.model.Project;
 
 import java.util.*;
 
-public class ProjectDfs {
+public class ProjectSearcher {
     public static List<Project> findAllProjects(Project startVertex) {
         List<Project> result = new ArrayList<>();
         Map<Project, Color> colors = new HashMap<>();
