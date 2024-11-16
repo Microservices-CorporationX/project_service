@@ -1,31 +1,42 @@
 package faang.school.projectservice.controller.stage_invitation;
 
-import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.invitation.StageInvitationRequestDto;
+import faang.school.projectservice.dto.invitation.StageInvitationResponseDto;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
-import lombok.Data;
-import org.springframework.stereotype.Controller;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Data
-@Controller
+@RestController
+@RequestMapping(value = "/invitations")
+@RequiredArgsConstructor
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    public StageInvitationDto createInvitation(StageInvitationDto stageInvitationDto) {
-        return stageInvitationService.createInvitation(stageInvitationDto);
+    @PostMapping(value = "/create")
+    public StageInvitationResponseDto createInvitation(@RequestBody StageInvitationRequestDto invitationRsDto) {
+        return stageInvitationService.createInvitation(invitationRsDto);
     }
 
-    public StageInvitationDto acceptInvitation(StageInvitationDto stageInvitationDto) {
-        return stageInvitationService.acceptInvitation(stageInvitationDto);
+    @PostMapping(value = "/{invitationId}/accept")
+    public StageInvitationResponseDto acceptInvitation(@PathVariable Long invitationId, Long userId) {
+        return stageInvitationService.acceptInvitation(invitationId, userId);
     }
 
-    public StageInvitationDto rejectInvitation(StageInvitationDto stageInvitationDto) {
-        return stageInvitationService.rejectInvitation(stageInvitationDto);
+    @PostMapping(value = "/{invitationId}/reject")
+    public StageInvitationResponseDto rejectInvitation(@PathVariable Long invitationId, StageInvitationRequestDto invitationRsDto) {
+        return stageInvitationService.rejectInvitation(invitationId, invitationRsDto);
     }
 
-    public List<StageInvitationDto> viewAllInvitation(StageInvitationDto stageInvitationDto, StageInvitationFilterDto filter) {
-        return stageInvitationService.viewAllInvitation(stageInvitationDto, filter);
+    @GetMapping(value = "/all")
+    public List<StageInvitationResponseDto> viewAllInvitation(Long userId, StageInvitationFilterDto filter) {
+        return stageInvitationService.viewAllInvitation(userId, filter);
     }
 }

@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StageInvitationDto {
-    private Long id;
+public class StageInvitationResponseDto {
+    private Long invitedId;
     private String description;
     private StageDto stage;
     private StageInvitationStatus status;

@@ -1,7 +1,8 @@
 package service;
 
-import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.invitation.StageInvitationRequestDto;
+import faang.school.projectservice.dto.invitation.StageInvitationResponseDto;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
@@ -12,7 +13,6 @@ import faang.school.projectservice.service.stage_invitation.StageInvitationServi
 import faang.school.projectservice.service.stage_invitation.filter.StageInvitationFilter;
 import faang.school.projectservice.validator.StageInvitationValidator;
 import lombok.Data;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +24,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,64 +48,83 @@ public class StageInvitationServiceTest {
     @Mock
     private List<StageInvitationFilter> invitationFilters;
 
-    private StageInvitationDto invitationDto;
+    private StageInvitationResponseDto invitationRsDto;
+    private StageInvitationRequestDto invitationRqDto;
     private StageInvitation invitation;
-
-    @BeforeEach
-    public void setUp() {
-        invitationDto = new StageInvitationDto();
-        invitation = new StageInvitation();
-    }
+    private TeamMember invitedMember;
+    private TeamMember executor;
 
     @Test
     public void testCreateInvitation() {
-        when(stageInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        when(stageInvitationMapper.toDto(invitation)).thenReturn(invitationDto);
+        when(stageInvitationMapper.toRqEntity(invitationRqDto)).thenReturn(invitation);
+        when(stageInvitationMapper.toRsDto(invitation)).thenReturn(new StageInvitationResponseDto());
 
-        service.createInvitation(invitationDto);
+        StageInvitationResponseDto response = service.createInvitation(invitationRqDto);
 
-        verify(stageInvitationValidate).validateInvitation(invitationDto);
+        assertNotNull(response);
+        verify(stageInvitationValidate).validateInvitation(invitationRqDto);
         verify(stageInvitationRepository).save(invitation);
-        verify(stageInvitationMapper).toDto(invitation);
+        verify(stageInvitationMapper).toRsDto(invitation);
     }
 
     @Test
     public void testAcceptInvitation() {
-        when(stageInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        when(stageInvitationMapper.toDto(invitation)).thenReturn(invitationDto);
-        invitation.setStage(new Stage());
+        invitation = new StageInvitation();
+        Long invitationId = 1L;
+        Long userId = 1L;
+
+        Stage stage = new Stage();
+        invitedMember = new TeamMember();
         List<TeamMember> executors = new ArrayList<>();
-        executors.add(new TeamMember());
-        executors.add(new TeamMember());
-        invitation.getStage().setExecutors(executors);
+        executors.add(invitedMember);
+        stage.setExecutors(executors);
 
-        StageInvitationDto result = service.acceptInvitation(invitationDto);
+        invitation.setStage(stage);
 
-        assertEquals(invitationDto, result);
+        when(stageInvitationRepository.findById(invitationId)).thenReturn(invitation);
+        when(stageInvitationMapper.toRsDto(invitation)).thenReturn(new StageInvitationResponseDto());
+
+        StageInvitationResponseDto response = service.acceptInvitation(invitationId, userId);
+
+        assertNotNull(response);
         assertEquals(StageInvitationStatus.ACCEPTED, invitation.getStatus());
+        assertEquals(userId, invitation.getInvited().getId());
+        assertTrue(invitation.getStage().getExecutors().contains(invitedMember));
+
+        verify(stageInvitationRepository).findById(invitationId);
+        verify(stageInvitationValidate).checkStatus(invitation, StageInvitationStatus.ACCEPTED);
+        verify(stageInvitationMapper).toRsDto(invitation);
     }
 
     @Test
     public void testRejectInvitation() {
-        when(stageInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        when(stageInvitationMapper.toDto(invitation)).thenReturn(invitationDto);
+        Long invitationId = 1L;
+        invitation = new StageInvitation();
+        invitationRqDto = new StageInvitationRequestDto();
+        invitationRqDto.setInvitedId(3L);
 
-        service.rejectInvitation(invitationDto);
+        when(stageInvitationRepository.findById(invitationId)).thenReturn(invitation);
+        when(stageInvitationMapper.toRsDto(invitation)).thenReturn(new StageInvitationResponseDto());
 
-        verify(stageInvitationValidate).validateDescription(invitationDto);
+        StageInvitationResponseDto response = service.rejectInvitation(invitationId, invitationRqDto);
+
+        assertNotNull(response);
         assertEquals(StageInvitationStatus.REJECTED, invitation.getStatus());
+        assertEquals(3L, invitation.getInvited().getId());
+
+        verify(stageInvitationValidate).validateDescription(invitationRqDto);
+        verify(stageInvitationValidate).checkStatus(invitation, StageInvitationStatus.REJECTED);
+        verify(stageInvitationRepository).findById(invitationId);
+        verify(stageInvitationMapper).toRsDto(invitation);
     }
 
     @Test
     public void testViewAllInvitation() {
-        when(stageInvitationMapper.toEntity(invitationDto)).thenReturn(invitation);
-        invitation.setInvited(new TeamMember());
-        invitation.getInvited().setUserId(1L);
-        StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
+        Long userId = 1L;
+        StageInvitationFilterDto filter = new StageInvitationFilterDto();
 
-        List<StageInvitationDto> result = service.viewAllInvitation(invitationDto, filterDto);
+        service.viewAllInvitation(userId, filter);
 
-        assertNotNull(result);
-        verify(stageInvitationRepository).findAll();
+        verify(stageInvitationRepository, times(1)).findAll();
     }
 }
