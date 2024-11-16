@@ -24,7 +24,7 @@ public class InternshipController {
     private final InternshipService internshipService;
 
     @PostMapping("/create")
-    public ResponseEntity<InternshipDto> createInternship(@RequestBody @Valid InternshipDto internshipDto) {
+    public ResponseEntity<InternshipDto> createInternship(@RequestBody InternshipDto internshipDto) {
         InternshipDto responseDto = internshipService.createInternship(internshipDto);
         URI location = URI.create("/api/internship/" + responseDto.getId());
         return ResponseEntity.created(location).body(responseDto);

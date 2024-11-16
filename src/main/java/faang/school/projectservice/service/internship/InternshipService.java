@@ -12,7 +12,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,6 @@ public class InternshipService {
     private final List<InternshipFilter> internshipFilters;
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
-        internshipValidator.validateForExistInternship(internshipDto.getId());
         internshipValidator.validate(internshipDto);
         internshipValidator.validateInternshipTotalDuration(internshipDto);
 
