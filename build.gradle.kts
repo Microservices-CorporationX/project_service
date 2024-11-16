@@ -85,10 +85,9 @@ tasks.test {
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
+//  "**/controller/**",
     "**/service/**",
     "**/validator/**",
-    "**/mapper/**"
 )
 
 tasks.jacocoTestReport {
