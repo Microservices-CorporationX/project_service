@@ -147,7 +147,6 @@ class ProjectServiceTest {
 
     @Test
     void testCreateProjectSuccessful() {
-        doNothing().when(projectValidator).validateUniqueProject(projectDto);
         when(projectRepository.save(project)).thenReturn(project);
         project.setStatus(ProjectStatus.CREATED);
 
@@ -241,26 +240,25 @@ class ProjectServiceTest {
     }
 
     @Test
-    void testGetAccessibleProjectsByIdSuccess() {
+    void testGetAccessibleProjectByIdSuccess() {
         project.setId(1L);
         project.setStatus(ProjectStatus.CREATED);
         projectDto.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
         when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(true);
 
-        ProjectDto result = projectService.getAccessibleProjectsById(project.getId(), ownerId);
+        ProjectDto result = projectService.getAccessibleProjectById(project.getId(), ownerId);
 
         assertEquals(projectDto, result);
     }
 
     @Test
-    void testGetAccessibleProjectsByIdShouldThrowException() {
+    void testGetAccessibleProjectByIdShouldThrowException() {
         project.setId(1L);
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
-        when(projectValidator.canUserAccessProject(project, ownerId)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () ->
-                projectService.getAccessibleProjectsById(project.getId(), ownerId));
+                projectService.getAccessibleProjectById(project.getId(), ownerId));
     }
 
     @Test
