@@ -41,7 +41,7 @@ public class InternshipController {
     }
 
     @GetMapping("/internship/filter")
-    public List<InternshipFilterDto> getAllInternshipsByFilter(@RequestParam InternshipFilterDto filterInternship) {
+    public List<InternshipFilterDto> getAllInternshipsByFilter(@RequestBody InternshipFilterDto filterInternship) {
         log.info("Filtering all internships by User {}.", filterInternship.getCreatedBy());
         return internshipService.filterInternship(filterInternship);
     }
