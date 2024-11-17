@@ -131,4 +131,7 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException("Team member with id " + id + " does not exist!"));
     }
 
+    public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+    }
 }

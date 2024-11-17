@@ -3,7 +3,7 @@ package faang.school.projectservice.validator.teamMember;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TeamMemberValidator {
 
-    private final TeamMemberRepository teamMemberRepository;
+    private final TeamMemberService teamMemberService;
 
     public void validateUserHasStatusOwnerOrManagerInTeam(Long userId, Long projectId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+        TeamMember teamMember = teamMemberService.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id - " + userId +
                         " is not a team member of project with id - " + projectId));
 
