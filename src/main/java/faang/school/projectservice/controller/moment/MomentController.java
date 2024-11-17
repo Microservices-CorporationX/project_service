@@ -1,7 +1,7 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.moment;
 
-import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.service.moment.MomentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/moment")
+@RestController("/moments")
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService service;

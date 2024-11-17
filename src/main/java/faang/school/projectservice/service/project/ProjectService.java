@@ -70,7 +70,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public List<Project> findProjectsById(List<Long> projectIds) {
+    public List<Project> findProjectsByIds(List<Long> projectIds) {
         return projectIds.stream()
                 .map(id -> projectRepository.findById(id)
                         .orElseThrow(() -> new EntityNotFoundException(PROJECT, id)))

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.MomentDto;
-import faang.school.projectservice.dto.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.moment.MomentMapperImpl;
@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -83,7 +84,8 @@ public class MomentServiceTest {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         moment.setProjects(List.of(project));
 
-        when(projectService.findProjectsById(momentDto.getProjectIds())).thenReturn(List.of(project));
+        when(projectService.findProjectsByIds(momentDto.getProjectIds())).thenReturn(List.of(project));
+        when(momentRepository.save(moment)).thenReturn(moment);
 
         MomentDto result = momentService.createMoment(momentDto);
 
@@ -107,25 +109,33 @@ public class MomentServiceTest {
     @Test
     void updateMomentTest() {
         Long momentId = 1L;
+
         MomentDto updatedMomentDto = new MomentDto();
-        updatedMomentDto.setName("Test 1");
+        updatedMomentDto.setName("Updated Name");
         updatedMomentDto.setProjectIds(List.of(1L, 2L));
 
         Moment momentToUpdate = new Moment();
-        momentToUpdate.setName("Test 2");
+        momentToUpdate.setId(momentId);
+        momentToUpdate.setName("Old Name");
 
-        Project project = new Project();
-        project.setStatus(ProjectStatus.IN_PROGRESS);
-        momentToUpdate.setProjects(List.of(project));
+        Project activeProject = new Project();
+        activeProject.setStatus(ProjectStatus.IN_PROGRESS);
+
+        momentToUpdate.setProjects(List.of(activeProject));
 
         when(momentRepository.findById(momentId)).thenReturn(Optional.of(momentToUpdate));
-        when(projectService.findProjectsById(updatedMomentDto.getProjectIds()))
-                .thenReturn(List.of(new Project(), new Project()));
+        when(projectService.findProjectsByIds(updatedMomentDto.getProjectIds()))
+                .thenReturn(List.of(activeProject, new Project()));
 
+        when(momentRepository.save(momentToUpdate)).thenReturn(momentToUpdate);
         momentService.updateMoment(updatedMomentDto, momentId);
 
-        verify(momentMapper, times(1)).updateEntity(momentToUpdate, updatedMomentDto);
-        verify(momentRepository, times(1)).save(momentToUpdate);
+        Moment savedMoment = momentRepository.findById(momentId).orElse(null);
+        assertNotNull(savedMoment, "Saved moment should not be null");
+        assertEquals(momentId, savedMoment.getId());
+
+        verify(momentMapper, times(1)).updateEntity(savedMoment, updatedMomentDto);
+        verify(momentRepository, times(1)).save(savedMoment);
     }
 
     @Test

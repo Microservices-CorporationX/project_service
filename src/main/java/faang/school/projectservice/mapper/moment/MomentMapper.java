@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.moment;
 
-import faang.school.projectservice.dto.MomentDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
