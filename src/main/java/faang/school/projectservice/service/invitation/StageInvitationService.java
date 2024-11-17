@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.invitation;
 
-import faang.school.projectservice.mappers.invitation.StageInvitationMapperImpl;
+import faang.school.projectservice.mapper.invitation.StageInvitationMapper;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -16,5 +16,5 @@ public class StageInvitationService {
     private final StageInvitationRepository stageInvitationRepository;
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final StageInvitationMapperImpl
+    private final StageInvitationMapper stageInvitationMapper;
 }

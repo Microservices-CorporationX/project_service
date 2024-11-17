@@ -1,11 +1,11 @@
 package faang.school.projectservice.mapper.invitation;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.NullValueCheckStrategy;
+import faang.school.projectservice.dto.invitation.StageInvitationDTO;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 
-@Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-public class StageInvitationMapper {
+public interface StageInvitationMapper {
 
-    StageInvitat
+    StageInvitation toEntity(StageInvitationDTO stageInvitationDTO);
 
+    StageInvitationDTO toDto(StageInvitation stageInvitation);
 }
