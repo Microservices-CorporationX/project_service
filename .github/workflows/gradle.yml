@@ -9,9 +9,11 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "Cyclop-master-stream7" ]
+    # branches: [ "Cyclop-master-stream7" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "Cyclop-master-stream7" ]
+  # branches: [ "Cyclop-master-stream7" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
