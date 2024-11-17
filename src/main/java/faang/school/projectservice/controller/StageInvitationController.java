@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/stage-invitation")
+@RequestMapping
 @RequiredArgsConstructor
 public class StageInvitationController {
     private StageInvitationService stageInvitationService;
@@ -29,7 +29,7 @@ public class StageInvitationController {
         return stageInvitationService.sendAnInvitation(stageInvitationDto);
     }
 
-    @PutMapping("/acceptedInvitation")
+    @PutMapping("/accepted-invitation")
     public StageInvitationDto acceptAnInvitation(@RequestBody StageInvitationDto stageInvitationDto) {
         log.info("A request has been received to accept an invitation {}", stageInvitationDto.getDescription());
         return stageInvitationService.acceptAnInvitation(stageInvitationDto);
@@ -41,10 +41,10 @@ public class StageInvitationController {
         return stageInvitationService.rejectAnInvitation(stageInvitationDto);
     }
 
-    @GetMapping
+    @GetMapping("/all-invitations")
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(
-            @RequestParam StageInvitationDto stageInvitationDto,
-            @RequestParam(required = false) StageInvitationFilterDto filter) {
+            @RequestBody StageInvitationDto stageInvitationDto,
+            @RequestBody(required = false) StageInvitationFilterDto filter) {
         log.info("A request has been received to view all invitations with filters for {}", stageInvitationDto.getInvitedId());
         return stageInvitationService.viewAllInvitationsForOneParticipant(stageInvitationDto.getInvitedId(), filter);
     }
