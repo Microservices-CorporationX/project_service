@@ -37,8 +37,10 @@ public class InternshipService {
         List<TeamMember> interns = teamMemberRepository.findAllById(internshipDto.getInternIds());
         internshipToSave.setInterns(interns);
 
-        internshipRepository.save(internshipToSave);
-        log.info("The internship called {} was successfully created!", internshipDto.getName());
+        internshipToSave = internshipRepository.save(internshipToSave);
+        log.info("The internship called {}, with ID {} was created",
+                internshipDto.getName(),
+                internshipToSave.getId());
         return internshipMapper.toDto(internshipToSave);
     }
 
@@ -57,19 +59,19 @@ public class InternshipService {
         Internship internshipAfterUpdate = taskStatusValidator.checkingInternsTaskStatus(internship);
 
         internshipRepository.save(internshipAfterUpdate);
-        log.info("The internship called {} was successfully updated!", internshipAfterUpdate.getName());
+        log.info("The internship called {}, with ID {} was updated", internshipAfterUpdate.getName(), internship.getId());
         return internshipMapper.toDto(internshipAfterUpdate);
     }
 
     public List<InternshipDto> getInternships() {
         List<Internship> allInternships = internshipRepository.findAll();
-        log.info("Request for getting all internships");
+        log.info("The request for all internships was successful");
         return internshipMapper.mapToDtoList(allInternships);
     }
 
     public List<InternshipDto> getInternships(InternshipFilterDto filters) {
         Stream<Internship> internships = new ArrayList<>(internshipRepository.findAll()).stream();
-        log.info("Request to get all internships using filters");
+        log.info("The request for all internships using filters was successful");
         return internshipFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(internships,
@@ -82,7 +84,7 @@ public class InternshipService {
     public InternshipDto getInternship(Long internshipId) {
         Internship internship = internshipRepository.findById(internshipId)
                 .orElseThrow(() -> new DataValidationException(String.format("Internship doesn't exist by id: %s", internshipId)));
-        log.info("Request for an internship by ID: {}", internshipId);
+        log.info("The request for an internship by ID {} was successful", internshipId);
         return internshipMapper.toDto(internship);
     }
 }
