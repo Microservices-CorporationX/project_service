@@ -3,7 +3,7 @@ package faang.school.projectservice.service.moment;
 import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.filters.moment.MomentFilter;
+import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.TeamMember;
@@ -25,9 +25,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class MomentService {
-    public MomentRequestDto create(MomentRequestDto momentRequestDto, Long userId) {
-        // TODO создать метод для создания момента
-        return null;
     private final MomentMapper momentMapper;
     private final MomentRepository momentRepository;
     private final MomentServiceValidator momentServiceValidator;
@@ -112,5 +109,10 @@ public class MomentService {
         return teamIds.stream()
                 .map(id -> teamMemberRepository.findById(id).getTeam().getProject().getId())
                 .collect(Collectors.toSet());
+    }
+
+    public MomentRequestDto create(MomentRequestDto momentRequestDto, Long userId) {
+        // TODO создать метод для создания момента
+        return null;
     }
 }
