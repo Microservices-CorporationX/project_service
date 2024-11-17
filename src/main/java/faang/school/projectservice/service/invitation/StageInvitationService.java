@@ -53,10 +53,10 @@ public class StageInvitationService {
         }
 
         StageInvitation invitation = stageInvitationMapper.toEntity(stageInvitationDTO);
-        invitation.setStatus(StageInvitationStatus.PENDING);
         invitation.setStage(stage);
-        invitation.setInvited(invited);
         invitation.setAuthor(author);
+        invitation.setInvited(invited);
+        invitation.setStatus(StageInvitationStatus.PENDING);
 
         StageInvitation savedInvitation = stageInvitationRepository.save(invitation);
         log.info("Приглашение успешно отправлено: {}", savedInvitation);
@@ -89,11 +89,19 @@ public class StageInvitationService {
         Optional<StageInvitation> invitationOpt = Optional.ofNullable(stageInvitationRepository.findById(invitationId));
         if (!invitationOpt.isPresent()) {
             log.warn("Приглашение с ID {} не найдено", invitationId);
-throw new InvalidInvitationDataException("Приглашение с ID " + invitationId + " не найдено");
+            throw new InvalidInvitationDataException("Приглашение с ID " + invitationId + " не найдено");
         }
 
         StageInvitation invitation = invitationOpt.get();
         invitation.setStatus(StageInvitationStatus.REJECTED);
-        invitation.set
+        invitation.setRejectionReason(rejectionReason);
+
+        StageInvitation updatedInvitation = stageInvitationRepository.save(invitation);
+        log.info("Приглашение успешно отклонено: {}", updatedInvitation);
+
+        return stageInvitationMapper.toDto(updatedInvitation);
     }
+
+
+
 }
