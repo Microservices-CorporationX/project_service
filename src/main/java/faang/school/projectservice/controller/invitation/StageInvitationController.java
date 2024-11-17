@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -44,4 +46,9 @@ public class StageInvitationController {
         return stageInvitationService.rejectInvitation(invitationId, rejectionReasonDTO.getReason());
     }
 
+    @PostMapping("/filter")
+    public List<StageInvitationDTO> getFilteredInvitations(@RequestBody @Valid StageInvitationDTO filterDTO) {
+        log.info("Получен запрос на фильтрацию приглашений с фильтром: {}", filterDTO);
+        return stageInvitationService.getFilteredInvitations(filterDTO);
+    }
 }
