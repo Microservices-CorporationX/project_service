@@ -21,7 +21,7 @@ public class InternshipValidator {
 
     public boolean validateForExistInternship(Long internshipId) {
         if (internshipRepository.existsById(internshipId)) {
-            log.warn("The internship already exists by ID: {}", internshipId);
+            log.error("The internship already exists by ID: {}", internshipId);
             throw new DataValidationException("The internship already exists");
         }
         return true;
@@ -29,15 +29,15 @@ public class InternshipValidator {
 
     public boolean validate(InternshipDto internshipDto) {
         if (internshipDto.getProjectId() == null) {
-            log.warn("The internship project is null");
+            log.error("The internship project is null");
             throw new DataValidationException("The internship must be related to some project");
         }
         if (internshipDto.getInternIds().isEmpty()) {
-            log.warn("The internship has no interns");
+            log.error("The internship has no interns");
             throw new DataValidationException("An internship is not created without interns");
         }
         if (internshipDto.getMentorId() == null) {
-            log.warn("The internship has no mentor");
+            log.error("The internship has no mentor");
             throw new DataValidationException("An internship won't happen without a mentor");
         }
         return true;
@@ -48,7 +48,7 @@ public class InternshipValidator {
         LocalDateTime endDate = internshipDto.getEndDate();
         long monthsBetween = ChronoUnit.MONTHS.between(startDate, endDate);
         if (monthsBetween >= 3) {
-            log.warn("The internship lasts 3 months or more");
+            log.error("The internship lasts 3 months or more");
             throw new DataValidationException("The internship cannot last 3 months or more");
         }
         return true;
@@ -61,7 +61,7 @@ public class InternshipValidator {
         }
         if (!isDateChanges && !internship.getInterns().equals(internsBeforeUpdate) &&
                 internship.getStartDate().isBefore(LocalDateTime.now())) {
-            log.warn("Trying to attach interns to an internship that has already started");
+            log.error("Trying to attach interns to an internship that has already started");
             throw new DataValidationException("It is not possible to add interns to an internship that has already started");
         }
         return isDateChanges;
