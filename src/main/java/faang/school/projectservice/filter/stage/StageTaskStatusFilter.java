@@ -7,6 +7,7 @@ import io.micrometer.common.util.StringUtils;
 import java.util.stream.Stream;
 
 public class StageTaskStatusFilter implements StageFilter {
+
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
         return stageFilterDto != null && StringUtils.isNotBlank(stageFilterDto.getTaskStatusPattern());

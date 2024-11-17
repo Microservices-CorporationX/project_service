@@ -463,7 +463,7 @@ public class StageService {
     }
 
     private Stage save(Stage stage) {
-        log.info("Saving stage: {}", stage);
+        log.info("Saving stage: {}", stage.getStageId());
 
         stageValidator.validationOnNull(stage, "Stage cannot be null");
 
@@ -482,7 +482,7 @@ public class StageService {
 
         stageValidator.validationOnNull(stage, "Stage not found for ID: " + stageId);
 
-        log.info("Retrieved stage: {}", stage);
+        log.info("Retrieved stage: {}", stage.getStageId());
         return stage;
     }
 
