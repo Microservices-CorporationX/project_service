@@ -38,7 +38,7 @@ public class SubProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createSubProject(parentId,createProjectDto));
     }
 
-    @PutMapping()
+    @PutMapping
     public ResponseEntity<ProjectResponseDto> updateSubProject(@Valid @RequestBody UpdateSubProjectDto updateSubProjectDto) {
         log.info("Request to update subproject id #{}", updateSubProjectDto.getId());
         return ResponseEntity.status(HttpStatus.OK).body(projectService.updateSubProject(updateSubProjectDto));
