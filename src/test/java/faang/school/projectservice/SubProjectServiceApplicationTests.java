@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
-class ProjectServiceApplicationTests {
+class SubProjectServiceApplicationTests {
     @Test
     void contextLoads() {
 
