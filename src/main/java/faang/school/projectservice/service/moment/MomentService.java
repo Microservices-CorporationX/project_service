@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.moment;
 
+import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.filters.moment.MomentFilter;
@@ -24,6 +25,9 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class MomentService {
+    public MomentRequestDto create(MomentRequestDto momentRequestDto, Long userId) {
+        // TODO создать метод для создания момента
+        return null;
     private final MomentMapper momentMapper;
     private final MomentRepository momentRepository;
     private final MomentServiceValidator momentServiceValidator;
