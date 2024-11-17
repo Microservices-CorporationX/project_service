@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
+import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.service.subprojectService.SubProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -8,11 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/subprojects")
 @AllArgsConstructor
 @Slf4j
-public class subprojectController {
+public class SubprojectController {
 
     private final SubProjectService projectService;
 
@@ -40,16 +43,14 @@ public class subprojectController {
         return ResponseEntity.ok(updatedProject);
     }
 
-    @GetMapping("/{projectId}/getSubprojects/{subProjectId}")
-    public ResponseEntity<ProjectDto> getSubProject(@PathVariable Long projectId, @PathVariable Long subProjectId) {
-        log.info("Received request to get subproject with ID: {} for project {}", subProjectId, projectId);
-        if (projectId == null || subProjectId == null) {
+    @GetMapping("/{projectId}/getSubprojects")
+    public ResponseEntity<List<ProjectDto>> getSubProject(@PathVariable Long projectId, @Valid @RequestBody SubprojectFilterDto subprojectFilterDto) {
+        log.info("Received request to get subproject with filter: {} for project {}", projectId, subprojectFilterDto); if (projectId == null || subprojectFilterDto == null) {
             return ResponseEntity.badRequest().build();
         }
-        ProjectDto subProject = projectService.getSubProject(projectId, subProjectId);
-
-        if (subProject == null) {
-            return ResponseEntity.badRequest().build();
+        List<ProjectDto> subProject = projectService.getSubProject(projectId, subprojectFilterDto);
+        if (subProject.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(subProject);
     }
