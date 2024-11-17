@@ -39,4 +39,9 @@ public class StageInvitation {
     @OneToOne
     @JoinColumn(name = "invited")
     private TeamMember invited;
+
+    public void setRejectionReason(String rejectionReason) {
+        this.status = StageInvitationStatus.REJECTED;
+        this.description = rejectionReason;
+    }
 }
