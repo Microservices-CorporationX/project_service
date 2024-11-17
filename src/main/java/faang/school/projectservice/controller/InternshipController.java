@@ -43,8 +43,9 @@ public class InternshipController {
     }
 
     @GetMapping("/getAll/filters")
-    public List<InternshipDto> getInternships(@RequestBody @Valid InternshipFilterDto filters) {
-        return internshipService.getInternships(filters);
+    public ResponseEntity<List<InternshipDto>> getInternships(@RequestBody @Valid InternshipFilterDto filters) {
+        List<InternshipDto> internships = internshipService.getInternships(filters);
+        return ResponseEntity.ok(internships);
     }
 
     @GetMapping("/get/{internshipId}")
