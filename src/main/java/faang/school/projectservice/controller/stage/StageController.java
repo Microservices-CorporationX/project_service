@@ -5,43 +5,50 @@ import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.service.stage.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/stages")
 public class StageController {
 
     public final StageService stageService;
 
-    public StageDto createStage(@Valid StageDto stageDto) {
-       return stageService.createStage(stageDto);
+    @PostMapping
+    public StageDto createStage(@RequestBody @Valid StageDto stageDto) {
+        return stageService.createStage(stageDto);
     }
 
-    public List<StageDto> getAllStagesByFilters(StageFilterDto stageFilterDto) {
-       return stageService.getAllStagesByFilters(stageFilterDto);
+    @GetMapping("/filters")
+    public List<StageDto> getAllStagesByFilters(@RequestBody StageFilterDto stageFilterDto) {
+        return stageService.getAllStagesByFilters(stageFilterDto);
     }
 
-    public void deleteStageById(Long id) {
-        stageService.deleteStageById(id);
+    @DeleteMapping("/{stageId}")
+    public void deleteStageById(@PathVariable Long stageId) {
+        stageService.deleteStageById(stageId);
     }
 
-    public StageDto updateStage(Long stageId) {
+    @PatchMapping("/{stageId}")
+    public StageDto updateStage(@PathVariable Long stageId) {
         return stageService.updateStage(stageId);
     }
 
-    public List<StageDto> getAllStages(Long projectId) {
+    @GetMapping("/projects/{projectId}")
+    public List<StageDto> getAllStages(@PathVariable Long projectId) {
         return stageService.getAllStagesOfProject(projectId);
     }
 
-    public StageDto getStageById(Long id) {
-        return stageService.getStageById(id);
+    @GetMapping("/{stageId}")
+    public StageDto getStageById(@PathVariable Long stageId) {
+        return stageService.getStageById(stageId);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    //@ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
     public void handleValidationExceptions(MethodArgumentNotValidException ex) {
         throw new IllegalArgumentException("Validation failed", ex);
     }
