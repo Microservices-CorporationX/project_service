@@ -7,7 +7,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ProjectService;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.Builder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,12 +36,8 @@ class ProjectServiceApplicationTests {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project project;
-    private ProjectDto projectDto;
-
-    @BeforeEach
-    void setUp() {
-        project = Project.builder()
+    private Project createTestProject() {
+        return Project.builder()
                 .id(1L)
                 .name("Test Project")
                 .description("A sample project description")
@@ -50,23 +46,29 @@ class ProjectServiceApplicationTests {
                 .visibility(ProjectVisibility.PUBLIC)
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
 
-        projectDto = new ProjectDto();
-        projectDto.setId(1L);
-        projectDto.setName("Test Project");
-        projectDto.setDescription("A sample project description");
-        projectDto.setOwnerId(100L);
-        projectDto.setStatus(ProjectStatus.CREATED);
-        projectDto.setVisibility(ProjectVisibility.PUBLIC);
-        projectDto.setCreatedAt(LocalDateTime.now());
 
-        lenient().when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
+    private ProjectDto createTestProjectDto() {
+        return ProjectDto.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("A sample project description")
+                .ownerId(100L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
     void createProject_Success() {
+        Project project = createTestProject();
+        ProjectDto projectDto = createTestProjectDto();
+
         when(projectRepository.existsByOwnerUserIdAndName(100L, "Test Project")).thenReturn(false);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
         ProjectDto result = projectService.createProject(projectDto);
 
@@ -82,6 +84,8 @@ class ProjectServiceApplicationTests {
 
     @Test
     void createProject_ProjectWithSameNameExists() {
+        ProjectDto projectDto = createTestProjectDto();
+
         when(projectRepository.existsByOwnerUserIdAndName(100L, "Test Project")).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(
@@ -95,7 +99,11 @@ class ProjectServiceApplicationTests {
 
     @Test
     void getProjectById_Success() {
+        Project project = createTestProject();
+        ProjectDto projectDto = createTestProjectDto();
+
         when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
         ProjectDto result = projectService.getProjectById(1L);
 
@@ -120,7 +128,11 @@ class ProjectServiceApplicationTests {
 
     @Test
     void findProjects_PublicAndOwnedProjects() {
+        Project project = createTestProject();
+        ProjectDto projectDto = createTestProjectDto();
+
         when(projectRepository.findAll()).thenReturn(List.of(project));
+        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
         List<ProjectDto> result = projectService.findProjects("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
 
