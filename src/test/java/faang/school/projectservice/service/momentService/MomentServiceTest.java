@@ -43,6 +43,13 @@ public class MomentServiceTest {
     private MomentFilter mockMomentFilter;
 
     List<MomentFilter> momentFilters;
+
+    @BeforeEach
+    void init() {
+        momentFilters = List.of(mockMomentFilter);
+        momentService = new MomentService(momentRepository, momentMapper, projectRepository, momentFilters);
+    }
+
     @Test
     public void testCreateProjectCancelled() {
         Project firstProject = createProject(1L, "Project 1", ProjectStatus.CANCELLED);
@@ -253,11 +260,5 @@ public class MomentServiceTest {
 
     private MomentFilterDto createMomentFilterDto(long id, LocalDateTime date, List<Long> projectIds) {
         return new MomentFilterDto(id, date, projectIds);
-    }
-
-    @BeforeEach
-    void init() {
-        momentFilters = List.of(mockMomentFilter);
-        momentService = new MomentService(momentRepository, momentMapper, projectRepository, momentFilters);
     }
 }
