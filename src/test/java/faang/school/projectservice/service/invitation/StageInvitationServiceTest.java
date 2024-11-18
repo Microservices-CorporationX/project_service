@@ -1,4 +1,4 @@
-package faang.school.projectservice.invitation;
+package faang.school.projectservice.service.invitation;
 
 import org.junit.jupiter.api.Test;
 
