@@ -1,14 +1,16 @@
-package faang.school.projectservice.invitation;
+package faang.school.projectservice.controller.invitation;
 
-import faang.school.projectservice.controller.invitation.StageInvitationController;
 import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
+import faang.school.projectservice.exception.invitation.InvalidInvitationDataException;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.invitation.StageInvitationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @ContextConfiguration(classes = {StageInvitationController.class, StageInvitationService.class})
+@ExtendWith(MockitoExtension.class)
 public class StageInvitationControllerTest {
 
     private static final String URL_SEND_INVITATION = "/stageInvitation";
@@ -105,19 +108,21 @@ public class StageInvitationControllerTest {
             .andExpect(status().isOk());
     }
 
-//    @Test
-//    @DisplayName("Тест ошибки при принятии приглашения")
-//    void negativeTestAcceptInvitation() throws Exception {
-//        Long invitationId = 1L;
-//
-//        when(stageInvitationService.acceptInvitation(invitationId))
-//            .thenThrow(new Exception("Invitation not found"));
-//
-//        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
-//                .contentType(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isNotFound())
-//            .andExpect(content().string("Invitation not found"));
-//    }
+
+//    проблемный тест
+    @Test
+    @DisplayName("Тест негативного принятия приглашения (приглашение не найдено)")
+    void negativeTestAcceptInvitation_NotFound() throws Exception {
+        Long invitationId = 1L;
+
+        when(stageInvitationService.acceptInvitation(invitationId))
+            .thenThrow(new InvalidInvitationDataException("Приглашение с ID " + invitationId + " не найдено"));
+
+        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Приглашение с ID " + invitationId + " не найдено"));
+    }
 
     @Test
     @DisplayName("Тест успешного отклонения приглашения")
@@ -163,6 +168,7 @@ public class StageInvitationControllerTest {
 //    @DisplayName("Тест фильтрации приглашений")
 //    void positiveTestGetFilteredInvitations() throws Exception {
 //        StageInvitationDTO filterDTO = StageInvitationDTO.builder()
+//            .invitedId(4L)
 //            .authorId(3L)
 //            .status(StageInvitationStatus.PENDING)
 //            .build();
@@ -174,11 +180,20 @@ public class StageInvitationControllerTest {
 //                .authorId(3L)
 //                .invitedId(4L)
 //                .status(StageInvitationStatus.PENDING)
-//                .description(null)
+//                .description("Приглашение на этап")
+//                .build(),
+//            StageInvitationDTO.builder()
+//                .id(2L)
+//                .stageId(3L)
+//                .authorId(3L)
+//                .invitedId(5L)
+//                .status(StageInvitationStatus.PENDING)
+//                .description("Приглашение на другой этап")
 //                .build()
 //        );
 //
 //        when(stageInvitationService.getFilteredInvitations(filterDTO)).thenReturn(filteredInvitations);
+//
 //
 //        mockMvc.perform(post(URL_GET_FILTERED_INVITATIONS)
 //                .contentType(MediaType.APPLICATION_JSON)
@@ -186,6 +201,7 @@ public class StageInvitationControllerTest {
 //            .andExpect(status().isOk())
 //            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(filteredInvitations)));
 //    }
+
 
     @Test
     @DisplayName("Тест ошибки при некорректном JSON для фильтрации приглашений")

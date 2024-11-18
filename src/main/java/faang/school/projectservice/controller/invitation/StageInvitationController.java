@@ -2,11 +2,13 @@ package faang.school.projectservice.controller.invitation;
 
 import faang.school.projectservice.dto.invitation.RejectionReasonDTO;
 import faang.school.projectservice.dto.invitation.StageInvitationDTO;
+import faang.school.projectservice.exception.invitation.InvalidInvitationDataException;
 import faang.school.projectservice.service.invitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,14 @@ public class StageInvitationController {
     public StageInvitationDTO acceptInvitation(@PathVariable Long invitationId) {
         log.info("Получен запрос на принятие приглашения: {}", invitationId);
         return stageInvitationService.acceptInvitation(invitationId);
+    }
+
+    // не работает негативный тест без этого
+
+    @ExceptionHandler(InvalidInvitationDataException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleInvalidInvitationDataException(InvalidInvitationDataException e) {
+        return e.getMessage();
     }
 
     @PatchMapping("/{invitationId}/reject")
