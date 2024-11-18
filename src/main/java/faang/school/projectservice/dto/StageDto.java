@@ -18,4 +18,5 @@ public class StageDto {
 
     private List<StageRoleDto> stageRoles;
     private List<TaskDto> tasks;
+    private List<Long> executorsIds;
 }

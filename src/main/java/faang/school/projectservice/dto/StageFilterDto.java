@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StageFilterDto {
-//    private String stageName;
     private List<TeamRole> roles;
     private List<TaskStatus> taskStatuses;
 }

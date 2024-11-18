@@ -4,21 +4,31 @@ import faang.school.projectservice.dto.StageDto;
 import faang.school.projectservice.dto.StageRoleDto;
 import faang.school.projectservice.dto.TaskDto;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface StageMapper {
 
     @Mapping(target = "projectId", source = "project.id")
+    @Mapping(source = "executors", target = "executorsIds", qualifiedByName = "map")
     StageDto toDto(Stage stage);
 
+    @Mapping(target = "executors", ignore = true)
     @Mapping(target = "project.id", source = "projectId")
     Stage toEntity(StageDto stageDto);
+
+    @Named("map")
+    default List<Long> map(List<TeamMember> teamMembers) {
+        return teamMembers != null ? teamMembers.stream().map(TeamMember::getId).toList() : Collections.emptyList();
+    }
 
     List<StageDto> toDtos(List<Stage> stage);
 
