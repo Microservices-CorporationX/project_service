@@ -11,16 +11,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/moments")
+@RestController
+@RequestMapping("/moments")
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService service;
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<MomentDto> createMoment(@RequestBody @Valid MomentDto momentDto) {
         return ResponseEntity.ok(service.createMoment(momentDto));
     }

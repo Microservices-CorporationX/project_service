@@ -2,13 +2,13 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class MomentService {
     public MomentDto updateMoment(MomentDto updatedMomentDto, Long momentId) {
         log.info("Updating moment with ID: {} using data: {}", momentId, updatedMomentDto);
         Moment momentToUpdate = momentRepository.findById(momentId).orElseThrow(() ->
-                new EntityNotFoundException("Moment not found with id : " + momentId));
+                new EntityNotFoundException("Moment not found with id : ",  + momentId));
         log.debug("Found existing moment: {}", momentToUpdate);
 
         Moment updatedMoment = momentMapper.toEntity(updatedMomentDto);
@@ -82,7 +82,7 @@ public class MomentService {
                 .findAny()
                 .orElseThrow(() -> {
                     log.warn("Moment not found with ID: {}", id);
-                    return new EntityNotFoundException("Moment not found with id : " + id);
+                    return new EntityNotFoundException("Moment not found with id : ", + id);
                 });
     }
 
