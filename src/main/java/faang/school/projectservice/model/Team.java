@@ -35,4 +35,12 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public void addTeamMember(TeamMember teamMember) {
+        teamMembers.add(teamMember);
+    }
+
+    public void removeTeamMember(TeamMember teamMember) {
+        teamMembers.remove(teamMember);
+    }
 }
