@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,18 +20,18 @@ import java.util.List;
 public class MomentController {
     private final MomentService service;
 
-    @PostMapping("/create")
+    @PostMapping("/")
     public ResponseEntity<MomentDto> createMoment(@RequestBody @Valid MomentDto momentDto) {
         return ResponseEntity.ok(service.createMoment(momentDto));
     }
 
-    @PostMapping("/{momentId}")
+    @PutMapping("/{momentId}")
     public ResponseEntity<MomentDto> updateMoment(@PathVariable("momentId") Long momentId,
                                                   @RequestBody @Valid MomentDto updatedMomentDto) {
         return ResponseEntity.ok(service.updateMoment(updatedMomentDto, momentId));
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public ResponseEntity<List<MomentDto>> getMomentsByFilter(@RequestBody @Valid MomentFilterDto momentFilterDto) {
         return ResponseEntity.ok(service.getMomentsByFilter(momentFilterDto));
     }
@@ -40,8 +41,8 @@ public class MomentController {
         return ResponseEntity.ok(service.getAllMoments());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<MomentDto> getMomentById(@PathVariable("id") Long id) {
+    @GetMapping("/{momentId}")
+    public ResponseEntity<MomentDto> getMomentById(@PathVariable("momentId") Long id) {
         return ResponseEntity.ok(service.getMomentById(id));
     }
 

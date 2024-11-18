@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 @Component
 public class MomentProjectsFilter implements MomentFilter {
+
     @Override
     public boolean isApplicable(MomentFilterDto filters) {
         return filters != null && !filters.getProjectsPattern().isBlank();
