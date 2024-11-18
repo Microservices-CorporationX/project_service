@@ -2,6 +2,7 @@ package faang.school.projectservice.service.moment;
 
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.moment.MomentFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.moment.MomentMapperImpl;
@@ -10,7 +11,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
