@@ -11,11 +11,11 @@ public class ProjectStatusFilter implements ProjectFilter{
 
     @Override
     public boolean isApplicable(ProjectFilterDto dto) {
-        return dto.getStatus() != null;
+        return dto.getStatusPattern() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto dto) {
-        return projects.filter(e -> e.getStatus().equals(dto.getStatus()));
+        return projects.filter(e -> e.getStatus().equals(dto.getStatusPattern()));
     }
 }

@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -35,19 +34,17 @@ public class ProjectService {
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
         Project project = projectMapper.toEntity(dto);
-        project.setCreatedAt(LocalDateTime.now());
         project = projectRepository.save(project);
         log.info("Created project {}", project);
         return projectMapper.toDto(project);
     }
 
-    public CreateSubProjectDto createSubProject(Long parentId, CreateSubProjectDto dto) {
+    public CreateSubProjectDto createSubProject(CreateSubProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
         Project project = createSubProjectMapper.toEntity(dto);
-        Project parent = projectRepository.getProjectById(parentId);
+        Project parent = projectRepository.getProjectById(dto.getParentId());
         projectValidator.validateIsPublic(parent, project);
         project.setParentProject(parent);
-        project.setCreatedAt(LocalDateTime.now());
         parent.getChildren().add(project);
         project = projectRepository.save(project);
         projectRepository.save(parent);
@@ -74,7 +71,8 @@ public class ProjectService {
         Stream<Project> children = projectRepository.getProjectById(projectId).getChildren().stream();
         return projectFilters.stream()
                 .filter(e -> e. isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(children, filterDto))
+                .reduce(children, (stream, filter) -> filter.apply(stream, filterDto),
+                        ((subStream, stream) -> stream))
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
                 .distinct()
                 .map(createSubProjectMapper::toDto)

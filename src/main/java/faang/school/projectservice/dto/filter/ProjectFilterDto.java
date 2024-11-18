@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectFilterDto {
-    private String name;
-    private ProjectStatus status;
+    private String namePattern;
+    private ProjectStatus statusPattern;
 }

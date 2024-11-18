@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.service.project.ProjectService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,8 +32,8 @@ public class SubProjectControllerTests {
     @Test
     void testCreateSubProject() {
         CreateSubProjectDto createSubProjectDto = new CreateSubProjectDto();
-        subProjectController.createSubProject(1L, createSubProjectDto);
-        verify(projectService, times(1)).createSubProject(1L, createSubProjectDto);
+        subProjectController.createSubProject(createSubProjectDto);
+        verify(projectService, times(1)).createSubProject(createSubProjectDto);
     }
 
     @Test

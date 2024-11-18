@@ -57,23 +57,25 @@ public class ProjectServiceTests {
         Project project = new Project();
         ProjectDto projectDto = new ProjectDto();
         when(projectMapper.toEntity(projectDto)).thenReturn(project);
-        projectService.createProject(projectDto);
+        when(projectMapper.toDto(any())).thenReturn(projectDto);
+        ProjectDto result = projectService.createProject(projectDto);
+        assertEquals(projectDto, result);
         verify(projectValidator, times(1)).validateUniqueProject(projectDto);
         verify(projectRepository, times(1)).save(project);
     }
 
     @Test
     public void testCreateSubProject() {
-        CreateSubProjectDto createSubProjectDto = new CreateSubProjectDto();
+        long parentId = 1L;
+        CreateSubProjectDto createSubProjectDto = CreateSubProjectDto.builder().parentId(parentId).build();
         Project parent = new Project();
         Project project = new Project();
-        long parentId = 1L;
         List<Project> children = new ArrayList<>();
         parent.setId(parentId);
         parent.setChildren(children);
         when(createSubProjectMapper.toEntity(createSubProjectDto)).thenReturn(project);
         when(projectRepository.getProjectById(parentId)).thenReturn(parent);
-        projectService.createSubProject(parentId, createSubProjectDto);
+        projectService.createSubProject(createSubProjectDto);
         verify(projectValidator, times(1)).validateUniqueProject(createSubProjectDto);
         assertEquals(parent, project.getParentProject());
         assertTrue(parent.getChildren().contains(project));
@@ -220,8 +222,8 @@ public class ProjectServiceTests {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .name("First")
-                .status(ProjectStatus.IN_PROGRESS)
+                .namePattern("First")
+                .statusPattern(ProjectStatus.IN_PROGRESS)
                 .build();
 
         CreateSubProjectDto child1Dto = CreateSubProjectDto.builder()
@@ -274,8 +276,8 @@ public class ProjectServiceTests {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
         ProjectFilterDto filterDto = ProjectFilterDto.builder()
-                .name("First")
-                .status(ProjectStatus.IN_PROGRESS)
+                .namePattern("First")
+                .statusPattern(ProjectStatus.IN_PROGRESS)
                 .build();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(parent);

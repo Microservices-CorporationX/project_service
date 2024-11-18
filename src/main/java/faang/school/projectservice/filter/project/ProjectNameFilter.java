@@ -11,11 +11,11 @@ public class ProjectNameFilter implements ProjectFilter {
 
     @Override
     public boolean isApplicable(ProjectFilterDto dto) {
-        return dto.getName() != null;
+        return dto.getNamePattern() != null;
     }
 
     @Override
     public Stream<Project> apply(Stream<Project> projects, ProjectFilterDto dto) {
-        return projects.filter(e -> e.getName().contains(dto.getName()));
+        return projects.filter(e -> e.getName().toLowerCase().contains(dto.getNamePattern().toLowerCase()));
     }
 }
