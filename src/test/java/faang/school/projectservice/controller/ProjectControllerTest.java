@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,7 +79,7 @@ class ProjectControllerTest {
     void testUpdateProjectSuccessful() {
         when(projectService.updateProject(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectDescription(updateProjectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProject(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateProjectDto, response.getBody());
@@ -108,12 +111,12 @@ class ProjectControllerTest {
     @Test
     void testGetProjectByIdSuccess() {
         projectDto.setId(1L);
-        when(projectService.getAccessibleProjectsById(projectDto.getId(), ownerId)).thenReturn(projectDto);
+        when(projectService.getAccessibleProjectById(projectDto.getId(), ownerId)).thenReturn(projectDto);
 
         ResponseEntity<ProjectDto> response = projectController.getProjectById(projectDto.getId(), ownerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).getAccessibleProjectsById(projectDto.getId(), ownerId);
+        verify(projectService, times(1)).getAccessibleProjectById(projectDto.getId(), ownerId);
     }
 }

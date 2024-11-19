@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
@@ -37,7 +39,7 @@ public class ProjectController {
     }
 
     @PutMapping
-    public ResponseEntity<UpdateProjectDto> updateProjectDescription(@Valid @RequestBody UpdateProjectDto dto) {
+    public ResponseEntity<UpdateProjectDto> updateProject(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.ok(projectService.updateProject(dto));
@@ -55,29 +57,29 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
 
-    @GetMapping("/all-projects/{currentUserId}")
+    @GetMapping("/all-projects")
     public ResponseEntity<List<ProjectDto>> getAllProjects(
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
-            @PathVariable
+            @RequestParam
             Long currentUserId) {
         log.info("Getting all projects by User #{}.", currentUserId);
 
         return ResponseEntity.ok(projectService.getAllProjectsForUser(currentUserId));
     }
 
-    @GetMapping("/project/{currentUserId}")
+    @GetMapping("/project/{projectId}")
     public ResponseEntity<ProjectDto> getProjectById(
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
-            @PathVariable
+            @RequestParam("currentUserId")
             Long currentUserId,
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
-            @RequestParam("projectId")
+            @PathVariable
             Long projectId) {
         log.info("Getting project id #{} by User #{}.", projectId, currentUserId);
 
-        return ResponseEntity.ok(projectService.getAccessibleProjectsById(currentUserId, projectId));
+        return ResponseEntity.ok(projectService.getAccessibleProjectById(currentUserId, projectId));
     }
 }

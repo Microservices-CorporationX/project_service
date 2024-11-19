@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.repository.CandidateRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

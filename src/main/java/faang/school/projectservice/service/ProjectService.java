@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
@@ -12,6 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +43,7 @@ public class ProjectService {
         return projectMapper.toDto(savedProject);
     }
 
+
     @Transactional
     public UpdateProjectDto updateProject(UpdateProjectDto dto) {
         Project project = projectRepository.getProjectById(dto.getId());
@@ -72,7 +73,9 @@ public class ProjectService {
 
         List<ProjectDto> result = projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(projects.stream(), filterDto))
+                .reduce(projects.stream(),
+                        (projectsStream, filter) -> filter.apply(projectsStream, filterDto),
+                        (s1, s2) -> s1)
                 .map(projectMapper::toDto)
                 .toList();
 
@@ -91,7 +94,7 @@ public class ProjectService {
         return result;
     }
 
-    public ProjectDto getAccessibleProjectsById(Long currentUserId, Long projectId) {
+    public ProjectDto getAccessibleProjectById(Long currentUserId, Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
         if (!projectValidator.canUserAccessProject(project, currentUserId)) {
@@ -111,11 +114,20 @@ public class ProjectService {
         return projectRepository.getProjectById(projectId);
     }
 
+    public ProjectDto findById(Long id) {
+        return projectMapper.toDto(projectRepository.getProjectById(id));
+    }
+
+    public List<ProjectDto> findAllById(List<Long> ids) {
+        return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
+    }
+
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
+
 
     public List<TeamMember> getProjectParticipantsWithRole(Project project, String role) {
         return project.getTeams().stream()
@@ -125,3 +137,5 @@ public class ProjectService {
                 .toList();
     }
 }
+
+

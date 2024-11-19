@@ -1,15 +1,13 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.repository.ProjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectValidatorTest {
@@ -41,6 +37,7 @@ class ProjectValidatorTest {
     private Project project;
     private Long ownerId;
     private String projectName;
+    private Long projectId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -118,5 +115,29 @@ class ProjectValidatorTest {
         assertEquals("Project with id 1 doesn't exist", ex.getMessage());
 
         verify(projectRepository, times(1)).existsById(projectId);
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusInProgress() {
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertTrue(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusCompleted() {
+        project.setStatus(ProjectStatus.COMPLETED);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertFalse(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    public void testIsOpenProjectWhenStatusCancelled() {
+        project.setStatus(ProjectStatus.CANCELLED);
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+
+        assertFalse(projectValidator.isOpenProject(projectId));
     }
 }
