@@ -11,6 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.validator.StageValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class StageService {
     private final ProjectService projectService;
     private final StageInvitationService stageInvitationService;
     private final StageMapper stageMapper;
+    private final StageValidator stageValidator;
     private final List<Filter<Stage, StageFilterDto>> stageFilters;
 
     public StageService(StageRepository stageRepository,
@@ -32,12 +34,14 @@ public class StageService {
                         ProjectService projectService,
                         @Lazy StageInvitationService stageInvitationService,
                         StageMapper stageMapper,
+                        StageValidator stageValidator,
                         List<Filter<Stage, StageFilterDto>> stageFilters) {
         this.stageRepository = stageRepository;
         this.teamMemberService = teamMemberService;
         this.projectService = projectService;
         this.stageInvitationService = stageInvitationService;
         this.stageMapper = stageMapper;
+        this.stageValidator = stageValidator;
         this.stageFilters = stageFilters;
     }
 
@@ -61,7 +65,7 @@ public class StageService {
     public void updateStage(long stageId, TeamMemberDto teamMemberDto) {
         Stage stage = getStageById(stageId);
         String role = teamMemberDto.getTeamRole().toString();
-        if (!isParticipantWithRoleExist(stage, role)) {
+        if (!stageValidator.isExecutorExist(stage, role)) {
             var teamMembers = getProjectMembersWithRole(stage, role);
             int requiredNumberOfUsers = numberStageUsersWithRole(stage, role);
             sendStageInvitations(stage, teamMembers, requiredNumberOfUsers);
@@ -117,12 +121,6 @@ public class StageService {
         Stage anotherStage = stageRepository.getById(anotherStageId);
         anotherStage.setTasks(stage.getTasks());
         return stage;
-    }
-
-    private boolean isParticipantWithRoleExist(Stage stage, String role) {
-        return stage.getExecutors().stream()
-                .flatMap(teamMember -> teamMember.getRoles().stream())
-                .anyMatch(teamRole -> teamRole.toString().equalsIgnoreCase(role));
     }
 
     private int numberStageUsersWithRole(Stage stage, String role) {
