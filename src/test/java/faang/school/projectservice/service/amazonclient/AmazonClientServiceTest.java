@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.InvalidFormatFile;
+import faang.school.projectservice.service.image.ImageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,9 @@ class AmazonClientServiceTest {
 
     @Mock
     private MultipartFile multipartFile;
+
+    @Mock
+    private ImageService imageService;
 
     @Mock
     private S3Object s3Object;
@@ -68,6 +72,7 @@ class AmazonClientServiceTest {
 
         when(multipartFile.getOriginalFilename()).thenReturn(fileName);
         when(multipartFile.getInputStream()).thenReturn(inputStream);
+        when(imageService.resizeImage(any(BufferedImage.class))).thenReturn(image);
 
         String result = amazonClientService.updateProjectCover(multipartFile);
 

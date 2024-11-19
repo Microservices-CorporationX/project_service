@@ -1,17 +1,11 @@
 package faang.school.projectservice.service.amazonclient;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.exception.InvalidFormatFile;
 import faang.school.projectservice.service.image.ImageService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,31 +25,12 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AmazonClientService {
 
-    private AmazonS3 s3client;
-
-    @Value("${services.s3.endpoint}")
-    private String endpointUrl;
+    private final AmazonS3 s3client;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    @Value("${services.s3.accessKey}")
-    private String accessKey;
-
-    @Value("${services.s3.secretKey}")
-    private String secretKey;
-
     private final ImageService imageService;
-
-    @PostConstruct
-    private void initializeAmazon() {
-        AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
-        this.s3client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withEndpointConfiguration(
-                        new AwsClientBuilder.EndpointConfiguration(endpointUrl, "us-east-1"))
-                .build();
-    }
 
     public String updateProjectCover(MultipartFile multipartFile) {
         String fileName = new Date().getTime() + "-" +
@@ -65,7 +40,7 @@ public class AmazonClientService {
             uploadFileTos3bucket(fileName, file);
             file.delete();
         } catch (IOException e) {
-            log.error("IOException: " + Arrays.toString(e.getStackTrace()));
+            log.warn("IOException: " + Arrays.toString(e.getStackTrace()));
             throw new RuntimeException(e);
         }
         return fileName;
@@ -77,7 +52,7 @@ public class AmazonClientService {
         try {
             return inputStream.readAllBytes();
         } catch (IOException e) {
-            log.error("IOException: " + Arrays.toString(e.getStackTrace()));
+            log.warn("IOException: " + Arrays.toString(e.getStackTrace()));
             throw new RuntimeException(e);
         }
     }
