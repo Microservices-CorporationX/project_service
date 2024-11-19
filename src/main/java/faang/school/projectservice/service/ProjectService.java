@@ -78,4 +78,8 @@ public class ProjectService {
         }
         return true;
     }
+
+    public Project getProjectEntityById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
 }

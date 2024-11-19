@@ -15,7 +15,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
 
+    @InjectMocks
     private ProjectService projectService;
 
     @Mock
@@ -111,6 +114,12 @@ public class ProjectServiceTest {
     }
 
     @Test
+    void getProjectEntityByIdSuccess(){
+        Mockito.lenient().when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(new Project());
+        assertEquals(new Project(), projectService.getProjectEntityById(1L));
+    }
+
+    @Test
     public void testUpdateProjectSuccessful() {
         ProjectDto dto = new ProjectDto();
         Project project = new Project();
@@ -132,6 +141,14 @@ public class ProjectServiceTest {
         projectService.existsByOwnerUserIdAndName(userId, name);
         verify(projectRepository).existsByOwnerUserIdAndName(userId, name);
     }
+
+    @Test
+    void getProjectEntityByIdFail(){
+        Mockito.lenient().when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found by id: %s".formatted(1L)));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.getProjectEntityById(1L));
+        assertEquals("Project not found by id: %s".formatted(1L), exception.getMessage());
+        }
+
 
     private ProjectFilterDto setupProjectsAndMocks(long userId, boolean userIsTeamMember) {
         ProjectFilterDto projectFilterDto = new ProjectFilterDto();
@@ -163,4 +180,5 @@ public class ProjectServiceTest {
 
         return projectFilterDto;
     }
+
 }
