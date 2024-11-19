@@ -24,16 +24,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @WebMvcTest
 @ContextConfiguration(classes = {SubprojectController.class, SubProjectService.class, SubprojectFilter.class})
 public class SubProjectControllerTest {
-    private final String POST = "/subprojects/1";
+    private final String POST = "/subprojects/projects/1/subprojects";
     private final String PUT = "/subprojects/2";
     private final String GET = "/subprojects/1/getSubprojects";
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private SubprojectFilterDto subprojectFilterDto;
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,59 +66,26 @@ public class SubProjectControllerTest {
     }
 
     @Test
-    void SubProjectController_createSubProject_updateSubProject() throws Exception {
-        CreateSubProjectDto createSubProjectDto = createValidSubProjectDto();
+    void SubProjectController_updateSubProject() throws Exception {
+        CreateSubProjectDto updateSubProjectDto = createValidSubProjectDto();
         ProjectDto expectedProjectDto = createExpectedProjectDto();
 
-        CreateSubProjectDto expectedUpdateSubProjectDto = CreateSubProjectDto.builder()
-                .id(2L)
-                .parentID(1L)
-                .name("Subproject 2")
-                .description("Description of Subproject")
-                .isPrivate(false)
-                .children(null)
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        mockMvc.perform(post(POST)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(createSubProjectDto)))
-                .andExpect(status().isOk());
+        when(subProjectService.updateSubProject(2L, updateSubProjectDto)).thenReturn(expectedProjectDto);
 
         mockMvc.perform(put(PUT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(expectedUpdateSubProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(updateSubProjectDto)))
+                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedProjectDto)))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void SubProjectController_createSubProject_updateSubProject_negative() throws Exception {
-        CreateSubProjectDto createSubProjectDto = createValidSubProjectDto();
-        ProjectDto expectedProjectDto = createExpectedProjectDto();
-
-        CreateSubProjectDto expectedUpdateSubProjectDto = CreateSubProjectDto.builder()
-                .id(1L)
-                .parentID(1L)
-                .name("Subproject 2")
-                .description("Description of Subproject")
-                .isPrivate(false)
-                .children(null)
-                .ownerId(1L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        mockMvc.perform(post(POST)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(createSubProjectDto)))
-                .andExpect(status().isOk());
-
+    void SubProjectController_updateSubProject_negative() throws Exception {
+        CreateSubProjectDto updateSubProjectDto = createInvalidSubProjectDto();
 
         mockMvc.perform(put(PUT)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(expectedUpdateSubProjectDto)))
+                        .content(OBJECT_MAPPER.writeValueAsString(updateSubProjectDto)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -150,13 +114,11 @@ public class SubProjectControllerTest {
                 .status(ProjectStatus.CREATED)
                 .build();
 
-
         mockMvc.perform(get("//getSubprojects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(filterDto)))
                 .andExpect(status().isNotFound());
     }
-
 
     private CreateSubProjectDto createValidSubProjectDto() {
         return CreateSubProjectDto.builder()
@@ -197,5 +159,4 @@ public class SubProjectControllerTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }
-
 }

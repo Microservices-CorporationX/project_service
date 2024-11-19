@@ -2,6 +2,7 @@ package faang.school.projectservice.dto.subprojectDto.subprojectDto;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ public class CreateSubProjectDto {
     Long id;
     @NotNull
     private Long parentID;
-    @NotNull
+    @NotBlank
     private String name;
     @NotNull
     private String description;

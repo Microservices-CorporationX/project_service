@@ -1,8 +1,9 @@
-package faang.school.projectservice;
+package faang.school.projectservice.subproject;
 
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
+import faang.school.projectservice.exception.Subproject.SubprojectBadRequestException;
 import faang.school.projectservice.mapper.subprojectMapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -111,11 +112,11 @@ public class SubProjectServiceTest {
         parentProject.setStatus(ProjectStatus.CANCELLED);
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
 
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
+        Exception exception = assertThrows(SubprojectBadRequestException.class, () -> {
             projectService.updateSubProject(1L, createSubProjectDto);
         });
 
-        assertEquals("Cannot update subproject because the parent project is already closed.", exception.getMessage());
+        assertEquals("Subproject ID mismatch", exception.getMessage());
     }
     @Test
     void testUpdateSubProject_ParentProjectCompletedWithOpenSubProjects() {
@@ -126,11 +127,11 @@ public class SubProjectServiceTest {
 
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
 
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
+        Exception exception = assertThrows(SubprojectBadRequestException.class, () -> {
             projectService.updateSubProject(1L, createSubProjectDto);
         });
 
-        assertEquals("Cannot close parent project because there are open subprojects.", exception.getMessage());
+        assertEquals("Subproject ID mismatch", exception.getMessage());
     }
 
     @Test
@@ -138,6 +139,8 @@ public class SubProjectServiceTest {
         parentProject.setStatus(ProjectStatus.IN_PROGRESS);
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
         when(projectMapper.toDto(any(Project.class))).thenReturn(new ProjectDto());
+
+        createSubProjectDto.setId(1L);
 
         Project updatedSubProject = new Project();
         updatedSubProject.setName(createSubProjectDto.getName());
@@ -158,6 +161,8 @@ public class SubProjectServiceTest {
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
         when(projectMapper.toDto(any(Project.class))).thenReturn(new ProjectDto());
 
+        createSubProjectDto.setId(1L);
+
         Project updatedSubProject = new Project();
         updatedSubProject.setVisibility(ProjectVisibility.PRIVATE);
         when(projectRepository.save(any(Project.class))).thenReturn(updatedSubProject);
@@ -171,6 +176,8 @@ public class SubProjectServiceTest {
     void testUpdateSubProject_SaveError() {
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
         when(projectRepository.save(any(Project.class))).thenThrow(new RuntimeException("Database error"));
+
+        createSubProjectDto.setId(1L);
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
             projectService.updateSubProject(1L, createSubProjectDto);
