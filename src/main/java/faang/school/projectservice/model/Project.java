@@ -6,10 +6,7 @@ import java.util.List;
 
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -40,11 +37,15 @@ public class Project {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @ManyToOne(cascade={CascadeType.ALL})
-    @JoinColumn(name="parent_project_id")
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "parent_project_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Project parentProject;
 
     @OneToMany(mappedBy = "parentProject", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Project> children;
 
     @OneToMany(mappedBy = "project")
