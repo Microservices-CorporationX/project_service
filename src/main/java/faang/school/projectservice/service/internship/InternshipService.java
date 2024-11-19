@@ -37,7 +37,7 @@ public class InternshipService {
         List<TeamMember> interns = teamMemberRepository.findAllById(internshipDto.getInternIds());
         internshipToSave.setInterns(interns);
 
-        internshipToSave = internshipRepository.save(internshipToSave);
+        internshipRepository.save(internshipToSave);
         log.info("The internship called {}, with ID {} was created",
                 internshipDto.getName(),
                 internshipToSave.getId());

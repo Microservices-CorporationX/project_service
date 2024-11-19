@@ -57,7 +57,7 @@ public class InternshipControllerTest {
 
         when(internshipService.createInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(post("/api/internship/create")
+        mockMvc.perform(post("/api/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
@@ -78,7 +78,7 @@ public class InternshipControllerTest {
 
         when(internshipService.updateInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(put("/api/internship/update")
+        mockMvc.perform(put("/api/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships()).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/internship/getAll")
+        mockMvc.perform(get("/api/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -134,7 +134,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships(any(InternshipFilterDto.class))).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/internship/getAll/filters")
+        mockMvc.perform(get("/api/internships/filters")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -149,7 +149,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternship(internshipDto.getId())).thenReturn(internshipDto);
 
-        mockMvc.perform(get("/api/internship/get/{internshipId}", internshipDto.getId())
+        mockMvc.perform(get("/api/internships/{internshipId}", internshipDto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())

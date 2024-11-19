@@ -42,7 +42,7 @@ public class InternshipController {
         return ResponseEntity.ok(internships);
     }
 
-    @GetMapping("/internships/filters")
+    @GetMapping("/filters")
     public ResponseEntity<List<InternshipDto>> getInternships(@RequestBody @Valid InternshipFilterDto filters) {
         List<InternshipDto> internships = internshipService.getInternships(filters);
         return ResponseEntity.ok(internships);

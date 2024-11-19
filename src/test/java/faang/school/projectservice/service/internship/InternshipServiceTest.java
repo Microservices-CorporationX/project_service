@@ -14,6 +14,8 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -27,6 +29,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -46,6 +50,8 @@ public class InternshipServiceTest {
     private TaskStatusValidator taskStatusValidator;
     @Mock
     private List<InternshipFilter> filters;
+    @Captor
+    private ArgumentCaptor<Internship> internshipCaptor;
 
     @BeforeEach
     void setUp() {
@@ -66,8 +72,11 @@ public class InternshipServiceTest {
         when(teamMemberRepository.findAllById(internshipDto.getInternIds())).thenReturn(interns);
 
         InternshipDto internshipDtoAfterSave = internshipService.createInternship(internshipDto);
+        verify(internshipRepository).save(internshipCaptor.capture());
+        Internship internshipToSave = internshipCaptor.getValue();
 
         assertEquals(internshipDto, internshipDtoAfterSave);
+        verify(internshipRepository, times(1)).save(internshipToSave);
     }
 
     @Test
