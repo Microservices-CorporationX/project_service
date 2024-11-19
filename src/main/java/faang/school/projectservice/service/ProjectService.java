@@ -8,7 +8,6 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -125,15 +124,6 @@ public class ProjectService {
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
-                .toList();
-    }
-
-
-    public List<TeamMember> getProjectParticipantsWithRole(Project project, String role) {
-        return project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(teamMember -> teamMember.getRoles().stream()
-                        .anyMatch(teamRole -> teamRole.toString().equalsIgnoreCase(role)))
                 .toList();
     }
 }

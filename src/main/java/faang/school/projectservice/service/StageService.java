@@ -64,13 +64,8 @@ public class StageService {
         if (!isParticipantWithRoleExist(stage, role)) {
             var teamMembers = getProjectMembersWithRole(stage, role);
             int requiredNumberOfUsers = numberStageUsersWithRole(stage, role);
-            for (int i = 0; i < requiredNumberOfUsers; i++) {
-                stageInvitationService.sendStageInvitation(StageInvitationDto.builder()
-                        .stageId(stageId)
-                        .authorId(stage.getProject().getOwnerId())
-                        .invitedId(teamMembers.get(i).getId())
-                        .build());
-            }
+            sendStageInvitations(stage, teamMembers, requiredNumberOfUsers);
+
         }
     }
 
@@ -97,7 +92,8 @@ public class StageService {
     }
 
     public void deleteStage(long stageId, long anotherStageId) {
-        stageRepository.delete(moveTasks(stageId, anotherStageId));
+        Stage stage = moveTasks(stageId, anotherStageId);
+        stageRepository.delete(stage);
     }
 
     public StageDto getStageDtoById(long stageId) {
@@ -113,13 +109,13 @@ public class StageService {
     }
 
     private List<TeamMember> getProjectMembersWithRole(Stage stage, String role) {
-        return projectService.getProjectParticipantsWithRole(stage.getProject(), role);
+        return teamMemberService.getProjectParticipantsWithRole(stage.getProject(), role);
     }
 
     private Stage moveTasks(long stageId, long anotherStageId) {
         Stage stage = stageRepository.getById(stageId);
-        Stage newStage = stageRepository.getById(anotherStageId);
-        newStage.setTasks(stage.getTasks());
+        Stage anotherStage = stageRepository.getById(anotherStageId);
+        anotherStage.setTasks(stage.getTasks());
         return stage;
     }
 
@@ -135,6 +131,23 @@ public class StageService {
                 .mapToInt(StageRoles::getCount)
                 .findFirst()
                 .orElse(0);
+    }
+
+    private void sendStageInvitations(Stage stage, List<TeamMember> teamMembers, int requiredNumberOfUsers) {
+        int invitationsToSend = Math.min(requiredNumberOfUsers, teamMembers.size());
+
+        for (int i = 0; i < invitationsToSend; i++) {
+            StageInvitationDto invitation = createStageInvitation(stage, teamMembers.get(i));
+            stageInvitationService.sendStageInvitation(invitation);
+        }
+    }
+
+    private StageInvitationDto createStageInvitation(Stage stage, TeamMember teamMember) {
+        return StageInvitationDto.builder()
+                .stageId(stage.getStageId())
+                .authorId(stage.getProject().getOwnerId())
+                .invitedId(teamMember.getId())
+                .build();
     }
 }
 

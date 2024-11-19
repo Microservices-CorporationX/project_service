@@ -49,7 +49,7 @@ class StageServiceTest {
     private List<Filter> stageFilters;
 
     private Stage stage;
-    private Stage newStage;
+    private Stage anotherStage;
     private TeamMember teamMember;
     private Project project;
     private StageDto stageDto;
@@ -88,7 +88,7 @@ class StageServiceTest {
                 .executors(new ArrayList<>())
                 .build();
 
-        newStage = Stage
+        anotherStage = Stage
                 .builder()
                 .stageId(2L)
                 .stageName("Stage 2")
@@ -145,7 +145,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void getById() {
+    public void testGetStageByIdSuccess() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
 
         Stage stage = stageService.getStageById(stageId);
@@ -163,7 +163,7 @@ class StageServiceTest {
     }
 
     @Test
-    void existsById_ShouldReturnFalse_WhenStageDoesNotExist() {
+    void existsByIdShouldReturnFalseWhenStageDoesNotExist() {
         Long stageId = 2L;
         when(stageRepository.existsById(stageId)).thenReturn(false);
 
@@ -180,7 +180,7 @@ class StageServiceTest {
     }
 
     @Test
-    void testCreateStage_Successfully() {
+    void testCreateStageSuccessfully() {
         when(stageMapper.toEntity(stageDto)).thenReturn(stage);
         when(projectService.getProjectById(projectId)).thenReturn(project);
         when(stageRepository.save(stage)).thenReturn(stage);
@@ -193,14 +193,14 @@ class StageServiceTest {
     }
 
     @Test
-    public void testGetStagesByProjectIdFiltered_Success() {
+    public void testGetStagesByProjectIdFilteredSuccess() {
         when(stageRepository.findAllByProjectId(projectId)).thenReturn(setUpStageList());
         Filter filter = mock(StageTaskStatusFilter.class);
         when(filter.isApplicable(filters)).thenReturn(true);
         when(filter.apply(any(Stream.class), eq(filters))).thenAnswer(invocation -> invocation.getArgument(0));
         when(stageFilters.stream()).thenReturn(Stream.of(filter));
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
-        when(stageMapper.toDto(newStage)).thenReturn(new StageDto());
+        when(stageMapper.toDto(anotherStage)).thenReturn(new StageDto());
 
         List<StageDto> result = stageService.getStagesByProjectIdFiltered(projectId, filters);
 
@@ -208,7 +208,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void testGetStagesByProjectIdFiltered_EmptyProject() {
+    public void testGetStagesByProjectIdFilteredEmptyProject() {
         when(stageRepository.findAllByProjectId(projectId)).thenReturn(List.of());
 
         List<StageDto> result = stageService.getStagesByProjectIdFiltered(projectId, filters);
@@ -217,7 +217,7 @@ class StageServiceTest {
     }
 
     @Test
-    void testGetAllStagesByProjectId_ShouldReturnExpectedStages_WhenProjectExists() {
+    void testGetAllStagesByProjectIdShouldReturnExpectedStagesWhenProjectExists() {
         List<Stage> expectedStages = List.of(stage);
 
         when(stageRepository.findAllByProjectId(stage.getProject().getId())).thenReturn(expectedStages);
@@ -232,7 +232,7 @@ class StageServiceTest {
     }
 
     @Test
-    void testDeleteStage_Successfully() {
+    void testDeleteStageSuccess() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
 
         stageService.deleteStage(stageId);
@@ -242,41 +242,41 @@ class StageServiceTest {
     }
 
     @Test
-    void testDeleteStageAndMoveTasks_Successfully() {
+    void testDeleteStageAndMoveTasksSuccess() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
-        when(stageRepository.getById(newStage.getStageId())).thenReturn(newStage);
+        when(stageRepository.getById(anotherStage.getStageId())).thenReturn(anotherStage);
 
-        stageService.deleteStage(stageId, newStage.getStageId());
+        stageService.deleteStage(stageId, anotherStage.getStageId());
 
-        assertEquals(stage.getTasks(), newStage.getTasks());
+        assertEquals(stage.getTasks(), anotherStage.getTasks());
         verify(stageRepository, times(1)).getById(stageId);
-        verify(stageRepository, times(1)).getById(newStage.getStageId());
+        verify(stageRepository, times(1)).getById(anotherStage.getStageId());
         verify(stageRepository, times(1)).delete(stage);
     }
 
     @Test
-    void testDeleteStageAndMoveTasks_IfNewStageDoesNotExist_ThrowEntityNotFoundException() {
+    void testDeleteStageTasksIfAnotherStageDoesNotExistThrowEntityNotFoundException() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
-        when(stageRepository.getById(newStage.getStageId())).thenThrow(new EntityNotFoundException(
-                String.format("Stage not found by id: %s", newStage.getStageId())));
+        when(stageRepository.getById(anotherStage.getStageId())).thenThrow(new EntityNotFoundException(
+                String.format("Stage not found by id: %s", anotherStage.getStageId())));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStage(stageId, newStage.getStageId()),
-                String.format("Stage not found by id: %s", newStage.getStageId()));
+                        stageService.deleteStage(stageId, anotherStage.getStageId()),
+                String.format("Stage not found by id: %s", anotherStage.getStageId()));
     }
 
     @Test
-    void testDeleteStageAndMoveTasks_IfStageDoesNotExist_ThrowEntityNotFoundException() {
+    void testDeleteStageIfStageDoesNotExistThrowEntityNotFoundException() {
         when(stageRepository.getById(stageId)).thenThrow(new EntityNotFoundException(
                 String.format("Stage not found by id: %s", stageId)));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStage(stageId, newStage.getStageId()),
+                        stageService.deleteStage(stageId, anotherStage.getStageId()),
                 String.format("Stage not found by id: %s", stageId));
     }
 
     @Test
-    void testGetAllStagesByProjectId_ShouldThrowEntityNotFoundException_WhenProjectDoesNotExist() {
+    void testGetAllStagesByProjectIdShouldThrowEntityNotFoundExceptionWhenProjectDoesNotExist() {
         when(stageRepository.findAllByProjectId(invalidProjectId)).thenThrow(new EntityNotFoundException(
                 String.format("Project not found by id: %s", invalidProjectId)));
 
@@ -288,7 +288,7 @@ class StageServiceTest {
     }
 
     @Test
-    void testGetStage_Successfully() {
+    void testGetStageSuccess() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
@@ -298,7 +298,7 @@ class StageServiceTest {
     }
 
     @Test
-    void testGetStage_ThrowEntityNotFoundException() {
+    void testGetStageThrowEntityNotFoundException() {
         when(stageRepository.getById(stageId)).thenThrow(new EntityNotFoundException(
                 String.format("Stage not found by id: %s", stageId)));
 
@@ -308,7 +308,7 @@ class StageServiceTest {
     }
 
     private List<Stage> setUpStageList() {
-        return List.of(stage, newStage);
+        return List.of(stage, anotherStage);
     }
 
 }
