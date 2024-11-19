@@ -4,7 +4,16 @@
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-    </root>
+
+    <profile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </profile>
+
+    <default>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </default>
 </configuration>
