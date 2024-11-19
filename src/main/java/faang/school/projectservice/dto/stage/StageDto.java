@@ -14,7 +14,7 @@ import java.util.List;
 public class StageDto {
     private Long stageId;
     private String stageName;
-    private Long projectId;
+    private long projectId;
     private List<Long> executorsId;
 }
 
