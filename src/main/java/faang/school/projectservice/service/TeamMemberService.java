@@ -68,6 +68,7 @@ public class TeamMemberService {
             user.setUsername(teamMemberDto.username());
         }
 
+        teamService.saveTeam(memberToUpdate.getTeam());
         return teamMemberMapper.toUpdateDto(memberToUpdate);
     }
 
@@ -76,6 +77,7 @@ public class TeamMemberService {
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), "delete team member");
         TeamMember teamMember = teamMemberRepository.findById(memberId);
         teamMember.getTeam().removeTeamMember(teamMember);
+        teamService.saveTeam(teamMember.getTeam());
     }
 
     public List<CreateTeamMemberDto> getFilteredTeamMembers(String name, TeamRole role, long projectId) {
