@@ -25,14 +25,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
+
+    private static final String PROJECT = "Project";
 
     @Mock
     private ProjectJpaRepository projectRepository;
@@ -271,5 +275,48 @@ public class ProjectServiceTest {
                 EntityNotFoundException.class,
                 () -> projectService.updateProject(projectDto)
         );
+    }
+
+    @Test
+    void isProjectExistsTrueTest() {
+        when(projectRepository.existsById(1L)).thenReturn(true);
+
+        boolean existsById = projectService.isProjectExists(1L);
+
+        assertTrue(existsById);
+        verify(projectRepository, times(1)).existsById(1L);
+    }
+
+    @Test
+    void isProjectExistsFalseTest() {
+        when(projectRepository.existsById(1L)).thenReturn(false);
+
+        boolean existsById = projectService.isProjectExists(1L);
+
+        assertFalse(existsById);
+        verify(projectRepository, times(1)).existsById(1L);
+    }
+
+    @Test
+    void getProjectByIdExistingProjectTest() {
+        long projectId = 1L;
+        Project project = Project.builder().id(projectId).build();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Project resultProject = projectService.getProjectById(projectId);
+
+        assertEquals(project, resultProject);
+        verify(projectRepository, times(1)).findById(projectId);
+    }
+
+    @Test
+    void getProjectByIdNotExistingProjectTest() {
+        long projectId = 1L;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class, () -> projectService.getProjectById(projectId));
+        assertEquals("Entity %s with ID %s not found".formatted(PROJECT, projectId), exception.getMessage());
+        verify(projectRepository, times(1)).findById(projectId);
     }
 }
