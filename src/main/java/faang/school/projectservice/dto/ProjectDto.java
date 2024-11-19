@@ -31,5 +31,6 @@ public class ProjectDto {
     @NotNull(message = "Visibility must not be null")
     private ProjectVisibility visibility;
     private String coverImageId;
-    private List<Long> teamIds;
+    private List<Long> teamsIds;
+    private List<Long> childrenIds;
 }

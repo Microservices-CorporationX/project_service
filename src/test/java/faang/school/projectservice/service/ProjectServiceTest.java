@@ -1,20 +1,26 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,6 +32,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -51,20 +59,178 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapperImpl projectMapper;
 
+    @Spy
+    private SubProjectMapperImpl subProjectMapper;
+
+    @Mock
+    private ProjectUpdate projectUpdate;
+
     @Mock
     private ProjectFilter filter;
+
+    private List<ProjectUpdate> projectUpdates;
+
+    private List<ProjectFilter> projectFilters;
+    private Project project = new Project();
+    private CreateSubProjectDto createSubProjectDto = new CreateSubProjectDto();
+    private ProjectDto projectDto = new ProjectDto();
+    private Project firstSubProject = new Project();
+    private ProjectFilterDto projectFilterDto = new ProjectFilterDto();
+
+    @Captor
+    private ArgumentCaptor<Project> projectCaptor;
 
     @BeforeEach
     public void setUp() {
         List<ProjectFilter> projectFilters = List.of(filter, filter);
+        List<ProjectUpdate> projectUpdates = List.of(projectUpdate, projectUpdate);
 
-        projectService = new ProjectService(
-                projectRepository,
-                userContext,
-                projectValidator,
-                projectMapper,
-                projectFilters
-        );
+        projectService = new ProjectService(projectRepository, subProjectMapper, projectMapper, projectUpdates, projectFilters, projectValidator, userContext);
+    }
+
+    @Test
+    void testCreateSubProjectWithPrivateVisibility() {
+        project.setVisibility(ProjectVisibility.PUBLIC);
+        createSubProjectDto.setVisibility(ProjectVisibility.PRIVATE);
+
+        Mockito.when(projectRepository.getProjectById(9L)).thenReturn(project);
+        assertThrows(IllegalArgumentException.class, () -> projectService.createSubProject(9L, createSubProjectDto));
+    }
+
+    @Test
+    void testCreateSubProjectWithSameName() {
+        Project subProject = new Project();
+        subProject.setName("testName");
+        project.setChildren(List.of(subProject));
+        project.setName("anotherName");
+        createSubProjectDto.setName("testName");
+
+        Mockito.when(projectRepository.getProjectById(9L)).thenReturn(project);
+        assertThrows(IllegalArgumentException.class, () -> projectService.createSubProject(9L, createSubProjectDto));
+    }
+
+    @Test
+    void testSuccessfulSubProject() {
+        project.setName("anotherName");
+        createSubProjectDto.setName("testName");
+        Mockito.when(projectRepository.getProjectById(9L)).thenReturn(project);
+        ProjectDto projectDto = projectService.createSubProject(9L, createSubProjectDto);
+
+        Mockito.verify(subProjectMapper).toProject(createSubProjectDto);
+        Mockito.verify(projectRepository, Mockito.times(2)).save(projectCaptor.capture());
+        Mockito.verify(projectMapper).toProjectDto(projectCaptor.getAllValues().get(0));
+
+        assertEquals(projectCaptor.getAllValues().get(0).getName(), createSubProjectDto.getName());
+        assertEquals(projectCaptor.getAllValues().get(1).getName(), project.getName());
+        assertEquals(projectDto.getName(), createSubProjectDto.getName());
+        assertEquals(project.getChildren().get(0).getName(), createSubProjectDto.getName());
+    }
+
+    @Test
+    void testNullIdForUpdateSubProject() {
+        projectDto.setId(null);
+        assertThrows(IllegalArgumentException.class, () -> projectService.updateSubProject(projectDto));
+    }
+
+    @Test
+    void testInvalidIdForUpdateSubProject() {
+        projectDto.setId(-11L);
+        assertThrows(IllegalArgumentException.class, () -> projectService.updateSubProject(projectDto));
+    }
+
+    @Test
+    void testCancelledStatusForUpdateSubProject() {
+        firstSubProject.setStatus(ProjectStatus.IN_PROGRESS);
+
+        project.setStatus(ProjectStatus.CANCELLED);
+        projectDto.setId(8L);
+        projectDto.setChildrenIds(List.of(1L, 1L));
+
+        Mockito.when(projectRepository.getProjectById(8L)).thenReturn(project);
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(firstSubProject);
+
+        assertThrows(IllegalStateException.class, () -> projectService.updateSubProject(projectDto));
+    }
+
+    @Test
+    void testSuccessForUpdateSubProject() {
+        Mockito.when(projectRepository.getProjectById(8L)).thenReturn(project);
+        projectDto.setId(8L);
+        projectDto.setName("Test");
+        projectDto.setDescription("TestDescription");
+
+        project.setName("Test");
+        project.setDescription("TestDescription");
+
+        projectService.updateSubProject(projectDto);
+        Mockito.verify(projectRepository).save(projectCaptor.capture());
+        Project resultProject = projectCaptor.getValue();
+
+        assertEquals(resultProject.getName(), "Test");
+        assertEquals(resultProject.getDescription(), "TestDescription");
+        assertNotNull(resultProject.getUpdatedAt());
+        assertNotNull(resultProject.getMoments());
+        assertEquals(resultProject.getMoments().get(0).getName(), "allSubProjectCancelled");
+    }
+
+    @Test
+    void testSuccessForUpdateSubProjectWithOutMoment() {
+        firstSubProject.setStatus(ProjectStatus.IN_PROGRESS);
+
+        project.setStatus(ProjectStatus.COMPLETED);
+        project.setName("Test");
+        project.setDescription("TestDescription");
+        projectDto.setId(8L);
+        projectDto.setChildrenIds(List.of(1L, 1L));
+
+        Mockito.when(projectRepository.getProjectById(8L)).thenReturn(project);
+        Mockito.when(projectRepository.getProjectById(1L)).thenReturn(firstSubProject);
+
+        projectService.updateSubProject(projectDto);
+        Mockito.verify(projectRepository).save(projectCaptor.capture());
+        Project resultProject = projectCaptor.getValue();
+        assertEquals(resultProject.getName(), "Test");
+        assertEquals(resultProject.getDescription(), "TestDescription");
+        assertNotNull(resultProject.getUpdatedAt());
+        assertNull(resultProject.getMoments());
+    }
+
+    @Test
+    void testChildWithSameName() {
+        Mockito.when(projectRepository.getProjectById(8L)).thenReturn(project);
+
+        assertThrows(NullPointerException.class, () -> projectService.getSubProjects(8L, projectFilterDto));
+    }
+
+    @Test
+    void testGetSubProjectsSuccess() {
+        Project secondSubProject = new Project();
+        Project thirdSubProject = new Project();
+        project.setVisibility(ProjectVisibility.PUBLIC);
+
+        firstSubProject.setName("Name");
+        firstSubProject.setStatus(ProjectStatus.CREATED);
+        firstSubProject.setVisibility(ProjectVisibility.PUBLIC);
+
+        secondSubProject.setName("Name");
+        secondSubProject.setStatus(ProjectStatus.CREATED);
+        secondSubProject.setVisibility(ProjectVisibility.PRIVATE);
+
+        thirdSubProject.setName("Not name");
+        thirdSubProject.setStatus(ProjectStatus.IN_PROGRESS);
+        thirdSubProject.setVisibility(ProjectVisibility.PUBLIC);
+
+        projectFilterDto.setName("Name");
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
+
+        project.setChildren(List.of(firstSubProject, secondSubProject, thirdSubProject));
+
+        Mockito.when(projectRepository.getProjectById(8L)).thenReturn(project);
+        List<ProjectDto> projectDtos = projectService.getSubProjects(8L, projectFilterDto);
+
+        assertEquals(projectDtos.size(), 2);
+        assertEquals(projectDtos.get(0).getName(), firstSubProject.getName());
+        assertEquals(projectDtos.get(0).getStatus(), firstSubProject.getStatus());
     }
 
     @Test
@@ -81,8 +247,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetProjectByIdFailed() {
         when(projectRepository.getProjectById(0L)).thenThrow(new EntityNotFoundException());
-        assertThrows(EntityNotFoundException.class,
-                () -> projectService.getProjectById(0L));
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(0L));
     }
 
     @Test
@@ -114,7 +279,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getProjectEntityByIdSuccess(){
+    void getProjectEntityByIdSuccess() {
         Mockito.lenient().when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(new Project());
         assertEquals(new Project(), projectService.getProjectEntityById(1L));
     }
@@ -143,11 +308,11 @@ public class ProjectServiceTest {
     }
 
     @Test
-    void getProjectEntityByIdFail(){
+    void getProjectEntityByIdFail() {
         Mockito.lenient().when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found by id: %s".formatted(1L)));
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.getProjectEntityById(1L));
         assertEquals("Project not found by id: %s".formatted(1L), exception.getMessage());
-        }
+    }
 
 
     private ProjectFilterDto setupProjectsAndMocks(long userId, boolean userIsTeamMember) {
