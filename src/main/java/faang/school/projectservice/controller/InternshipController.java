@@ -19,36 +19,36 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/internship")
+@RequestMapping("api/internships")
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<InternshipDto> createInternship(@RequestBody InternshipDto internshipDto) {
         InternshipDto responseDto = internshipService.createInternship(internshipDto);
         URI location = URI.create("/api/internship/" + responseDto.getId());
         return ResponseEntity.created(location).body(responseDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public ResponseEntity<InternshipDto> updateInternship(@RequestBody @Valid InternshipDto internshipDto) {
         InternshipDto responseDto = internshipService.updateInternship(internshipDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping
     public ResponseEntity<List<InternshipDto>> getInternships() {
         List<InternshipDto> internships = internshipService.getInternships();
         return ResponseEntity.ok(internships);
     }
 
-    @GetMapping("/getAll/filters")
+    @GetMapping("/internships/filters")
     public ResponseEntity<List<InternshipDto>> getInternships(@RequestBody @Valid InternshipFilterDto filters) {
         List<InternshipDto> internships = internshipService.getInternships(filters);
         return ResponseEntity.ok(internships);
     }
 
-    @GetMapping("/get/{internshipId}")
+    @GetMapping("/{internshipId}")
     public ResponseEntity<InternshipDto> getInternship(@PathVariable @Valid Long internshipId) {
         InternshipDto responseDto = internshipService.getInternship(internshipId);
         return ResponseEntity.ok(responseDto);
