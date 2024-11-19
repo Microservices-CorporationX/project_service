@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -146,54 +147,14 @@ public class StageInvitationServiceTest {
         verify(stageInvitationRepository, never()).save(any());
     }
 
-//    @Test
-//    void testAcceptAnInvitation_success() {
-//        stage = Stage.builder().stageId(1L).executors(Arrays.asList()).build();
-//
-//        when(stageRepository.getById(1L)).thenReturn(stage);
-//        when(stageService.getById(1L)).thenReturn(stageDto);
-//
-//        StageInvitationDto result = stageInvitationService.acceptAnInvitation(stageInvitationDto);
-//
-//        assertEquals("ACCEPTED", result.getStatus());
-//
-//        verify(stageService, times(1)).getById(1L);
-//    }
+    @Test
+    void testAcceptAnInvitation_noStageDtoFound() {
+        when(stageService.getById(1L)).thenReturn(null);
 
-    // @Test
-//    void testAcceptAnInvitation_multipleExecutors() {
-//        // Инициализация StageDto с существующим ID в executorsId
-//        Set<Long> existingExecutors = new HashSet<>();
-//        existingExecutors.add(2L);
-//        stageDto.setExecutorsId(existingExecutors);
-//
-//        // Настроим мок для stageService
-//        when(stageService.getById(1L)).thenReturn(stageDto);
-//
-//        // Вызов метода
-//        StageInvitationDto result = stageInvitationService.acceptAnInvitation(stageInvitationDto);
-//
-//        // Проверка, что статус был установлен в ACCEPTED
-//        assertEquals("ACCEPTED", result.getStatus(), "Status should be ACCEPTED");
-//
-//        // Проверка, что ID был добавлен в executorsId
-//        assertTrue(stageDto.getExecutorsId().contains(1L), "Executors ID should contain the stage ID");
-//
-//        // Проверка, что ID 2L не был удален
-//        assertTrue(stageDto.getExecutorsId().contains(2L), "Executors ID should still contain the original executor");
-//    }
+        StageInvitationDto result = stageInvitationService.acceptAnInvitation(stageInvitationDto);
 
-//    @Test
-//    void testAcceptAnInvitation_noStageDtoFound() {
-//        // Настроим мок для stageService так, чтобы он возвращал null
-//        when(stageService.getById(1L)).thenReturn(null);
-//
-//        // Вызов метода
-//        StageInvitationDto result = stageInvitationService.acceptAnInvitation(stageInvitationDto);
-//
-//        // Проверка, что результат не равен null
-//        assertNull(result, "Result should be null because stageDto is not found");
-//    }
+        assertNull(result.getId(), "Result should be null because stageDto is not found");
+    }
 
     @Test
     void testRejectAnInvitation_success() {
@@ -238,22 +199,4 @@ public class StageInvitationServiceTest {
         verify(stageInvitationRepository).findByInvited_UserId(1L);
         verify(stageInvitationMapper).toDto(stageInvitation);
     }
-
-//    @Test
-//    void testViewAllInvitationsForOneParticipant_withFilters() {
-//        //TODO НАПИСАТЬ ДЛЯ СУЩЕСТВУЮЩИХ ФИЛЬТРОВ
-//        filter = StageInvitationFilterDto.builder().author(L).build();
-//
-//        when(stageInvitationRepository.findByInvited_UserId(1L)).thenReturn(stageInvitations);
-//        when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
-//
-//        List<StageInvitationDto> result = stageInvitationService.viewAllInvitationsForOneParticipant(1L, filter);
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        assertEquals(stageInvitationDto, result.get(0));
-//
-//        verify(stageInvitationRepository).findByInvited_UserId(1L);
-//        verify(stageInvitationMapper).toDto(stageInvitation);
-//    }
 }

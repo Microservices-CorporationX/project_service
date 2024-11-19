@@ -3,12 +3,14 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.stage_invitation_filter.StageInvitationFilter;
 import faang.school.projectservice.validator.stage_invitation.ServiceStageInvitationValidator;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,7 +46,9 @@ public class StageInvitationService {
     public StageInvitationDto acceptAnInvitation(StageInvitationDto stageInvitationDto) {
         Long id = stageInvitationDto.getStageId();
         StageDto dto = stageService.getById(id);
-        dto.getExecutorsId().add(id);
+       if(dto != null) {
+            dto.getExecutorsId().add(id);
+        }
 
         stageInvitationDto = StageInvitationDto.builder().status(ACCEPTED).build();
         return stageInvitationDto;
@@ -60,7 +64,7 @@ public class StageInvitationService {
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(Long invitedId, StageInvitationFilterDto stageInvitationFilterDto) {
         Stream<StageInvitation> stageInvitations = stageInvitationRepository.findByInvited_UserId(invitedId).stream();
 
-        if(stageInvitationFilterDto == null){
+        if (stageInvitationFilterDto == null) {
             return stageInvitations.map(stageInvitationMapper::toDto).toList();
         }
 
