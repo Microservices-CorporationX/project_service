@@ -12,6 +12,7 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
+import faang.school.projectservice.validator.StageValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ class StageServiceTest {
 
     @Mock
     private TeamMemberService teamMemberService;
+
+    @Mock
+    private StageValidator stageValidator;
 
     @Spy
     private StageMapper stageMapper;
