@@ -35,7 +35,7 @@ public class TeamMemberService {
     public CreateTeamMemberDto addTeamMember(CreateTeamMemberDto teamMemberDto, Long creatorId) {
         ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), "add team member");
 
-        TeamMember teamMember = teamMemberMapper.toCreateEntity(teamMemberDto);
+        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
         Team team = teamService.getTeamById(teamMemberDto.teamId());
         Project project = team.getProject();
 

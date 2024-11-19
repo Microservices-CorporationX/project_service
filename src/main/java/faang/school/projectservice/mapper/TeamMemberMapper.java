@@ -15,24 +15,26 @@ public interface TeamMemberMapper {
     @Mapping(source = "team.id", target = "teamId")
     @Mapping(source = "stages", target = "stageIds", qualifiedByName = "mapStageIds")
     CreateTeamMemberDto toCreateDto(TeamMember teamMember);
+
     @Mapping(target = "team", ignore = true)
     @Mapping(target = "stages", ignore = true)
-    TeamMember toCreateEntity(CreateTeamMemberDto createTeamMemberDto);
+    TeamMember toEntity(CreateTeamMemberDto createTeamMemberDto);
 
     @Mapping(source = "team.id", target = "teamId")
     @Mapping(source = "stages", target = "stageIds", qualifiedByName = "mapStageIds")
     UpdateTeamMemberDto toUpdateDto(TeamMember teamMember);
+
     @Mapping(target = "team", ignore = true)
     @Mapping(target = "stages", ignore = true)
-    TeamMember toUpdateEntity(UpdateTeamMemberDto updateTeamMemberDto);
+    TeamMember toEntity(UpdateTeamMemberDto updateTeamMemberDto);
 
     List<CreateTeamMemberDto> toCreateDtoList(List<TeamMember> teamMembers);
-    List<TeamMember> toCreateEntityList(List<CreateTeamMemberDto> createTeamMemberDtos);
-
     List<UpdateTeamMemberDto> toUpdateDtoList(List<TeamMember> teamMembers);
+
+    List<TeamMember> toEntityList(List<CreateTeamMemberDto> createTeamMemberDtos);
     List<TeamMember> toUpdateEntityList(List<UpdateTeamMemberDto> updateTeamMemberDtos);
 
-    @Named("mapStageIds")
+    @Named("mapStageToIds")
     default List<Long> mapStageIds(List<Stage> stages) {
         return stages.stream()
                 .map(Stage::getStageId)
