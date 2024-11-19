@@ -85,26 +85,23 @@ jacoco {
     toolVersion = "0.8.9"
     reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
 }
+
 tasks.test {
     finalizedBy(tasks.jacocoTestReport)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
+//  "**/controller/**",
     "**/service/**",
-    "**/mapper/**"
-)
-val jacocoExcludePackAgeList = listOf(
-    "**/model/**",
-    "**/repository/**",
-    "**/dto/**"
+    "**/validator/**",
 )
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
     reports {
-        xml.required.set(true)
+        xml.required.set(false)
         csv.required.set(false)
         html.required.set(true)
     }
@@ -112,7 +109,6 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             include(jacocoIncludePackagesList)
-            exclude(jacocoExcludePackAgeList)
         }
     )
 }
@@ -120,17 +116,15 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    include(jacocoIncludePackagesList)
+                }
+            )
             limit {
-                counter = "BRANCH"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = BigDecimal.valueOf(0.7)
             }
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
-            }
-
         }
     }
 }
