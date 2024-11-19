@@ -22,7 +22,7 @@ import java.util.List;
 public class MomentController {
     private final MomentService service;
 
-    @PostMapping("")
+    @PostMapping()
     public ResponseEntity<MomentDto> createMoment(@RequestBody @Valid MomentDto momentDto) {
         return ResponseEntity.ok(service.createMoment(momentDto));
     }
