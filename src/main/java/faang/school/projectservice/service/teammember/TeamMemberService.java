@@ -48,4 +48,9 @@ public class TeamMemberService {
     public void deleteAll(List<TeamMember> teamMembers) {
         teamMemberRepository.deleteAll(teamMembers);
     }
+
+    public TeamMember getTeamMemberEntity(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId)
+                .orElseThrow(() -> new EntityNotFoundException("TeamMember", teamMemberId));
+    }
 }

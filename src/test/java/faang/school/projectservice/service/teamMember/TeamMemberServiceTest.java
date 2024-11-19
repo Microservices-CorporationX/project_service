@@ -1,8 +1,9 @@
-package faang.school.projectservice.service.teammember;
+package faang.school.projectservice.service.teamMember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -114,5 +115,22 @@ class TeamMemberServiceTest {
         List<TeamMember> teamMembersToDelete = List.of(new TeamMember());
         assertDoesNotThrow(() -> teamMemberService.deleteAll(teamMembersToDelete));
         verify(teamMemberRepository, times(1)).deleteAll(teamMembersToDelete);
+    }
+
+    @Test
+    public void teamMemberNotExistsTest() {
+        long id = 1L;
+
+        assertThrows(EntityNotFoundException.class,
+                () -> teamMemberService.getTeamMemberEntity(id));
+    }
+
+    @Test
+    public void teamMemberExistsTest() {
+        long id = 1L;
+        TeamMember teamMember = new TeamMember();
+        when(teamMemberRepository.findById(id)).thenReturn(Optional.of(teamMember));
+
+        assertDoesNotThrow(() -> teamMemberService.getTeamMemberEntity(id));
     }
 }

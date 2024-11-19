@@ -2,6 +2,9 @@ spring:
   mvc:
     servlet:
       path: /api/v1
+  servlet:
+    multipart:
+      max-file-size: 5MB
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -41,7 +44,7 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
     bucketName: projectbucket

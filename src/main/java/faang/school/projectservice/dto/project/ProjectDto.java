@@ -3,7 +3,6 @@ package faang.school.projectservice.dto.project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -35,4 +34,6 @@ public class ProjectDto {
 
     @Positive
     private Long ownerId;
+
+    private String coverImageId;
 }

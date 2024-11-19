@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.stage_invitation;
+package faang.school.projectservice.service.stageinvitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
@@ -16,7 +16,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.stage.StageService;
-import faang.school.projectservice.service.team_member.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import org.junit.jupiter.api.BeforeEach;
