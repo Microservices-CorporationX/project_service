@@ -164,8 +164,8 @@ public class SubProjectServiceTest {
     @DisplayName("Test create sub project with existent parent id and valid dto")
     public void createSubProjectTest() {
         Long parentId = 1L;
+        Long userId = 1L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
-                .ownerId(1L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)
@@ -183,9 +183,9 @@ public class SubProjectServiceTest {
         when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
         when(projectRepository.save(project)).thenReturn(project);
 
-        ProjectDto result = subProjectService.createSubProject(parentId, dto);
+        ProjectDto result = subProjectService.createSubProject(parentId, dto, userId);
 
-        assertEquals(dto.getOwnerId(), result.getOwnerId());
+        assertEquals(userId, result.getOwnerId());
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getDescription(), result.getDescription());
         assertEquals(dto.getVisibility(), result.getVisibility());
@@ -196,16 +196,18 @@ public class SubProjectServiceTest {
     @DisplayName("Test create sub project with nonexistent parentId")
     public void createSubProjectWithNonexistentParentIdTest() {
         Long parentId = 1L;
+        Long userId = 2L;
         when(projectRepository.getProjectById(parentId)).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class,
-                () -> subProjectService.createSubProject(parentId, new CreateSubProjectDto()));
+                () -> subProjectService.createSubProject(parentId, new CreateSubProjectDto(), userId));
     }
 
     @Test
     @DisplayName("Test create sub project with nonexistent owner")
     public void createSubProjectWithNonexistentOwnerTest() {
         Long parentId = 1L;
+        Long userId = 2L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
                 .ownerId(1L)
                 .name("cool name")
@@ -214,15 +216,16 @@ public class SubProjectServiceTest {
                 .build();
         Project parentProject = new Project();
         when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
-        doThrow(EntityNotFoundException.class).when(subProjectValidator).validateOwnerExistence(dto.getOwnerId());
+        doThrow(EntityNotFoundException.class).when(subProjectValidator).validateOwnerExistence(userId);
 
-        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto, userId));
     }
 
     @Test
     @DisplayName("Test create sub project with existent name")
     public void createSubProjectWithExistentNameTest() {
         Long parentId = 1L;
+        Long userId = 2L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
                 .ownerId(1L)
                 .name("cool name")
@@ -232,17 +235,17 @@ public class SubProjectServiceTest {
         Project parentProject = new Project();
         when(projectRepository.getProjectById(parentId)).thenReturn(parentProject);
         doThrow(EntityNotFoundException.class)
-                .when(subProjectValidator).validateExistenceByOwnerIdAndName(dto.getOwnerId(), dto.getName());
+                .when(subProjectValidator).validateExistenceByOwnerIdAndName(userId, dto.getName());
 
-        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto, userId));
     }
 
     @Test
     @DisplayName("Test create sub project with invalid visibility")
     public void createSubProjectWithInvalidVisibilityTest() {
         Long parentId = 1L;
+        Long userId = 2L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
-                .ownerId(1L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)
@@ -252,7 +255,7 @@ public class SubProjectServiceTest {
         doThrow(EntityNotFoundException.class)
                 .when(subProjectValidator).validateSubProjectVisibility(parentProject.getVisibility(), dto.getVisibility());
 
-        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto));
+        assertThrows(EntityNotFoundException.class, () -> subProjectService.createSubProject(parentId, dto, userId));
     }
 
     @Test

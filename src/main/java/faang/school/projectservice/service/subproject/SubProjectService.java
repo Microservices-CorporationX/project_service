@@ -38,13 +38,14 @@ public class SubProjectService {
         return subProjectMapper.toDtoList(subProjects);
     }
 
-    public ProjectDto createSubProject(Long parentId, CreateSubProjectDto dto) {
+    public ProjectDto createSubProject(Long parentId, CreateSubProjectDto dto, Long userId) {
         Project parentProject = projectRepository.getProjectById(parentId);
-        subProjectValidator.validateOwnerExistence(dto.getOwnerId());
-        subProjectValidator.validateExistenceByOwnerIdAndName(dto.getOwnerId(), dto.getName());
+        subProjectValidator.validateOwnerExistence(userId);
+        subProjectValidator.validateExistenceByOwnerIdAndName(userId, dto.getName());
         subProjectValidator.validateSubProjectVisibility(parentProject.getVisibility(), dto.getVisibility());
 
         Project subProject = subProjectMapper.toEntity(dto);
+        subProject.setOwnerId(userId);
         subProject.setParentProject(parentProject);
         subProject.setStatus(ProjectStatus.CREATED);
         subProject = projectRepository.save(subProject);

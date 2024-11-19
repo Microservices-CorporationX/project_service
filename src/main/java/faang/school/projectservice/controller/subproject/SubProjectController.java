@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
@@ -35,11 +35,12 @@ public class SubProjectController {
 
     @PostMapping
     public ResponseEntity<Void> createSubProject(@PathVariable("projectId") Long projectId,
-                                                 @Valid @RequestBody CreateSubProjectDto dto) {
+                                                 @Valid @RequestBody CreateSubProjectDto dto,
+                                                 @RequestHeader("x-user-id") Long userId) {
         return ResponseEntity.created(
                 ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
-                        .buildAndExpand(subProjectService.createSubProject(projectId, dto).getId())
+                        .buildAndExpand(subProjectService.createSubProject(projectId, dto, userId).getId())
                         .toUri()
         ).build();
     }
