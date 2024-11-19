@@ -121,7 +121,7 @@ class StageInvitationServiceTest {
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId())).thenReturn(invited);
         when(stageInvitationRepository.save(any(StageInvitation.class))).thenReturn(stageInvitation);
         when(stageInvitationMapper.toDto(any(StageInvitation.class))).thenReturn(stageInvitationDto);
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
 
         StageInvitationDto result = stageInvitationService.sendStageInvitation(stageInvitationDto);
 
@@ -130,7 +130,7 @@ class StageInvitationServiceTest {
         assertEquals(stageInvitationDto.getAuthorId(), result.getAuthorId());
         assertEquals(stageInvitationDto.getInvitedId(), result.getInvitedId());
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getInvitedId());
         verify(stageInvitationRepository, times(1)).save(any(StageInvitation.class));
@@ -139,32 +139,32 @@ class StageInvitationServiceTest {
 
     @Test
     void testSendStageInvitationFailureInvalidStage() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(null);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(null);
 
         StageInvitationDto stageInvitation = stageInvitationService.sendStageInvitation(stageInvitationDto);
 
         assertNull(stageInvitation);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, never()).getTeamMemberByUserId(null);
         verify(stageInvitationRepository, never()).save(null);
     }
 
     @Test
     void testSendStageInvitationFailureInvalidAuthor() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId())).thenReturn(null);
 
         stageInvitationService.sendStageInvitation(stageInvitationDto);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(stageInvitationRepository, never()).save(null);
     }
 
     @Test
     void testSendStageInvitationFailureInvalidInvited() {
-        when(stageService.getById(stageInvitationDto.getStageId())).thenReturn(stage);
+        when(stageService.getStageById(stageInvitationDto.getStageId())).thenReturn(stage);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId())).thenReturn(author);
         when(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId())).thenReturn(null);
 
@@ -172,7 +172,7 @@ class StageInvitationServiceTest {
 
         assertNull(response);
 
-        verify(stageService, times(1)).getById(stageInvitationDto.getStageId());
+        verify(stageService, times(1)).getStageById(stageInvitationDto.getStageId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getAuthorId());
         verify(teamMemberService, times(1)).getTeamMemberByUserId(stageInvitationDto.getInvitedId());
         verify(stageInvitationRepository, never()).save(null);

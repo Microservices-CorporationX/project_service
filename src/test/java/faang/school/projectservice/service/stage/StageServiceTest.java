@@ -148,7 +148,7 @@ class StageServiceTest {
     public void getById() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
 
-        Stage stage = stageService.getById(stageId);
+        Stage stage = stageService.getStageById(stageId);
         assertEquals(1L, stage.getStageId());
 
         verify(stageRepository, times(1)).getById(stageId);
@@ -246,7 +246,7 @@ class StageServiceTest {
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(stageRepository.getById(newStage.getStageId())).thenReturn(newStage);
 
-        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId());
+        stageService.deleteStage(stageId, newStage.getStageId());
 
         assertEquals(stage.getTasks(), newStage.getTasks());
         verify(stageRepository, times(1)).getById(stageId);
@@ -261,7 +261,7 @@ class StageServiceTest {
                 String.format("Stage not found by id: %s", newStage.getStageId())));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId()),
+                        stageService.deleteStage(stageId, newStage.getStageId()),
                 String.format("Stage not found by id: %s", newStage.getStageId()));
     }
 
@@ -271,7 +271,7 @@ class StageServiceTest {
                 String.format("Stage not found by id: %s", stageId)));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.deleteStageAndMoveTasks(stageId, newStage.getStageId()),
+                        stageService.deleteStage(stageId, newStage.getStageId()),
                 String.format("Stage not found by id: %s", stageId));
     }
 
@@ -292,7 +292,7 @@ class StageServiceTest {
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(stageMapper.toDto(stage)).thenReturn(stageDto);
 
-        StageDto result = stageService.getStage(stageId);
+        StageDto result = stageService.getStageDtoById(stageId);
 
         assertEquals(stageDto, result);
     }
@@ -303,7 +303,7 @@ class StageServiceTest {
                 String.format("Stage not found by id: %s", stageId)));
 
         assertThrows(EntityNotFoundException.class, () ->
-                        stageService.getStage(stageId),
+                        stageService.getStageDtoById(stageId),
                 String.format("Stage not found by id: %s", stage));
     }
 

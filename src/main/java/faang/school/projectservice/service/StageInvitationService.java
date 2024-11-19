@@ -32,7 +32,7 @@ public class StageInvitationService {
 
         StageInvitation stageInvitation = StageInvitation
                 .builder()
-                .stage(stageService.getById(stageInvitationDto.getStageId()))
+                .stage(stageService.getStageById(stageInvitationDto.getStageId()))
                 .author(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getAuthorId()))
                 .invited(teamMemberService.getTeamMemberByUserId(stageInvitationDto.getInvitedId()))
                 .status(StageInvitationStatus.PENDING)

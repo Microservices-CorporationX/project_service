@@ -30,7 +30,7 @@ public class StageController {
 
     @GetMapping("{stageId}")
     public StageDto getStage(@PathVariable @Positive long stageId) {
-        return stageService.getStage(stageId);
+        return stageService.getStageDtoById(stageId);
     }
 
     @PostMapping
@@ -38,9 +38,9 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @PatchMapping("{stageId}/executor")
+    @PutMapping("{stageId}/executor")
     public void updateStage(@PathVariable @Positive long stageId,
-                            @RequestBody TeamMemberDto teamMemberDto) {
+                            @Valid @RequestBody TeamMemberDto teamMemberDto) {
         stageService.updateStage(stageId, teamMemberDto);
     }
 
@@ -52,6 +52,6 @@ public class StageController {
     @DeleteMapping("{stageId}/move/tasks/to/{anotherStageId}")
     public void deleteStageAndMoveTasks(@PathVariable @Positive long stageId,
                                         @PathVariable @Positive long anotherStageId) {
-        stageService.deleteStageAndMoveTasks(stageId, anotherStageId);
+        stageService.deleteStage(stageId, anotherStageId);
     }
 }
