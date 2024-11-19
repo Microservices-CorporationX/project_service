@@ -134,7 +134,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void setExecutor() {
+    public void testSetExecutor() {
         when(stageRepository.getById(stageId)).thenReturn(stage);
         when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
 
@@ -155,7 +155,7 @@ class StageServiceTest {
     }
 
     @Test
-    void existsById_ShouldReturnTrue_WhenStageExists() {
+    void testExistsByIdShouldReturnTrueWhenStageExists() {
         Long stageId = 1L;
         when(stageRepository.existsById(stageId)).thenReturn(true);
 
@@ -163,7 +163,7 @@ class StageServiceTest {
     }
 
     @Test
-    void existsByIdShouldReturnFalseWhenStageDoesNotExist() {
+    void testExistsByIdShouldReturnFalseWhenStageDoesNotExist() {
         Long stageId = 2L;
         when(stageRepository.existsById(stageId)).thenReturn(false);
 
