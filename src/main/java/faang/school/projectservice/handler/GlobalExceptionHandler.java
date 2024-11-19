@@ -64,11 +64,4 @@ public class GlobalExceptionHandler {
         log.error("Subproject Bad Request Error: {}", exception.getMessage());
         return new ErrorResponse("Subproject Bad Request Error: {}", exception.getMessage());
     }
-
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGenericException(Exception e) {
-        return new ErrorResponse("Internal Server Error", e.getMessage());
-    }
 }
