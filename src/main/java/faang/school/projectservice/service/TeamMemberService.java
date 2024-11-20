@@ -2,16 +2,22 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
     public boolean curatorHasNoAccess(Long curatorId) {
         TeamMember teamMember = teamMemberRepository.findById(curatorId);
         return !teamMember.isCurator();
+    }
+
+    @Transactional
+    public TeamMember getTeamMember(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId);
     }
 }

@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,11 +20,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class TeamMemberServiceTest {
 
-    @Mock
-    private TeamMemberRepository teamMemberRepository;
-
     @InjectMocks
     private TeamMemberService teamMemberService;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
 
     @Test
     public void testHasCuratorAccess_Curator() {
@@ -50,5 +52,19 @@ public class TeamMemberServiceTest {
 
         // Assert
         assertTrue(result);
+    }
+
+    @Test
+    public void testGetTeamMemberValidId() {
+        // arrange
+        long id = 5L;
+        TeamMember teamMember = new TeamMember();
+        when(teamMemberRepository.findById(id)).thenReturn(teamMember);
+
+        // act
+        TeamMember returnedTeamMember = teamMemberService.getTeamMember(id);
+
+        // assert
+        assertEquals(teamMember, returnedTeamMember);
     }
 }
