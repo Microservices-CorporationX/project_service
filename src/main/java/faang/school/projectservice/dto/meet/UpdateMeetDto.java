@@ -16,7 +16,7 @@ public record UpdateMeetDto(
         @Size(max = 128, message = "The content must not exceed 128 characters")
         String title,
         @NotBlank(message = "Description cannot be blank")
-        @Size(max = 512, message = "The content must not exceed 4096 characters")
+        @Size(max = 512, message = "The content must not exceed 512 characters")
         String description,
         @NotNull
         MeetStatus status,
