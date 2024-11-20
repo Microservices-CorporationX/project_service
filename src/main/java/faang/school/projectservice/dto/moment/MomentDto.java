@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.moment;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MomentDto {
 
+    @NotNull
     @Positive
     private Long id;
 
@@ -27,10 +29,7 @@ public class MomentDto {
 
     private LocalDateTime date;
 
-    @NotNull
-    private List<Long> projectIds;
-
-    @NotNull
-    private List<Long> userIds;
+    @NotEmpty
+    private List<@NotNull Long> projectIds;
 
 }
