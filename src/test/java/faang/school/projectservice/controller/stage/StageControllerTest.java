@@ -1,4 +1,4 @@
-package faang.school.projectservice.stage;
+package faang.school.projectservice.controller.stage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.config.context.UserContext;
