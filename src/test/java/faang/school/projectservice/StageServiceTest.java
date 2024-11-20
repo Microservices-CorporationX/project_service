@@ -13,9 +13,10 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.ProjectService;
+
 import faang.school.projectservice.service.StageInvitationServiceImpl;
 import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
