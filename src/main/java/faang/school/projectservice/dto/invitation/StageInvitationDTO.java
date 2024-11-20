@@ -18,13 +18,13 @@ public class StageInvitationDTO {
     private  Long id;
     private String description;
     private StageInvitationStatus status;
-    @Positive
+    @Positive(message = "Идентификатор этапа не может быть отрицательным")
     @NotNull(message = "Идентификатор этапа не может быть null")
     private Long stageId;
-    @Positive
+    @Positive(message = "Идентификатор автора не может быть отрицательным")
     @NotNull(message = "Идентификатор автора не может быть null")
     private Long authorId;
-    @Positive
+    @Positive(message = "Идентификатор приглашенного не может быть отрицательным")
     @NotNull(message = "Идентификатор приглашенного не может быть null")
     private Long invitedId;
 }

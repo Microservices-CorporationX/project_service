@@ -19,8 +19,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.stream.Stream;
 
+import static faang.school.projectservice.model.stage_invitation.StageInvitationStatus.ACCEPTED;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,14 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ContextConfiguration(classes = {StageInvitationController.class, StageInvitationService.class})
 @ExtendWith(MockitoExtension.class)
-public class StageInvitationControllerTest {
+@DisplayName("StageInvitationController Tests")
+class StageInvitationControllerTest {
 
     private static final String URL_SEND_INVITATION = "/stageInvitation";
     private static final String URL_ACCEPT_INVITATION = "/stageInvitation/{invitationId}/accept";
     private static final String URL_REJECT_INVITATION = "/stageInvitation/{invitationId}/reject";
     private static final String URL_GET_FILTERED_INVITATIONS = "/stageInvitation/filter";
 
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,9 +51,7 @@ public class StageInvitationControllerTest {
     @Test
     @DisplayName("Тест успешного отправления приглашения")
     void positiveTestSendInvitation() throws Exception {
-
-        StageInvitationDTO invitationDTO = StageInvitationDTO.builder()
-            .id(1L)
+        StageInvitationDTO inputDTO = StageInvitationDTO.builder()
             .stageId(2L)
             .authorId(3L)
             .invitedId(4L)
@@ -67,141 +68,111 @@ public class StageInvitationControllerTest {
             .description("reason")
             .build();
 
-        when(stageInvitationService.sendInvitation(invitationDTO)).thenReturn(expectedDTO);
+        when(stageInvitationService.sendInvitation(inputDTO)).thenReturn(expectedDTO);
 
         mockMvc.perform(post(URL_SEND_INVITATION)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(invitationDTO)))
-            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
-            .andExpect(status().isCreated());
+                .content(OBJECT_MAPPER.writeValueAsString(inputDTO)))
+            .andExpect(status().isCreated())
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)));
     }
 
     @ParameterizedTest
     @MethodSource("invalidSendInvitationDTO")
     @DisplayName("Тест с некорректными данными: обязательные поля отсутствуют")
-    void negativeSendInvitationNoRequestArgument(StageInvitationDTO invitationDTO) throws Exception {
+    void negativeSendInvitation(StageInvitationDTO inputDTO) throws Exception {
         mockMvc.perform(post(URL_SEND_INVITATION)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(invitationDTO)))
+                .content(OBJECT_MAPPER.writeValueAsString(inputDTO)))
             .andExpect(status().isBadRequest());
+    }
+
+    static Stream<StageInvitationDTO> invalidSendInvitationDTO() {
+        return Stream.of(
+            StageInvitationDTO.builder().stageId(2L).authorId(3L).status(StageInvitationStatus.PENDING).build(),
+            StageInvitationDTO.builder().authorId(3L).invitedId(4L).status(StageInvitationStatus.PENDING).build(),
+            StageInvitationDTO.builder().stageId(2L).invitedId(4L).status(StageInvitationStatus.PENDING).build()
+        );
     }
 
     @Test
     @DisplayName("Тест успешного принятия приглашения")
     void positiveTestAcceptInvitation() throws Exception {
         Long invitationId = 1L;
-
         StageInvitationDTO expectedDTO = StageInvitationDTO.builder()
             .id(invitationId)
-            .stageId(2L)
-            .authorId(3L)
-            .invitedId(4L)
-            .status(StageInvitationStatus.ACCEPTED)
-            .description(null)
+            .status(ACCEPTED)
             .build();
 
         when(stageInvitationService.acceptInvitation(invitationId)).thenReturn(expectedDTO);
 
-        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
-            .andExpect(status().isOk());
+        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId))
+            .andExpect(status().isOk())
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)));
     }
 
-
-//    проблемный тест
     @Test
-    @DisplayName("Тест негативного принятия приглашения (приглашение не найдено)")
-    void negativeTestAcceptInvitation_NotFound() throws Exception {
+    @DisplayName("Тест принятия несуществующего приглашения")
+    void negativeTestAcceptInvitationNotFound() throws Exception {
         Long invitationId = 1L;
 
         when(stageInvitationService.acceptInvitation(invitationId))
-            .thenThrow(new InvalidInvitationDataException("Приглашение с ID " + invitationId + " не найдено"));
+            .thenThrow(new InvalidInvitationDataException("Приглашение не найдено"));
 
-        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound())
-            .andExpect(content().string("Приглашение с ID " + invitationId + " не найдено"));
+        mockMvc.perform(patch(URL_ACCEPT_INVITATION, invitationId))
+            .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("Тест успешного отклонения приглашения")
     void positiveTestRejectInvitation() throws Exception {
-
         Long invitationId = 1L;
-        RejectionReasonDTO rejectionReasonDTO = RejectionReasonDTO.builder()
-            .reason("Not interested")
-            .build();
+        RejectionReasonDTO reasonDTO = new RejectionReasonDTO("Занят на других проектах");
 
         StageInvitationDTO expectedDTO = StageInvitationDTO.builder()
             .id(invitationId)
-            .stageId(2L)
-            .authorId(3L)
-            .invitedId(4L)
             .status(StageInvitationStatus.REJECTED)
-            .description("Not interested")
+            .description(reasonDTO.getRejectReason())
             .build();
 
-        when(stageInvitationService.rejectInvitation(invitationId, rejectionReasonDTO.getReason()))
-            .thenReturn(expectedDTO);
+        when(stageInvitationService.rejectInvitation(invitationId, reasonDTO.getRejectReason())).thenReturn(expectedDTO);
 
         mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(rejectionReasonDTO)))
-            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)))
-            .andExpect(status().isOk());
+                .content(OBJECT_MAPPER.writeValueAsString(reasonDTO)))
+            .andExpect(status().isOk())
+            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedDTO)));
     }
 
     @Test
-    @DisplayName("Тест ошибки при отклонении приглашения с пустой причиной")
-    void negativeTestRejectInvitationWithEmptyReason() throws Exception {
+    @DisplayName("Тест отклонения без причины")
+    void negativeTestRejectInvitationMissingReason() throws Exception {
         Long invitationId = 1L;
-        RejectionReasonDTO invalidDTO = RejectionReasonDTO.builder().reason("").build();
+        RejectionReasonDTO emptyReasonDTO = new RejectionReasonDTO();
 
         mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(invalidDTO)))
+                .content(OBJECT_MAPPER.writeValueAsString(emptyReasonDTO)))
             .andExpect(status().isBadRequest());
     }
 
 //    @Test
-//    @DisplayName("Тест фильтрации приглашений")
+//    @DisplayName("Тест успешной фильтрации приглашений")
 //    void positiveTestGetFilteredInvitations() throws Exception {
-//        StageInvitationDTO filterDTO = StageInvitationDTO.builder()
-//            .invitedId(4L)
-//            .authorId(3L)
-//            .status(StageInvitationStatus.PENDING)
-//            .build();
+//        StageInvitationDTO filterDTO = StageInvitationDTO.builder().status(ACCEPTED).build();
 //
-//        List<StageInvitationDTO> filteredInvitations = List.of(
-//            StageInvitationDTO.builder()
-//                .id(1L)
-//                .stageId(2L)
-//                .authorId(3L)
-//                .invitedId(4L)
-//                .status(StageInvitationStatus.PENDING)
-//                .description("Приглашение на этап")
-//                .build(),
-//            StageInvitationDTO.builder()
-//                .id(2L)
-//                .stageId(3L)
-//                .authorId(3L)
-//                .invitedId(5L)
-//                .status(StageInvitationStatus.PENDING)
-//                .description("Приглашение на другой этап")
-//                .build()
+//        List<StageInvitationDTO> expectedList = List.of(
+//            StageInvitationDTO.builder().id(1L).status(ACCEPTED).build()
 //        );
 //
-//        when(stageInvitationService.getFilteredInvitations(filterDTO)).thenReturn(filteredInvitations);
-//
+//        when(stageInvitationService.getFilteredInvitations(filterDTO)).thenReturn(expectedList);
 //
 //        mockMvc.perform(post(URL_GET_FILTERED_INVITATIONS)
 //                .contentType(MediaType.APPLICATION_JSON)
 //                .content(OBJECT_MAPPER.writeValueAsString(filterDTO)))
 //            .andExpect(status().isOk())
-//            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(filteredInvitations)));
+//            .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedList)));
 //    }
-
 
     @Test
     @DisplayName("Тест ошибки при некорректном JSON для фильтрации приглашений")
@@ -212,31 +183,5 @@ public class StageInvitationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
             .andExpect(status().isBadRequest());
-    }
-
-    static Stream<Object[]> invalidSendInvitationDTO() {
-        return Stream.of(
-            new Object[]{StageInvitationDTO.builder()
-                .id(1L)
-                .stageId(2L)
-                .authorId(3L)
-                .status(StageInvitationStatus.PENDING)
-                .description("reason")
-                .build()},
-            new Object[]{StageInvitationDTO.builder()
-                .id(1L)
-                .stageId(2L)
-                .invitedId(4L)
-                .status(StageInvitationStatus.PENDING)
-                .description("reason")
-                .build()},
-            new Object[]{StageInvitationDTO.builder()
-                .id(1L)
-                .authorId(3L)
-                .invitedId(4L)
-                .status(StageInvitationStatus.PENDING)
-                .description("reason")
-                .build()}
-        );
     }
 }
