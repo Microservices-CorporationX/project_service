@@ -38,7 +38,7 @@ public class TeamMemberService {
 
     @Transactional
     public ResponseTeamMemberDto addTeamMember(CreateTeamMemberDto teamMemberDto,
-                                               Long teamId) {
+                                               long teamId) {
         long creatorId = userContext.getUserId();
         ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD);
 
@@ -52,7 +52,7 @@ public class TeamMemberService {
 
     @Transactional
     public ResponseTeamMemberDto updateTeamMember(UpdateTeamMemberDto teamMemberDto,
-                                                Long teamId) {
+                                                long teamId) {
         long updaterId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
         TeamMember updater = teamMemberRepository.findById(updaterId);

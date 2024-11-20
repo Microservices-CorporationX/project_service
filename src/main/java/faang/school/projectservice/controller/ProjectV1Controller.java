@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.TeamMemberService;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +25,7 @@ public class ProjectV1Controller {
     @GetMapping("/{projectId}/members")
     public List<ResponseTeamMemberDto> getFilteredTeamMembers(@RequestParam(required = false) String name,
                                                               @RequestParam(required = false) TeamRole role,
-                                                              @PathVariable @Positive Long projectId) {
+                                                              @PathVariable @Positive @NotNull Long projectId) {
         return teamService.getFilteredTeamMembers(name, role, projectId);
     }
 }
