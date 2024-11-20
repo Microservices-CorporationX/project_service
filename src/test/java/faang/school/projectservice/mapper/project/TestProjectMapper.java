@@ -2,8 +2,6 @@ package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
-import faang.school.projectservice.mapper.projectMapper.ProjectMapper;
-import faang.school.projectservice.mapper.projectMapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

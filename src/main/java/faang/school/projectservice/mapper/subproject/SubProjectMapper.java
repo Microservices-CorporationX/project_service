@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper.project;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.model.Moment;

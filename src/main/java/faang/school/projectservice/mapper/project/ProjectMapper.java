@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper.projectMapper;
+package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;

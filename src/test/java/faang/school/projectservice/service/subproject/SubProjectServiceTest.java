@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
-import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -32,7 +32,7 @@ class SubProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private SubProjectMapperImpl subProjectMapper;
+    private SubProjectMapper subProjectMapper;
     @Mock
     private SubProjectServiceValidate projectValidator;
     @Mock

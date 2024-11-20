@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
-import faang.school.projectservice.mapper.project.SubProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
