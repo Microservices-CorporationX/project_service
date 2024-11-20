@@ -59,7 +59,7 @@ class StageInvitationServiceTest {
     StageService stageService;
 
     @Mock
-    faang.school.projectservice.service.teammember.TeamMemberService teamMemberService;
+    TeamMemberService teamMemberService;
 
     private StageInvitationService service;
     private StageInvitationFilter mockDescriptionFilter;
