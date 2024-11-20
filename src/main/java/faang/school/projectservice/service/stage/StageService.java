@@ -17,6 +17,7 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.stage.StageValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 public class StageService {
 
     private final StageRepository stageRepository;
-    private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
     private final StageInvitationRepository stageInvitationRepository;
     private final StageValidator stageValidator;
     private final StageMapper stageMapper;
@@ -170,7 +171,7 @@ public class StageService {
         stageValidator.validationNumOnNullAndLessThanZero(projectId, "Project ID must be a positive number");
 
         log.debug("Retrieving all stages from repository");
-        List<Stage> stages = getProjectById(projectId).getStages();
+        List<Stage> stages = projectService.getProjectById(projectId).getStages();
         log.debug("Successfully fetched project");
 
         stageValidator.validationOnNullOrEmptyList(stages, "No stages found for project");
@@ -486,18 +487,7 @@ public class StageService {
         return stage;
     }
 
-    private Project getProjectById(Long projectId) {
-        log.info("Retrieving project by ID: {}", projectId);
 
-        stageValidator.validationOnNull(projectId, "Project ID cannot be null");
-
-        Project project = projectRepository.getProjectById(projectId);
-
-        stageValidator.validationOnNull(project, "Project not found for ID: " + projectId);
-
-        log.info("Retrieved project: {}", project);
-        return project;
-    }
 
     private void delete(Stage stage) {
         log.info("Deleting stage: {}", stage);

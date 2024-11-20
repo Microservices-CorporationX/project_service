@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/stages")
+@RequestMapping("stages")
 public class StageController {
 
     private final StageService stageService;
@@ -35,7 +35,7 @@ public class StageController {
         return stageService.createStage(stageDto);
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<StageDto> getStageWithFilter(@RequestBody StageFilterDto stageFilterDto) {
         log.info("Get all project stages filtered by roles: {}", stageFilterDto);
         return stageService.getStageByFilter(stageFilterDto);
@@ -56,7 +56,7 @@ public class StageController {
         return stageService.updateStage(stageDto);
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/projects/{projectId}")
     public List<StageDto> getAllStage(@PathVariable Long projectId) {
         log.info("Get all stages for project: {}", projectId);
         return stageService.getAllProjectStages(projectId);
