@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.stage;
 
-import faang.school.projectservice.entity.stage.DeleteStrategy;
+import faang.school.projectservice.model.stage.DeleteStrategy;
 import lombok.Builder;
 import lombok.Getter;
 

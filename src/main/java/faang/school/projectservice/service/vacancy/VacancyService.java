@@ -3,7 +3,7 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.vacancy.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;

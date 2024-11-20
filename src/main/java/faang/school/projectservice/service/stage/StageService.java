@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.stage;
 
-import faang.school.projectservice.deletestrategy.DeleteStrategyRegistry;
+import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.model.stage.deletestrategy.DeleteStrategyRegistry;
 import faang.school.projectservice.dto.stage.DeleteTypeDto;
 import faang.school.projectservice.dto.stage.StageCreateDto;
 import faang.school.projectservice.dto.stage.StageDto;
@@ -10,8 +11,7 @@ import faang.school.projectservice.exception.ExecutorRoleNotValidException;
 import faang.school.projectservice.exception.NotEnoughTeamMembersException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.exception.WrongProjectStatusException;
-import faang.school.projectservice.filters.*;
-import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;

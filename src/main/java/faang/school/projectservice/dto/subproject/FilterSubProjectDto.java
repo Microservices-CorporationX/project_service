@@ -1,6 +1,5 @@
 package faang.school.projectservice.dto.subproject;
 
-import faang.school.projectservice.dto.FilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
