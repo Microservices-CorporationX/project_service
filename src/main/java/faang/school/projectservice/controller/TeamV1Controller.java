@@ -1,9 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.CreateTeamMemberDto;
+import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.UpdateTeamMemberDto;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.TeamMemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,38 +27,29 @@ import java.util.List;
 public class TeamV1Controller {
     private final TeamMemberService teamService;
 
-    @PostMapping("/{creatorId}/members")
-    public CreateTeamMemberDto addTeamMember(@RequestBody @Valid CreateTeamMemberDto teamMemberDto,
-                                             @PathVariable @Positive Long creatorId) {
-        return teamService.addTeamMember(teamMemberDto, creatorId);
+    @PostMapping("/{teamId}/members/add")
+    public ResponseTeamMemberDto addTeamMember(@RequestBody @Valid CreateTeamMemberDto teamMemberDto,
+                                             @PathVariable @Positive Long teamId,
+                                             HttpServletRequest request) {
+        return teamService.addTeamMember(teamMemberDto, teamId, request);
     }
 
-    @PostMapping("/{updaterId}/members/{memberId}")
-    public UpdateTeamMemberDto updateTeamMember(@RequestBody @Valid UpdateTeamMemberDto teamMemberDto,
-                                                @PathVariable @Positive Long updaterId) {
-        return teamService.updateTeamMember(teamMemberDto, updaterId);
+    @PutMapping("/{teamId}/members/update")
+    public ResponseTeamMemberDto updateTeamMember(@RequestBody @Valid UpdateTeamMemberDto teamMemberDto,
+                                                  @PathVariable @Positive Long teamId,
+                                                  HttpServletRequest request) {
+        return teamService.updateTeamMember(teamMemberDto, teamId, request);
     }
 
-    @DeleteMapping("/{deleterId}/members/{memberId}")
-    public void deleteTeamMember(@PathVariable @Positive Long deleterId,
-                                 @PathVariable @Positive Long memberId) {
-        teamService.deleteTeamMember(memberId, deleterId);
-    }
-
-    @GetMapping("/{projectId}/members")
-    public List<CreateTeamMemberDto> getFilteredTeamMembers(@RequestParam(required = false) String name,
-                                                            @RequestParam(required = false) TeamRole role,
-                                                            @PathVariable @Positive Long projectId) {
-        return teamService.getFilteredTeamMembers(name, role, projectId);
-    }
-
-    @GetMapping("/members")
-    public List<CreateTeamMemberDto> getAllTeamMembers() {
-        return teamService.getAllTeamMembers();
+    @DeleteMapping("/{teamId}/members/delete/{memberId}")
+    public void deleteTeamMember(@PathVariable @Positive Long teamId,
+                                 @PathVariable @Positive Long memberId,
+                                 HttpServletRequest request) {
+        teamService.deleteTeamMember(teamId, memberId, request);
     }
 
     @GetMapping("/{teamId}/members")
-    public List<CreateTeamMemberDto> getMembersByTeamId(@PathVariable @Positive Long teamId) {
+    public List<ResponseTeamMemberDto> getMembersByTeamId(@PathVariable @Positive Long teamId) {
         return teamService.getTeamMembersByTeamId(teamId);
     }
 }

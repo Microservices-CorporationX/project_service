@@ -12,7 +12,6 @@ public record CreateTeamMemberDto(
         Long id,
         @Positive Long userId,
         @NotBlank List<TeamRole> roles,
-        @Positive Long teamId,
         @NotBlank List<Long> stageIds
 ) {
 }
