@@ -9,46 +9,61 @@ import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
 @Slf4j
+@RestController
+@RequestMapping("/stage")
 @RequiredArgsConstructor
 public class StageController {
     private final StageService stageService;
 
-    public StageDto create(StageDto stage){
+    @PostMapping
+    public StageDto create(@RequestBody StageDto stage){
         validate(stage);
         return stageService.create(stage);
     }
 
-    public List<StageDto> getByRole(StageDto stage, TeamRole role) {
+    @GetMapping("/{role}")
+    public List<StageDto> getByRole(@RequestBody StageDto stage, @PathVariable TeamRole role) {
         return stageService.getByRole(stage, role);
     }
 
-    public List<StageDto> getByStatus(StageDto stage, TaskStatus status) {
+    @GetMapping("/{status}")
+    public List<StageDto> getByStatus(@RequestBody StageDto stage, @PathVariable TaskStatus status) {
         return stageService.getByStatus(stage, status);
     }
 
-    public StageDto deleteCascade(StageDto stage){
+    @DeleteMapping("/delete-with-tasks")
+    public StageDto deleteCascade(@RequestBody StageDto stage){
         return stageService.deleteCascade(stage);
     }
 
-    public StageDto postponeTasks(StageDto stage, Long nextStageId){
+    @PostMapping("/postpone/{nextStageId}")
+    public StageDto postponeTasks(@RequestBody StageDto stage, @PathVariable Long nextStageId){
         return stageService.postponeTasks(stage, nextStageId);
     }
 
-    public StageDto update(StageDto stage){
+    @PostMapping("/update")
+    public StageDto update(@RequestBody StageDto stage){
         return stageService.update(stage);
     }
 
-    public List<StageDto> getAllStages(StageDto stage){
+    @GetMapping("/stages")
+    public List<StageDto> getAllStages(@RequestBody StageDto stage){
         return stageService.getAllStages(stage);
     }
 
-    public StageDto getById(Long stageId){
+    @GetMapping("/{stageId}")
+    public StageDto getById(@PathVariable Long stageId){
         return stageService.getById(stageId);
     }
 
