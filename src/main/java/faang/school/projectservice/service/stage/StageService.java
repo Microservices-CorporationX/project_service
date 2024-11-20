@@ -3,10 +3,11 @@ package faang.school.projectservice.service.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.ActionWithTask;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -14,11 +15,9 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.stage.StageValidator;
+import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ import java.util.stream.Stream;
 @Service
 public class StageService {
 
-    private final StageRepository stageRepository;
+    private final StageJpaRepository stageRepository;
     private final ProjectService projectService;
     private final StageInvitationRepository stageInvitationRepository;
     private final StageValidator stageValidator;
@@ -487,8 +486,6 @@ public class StageService {
         return stage;
     }
 
-
-
     private void delete(Stage stage) {
         log.info("Deleting stage: {}", stage);
 
@@ -496,5 +493,10 @@ public class StageService {
 
         stageRepository.delete(stage);
         log.info("Successfully deleted stage with ID: {}", stage.getStageId());
+    }
+
+    public Stage getStageEntity(long stageId) {
+        return stageRepository.findById(stageId)
+                .orElseThrow(() -> new EntityNotFoundException("Stage", stageId));
     }
 }

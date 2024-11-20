@@ -3,6 +3,7 @@ package faang.school.projectservice.service.stage;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.ActionWithTask;
 import faang.school.projectservice.model.Project;
@@ -40,7 +41,7 @@ public class StageServiceTest {
     private StageService stageService;
 
     @Mock
-    private StageRepository stageRepository;
+    private StageJpaRepository stageRepository;
 
     @Mock
     private ProjectRepository projectRepository;
