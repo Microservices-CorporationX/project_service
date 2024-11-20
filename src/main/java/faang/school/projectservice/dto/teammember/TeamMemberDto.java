@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.teammember;
+package faang.school.projectservice.dto.teammember;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

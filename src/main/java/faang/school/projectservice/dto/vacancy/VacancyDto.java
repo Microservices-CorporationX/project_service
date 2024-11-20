@@ -1,6 +1,6 @@
-package faang.school.projectservice.dto.client.vacancy;
+package faang.school.projectservice.dto.vacancy;
 
-import faang.school.projectservice.dto.client.teammember.TeamMemberDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.model.VacancyStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

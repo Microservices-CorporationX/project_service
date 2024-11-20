@@ -2,7 +2,6 @@ package faang.school.projectservice.controller.stage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.controller.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.InvalidStageTransferException;
