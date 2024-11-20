@@ -1,11 +1,15 @@
 package faang.school.projectservice.handler;
 
+import faang.school.projectservice.exception.ExternalServiceException;
 import faang.school.projectservice.exception.InvalidStageTransferException;
 import faang.school.projectservice.exception.NonExistentDeletionTypeException;
 import faang.school.projectservice.exception.ProjectStatusValidationException;
+import faang.school.projectservice.exception.TeamMemberValidationException;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -55,5 +59,33 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleVacancyCreation(IllegalArgumentException exception){
         log.error("Illegal Argument Error: {}", exception.getMessage());
         return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleDataAccessException(DataAccessException e) {
+        log.error("Database error occurred: ", e);
+        return new ErrorResponse("Database error", "An error occurred while accessing the database.");
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleExternalServiceException(ExternalServiceException e) {
+        log.error("Interaction failure", e);
+        return new ErrorResponse("Interaction failure", e.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleUnauthorizedAccessException(UnauthorizedAccessException e) {
+        log.error("Unauthorized access", e);
+        return new ErrorResponse("Unauthorized access", e.getMessage());
+    }
+
+    @ExceptionHandler(TeamMemberValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTeamMemberValidationException(TeamMemberValidationException e) {
+        log.error("Team member validation failure", e);
+        return new ErrorResponse("Team member validation failure", e.getMessage());
     }
 }

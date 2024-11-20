@@ -1,6 +1,5 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +17,18 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Query("SELECT CASE WHEN COUNT(tm) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Project p " +
+            "JOIN p.teams t " +
+            "JOIN t.teamMembers tm " +
+            "WHERE p.id = :projectId AND tm.userId = :userId")
+    boolean isUserInAnyTeamOfProject(long projectId, long userId);
+
+    @Query("SELECT COUNT(DISTINCT tm.userId) " +
+            "FROM Project p " +
+            "JOIN p.teams t " +
+            "JOIN t.teamMembers tm " +
+            "WHERE p.id = :projectId AND tm.userId IN :userIds")
+    long countUsersInProjectTeams(long projectId, List<Long> userIds);
 }
