@@ -69,6 +69,15 @@ public class ProjectService {
         return projectMapper.toDto(savedProject);
     }
 
+    @Transactional
+    public List<Project> findProjectsByIds(List<Long> projectIds) {
+        return projectIds.stream()
+                .map(id -> projectRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(PROJECT, id)))
+                .collect(Collectors.toList());
+    }
+
+
     public boolean isProjectExists(long projectId) {
         return projectRepository.existsById(projectId);
     }
