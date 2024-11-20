@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateTeamMemberDto;
 import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.UpdateTeamMemberDto;
@@ -33,12 +34,12 @@ public class TeamMemberService {
     private final StageService stageService;
     private final TeamMemberMapper teamMemberMapper;
     private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
 
     @Transactional
     public ResponseTeamMemberDto addTeamMember(CreateTeamMemberDto teamMemberDto,
-                                               Long teamId,
-                                               HttpServletRequest request) {
-        Long creatorId = Long.parseLong(request.getHeader("x-user-id"));
+                                               Long teamId) {
+        long creatorId = userContext.getUserId();
         ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD);
 
         TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
@@ -51,9 +52,8 @@ public class TeamMemberService {
 
     @Transactional
     public ResponseTeamMemberDto updateTeamMember(UpdateTeamMemberDto teamMemberDto,
-                                                Long teamId,
-                                                HttpServletRequest request) {
-        Long updaterId = Long.parseLong(request.getHeader("x-user-id"));
+                                                Long teamId) {
+        long updaterId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
         TeamMember updater = teamMemberRepository.findById(updaterId);
         TeamMember memberToUpdate = teamMemberRepository.findById(teamMemberDto.id());
@@ -66,7 +66,7 @@ public class TeamMemberService {
                 List<Stage> stages = stageService.getStagesByIds(teamMemberDto.stageIds());
                 memberToUpdate.setStages(stages);
             }
-        } else if (updaterId.equals(teamMemberDto.id())) {
+        } else if (updaterId == teamMemberDto.id()) {
             UserDto user = userServiceClient.getUser(updaterId);
             user.setUsername(teamMemberDto.username());
         }
@@ -76,8 +76,8 @@ public class TeamMemberService {
     }
 
     @Transactional
-    public void deleteTeamMember(long memberId, long teamId, HttpServletRequest request) {
-        Long deleterId = Long.parseLong(request.getHeader("x-user-id"));
+    public void deleteTeamMember(long memberId, long teamId) {
+        long deleterId = userContext.getUserId();
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE);
         Team team = teamService.getTeamById(teamId);
         TeamMember teamMember = teamMemberRepository.findById(memberId);

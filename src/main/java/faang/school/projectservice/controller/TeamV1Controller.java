@@ -29,23 +29,20 @@ public class TeamV1Controller {
 
     @PostMapping("/{teamId}/members/add")
     public ResponseTeamMemberDto addTeamMember(@RequestBody @Valid CreateTeamMemberDto teamMemberDto,
-                                             @PathVariable @Positive Long teamId,
-                                             HttpServletRequest request) {
-        return teamService.addTeamMember(teamMemberDto, teamId, request);
+                                             @PathVariable @Positive Long teamId) {
+        return teamService.addTeamMember(teamMemberDto, teamId);
     }
 
     @PutMapping("/{teamId}/members/update")
     public ResponseTeamMemberDto updateTeamMember(@RequestBody @Valid UpdateTeamMemberDto teamMemberDto,
-                                                  @PathVariable @Positive Long teamId,
-                                                  HttpServletRequest request) {
-        return teamService.updateTeamMember(teamMemberDto, teamId, request);
+                                                  @PathVariable @Positive Long teamId) {
+        return teamService.updateTeamMember(teamMemberDto, teamId);
     }
 
     @DeleteMapping("/{teamId}/members/delete/{memberId}")
     public void deleteTeamMember(@PathVariable @Positive Long teamId,
-                                 @PathVariable @Positive Long memberId,
-                                 HttpServletRequest request) {
-        teamService.deleteTeamMember(teamId, memberId, request);
+                                 @PathVariable @Positive Long memberId) {
+        teamService.deleteTeamMember(teamId, memberId);
     }
 
     @GetMapping("/{teamId}/members")
