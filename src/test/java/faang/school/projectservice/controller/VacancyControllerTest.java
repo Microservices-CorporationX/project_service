@@ -130,7 +130,8 @@ class VacancyControllerTest {
     void testFilterVacanciesSuccess() {
         when(vacancyService.filterVacancies(filters)).thenReturn(List.of(responseDto));
 
-        ResponseEntity<List<VacancyResponseDto>> resultResponse = vacancyController.filterVacancies(filters);
+        ResponseEntity<List<VacancyResponseDto>> resultResponse = vacancyController.
+                filterVacancies(filters.getTitle(), filters.getSalary(), filters.getWorkSchedule());
         List<VacancyResponseDto> resultDto = resultResponse.getBody();
 
         verify(vacancyService).filterVacancies(filters);

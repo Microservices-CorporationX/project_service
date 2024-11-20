@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.vacancy.NewVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
+import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -49,8 +51,13 @@ public class VacancyController {
     }
 
     @Operation(summary = "Receive a list of vacancies filtered by a provided filter")
-    @PostMapping("/filters/")
-    public ResponseEntity<List<VacancyResponseDto>> filterVacancies(@Valid @RequestBody FilterVacancyDto filters) {
+    @GetMapping("/filters/")
+    public ResponseEntity<List<VacancyResponseDto>> filterVacancies(
+            @RequestParam(required = false) @Schema(description = "Vacancy title") String title,
+            @RequestParam(required = false) @Schema(description = "Salary", minimum = "0.0") Double salary,
+            @RequestParam(required = false) @Schema(description = "Work schedule") WorkSchedule workSchedule
+    ) {
+        FilterVacancyDto filters = new FilterVacancyDto(title, salary, workSchedule);
         log.info("Filters request received: {}", filters);
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.filterVacancies(filters));
     }
