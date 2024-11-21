@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
@@ -8,7 +9,7 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.task.TaskService;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,14 +161,14 @@ public class StageServiceTest {
     @DisplayName("Проверка getAllStagesOfProject - Получение stages по project")
     public void getAllStagesOfProject_shouldReturnStagesOfProject() {
 
-        when(projectService.getProject(100L)).thenReturn(project);
+        when(projectService.getProjectById(100L)).thenReturn(new ProjectDto());
         when(stageMapper.toStageDtos(project.getStages())).thenReturn(List.of(stageDto, stageDto2));
 
         List<StageDto> result = stageService.getAllStagesOfProject(100L);
 
         assertEquals(List.of(stageDto, stageDto2), result);
 
-        verify(projectService, times(1)).getProject(100L);
+        verify(projectService, times(1)).getProjectById(100L);
         verify(stageMapper, times(1)).toStageDtos(project.getStages());
     }
 

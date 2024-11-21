@@ -10,7 +10,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.task.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,7 +79,7 @@ public class StageService {
     }
 
     public List<StageDto> getAllStagesOfProject(Long projectId) {
-        return stageMapper.toStageDtos(projectService.getProject(projectId).getStages());
+        return stageMapper.toStageDtos(projectService.getProjectById(projectId).getStages());
     }
 
     public StageDto getStageById(Long id) {
