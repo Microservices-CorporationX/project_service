@@ -1,9 +1,8 @@
-package faang.school.projectservice.service.teamMember;
+package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.service.teammember.TeamMemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
