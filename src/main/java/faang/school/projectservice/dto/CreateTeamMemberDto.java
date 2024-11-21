@@ -10,7 +10,6 @@ import java.util.List;
 
 @Builder
 public record CreateTeamMemberDto(
-        Long id,
         @Positive @NotNull Long userId,
         @NotBlank List<TeamRole> roles,
         @NotBlank List<Long> stageIds

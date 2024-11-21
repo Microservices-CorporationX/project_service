@@ -9,7 +9,6 @@ import java.util.List;
 
 @Builder
 public record UpdateTeamMemberDto(
-        @Positive @NotNull Long id,
         @Positive @NotNull Long userId,
         String username,
         List<TeamRole> roles,

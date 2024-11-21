@@ -53,21 +53,22 @@ public class TeamMemberService {
 
     @Transactional
     public ResponseTeamMemberDto updateTeamMember(UpdateTeamMemberDto teamMemberDto,
-                                                long teamId) {
+                                                  long teamId,
+                                                  long memberId) {
         long updaterId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
         TeamMember updater = teamMemberRepository.findById(updaterId);
-        TeamMember memberToUpdate = teamMemberRepository.findById(teamMemberDto.id());
+        TeamMember memberToUpdate = teamMemberRepository.findById(memberId);
 
         if (updater.getRoles().contains(TeamRole.TEAMLEAD)) {
             if (teamMemberDto.roles() != null) {
                 memberToUpdate.setRoles(teamMemberDto.roles());
             }
-            if (teamMemberDto.stageIds()!=null) {
+            if (teamMemberDto.stageIds() != null) {
                 List<Stage> stages = stageService.getStagesByIds(teamMemberDto.stageIds());
                 memberToUpdate.setStages(stages);
             }
-        } else if (updaterId == teamMemberDto.id()) {
+        } else if (updaterId == memberId) {
             UserDto user = userServiceClient.getUser(updaterId);
             user.setUsername(teamMemberDto.username());
         }

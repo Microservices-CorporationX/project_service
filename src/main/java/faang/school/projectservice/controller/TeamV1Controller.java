@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.CreateTeamMemberDto;
 import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.UpdateTeamMemberDto;
 import faang.school.projectservice.service.TeamMemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -28,19 +27,20 @@ import java.util.List;
 public class TeamV1Controller {
     private final TeamMemberService teamService;
 
-    @PostMapping("/{teamId}/members/add")
+    @PostMapping("/{teamId}/members")
     public ResponseTeamMemberDto addTeamMember(@RequestBody @Valid CreateTeamMemberDto teamMemberDto,
                                              @PathVariable @Positive @NotNull Long teamId) {
         return teamService.addTeamMember(teamMemberDto, teamId);
     }
 
-    @PutMapping("/{teamId}/members/update")
+    @PutMapping("/{teamId}/members/{memberId}")
     public ResponseTeamMemberDto updateTeamMember(@RequestBody @Valid UpdateTeamMemberDto teamMemberDto,
-                                                  @PathVariable @Positive @NotNull Long teamId) {
-        return teamService.updateTeamMember(teamMemberDto, teamId);
+                                                  @PathVariable @Positive @NotNull Long teamId,
+                                                  @PathVariable @Positive @NotNull Long memberId) {
+        return teamService.updateTeamMember(teamMemberDto, teamId, memberId);
     }
 
-    @DeleteMapping("/{teamId}/members/delete/{memberId}")
+    @DeleteMapping("/{teamId}/members/{memberId}")
     public void deleteTeamMember(@PathVariable @Positive @NotNull Long teamId,
                                  @PathVariable @Positive @NotNull Long memberId) {
         teamService.deleteTeamMember(teamId, memberId);
