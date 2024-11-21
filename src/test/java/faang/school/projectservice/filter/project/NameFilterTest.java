@@ -1,49 +1,59 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+@ExtendWith(MockitoExtension.class)
+public class NameFilterTest {
+    NameFilter nameFilter;
 
-class NameFilterTest {
-    private NameFilter nameFilter = new NameFilter();
-    private ProjectFilterDto projectFilterDto = new ProjectFilterDto();
+    ProjectFilterDto projectFilterDto;
 
-    @Test
-    void testIsApplicableFalse() {
-        assertFalse(nameFilter.isApplicable(projectFilterDto));
+    @BeforeEach
+    public void setUp() {
+        nameFilter = new NameFilter();
+        projectFilterDto = new ProjectFilterDto();
     }
 
     @Test
-    void testIsApplicableTrue() {
-        projectFilterDto.setName("Name");
-        assertTrue(nameFilter.isApplicable(projectFilterDto));
+    public void testIsApplicableFailed() {
+        projectFilterDto.setName(null);
+        boolean result = nameFilter.isApplicable(projectFilterDto);
+
+        assertFalse(result);
     }
 
     @Test
-    void testApply() {
+    public void testIsApplicableSuccessful() {
+        projectFilterDto.setName("name");
+        boolean result = nameFilter.isApplicable(projectFilterDto);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testApplySuccessful() {
         Project firstProject = new Project();
-        firstProject.setName("Name");
         Project secondProject = new Project();
-        secondProject.setName("Not a name");
+        firstProject.setName("first");
+        secondProject.setName("second");
+        projectFilterDto.setName("first");
+        Stream<Project> projects = Stream.of(firstProject, secondProject);
 
-        projectFilterDto.setName("Name");
+        List<Project> result = nameFilter.apply(projectFilterDto, projects).toList();
 
-        List<Project> projects = new ArrayList<>();
-        projects.add(firstProject);
-        projects.add(secondProject);
-
-        nameFilter.apply(projects, projectFilterDto);
-
-
-        assertEquals(projects.get(0), firstProject);
-        assertEquals(projects.size(), 1);
-
+        assertEquals(1, result.size());
+        assertEquals("first", result.get(0).getName());
     }
-
 }
