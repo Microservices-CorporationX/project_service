@@ -45,8 +45,9 @@ public class TeamMemberService {
         ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD, project.getId());
 
         TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
-
         teamMember = createTeamMember(teamMember, team, project);
+        teamService.saveTeam(team);
+        teamMemberRepository.save(teamMember);
         return teamMemberMapper.toResponseDto(teamMember);
     }
 
@@ -125,24 +126,24 @@ public class TeamMemberService {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId) != null;
     }
 
-    private boolean hasAccess(Long memberId, List<TeamRole> requiredRoles, Long projectId) {
-        if (TeamMemberExistsByUserAndProjectIds(memberId, projectId)) {
-            TeamMember teamMember = teamMemberRepository.findById(memberId);
+    private boolean hasAccess(Long userId, List<TeamRole> requiredRoles, Long projectId) {
+        if (TeamMemberExistsByUserAndProjectIds(userId, projectId)) {
+            TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
             return requiredRoles.stream().anyMatch(role -> teamMember.getRoles().contains(role));
         } else {
-            log.warn("Team member with user ID {} does not exist", memberId);
+            log.warn("Team member with user ID {} does not exist", userId);
             throw new ResourceNotFoundException(
-                    String.format("Team member with user ID %d does not exist", memberId)
+                    String.format("Team member with user ID %d does not exist", userId)
             );
         }
     }
 
-    private void ensureHasAccess(Long memberId, List<TeamRole> requiredRoles,
+    private void ensureHasAccess(Long userId, List<TeamRole> requiredRoles,
                                  TeamMemberActions action, Long projectId) {
-        if (!hasAccess(memberId, requiredRoles, projectId)) {
-            log.warn("Member with ID {} has no access to {}", memberId, action.getDescription());
+        if (!hasAccess(userId, requiredRoles, projectId)) {
+            log.warn("Member with ID {} has no access to {}", userId, action.getDescription());
             throw new DataValidationException(String.format(
-                    "Member with ID %d has no access to %s", memberId, action.getDescription())
+                    "Member with ID %d has no access to %s", userId, action.getDescription())
             );
         }
     }
@@ -160,11 +161,8 @@ public class TeamMemberService {
             existingTeamMember.setRoles(teamMember.getRoles());
             return existingTeamMember;
         }
-
         teamMember.setTeam(team);
         team.addTeamMember(teamMember);
-        teamService.saveTeam(team);
-        teamMemberRepository.save(teamMember);
         return teamMember;
     }
 }
