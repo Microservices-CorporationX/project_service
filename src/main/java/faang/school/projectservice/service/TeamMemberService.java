@@ -6,8 +6,6 @@ import faang.school.projectservice.dto.CreateTeamMemberDto;
 import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.exceptions.DataValidationException;
-import faang.school.projectservice.exceptions.ResourceNotFoundException;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -16,6 +14,7 @@ import faang.school.projectservice.model.TeamMemberActions;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -105,7 +104,7 @@ public class TeamMemberService {
                     UserDto user = users.stream()
                             .filter(u -> u.getId().equals(member.getId()))
                             .findFirst()
-                            .orElseThrow(() -> new DataValidationException("User not found"));
+                            .orElseThrow(() -> new EntityNotFoundException("User not found"));
                     return user.getUsername().contains(name) && member.getRoles().contains(role);
                 })
                 .toList();
@@ -133,7 +132,7 @@ public class TeamMemberService {
             return requiredRoles.stream().anyMatch(role -> teamMember.getRoles().contains(role));
         } else {
             log.warn("Team member with user ID {} does not exist", userId);
-            throw new ResourceNotFoundException(
+            throw new EntityNotFoundException(
                     String.format("Team member with user ID %d does not exist", userId)
             );
         }
@@ -143,7 +142,7 @@ public class TeamMemberService {
                                  TeamMemberActions action, Long projectId) {
         if (!hasAccess(userId, requiredRoles, projectId)) {
             log.warn("Member with ID {} has no access to {}", userId, action.getDescription());
-            throw new DataValidationException(String.format(
+            throw new EntityNotFoundException(String.format(
                     "Member with ID %d has no access to %s", userId, action.getDescription())
             );
         }
