@@ -6,5 +6,5 @@ public interface IssueFilter {
 
     boolean isApplicable(IssueFilterDto issueFilterDto);
 
-    String getJql(String projectKey, IssueFilterDto filter);
+    String getJql(IssueFilterDto filter);
 }

@@ -48,11 +48,13 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public List<IssueDto> getAllIssueByFilter(String projectKey, IssueFilterDto filter) {
+    public List<IssueDto> getAllIssueByFilter(IssueFilterDto filter) {
+        log.info("Fetching issues with filter: {}", filter);
         String jql = issueFilter.stream()
                 .filter(filters -> filters.isApplicable(filter))
-                .map(filters -> filters.getJql(projectKey, filter))
+                .map(filters -> filters.getJql(filter))
                 .collect(Collectors.joining(""));
+        log.debug("Generated JQL query: {}", jql);
         try {
             SearchResult result = jiraRestClient.getSearchClient().searchJql(jql).claim();
             return mapper.toIssueDtos((List<Issue>) result.getIssues());
@@ -63,21 +65,11 @@ public class JiraServiceImpl implements JiraService {
     }
 
     @Override
-    public List<IssueDto> getAllIssues(String projectKey) {
-        try {
-            SearchResult result = jiraRestClient.getSearchClient()
-                    .searchJql("project = " + projectKey).claim();
-            return mapper.toIssueDtos((List<Issue>) result.getIssues());
-        } catch (RestClientException e) {
-            log.error(e.getMessage());
-            throw e;
-        }
-    }
-
-    @Override
     public IssueDto getIssue(String issueKey) {
+        log.info("Fetching issue with key: {}", issueKey);
         try {
             Issue issue = jiraRestClient.getIssueClient().getIssue(issueKey).claim();
+            log.info("Successfully fetched issue: {}", issueKey);
             return mapper.toIssueDto(issue);
         } catch (RestClientException e) {
             log.error(e.getMessage());

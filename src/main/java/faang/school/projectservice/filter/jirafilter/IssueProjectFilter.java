@@ -4,16 +4,16 @@ import faang.school.projectservice.dto.jira.IssueFilterDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IssueStatusFilter implements IssueFilter {
+public class IssueProjectFilter implements IssueFilter {
 
     @Override
     public boolean isApplicable(IssueFilterDto issueFilterDto) {
-        return issueFilterDto.status() != null;
+        return true;
     }
 
     @Override
     public String getJql(IssueFilterDto filter) {
-        String jqlFormat = " AND status = %s";
-        return String.format(jqlFormat, filter.status());
+        String jqlFormat = "project = %s";
+        return String.format(jqlFormat, filter.projectKey());
     }
 }

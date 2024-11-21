@@ -3,7 +3,6 @@ package faang.school.projectservice.controller.jira;
 import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.IssueFilterDto;
 import faang.school.projectservice.service.jira.JiraService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,15 +23,9 @@ public class JiraController {
         return jiraService.createIssue(projectKey, issueDto);
     }
 
-    @GetMapping("/{projectKey}/filters")
-    public List<IssueDto> getAllIssueByFilter(@PathVariable String projectKey,
-                                              @Valid @RequestBody IssueFilterDto filter) {
-        return jiraService.getAllIssueByFilter(projectKey, filter);
-    }
-
-    @GetMapping("/all/{projectKey}")
-    public List<IssueDto> getAllIssues(@PathVariable String projectKey) {
-        return jiraService.getAllIssues(projectKey);
+    @PostMapping("/filter")
+    public List<IssueDto> getAllIssueByFilter(@RequestBody IssueFilterDto filter) {
+        return jiraService.getAllIssueByFilter(filter);
     }
 
     @GetMapping("/{issueKey}")

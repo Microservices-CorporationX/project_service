@@ -1,5 +1,10 @@
 package faang.school.projectservice.dto.jira;
 
-public record IssueFilterDto(String status,
-                             String assignee) {
+import lombok.NonNull;
+
+public record IssueFilterDto(
+        @NonNull
+        String projectKey,
+        String status,
+        String assignee) {
 }

@@ -9,9 +9,7 @@ public interface JiraService {
 
     IssueDto createIssue(String projectKey, IssueDto issueDto);
 
-    List<IssueDto> getAllIssueByFilter(String projectKey, IssueFilterDto filter);
-
-    List<IssueDto> getAllIssues(String projectKey);
+    List<IssueDto> getAllIssueByFilter(IssueFilterDto filter);
 
     IssueDto getIssue(String issueKey);
 }

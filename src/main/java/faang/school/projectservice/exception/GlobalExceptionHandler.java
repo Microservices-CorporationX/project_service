@@ -28,7 +28,8 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class, UserNotTeamMemberException.class, StorageSizeExceededException.class})
+    @ExceptionHandler({DataValidationException.class, IllegalArgumentException.class,
+            UserNotTeamMemberException.class, StorageSizeExceededException.class, RestClientException.class})
     public ErrorResponse handleValidationExceptions(Exception ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
@@ -99,13 +100,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Throwable.class)
     public ErrorResponse handleThrowable(Throwable ex) {
-        log.error(ex.getMessage(), ex);
-        return new ErrorResponse(ex.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(RestClientException.class)
-    public ErrorResponse handleRestClientException(RestClientException ex) {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }

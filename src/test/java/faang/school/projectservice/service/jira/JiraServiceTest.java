@@ -100,29 +100,14 @@ public class JiraServiceTest {
     public void testGetAllIssuesByFilter() {
         String projectKey = "BJS2";
         String jql = "res";
-        IssueFilterDto filterDto = new IssueFilterDto("Status", "Assignee");
+        IssueFilterDto filterDto = new IssueFilterDto("Project","Status", "Assignee");
         SearchResult result = mock(SearchResult.class);
         Promise<SearchResult> promise = mock(Promise.class);
         when(searchRestClient.searchJql(anyString())).thenReturn(promise);
         when(promise.claim()).thenReturn(result);
         when(issueMapper.toIssueDtos(any(List.class))).thenReturn(issueDtos);
 
-        List<IssueDto> dtoList = jiraService.getAllIssueByFilter(projectKey, filterDto);
-
-        assertEquals(dtoList, issueDtos);
-    }
-
-    @Test
-    public void testGetAllIssues() {
-        String projectKey = "BJS2";
-        String jql = "project = BJS2";
-        SearchResult result = mock(SearchResult.class);
-        Promise<SearchResult> promise = mock(Promise.class);
-        when(searchRestClient.searchJql(jql)).thenReturn(promise);
-        when(promise.claim()).thenReturn(result);
-        when(issueMapper.toIssueDtos(any(List.class))).thenReturn(issueDtos);
-
-        List<IssueDto> dtoList = jiraService.getAllIssues(projectKey);
+        List<IssueDto> dtoList = jiraService.getAllIssueByFilter(filterDto);
 
         assertEquals(dtoList, issueDtos);
     }
