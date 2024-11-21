@@ -1,20 +1,21 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 public class StatusFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto projectFilterDto) {
-        return projectFilterDto.getProjectStatus() != null;
+        return projectFilterDto.getStatus() != null;
     }
 
     @Override
-    public void apply(List<Project> projectStream, ProjectFilterDto projectFilterDto) {
-        projectStream.removeIf(project -> !(project.getStatus() == projectFilterDto.getProjectStatus()));
+    public Stream<Project> apply(ProjectFilterDto projectFilterDto, Stream<Project> projects) {
+        return projects.filter(project -> project.getStatus().equals(projectFilterDto.getStatus()));
     }
 }
