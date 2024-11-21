@@ -7,5 +7,5 @@ import java.util.stream.Stream;
 public interface Filter<T, F extends FilterDto> {
     boolean isApplicable(F filterDto);
 
-    Stream<T> apply(Stream<T> internships,F filterDto);
+    Stream<T> apply(Stream<T> objects,F filterDto);
 }
