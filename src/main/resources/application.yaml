@@ -25,6 +25,20 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  springdoc:
+    api-docs:
+      enabled: true
+    swagger-ui:
+      enabled: true
+    info:
+      title: "Project Service API"
+      description: "This is a sample Project service functionality"
+      version: "1.0.0"
+      terms-of-service: "http://swagger.io/terms/"
+      license:
+        name: "Apache 2.0"
+        url: "http://springdoc.org"
+
 server:
   port: 8082
 
