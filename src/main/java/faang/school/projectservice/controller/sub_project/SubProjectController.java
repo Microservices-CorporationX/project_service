@@ -33,29 +33,52 @@ public class SubProjectController {
     @PostMapping("/{Id}/createSubProject")
     @Operation(summary = "Создать подпроект")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Project created",
+            @ApiResponse(responseCode = "201", description = "SubProject created",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProjectDto.class))}),
             @ApiResponse(responseCode = "400", description = "Non-validate parameters",
                     content = @Content),
-            @ApiResponse(responseCode = "400", description = "Project already exists",
+            @ApiResponse(responseCode = "400", description = "SubProject already exists",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)
     })
-    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId, @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
+    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+                                       @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
     }
 
     @PatchMapping("/{Id}/updateSubProject")
-
+    @Operation(summary = "Обновить подпроект")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "SubProject was updated",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Non-validate parameters",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "SubProject not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Server error",
+                    content = @Content)
+    })
     public ProjectDto updateSubProject(@Valid @RequestBody ProjectDto subProjectDto) {
         return projectService.updateSubProject(subProjectDto);
     }
 
     @PostMapping("/{Id}/getSubProject")
-
-    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId, @RequestBody ProjectFilterDto projectFilterDto) {
+    @Operation(summary = "Получить подпроект по id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "SubProject found",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid subProject id",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "SubProject not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Server error",
+                    content = @Content)})
+    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+                                           @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }
 }
