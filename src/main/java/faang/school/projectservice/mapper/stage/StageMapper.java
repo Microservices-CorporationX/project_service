@@ -2,11 +2,13 @@ package faang.school.projectservice.mapper.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.service.project.ProjectService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -16,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {ProjectService.class})
 public interface StageMapper {
 
     @Mapping(source = "stageRoles", target = "stageRolesId", qualifiedByName = "mapStageToIds")
@@ -25,7 +27,6 @@ public interface StageMapper {
     StageDto toDto(Stage stage);
 
     Stage toEntity(StageDto stageDto);
-
 
     @Mapping(target = "teamRolePattern", source = "stageRoles", qualifiedByName = "stageRolesToPattern")
     @Mapping(target = "taskStatusPattern", source = "tasks", qualifiedByName = "taskStatusToPattern")

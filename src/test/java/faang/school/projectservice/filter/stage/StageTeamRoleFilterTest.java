@@ -1,8 +1,6 @@
 package faang.school.projectservice.filter.stage;
 
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
@@ -31,7 +29,7 @@ public class StageTeamRoleFilterTest {
     @Test
     @DisplayName("Is applicable successful filter test")
     public void isApplicableFilterTest() {
-        stageFilterDto.setTaskStatusPattern("completed");
+        stageFilterDto.setTeamRolePattern("owner");
 
         assertTrue(stageTeamRoleFilter.isApplicable(stageFilterDto));
     }

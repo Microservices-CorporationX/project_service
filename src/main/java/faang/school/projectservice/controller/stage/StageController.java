@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.stage;
 
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.model.ActionWithTask;
@@ -23,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("stages")
+@RequestMapping("/stages")
 public class StageController {
 
     private final StageService stageService;
@@ -41,13 +42,11 @@ public class StageController {
         return stageService.getStageByFilter(stageFilterDto);
     }
 
-    @DeleteMapping("/{stageId}")
+    @DeleteMapping()
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteStage(@PathVariable Long stageId,
-                            @RequestParam ActionWithTask actionWithTask,
-                            @RequestParam(required = false) Long transferStageId) {
-        log.info("Delete stage with ID: {}", stageId);
-        stageService.deleteStage(stageId, actionWithTask, transferStageId);
+    public void deleteStage(@RequestBody StageDeleteDto stageDeleteDto) {
+        log.info("Delete stage with ID: {}", stageDeleteDto.getStageId());
+        stageService.deleteStage(stageDeleteDto);
     }
 
     @PutMapping

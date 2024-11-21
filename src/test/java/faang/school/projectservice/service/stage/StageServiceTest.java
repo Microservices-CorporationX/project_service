@@ -1,11 +1,13 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.stage.ActionWithTaskDto;
+import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.StageJpaRepository;
+import faang.school.projectservice.jpa.StageRolesRepository;
 import faang.school.projectservice.mapper.stage.StageMapperImpl;
-import faang.school.projectservice.model.ActionWithTask;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -14,9 +16,12 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.team_member.TeamMemberService;
 import faang.school.projectservice.validator.stage.StageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,9 +32,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,13 +49,22 @@ public class StageServiceTest {
     private StageService stageService;
 
     @Mock
+    private ProjectService projectService;
+
+    @Mock
     private StageJpaRepository stageRepository;
 
     @Mock
     private ProjectRepository projectRepository;
 
     @Mock
+    private StageRolesRepository stageRolesRepository;
+
+    @Mock
     private StageInvitationRepository stageInvitationRepository;
+
+    @Mock
+    private TeamMemberService teamMemberService;
 
     @Spy
     private StageMapperImpl stageMapper;
@@ -65,6 +82,7 @@ public class StageServiceTest {
     private StageDto stageDto;
     private StageFilterDto stageFilterDto;
     private Project project;
+    private List<Task> tasks;
 
 
     @BeforeEach
@@ -108,7 +126,7 @@ public class StageServiceTest {
                 StageRoles.builder().id(3L).count(10).teamRole(TeamRole.TESTER).build()
         );
 
-        List<Task> tasks = List.of(
+        tasks = List.of(
                 Task.builder().id(1L).description("Task 1").build(),
                 Task.builder().id(2L).description("Task 2").build()
         );
@@ -142,18 +160,25 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verifying successful stage creation")
     public void checkCreateStageSuccessTest() {
-        when(stageMapper.toEntity(stageDto))
-                .thenReturn(stage);
-        when(stageRepository.save(stage))
-                .thenReturn(stage);
-        when(stageMapper.toDto(stage))
-                .thenReturn(stageDto);
+        when(stageRolesRepository.findAllById(stageDto.getStageRolesId()))
+                .thenReturn(stage.getStageRoles());
+        when(projectService.getProjectById(stageDto.getProjectId()))
+                .thenReturn(stage.getProject());
+        when(teamMemberService.findAllById(stageDto.getExecutorsId()))
+                .thenReturn(stage.getExecutors());
+        when(stageRepository.save(any(Stage.class)))
+                .thenAnswer(invocation -> {
+                    Stage saved = invocation.getArgument(0);
+                    saved.setStageId(1L);
+                    return saved;
+                });
 
         StageDto createdStage = stageService.createStage(stageDto);
 
         assertNotNull(createdStage);
+        assertEquals(1L, createdStage.getStageId());
 
-        verify(stageRepository, times(1)).save(stage);
+        verify(stageRepository, times(1)).save(any(Stage.class));
     }
 
     @Test
@@ -167,11 +192,13 @@ public class StageServiceTest {
         Stage firstFilter = Stage.builder()
                 .tasks(List.of(Task.builder().status(TaskStatus.TODO).build()))
                 .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.OWNER).build()))
+                .executors(Collections.emptyList())
                 .build();
 
         Stage secondFilter = Stage.builder()
                 .tasks(List.of(Task.builder().status(TaskStatus.TODO).build()))
                 .stageRoles(List.of(StageRoles.builder().teamRole(TeamRole.OWNER).build()))
+                .executors(Collections.emptyList())
                 .build();
 
         List<Stage> stageList = List.of(firstFilter, secondFilter);
@@ -189,12 +216,22 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verifying successful user cascade deletion")
     public void checkDeleteUserSuccessCascadeTest() {
-        ActionWithTask actionWithTask = ActionWithTask.CASCADE;
-        Long transferStageId = 2L;
+        ActionWithTaskDto actionWithTask = ActionWithTaskDto.builder()
+                .action("CASCADE")
+                .build();
 
-        when(stageRepository.getById(stage.getStageId())).thenReturn(stage);
+        StageDeleteDto stageDeleteDto = StageDeleteDto.builder()
+                .stageId(1L)
+                .actionWithTaskDto(actionWithTask)
+                .build();
 
-        stageService.deleteStage(stage.getStageId(), actionWithTask, transferStageId);
+        when(stageRepository.getById(1L))
+                .thenReturn(stage);
+
+        when(stageRepository.getById(stage.getStageId()))
+                .thenReturn(stage);
+
+        stageService.deleteStage(stageDeleteDto);
 
         verify(stageRepository, times(1))
                 .delete(stage);
@@ -203,56 +240,90 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verifying successful user close deletion")
     public void checkDeleteUserSuccessCloseTest() {
-        ActionWithTask actionWithTask = ActionWithTask.CLOSE;
-        Long transferStageId = 2L;
+        ActionWithTaskDto actionWithTask = ActionWithTaskDto.builder()
+                .action("CLOSE")
+                .build();
 
-        when(stageRepository.getById(stage.getStageId())).thenReturn(stage);
+        StageDeleteDto stageDeleteDto = StageDeleteDto.builder()
+                .stageId(1L)
+                .actionWithTaskDto(actionWithTask)
+                .build();
 
-        stageService.deleteStage(stage.getStageId(), ActionWithTask.CLOSE, transferStageId);
+        when(stageRepository.getById(1L))
+                .thenReturn(stage);
+
+        stageService.deleteStage(stageDeleteDto);
 
         verify(stageRepository, times(1))
                 .delete(stage);
     }
 
     @Test
-    @DisplayName("Verifying successful user transfer deletion")
+    @DisplayName("Verifying successful transfer deletion")
     public void checkDeleteUserSuccessTransferTest() {
-        ActionWithTask actionWithTask = ActionWithTask.TRANSFER;
-        Long transferStageId = 2L;
+        ActionWithTaskDto actionWithTask = ActionWithTaskDto.builder()
+                .action("TRANSFER")
+                .transferStageId(2L)
+                .build();
+
+        StageDeleteDto stageDeleteDto = StageDeleteDto.builder()
+                .stageId(1L)
+                .actionWithTaskDto(actionWithTask)
+                .build();
+
+        Stage deletedStage = Stage.builder()
+                .stageId(1L)
+                .stageName("Test Stage")
+                .project(project)
+                .stageRoles(stage.getStageRoles())
+                .tasks(tasks)
+                .executors(Collections.emptyList())
+                .build();
 
         Stage transferStage = Stage.builder()
                 .stageId(2L)
-                .tasks(List.of(
-                        Task.builder()
-                                .id(1L)
-                                .description("Task 1")
-                                .build(),
-                        Task.builder()
-                                .id(2L)
-                                .description("Task 2")
-                                .build()
-                ))
+                .stageName("Transferred Stage")
+                .project(project)
+                .stageRoles(stage.getStageRoles())
+                .tasks(Collections.emptyList())
+                .executors(Collections.emptyList())
+                .build();
+
+        Stage savedTransferStage = Stage.builder()
+                .stageId(2L)
+                .stageName("Transferred Stage")
+                .project(project)
+                .stageRoles(stage.getStageRoles())
+                .tasks(tasks)
+                .executors(Collections.emptyList())
                 .build();
 
         when(stageRepository.getById(stage.getStageId()))
-                .thenReturn(stage);
-        when(stageRepository.getById(transferStageId))
+                .thenReturn(deletedStage);
+        when(stageRepository.getById(transferStage.getStageId()))
                 .thenReturn(transferStage);
+        when(stageRepository.save(any(Stage.class)))
+                .thenReturn(savedTransferStage);
 
-        stageService.deleteStage(stage.getStageId(), actionWithTask, transferStageId);
+        stageService.deleteStage(stageDeleteDto);
 
-        verify(stageRepository, times(1))
-                .save(transferStage);
-        verify(stageRepository, times(1))
-                .delete(stage);
-
+        verify(stageRepository, times(1)).delete(deletedStage);
+        verify(stageRepository, times(1)).save(transferStage);
     }
 
     @Test
     @DisplayName("Verifying successful stage update")
     public void checkUpdateStageSuccessTest() {
+        StageInvitation stageInvitation = StageInvitation.builder()
+                .stage(stage)
+                .invited(TeamMember.builder().id(1L).build())
+                .status(StageInvitationStatus.PENDING)
+                .build();
+
         when(stageRepository.getById(stage.getStageId()))
                 .thenReturn(stage);
+        when(stageInvitationRepository.save(any(StageInvitation.class)))
+                .thenReturn(stageInvitation);
         when(stageRepository.save(stage))
                 .thenReturn(stage);
         when(stageMapper.toDto(stage))
@@ -271,16 +342,16 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verification of successful receipt of all stages of the project")
     public void checkGetStagesByProjectSuccessTest() {
-        when(projectRepository.getProjectById(project.getId()))
+        when(projectService.getProjectById(any()))
                 .thenReturn(project);
         when(stageMapper.toDto(stage))
                 .thenReturn(stageDto);
 
-        List<StageDto> stages = stageService.getAllProjectStages(project.getId());
+        List<StageDto> stageDtoList = stageService.getAllProjectStages(project.getId());
 
-        assertNotNull(stages);
+        assertNotNull(stageDtoList);
 
-        verify(projectRepository, times(1))
+        verify(projectService, times(1))
                 .getProjectById(project.getId());
     }
 

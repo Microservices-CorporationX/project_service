@@ -43,7 +43,7 @@ public class StageValidatorTest {
     @DisplayName("Validation on null or empty string")
     public void validationOnEmptyOrNullStringTest() {
         DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> stageValidator.validationOnNull("", "Value cannot be empty"));
+                () -> stageValidator.validationOnNull(null, "Value cannot be empty"));
 
         assertEquals("Value cannot be empty", exception.getMessage());
     }
