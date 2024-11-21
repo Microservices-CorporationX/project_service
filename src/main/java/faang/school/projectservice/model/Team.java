@@ -35,4 +35,9 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public boolean hasNoTeamMember(long userId) {
+        return teamMembers.stream()
+                .noneMatch(teamMember -> teamMember.getUserId().equals(userId));
+    }
 }

@@ -90,4 +90,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    public boolean hasNoTeamMember(long userId) {
+        return teams.stream()
+                .allMatch(team -> team.hasNoTeamMember(userId));
+    }
 }
