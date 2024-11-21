@@ -7,6 +7,8 @@ import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,41 +19,45 @@ import java.util.List;
 public class StageController {
     private final StageService stageService;
 
-    @GetMapping("{projectId}/filter")
-    public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId,
-                                         @RequestBody StageFilterDto stageFilterDto) {
-        return stageService.getStagesByProjectIdFiltered(projectId, stageFilterDto);
-    }
-
     @GetMapping("{projectId}")
-    public List<StageDto> getAllStagesBy(@PathVariable @Positive long projectId) {
-        return stageService.getStagesByProjectId(projectId);
+    public ResponseEntity<List<StageDto>> getAllStagesByProjectId(@PathVariable @Positive long projectId) {
+        return ResponseEntity.ok(stageService.getStagesByProjectId(projectId));
     }
 
-    @GetMapping("{stageId}")
-    public StageDto getStage(@PathVariable @Positive long stageId) {
-        return stageService.getStageDtoById(stageId);
+    @GetMapping("{projectId}/filter")
+    public ResponseEntity<List<StageDto>> getFilteredStagesByProjectId(@PathVariable @Positive long projectId,
+                                                                       @RequestBody StageFilterDto stageFilterDto) {
+        return ResponseEntity.ok(stageService.getStagesByProjectIdFiltered(projectId, stageFilterDto));
+    }
+
+    @GetMapping("stage/{stageId}")
+    public ResponseEntity<StageDto> getStageById(@PathVariable @Positive long stageId) {
+        return ResponseEntity.ok(stageService.getStageDtoById(stageId));
     }
 
     @PostMapping
-    public StageDto createStage(@Valid @RequestBody StageDto stageDto) {
-        return stageService.createStage(stageDto);
+    public ResponseEntity<StageDto> createStage(@Valid @RequestBody StageDto stageDto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(stageService.createStage(stageDto));
     }
 
     @PutMapping("{stageId}/executor")
-    public void updateStage(@PathVariable @Positive long stageId,
-                            @Valid @RequestBody TeamMemberDto teamMemberDto) {
+    public ResponseEntity<Void> updateStage(@PathVariable @Positive long stageId,
+                                            @Valid @RequestBody TeamMemberDto teamMemberDto) {
         stageService.updateStage(stageId, teamMemberDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("{stageId}")
-    public void deleteStage(@PathVariable @Positive long stageId) {
+    public ResponseEntity<Void> deleteStage(@PathVariable @Positive long stageId) {
         stageService.deleteStage(stageId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("{stageId}/move/tasks/to/{anotherStageId}")
-    public void deleteStageAndMoveTasks(@PathVariable @Positive long stageId,
-                                        @PathVariable @Positive long anotherStageId) {
+    public ResponseEntity<Void> deleteStageAndMoveTasks(@PathVariable @Positive long stageId,
+                                                        @PathVariable @Positive long anotherStageId) {
         stageService.deleteStage(stageId, anotherStageId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
