@@ -6,10 +6,10 @@ import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateRequestDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.internship.InternshipStatusFilter;
 import faang.school.projectservice.filter.internship.InternshipTeamRoleFilter;
-import faang.school.projectservice.mapper.InternshipMapperImpl;
+import faang.school.projectservice.mapper.intership.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
@@ -89,9 +89,9 @@ class InternshipServiceTest {
 
     @BeforeEach
     void setUp() {
-        InternshipFilter statusFilter = Mockito.spy(InternshipStatusFilter.class);
-        InternshipFilter roleFilter = Mockito.spy(InternshipTeamRoleFilter.class);
-        List<InternshipFilter> filters = List.of(statusFilter, roleFilter);
+        Filter<Internship, InternshipFilterDto> statusFilter = Mockito.spy(InternshipStatusFilter.class);
+        Filter<Internship, InternshipFilterDto> roleFilter = Mockito.spy(InternshipTeamRoleFilter.class);
+        List<Filter<Internship, InternshipFilterDto> > filters = List.of(statusFilter, roleFilter);
 
         internshipService = new InternshipService(
                 internshipRepository, validator, internshipMapper, teamMemberService,

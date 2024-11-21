@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.stageinvitation;
 
+import faang.school.projectservice.dto.filter.FilterDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StageInvitationFilterDto {
+public class StageInvitationFilterDto implements FilterDto {
     private String descriptionPattern;
     private String stageNamePattern;
     private String projectNamePattern;

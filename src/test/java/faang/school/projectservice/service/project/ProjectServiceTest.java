@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
@@ -44,7 +44,7 @@ public class ProjectServiceTest {
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
-    private final List<ProjectFilter> projectFilters = new ArrayList<>();
+    private final List<Filter<Project,ProjectFilterDto>> projectFilters = new ArrayList<>();
 
     @InjectMocks
     private ProjectService projectService;

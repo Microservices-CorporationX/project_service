@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.project;
 
+import faang.school.projectservice.dto.filter.FilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectFilterDto {
+public class ProjectFilterDto implements FilterDto {
 
     @Size(max = 128)
     private String name;

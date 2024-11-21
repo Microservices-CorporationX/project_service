@@ -1,11 +1,12 @@
 package faang.school.projectservice.filter.internship;
 
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Internship;
 
 import java.util.stream.Stream;
 
-public class InternshipStatusFilter implements InternshipFilter {
+public class InternshipStatusFilter implements Filter<Internship, InternshipFilterDto> {
 
     @Override
     public boolean isApplicable(InternshipFilterDto filterDto) {

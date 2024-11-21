@@ -1,12 +1,12 @@
 package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.*;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.dto.user.UserIdsDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.ServiceCallException;
-import faang.school.projectservice.filter.internship.InternshipFilter;
-import faang.school.projectservice.mapper.InternshipMapper;
+import faang.school.projectservice.mapper.intership.InternshipMapper;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.team.TeamService;
@@ -48,7 +48,7 @@ public class InternshipService {
     private final TeamService teamService;
     private final ProjectService projectService;
     private final RestTemplate restTemplate;
-    private final List<InternshipFilter> filters;
+    private final List<Filter<Internship, InternshipFilterDto>> filters;
 
     @Transactional
     public InternshipDto createInternship(InternshipCreationDto creationDto) {

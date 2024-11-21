@@ -3,7 +3,7 @@ package faang.school.projectservice.service.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
@@ -24,7 +24,7 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final ProjectService projectService;
-    private final List<MomentFilter> momentFilters;
+    private final List<Filter<Moment, MomentFilterDto>> momentFilters;
 
     public MomentDto createMoment(MomentDto momentDto) {
         log.info("Creating a new moment: {}", momentDto);

@@ -16,3 +16,18 @@ public class ProjectServiceApplication {
                 .run(args);
     }
 }
+
+/*
+Условия задачи
+
+Создать глобальный обработчик исключений @RestControllerAdvice
+с методами для обработки различных типов исключений в приложении.
+Не забыть указать корректный ResponseStatus. Для MethodArgumentNotValidException
+в ответе должны содержаться поля, которые не прошли валидацию и сообщение из аннотации в формате JSON.
+
+Например:
+
+{
+"description": "should not be blank"
+}
+ */

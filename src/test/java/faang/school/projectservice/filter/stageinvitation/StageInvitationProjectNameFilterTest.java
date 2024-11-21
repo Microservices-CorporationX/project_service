@@ -1,6 +1,7 @@
-package faang.school.projectservice.filter.stageinvitationfilter;
+package faang.school.projectservice.filter.stageinvitation;
 
 import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stageinvitation.StageInvitation;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,31 +16,31 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class StageInvitationStageNameFilterTest {
+class StageInvitationProjectNameFilterTest {
 
-    StageInvitationStageNameFilter stageNameFilter;
+    StageInvitationProjectNameFilter projectNameFilter;
     StageInvitationFilterDto filterDto;
 
     @BeforeEach
     void setUp() {
-        stageNameFilter = new StageInvitationStageNameFilter();
+        projectNameFilter = new StageInvitationProjectNameFilter();
         filterDto = new StageInvitationFilterDto();
     }
 
     @Test
     public void projectNamePatternIsApplicableTest() {
-        filterDto.setStageNamePattern("stage");
+        filterDto.setProjectNamePattern("project");
 
-        boolean result = stageNameFilter.isApplicable(filterDto);
+        boolean result = projectNameFilter.isApplicable(filterDto);
 
         assertTrue(result);
     }
 
     @Test
     public void filterDescriptionPatternIsNullTest() {
-        filterDto.setStageNamePattern(null);
+        filterDto.setProjectNamePattern(null);
 
-        boolean result = stageNameFilter.isApplicable(filterDto);
+        boolean result = projectNameFilter.isApplicable(filterDto);
 
         assertFalse(result);
     }
@@ -48,26 +49,31 @@ class StageInvitationStageNameFilterTest {
     public void filterIsNullTest() {
         filterDto = null;
 
-        boolean result = stageNameFilter.isApplicable(filterDto);
+        boolean result = projectNameFilter.isApplicable(filterDto);
 
         assertFalse(result);
     }
 
     @Test
     public void filterDescriptionPatternIsBlankTest() {
-        filterDto.setStageNamePattern("");
+        filterDto.setProjectNamePattern("");
 
-        boolean result = stageNameFilter.isApplicable(filterDto);
+        boolean result = projectNameFilter.isApplicable(filterDto);
 
         assertFalse(result);
     }
 
     @Test
     public void applyTest() {
+        Project project = new Project();
+        project.setName("project");
+        Project anotherProject = new Project();
+        anotherProject.setName("another");
+
         Stage stage = new Stage();
-        stage.setStageName("stage");
+        stage.setProject(project);
         Stage anotherStage = new Stage();
-        anotherStage.setStageName("another");
+        anotherStage.setProject(anotherProject);
 
         StageInvitation stageInvitation = new StageInvitation();
         stageInvitation.setStage(stage);
@@ -75,10 +81,10 @@ class StageInvitationStageNameFilterTest {
         anotherStageInvitation.setStage(anotherStage);
 
         Stream<StageInvitation> invitations = Stream.of(stageInvitation, anotherStageInvitation);
-        filterDto.setStageNamePattern("stage");
+        filterDto.setProjectNamePattern("project");
 
-        Stream<StageInvitation> result = stageNameFilter.apply(invitations, filterDto);
+        Stream<StageInvitation> result = projectNameFilter.apply(invitations, filterDto);
 
-        assertEquals(1, result.toList().size());
+        assertEquals(1, result.count());
     }
 }

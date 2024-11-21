@@ -3,7 +3,9 @@ package faang.school.projectservice.service.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.moment.MomentFilter;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.moment.MomentDateFilter;
+import faang.school.projectservice.filter.moment.MomentProjectsFilter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.mapper.moment.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
@@ -147,8 +149,9 @@ public class MomentServiceTest {
         List<Moment> moments = Arrays.asList(moment1, moment2);
         when(momentRepository.findAll()).thenReturn(moments);
 
-        MomentFilter filterMock = Mockito.mock(MomentFilter.class);
-        List<MomentFilter> filters = List.of(filterMock);
+        Filter<Moment, MomentFilterDto> dateFilter = Mockito.mock(MomentDateFilter.class);
+        Filter<Moment, MomentFilterDto> projectsFilter = Mockito.mock(MomentProjectsFilter.class);
+        List<Filter<Moment, MomentFilterDto>> filters = List.of(dateFilter, projectsFilter);
 
         momentService = new MomentService(momentRepository, momentMapper, projectService, filters);
 

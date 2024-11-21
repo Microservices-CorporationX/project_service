@@ -1,13 +1,14 @@
-package faang.school.projectservice.filter.stageinvitationfilter;
+package faang.school.projectservice.filter.stageinvitation;
 
 import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.stageinvitation.StageInvitation;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
 @Component
-public class StageInvitationProjectNameFilter implements StageInvitationFilter {
+public class StageInvitationProjectNameFilter implements Filter<StageInvitation, StageInvitationFilterDto> {
 
     @Override
     public boolean isApplicable(StageInvitationFilterDto filter) {

@@ -5,9 +5,9 @@ import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
 import faang.school.projectservice.dto.stageinvitation.StageInvitationRejectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.stageinvitationfilter.StageInvitationDescriptionFilter;
-import faang.school.projectservice.filter.stageinvitationfilter.StageInvitationFilter;
-import faang.school.projectservice.filter.stageinvitationfilter.StageInvitationStageNameFilter;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.stageinvitation.StageInvitationDescriptionFilter;
+import faang.school.projectservice.filter.stageinvitation.StageInvitationStageNameFilter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapperImpl;
@@ -62,8 +62,8 @@ class StageInvitationServiceTest {
     TeamMemberService teamMemberService;
 
     private StageInvitationService service;
-    private StageInvitationFilter mockDescriptionFilter;
-    private StageInvitationFilter mockStageNameFilter;
+    private Filter<StageInvitation, StageInvitationFilterDto> mockDescriptionFilter;
+    private Filter<StageInvitation, StageInvitationFilterDto> mockStageNameFilter;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +71,7 @@ class StageInvitationServiceTest {
         mockDescriptionFilter = mock(StageInvitationDescriptionFilter.class);
         mockStageNameFilter = mock(StageInvitationStageNameFilter.class);
 
-        List<StageInvitationFilter> filters = new ArrayList<>(
+        List<Filter<StageInvitation, StageInvitationFilterDto>> filters = new ArrayList<>(
                 List.of(mockDescriptionFilter, mockStageNameFilter));
 
         service = new StageInvitationService(filters, stageInvitationMapper, repository,
