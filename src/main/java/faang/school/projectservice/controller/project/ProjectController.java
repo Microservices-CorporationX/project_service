@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Tag(name = "Projects methods")
 @RestController
@@ -29,6 +33,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ProjectFilesService projectFilesService;
 
     @Operation(summary = "Create a new project",
             description = "Creates a new project with the provided details.")
@@ -83,5 +88,26 @@ public class ProjectController {
     @PutMapping
     public ProjectDto updateProject(@RequestBody @Valid ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
+    }
+
+    @PostMapping("/{projectId}/files")
+    public void uploadFile(@PathVariable long projectId, @RequestParam MultipartFile file) {
+        projectFilesService.uploadFile(projectId, file);
+    }
+
+    @GetMapping("/files/{fileId}")
+    public Stream<Byte> downloadFile(@PathVariable long fileId) {
+        return projectFilesService.downloadFile(fileId);
+    }
+
+    @DeleteMapping("/files/{fileId}")
+    public void deleteFile(@PathVariable long fileId) {
+        projectFilesService.deleteFile(fileId);
+    }
+
+    //is this method necessary ???
+    @PostMapping("/files/{fileId}")
+    public void updateFile(@PathVariable long fileId, @RequestParam MultipartFile file) {
+        projectFilesService.updateFile(fileId, file);
     }
 }
