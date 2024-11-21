@@ -21,6 +21,9 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
 
     List<TeamMember> findByUserId(long userId);
 
+    @Query("SELECT tm FROM TeamMember tm JOIN tm.team t WHERE t.project.id = :projectId")
+    List<TeamMember> findAllMembersByProjectId(long projectId);
+
     @Modifying
     @Transactional
     @Query("UPDATE Team t SET t.teamMembers = CONCAT(t.teamMembers, :teamMember) WHERE t.id = :teamId")

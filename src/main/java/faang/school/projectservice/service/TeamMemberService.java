@@ -59,8 +59,8 @@ public class TeamMemberService {
         if (hasAccess(updaterId, List.of(TeamRole.TEAMLEAD), project.getId())) {
             updateRolesIfPresent(teamMemberDto, memberToUpdate);
             updateStagesIfPresent(teamMemberDto, memberToUpdate);
-        } else {
-            updateSelfSurname(updaterId, teamMemberDto, memberToUpdate);
+        } else if (updaterId == memberToUpdate.getUserId()) {
+            updateSelfSurname(updaterId, teamMemberDto);
         }
         teamMemberRepository.save(memberToUpdate);
         return teamMemberMapper.toResponseDto(memberToUpdate);
@@ -80,24 +80,11 @@ public class TeamMemberService {
     }
 
     public List<ResponseTeamMemberDto> getFilteredTeamMembers(String name, TeamRole role, long projectId) {
-        List<Team> teams = projectService.findProjectById(projectId).getTeams();
-        List<Long> userIds = teams.stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .map(TeamMember::getId)
-                .toList();
+        List<TeamMember> teamMembers = teamMemberRepository.findAllMembersByProjectId(projectId);
+        List<Long> userIds = getUserIdsFromTeams(teamMembers);
+        List<UserDto> users = getUsersByIds(userIds);
 
-        List<UserDto> users = userServiceClient.getUsersByIds(userIds);
-
-        List<TeamMember> filteredMembers = teams.stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(member -> {
-                    UserDto user = users.stream()
-                            .filter(u -> u.getId().equals(member.getId()))
-                            .findFirst()
-                            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-                    return user.getUsername().contains(name) && member.getRoles().contains(role);
-                })
-                .toList();
+        List<TeamMember> filteredMembers = filterTeamMembers(teamMembers, users, name, role);
 
         return teamMemberMapper.toResponseDto(filteredMembers);
     }
@@ -170,10 +157,34 @@ public class TeamMemberService {
         }
     }
 
-    private void updateSelfSurname(long updaterId, UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {
-        if (updaterId == teamMember.getUserId()) {
-            UserDto user = userServiceClient.getUser(updaterId);
-            user.setUsername(teamMemberDto.username());
-        }
+    private void updateSelfSurname(long updaterId, UpdateTeamMemberDto teamMemberDto) {
+        UserDto user = userServiceClient.getUser(updaterId);
+        user.setUsername(teamMemberDto.username());
+    }
+
+    private List<Long> getUserIdsFromTeams(List<TeamMember> teamMembers) {
+        return teamMembers.stream()
+                .map(TeamMember::getId)
+                .toList();
+    }
+
+    private List<UserDto> getUsersByIds(List<Long> userIds) {
+        return userServiceClient.getUsersByIds(userIds);
+    }
+
+    private UserDto findUserById(List<UserDto> users, Long userId) {
+        return users.stream()
+                .filter(user -> user.isSameUser(userId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    private List<TeamMember> filterTeamMembers(List<TeamMember> teamMembers, List<UserDto> users, String name, TeamRole role) {
+        return teamMembers.stream()
+                .filter(member -> {
+                    UserDto userDto = findUserById(users, member.getId());
+                    return userDto.containsUsername(name) && member.hasRole(role);
+                })
+                .toList();
     }
 }

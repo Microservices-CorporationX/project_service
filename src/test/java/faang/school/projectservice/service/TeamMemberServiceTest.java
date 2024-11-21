@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +83,6 @@ public class TeamMemberServiceTest {
                 .build();
 
         updateDto = UpdateTeamMemberDto.builder()
-                .userId(2L)
                 .stageIds(List.of(1L))
                 .build();
 
@@ -234,9 +234,9 @@ public class TeamMemberServiceTest {
         user2.setId(2L);
         user2.setUsername("Jane Doe");
 
-        when(projectService.findProjectById(projectId)).thenReturn(project);
         when(userServiceClient.getUsersByIds(List.of(1L, 2L))).thenReturn(List.of(user1, user2));
-        when(teamMemberMapper.toResponseDto(List.of(member1))).thenReturn(List.of(responseDto));
+        when(teamMemberMapper.toResponseDto(anyList())).thenReturn(List.of(responseDto));
+        when(teamMemberRepository.findAllMembersByProjectId(projectId)).thenReturn(List.of(member1, member2));
 
         // Act
         List<ResponseTeamMemberDto> result = teamMemberService.getFilteredTeamMembers(name, role, projectId);
@@ -244,10 +244,11 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals(responseDto, result.get(0));
-        verify(projectService).findProjectById(projectId);
         verify(userServiceClient).getUsersByIds(List.of(1L, 2L));
-        verify(teamMemberMapper).toResponseDto(List.of(member1));
+        verify(teamMemberMapper).toResponseDto(anyList());
+        verify(teamMemberRepository).findAllMembersByProjectId(projectId);
     }
+
     @Test
     public void testGetTeamMembersByTeamId() {
         // Arrange
