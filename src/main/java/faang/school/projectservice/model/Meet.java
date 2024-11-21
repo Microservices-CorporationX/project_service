@@ -42,6 +42,10 @@ public class Meet {
     @Column(name = "user_id")
     private List<Long> userIds;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "meet_date", nullable = false)
+    private LocalDateTime meetDate;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

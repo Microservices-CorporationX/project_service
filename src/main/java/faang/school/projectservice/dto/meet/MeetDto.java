@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.meet;
 
 import faang.school.projectservice.model.MeetStatus;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +39,10 @@ public class MeetDto {
 
     @NotEmpty(message = "The list of user IDs cannot be empty", groups = {Before.class, After.class})
     private List<Long> userIds;
+
+    @NotNull
+    @FutureOrPresent(message = "Meet date cannot be in the past")
+    private LocalDateTime meetDate;
 
     private LocalDateTime createdAt;
 
