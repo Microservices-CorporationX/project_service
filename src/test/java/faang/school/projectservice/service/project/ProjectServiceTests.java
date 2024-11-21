@@ -8,6 +8,7 @@ import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -35,7 +36,7 @@ public class ProjectServiceTests {
     private ProjectService projectService;
 
     @Mock
-    private ProjectMapper projectMapper;
+    private ProjectMapperImpl projectMapper;
     @Mock
     private CreateSubProjectMapper createSubProjectMapper;
     private List<ProjectFilter> projectFilters;

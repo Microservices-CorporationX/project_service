@@ -20,11 +20,6 @@ public class SubProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
-    public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto projectDto) {
-        return ResponseEntity.ok(projectService.createProject(projectDto));
-    }
-
     @PostMapping("/{parentProjectId}")
     public ResponseEntity<CreateSubProjectDto> createSubProject(@Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         return ResponseEntity.ok(projectService.createSubProject(createSubProjectDto));

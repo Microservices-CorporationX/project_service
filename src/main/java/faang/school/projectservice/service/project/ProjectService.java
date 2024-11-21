@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProjectService {
 
-    private final ProjectMapper projectMapper;
+    private final ProjectMapperImpl projectMapper;
     private final CreateSubProjectMapper createSubProjectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> projectFilters;
