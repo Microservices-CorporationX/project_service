@@ -50,4 +50,9 @@ public class ProjectRepository {
     public void saveAll(List<Project> projects) {
         projectJpaRepository.saveAll(projects);
     }
+
+    public Project findById(Long id) {
+        return projectJpaRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Project not found by id: %d".formatted(id)));
+    }
 }

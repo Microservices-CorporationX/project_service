@@ -1,7 +1,6 @@
 package faang.school.projectservice.filter.subproject;
 
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
-import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 import org.springframework.stereotype.Component;

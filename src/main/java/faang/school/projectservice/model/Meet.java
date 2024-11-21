@@ -10,9 +10,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "meet")
-@Getter
-@Setter
+@Builder
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(exclude = "id")
 public class Meet {
 

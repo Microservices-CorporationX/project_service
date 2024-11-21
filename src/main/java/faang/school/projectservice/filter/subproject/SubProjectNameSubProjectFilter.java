@@ -2,7 +2,6 @@ package faang.school.projectservice.filter.subproject;
 
 import com.amazonaws.util.StringUtils;
 import faang.school.projectservice.dto.subproject.FilterSubProjectDto;
-import faang.school.projectservice.filter.SubProjectFilter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
