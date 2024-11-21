@@ -19,4 +19,12 @@ public class TeamMemberRepository {
     public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
         return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
+
+    public TeamMember save(TeamMember teamMember) {
+        return jpaRepository.save(teamMember);
+    }
+
+    public void delete(TeamMember teamMember) {
+        jpaRepository.delete(teamMember);
+    }
 }

@@ -72,6 +72,7 @@ public class TeamMemberService {
         }
 
         teamService.saveTeam(team);
+        teamMemberRepository.save(memberToUpdate);
         return teamMemberMapper.toResponseDto(memberToUpdate);
     }
 
@@ -84,6 +85,7 @@ public class TeamMemberService {
         TeamMember teamMember = teamMemberRepository.findById(memberId);
         team.removeTeamMember(teamMember);
         teamService.saveTeam(teamMember.getTeam());
+        teamMemberRepository.delete(teamMember);
     }
 
     public List<ResponseTeamMemberDto> getFilteredTeamMembers(String name, TeamRole role, long projectId) {
@@ -162,6 +164,7 @@ public class TeamMemberService {
         teamMember.setTeam(team);
         team.addTeamMember(teamMember);
         teamService.saveTeam(team);
+        teamMemberRepository.save(teamMember);
         return teamMember;
     }
 }
