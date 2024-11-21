@@ -16,8 +16,6 @@ public class StageService {
     private final StageRepository stageRepository;
 
     public List<Stage> getStagesByIds(List<Long> stageIds) {
-        return stageIds.stream()
-                .map(stageRepository::getById)
-                .toList();
+        return stageRepository.findAllByIds(stageIds);
     }
 }

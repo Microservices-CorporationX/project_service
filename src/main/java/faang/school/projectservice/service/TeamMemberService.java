@@ -2,9 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.CreateTeamMemberDto;
-import faang.school.projectservice.dto.ResponseTeamMemberDto;
-import faang.school.projectservice.dto.UpdateTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
@@ -41,12 +41,9 @@ public class TeamMemberService {
         long creatorId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
         Project project = team.getProject();
-        ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD, project.getId());
+        ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD_MEMBER, project.getId());
 
-        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
-        teamMember = createTeamMember(teamMember, team, project);
-        teamService.saveTeam(team);
-        teamMemberRepository.save(teamMember);
+        TeamMember teamMember = createOrUpdateRolesTeamMember(teamMemberDto, team, project);
         return teamMemberMapper.toResponseDto(teamMember);
     }
 
@@ -56,23 +53,15 @@ public class TeamMemberService {
                                                   long memberId) {
         long updaterId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
-        TeamMember updater = teamMemberRepository.findById(updaterId);
+        Project project = team.getProject();
         TeamMember memberToUpdate = teamMemberRepository.findById(memberId);
 
-        if (updater.getRoles().contains(TeamRole.TEAMLEAD)) {
-            if (teamMemberDto.roles() != null) {
-                memberToUpdate.setRoles(teamMemberDto.roles());
-            }
-            if (teamMemberDto.stageIds() != null) {
-                List<Stage> stages = stageService.getStagesByIds(teamMemberDto.stageIds());
-                memberToUpdate.setStages(stages);
-            }
-        } else if (updaterId == memberId) {
-            UserDto user = userServiceClient.getUser(updaterId);
-            user.setUsername(teamMemberDto.username());
+        if (hasAccess(updaterId, List.of(TeamRole.TEAMLEAD), project.getId())) {
+            updateRolesIfPresent(teamMemberDto, memberToUpdate);
+            updateStagesIfPresent(teamMemberDto, memberToUpdate);
+        } else {
+            updateSelfSurname(updaterId, teamMemberDto, memberToUpdate);
         }
-
-        teamService.saveTeam(team);
         teamMemberRepository.save(memberToUpdate);
         return teamMemberMapper.toResponseDto(memberToUpdate);
     }
@@ -82,10 +71,11 @@ public class TeamMemberService {
         long deleterId = userContext.getUserId();
         Team team = teamService.getTeamById(teamId);
         Project project = team.getProject();
-        ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE, project.getId());
+
+        ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE_MEMBER, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
+
         teamMemberRepository.removeTeamMemberFromTeam(team.getId(), teamMember);
-        teamService.saveTeam(teamMember.getTeam());
         teamMemberRepository.delete(teamMember);
     }
 
@@ -122,20 +112,10 @@ public class TeamMemberService {
         return !teamMember.isCurator();
     }
 
-    private boolean TeamMemberExistsByUserAndProjectIds(Long userId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId) != null;
-    }
-
     private boolean hasAccess(Long userId, List<TeamRole> requiredRoles, Long projectId) {
-        if (TeamMemberExistsByUserAndProjectIds(userId, projectId)) {
-            TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
-            return requiredRoles.stream().anyMatch(role -> teamMember.getRoles().contains(role));
-        } else {
-            log.warn("Team member with user ID {} does not exist", userId);
-            throw new EntityNotFoundException(
-                    String.format("Team member with user ID %d does not exist", userId)
-            );
-        }
+        TeamMember teamMember = findTeamMemberByUserAndProjectId(userId, projectId);
+        return requiredRoles.stream()
+                .anyMatch(teamMember::hasRole);
     }
 
     private void ensureHasAccess(Long userId, List<TeamRole> requiredRoles,
@@ -151,11 +131,12 @@ public class TeamMemberService {
     private boolean isUserAlreadyInProject(Long memberId, Project project) {
         return project.getTeams().stream()
                 .anyMatch(team -> team.getTeamMembers().stream()
-                        .anyMatch(teamMember -> teamMember.getId().equals(memberId))
+                        .anyMatch(teamMember -> teamMember.isSameMember(memberId))
                 );
     }
 
-    private TeamMember createTeamMember(TeamMember teamMember, Team team, Project project) {
+    private TeamMember createOrUpdateRolesTeamMember(CreateTeamMemberDto teamMemberDto, Team team, Project project) {
+        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
         if (isUserAlreadyInProject(teamMember.getId(), project)) {
             TeamMember existingTeamMember = teamMemberRepository.findById(teamMember.getId());
             existingTeamMember.setRoles(teamMember.getRoles());
@@ -163,6 +144,36 @@ public class TeamMemberService {
         }
         teamMember.setTeam(team);
         teamMemberRepository.addTeamMemberToTeam(team.getId(), teamMember);
+        teamMemberRepository.save(teamMember);
         return teamMember;
+    }
+
+    private TeamMember findTeamMemberByUserAndProjectId(Long memberId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(memberId, projectId)
+                .orElseThrow(() -> {
+                    log.warn("Team member with user ID {} does not exist", memberId);
+                    return new EntityNotFoundException(
+                            String.format("Team member with user ID %d does not exist", memberId));
+                });
+    }
+
+    private void updateRolesIfPresent(UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {
+        if (teamMemberDto.roles() != null) {
+            teamMember.setRoles(teamMemberDto.roles());
+        }
+    }
+
+    private void updateStagesIfPresent(UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {
+        if (teamMemberDto.stageIds() != null) {
+            List<Stage> stages = stageService.getStagesByIds(teamMemberDto.stageIds());
+            teamMember.setStages(stages);
+        }
+    }
+
+    private void updateSelfSurname(long updaterId, UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {
+        if (updaterId == teamMember.getUserId()) {
+            UserDto user = userServiceClient.getUser(updaterId);
+            user.setUsername(teamMemberDto.username());
+        }
     }
 }

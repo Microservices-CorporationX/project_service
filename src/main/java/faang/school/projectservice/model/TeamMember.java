@@ -40,4 +40,12 @@ public class TeamMember {
     public boolean isCurator() {
         return roles.contains(TeamRole.OWNER) || roles.contains(TeamRole.MANAGER);
     }
+
+    public boolean hasRole(TeamRole role) {
+        return roles.contains(role);
+    }
+
+    public boolean isSameMember(Long teamMemberId) {
+        return this.id.equals(teamMemberId);
+    }
 }

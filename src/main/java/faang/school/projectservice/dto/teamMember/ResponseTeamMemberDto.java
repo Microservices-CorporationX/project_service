@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.teamMember;
 
 import faang.school.projectservice.model.TeamRole;
 import jakarta.validation.constraints.NotBlank;
@@ -9,9 +9,11 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record CreateTeamMemberDto(
+public record ResponseTeamMemberDto(
+        @Positive @NotNull Long id,
         @Positive @NotNull Long userId,
         @NotBlank List<TeamRole> roles,
-        @NotBlank List<Long> stageIds
+        @Positive @NotNull Long teamId,
+        @NotBlank List<@Positive Long> stageIds
 ) {
 }

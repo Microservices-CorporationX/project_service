@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class TeamMemberRepository {
@@ -16,7 +18,7 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
-    public TeamMember findByUserIdAndProjectId(Long userId, Long projectId) {
+    public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
         return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 

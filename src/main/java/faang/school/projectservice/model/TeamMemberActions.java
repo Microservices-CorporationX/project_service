@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum TeamMemberActions {
-    ADD("adding a team member"),
-    UPDATE("updating a team member"),
-    REMOVE("removing a team member");
+    ADD_MEMBER("adding a team member"),
+    UPDATE_MEMBER("updating a team member"),
+    REMOVE_MEMBER("removing a team member");
 
     private final String description;
 
