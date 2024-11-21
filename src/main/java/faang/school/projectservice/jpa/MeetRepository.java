@@ -13,9 +13,5 @@ public interface MeetRepository extends JpaRepository<Meet, Long> {
 
     Optional<Meet> findByProject(Project project);
 
-    Optional<Meet> findOneByCreatorId(long creatorId);
-
-    Optional<Meet> findById(long id);
-
     List<Meet> findByCreatorId(long creatorId);
 }
