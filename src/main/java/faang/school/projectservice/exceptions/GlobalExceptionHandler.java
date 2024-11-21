@@ -23,7 +23,6 @@ public class GlobalExceptionHandler {
     private static final String ENTITY_NOT_FOUND = "EntityNotFoundException: {}";
     private static final String CONSTRAINT_VIOLATION = "ConstraintViolationException: {}";
     private static final String METHOD_ARGUMENT_NOT_VALID = "ConstraintViolationException: {}";
-    private static final String UNEXPECTED_ERROR = "An unexpected error occurred: {}";
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
