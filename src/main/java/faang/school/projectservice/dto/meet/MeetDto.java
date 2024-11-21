@@ -21,10 +21,12 @@ public record MeetDto(
         @NotBlank(message = "Description cannot be blank")
         @Size(max = 512, message = "The content must not exceed 512 characters")
         String description,
-        @NotNull
+        @NotNull(message = "Status cannot be null")
         MeetStatus status,
+        @NotNull(message = "CreatorId cannot be null")
         @Positive(message = "CreatorId must be positive")
         Long creatorId,
+        @NotNull(message = "ProjectId cannot be null")
         @Positive(message = "ProjectId must be positive")
         Long projectId,
         List<Long> userIds,

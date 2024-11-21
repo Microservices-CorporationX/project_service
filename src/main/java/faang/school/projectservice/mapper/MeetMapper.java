@@ -1,9 +1,11 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.dto.meet.UpdateMeetDto;
 import faang.school.projectservice.model.Meet;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -20,4 +22,6 @@ public interface MeetMapper {
     List<MeetDto> toMeetDtoList(List<Meet> meets);
 
     List<Meet> toMeetList(List<MeetDto> meetDtos);
+
+    void updateMeetFromDto(UpdateMeetDto updateMeetDto, @MappingTarget Meet meet);
 }

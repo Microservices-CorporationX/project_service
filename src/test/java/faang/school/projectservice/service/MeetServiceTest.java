@@ -1,14 +1,17 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.UpdateMeetDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.validator.MeetValidator;
-import jakarta.servlet.http.HttpServletRequest;
+import feign.FeignException;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +29,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -37,15 +42,15 @@ public class MeetServiceTest {
     @InjectMocks
     private MeetService meetService;
     @Mock
+    private UserServiceClient userServiceClient;
+    @Mock
     private MeetRepository meetRepository;
     @Spy
     private MeetMapper meetMapper = Mappers.getMapper(MeetMapper.class);
     @Mock
     private ProjectService projectService;
     @Mock
-    private MeetValidator meetValidator;
-    @Mock
-    private HttpServletRequest request;
+    private UserContext userContext;
 
     private Meet meet;
     private List<Meet> meets;
@@ -63,6 +68,8 @@ public class MeetServiceTest {
         meet = new Meet();
         meet.setId(1L);
         meet.setCreatorId(1L);
+        meet.setProject(project);
+        meet.setStatus(MeetStatus.PENDING);
         List<Long> userIds = new ArrayList<>() {{
             add(1L);
             add(2L);
@@ -101,18 +108,23 @@ public class MeetServiceTest {
 
         verify(projectService, times(1)).findProjectById(project.getId());
         verify(meetRepository, times(1)).save(any());
-        verify(meetValidator, times(1)).validateUserExists(meetDto.creatorId());
+    }
+
+    @Test
+    public void testCreateMeetWithNonexistentUser() {
+        when(userServiceClient.getUser(1L)).thenThrow(FeignException.class);
+        assertThrows(EntityNotFoundException.class, () -> meetService.createMeet(meetDto));
     }
 
     @Test
     public void testUpdateMeet() {
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(1L);
 
-        MeetDto dto = meetService.updateMeet(updateMeetDto, request);
+        MeetDto dto = meetService.updateMeet(updateMeetDto);
 
         verify(meetRepository, times(1)).findById(anyLong());
-        verify(meetValidator, times(1)).validateMeetUpdating(meet);
-        verify(meetValidator, times(1)).validateThatRequestWasSentByTheCreator(meet, request);
+        verify(userContext, times(1)).getUserId();
         assertEquals(dto.description(), updateMeetDto.description());
         assertEquals(dto.userIds(), updateMeetDto.userIds());
         assertEquals(dto.description(), updateMeetDto.description());
@@ -120,28 +132,77 @@ public class MeetServiceTest {
     }
 
     @Test
-    public void testDeleteMeetingParticipant() {
+    public void testUpdateAlreadyCancelledMeet() {
+        meet.setStatus(MeetStatus.CANCELLED);
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
-        Long userId = 1L;
+        assertThrows(DataValidationException.class, () -> meetService.updateMeet(updateMeetDto));
+    }
 
-        MeetDto dto = meetService.deleteMeetingParticipant(1L, userId, request);
+    @Test
+    public void testUpdateMeetByNotCreatorUser() {
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(anyLong());
+
+        assertThrows(DataValidationException.class, () -> meetService.updateMeet(updateMeetDto));
+        verify(meetRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    public void testUpdateMeetByNonExistenceUser() {
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(1L);
+        when(userServiceClient.getUser(1L)).thenThrow(FeignException.class);
+
+        assertThrows(EntityNotFoundException.class, () -> meetService.updateMeet(updateMeetDto));
 
         verify(meetRepository, times(1)).findById(anyLong());
-        verify(meetValidator, times(1)).validateThatRequestWasSentByTheCreator(meet, request);
-        verify(meetValidator, times(1)).validateParticipants(userId, meet);
+        verify(userContext, times(1)).getUserId();
+    }
+
+    @Test
+    public void testDeleteMeetingParticipant() {
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(1L);
+        Long userId = 1L;
+
+        MeetDto dto = meetService.deleteMeetingParticipant(1L, userId);
+
+        verify(meetRepository, times(1)).findById(anyLong());
+        verify(userContext, times(1)).getUserId();
         verify(meetRepository, times(1)).findById(userId);
         assertFalse(dto.userIds().contains(userId));
     }
 
     @Test
-    public void testCancelMeet() {
+    public void testDeleteMeetingNotParticipant() {
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(99999L);
 
-        MeetDto dto = meetService.cancelMeet(1L, request);
+        assertThrows(DataValidationException.class, () -> meetService.deleteMeetingParticipant(1L, 99999L));
 
         verify(meetRepository, times(1)).findById(anyLong());
-        verify(meetValidator, times(1)).validateThatRequestWasSentByTheCreator(meet, request);
+        verify(userContext, times(1)).getUserId();
+    }
+
+    @Test
+    public void testCancelMeet() {
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+        when(userContext.getUserId()).thenReturn(1L);
+
+        MeetDto dto = meetService.cancelMeet(1L);
+
+        verify(meetRepository, times(1)).findById(anyLong());
+        verify(userContext, times(1)).getUserId();
         assertEquals(dto.status(), MeetStatus.CANCELLED);
+    }
+
+    @Test
+    public void testCancelMeetAlreadyCancelled() {
+        meet.setStatus(MeetStatus.CANCELLED);
+        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
+
+        assertThrows(DataValidationException.class, () -> meetService.cancelMeet(1L));
+        verify(meetRepository, times(1)).findById(anyLong());
     }
 
     @Test

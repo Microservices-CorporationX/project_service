@@ -11,16 +11,18 @@ import java.util.List;
 
 @Builder
 public record UpdateMeetDto(
-        @Positive Long id,
+        @Positive(message = "Id must be positive")
+        @NotNull(message = "Id cannot be null")
+        Long id,
         @NotBlank(message = "Title cannot be blank")
         @Size(max = 128, message = "The content must not exceed 128 characters")
         String title,
         @NotBlank(message = "Description cannot be blank")
         @Size(max = 512, message = "The content must not exceed 512 characters")
         String description,
-        @NotNull
+        @NotNull(message = "Status cannot be null")
         MeetStatus status,
-        @NotNull
+        @NotNull(message = "UserIds cannot be null")
         List<Long> userIds
 ) {
 }

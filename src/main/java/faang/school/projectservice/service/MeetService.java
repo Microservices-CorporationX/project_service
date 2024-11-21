@@ -1,14 +1,17 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.dto.meet.UpdateMeetDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.meetFilters.MeetFilter;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.validator.MeetValidator;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +30,13 @@ public class MeetService {
     private final List<MeetFilter> filters;
     private final MeetMapper meetMapper;
     private final ProjectService projectService;
-    private final MeetValidator meetValidator;
+    private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
 
     @Transactional
     public MeetDto createMeet(MeetDto meetDto) {
         log.info("Trying to create meet: {}", meetDto);
-        meetValidator.validateUserExists(meetDto.creatorId());
+        validateUserExists(meetDto.creatorId());
 
         Meet meet = initializeMeet(meetDto);
         meet = meetRepository.save(meet);
@@ -41,26 +45,23 @@ public class MeetService {
     }
 
     @Transactional
-    public MeetDto updateMeet(UpdateMeetDto updateMeetDto, HttpServletRequest request) {
+    public MeetDto updateMeet(UpdateMeetDto updateMeetDto) {
         Meet meet = findMeetById(updateMeetDto.id());
         log.info("Trying to update meet from {} to {}", meet, updateMeetDto);
-        meetValidator.validateMeetUpdating(meet);
-        meetValidator.validateThatRequestWasSentByTheCreator(meet, request);
+        validateMeetUpdating(meet);
+        validateThatRequestWasSentByTheCreator(meet);
 
-        meet.setTitle(updateMeetDto.title());
-        meet.setDescription(updateMeetDto.description());
-        meet.setStatus(updateMeetDto.status());
-        meet.setUserIds(updateMeetDto.userIds());
+        meetMapper.updateMeetFromDto(updateMeetDto, meet);
 
         log.info("Meet success updated: {}", meet);
         return meetMapper.toDto(meet);
     }
 
     @Transactional
-    public MeetDto cancelMeet(long id, HttpServletRequest request) {
+    public MeetDto cancelMeet(long id) {
         Meet meet = findMeetById(id);
-        meetValidator.validateMeetUpdating(meet);
-        meetValidator.validateThatRequestWasSentByTheCreator(meet, request);
+        validateMeetUpdating(meet);
+        validateThatRequestWasSentByTheCreator(meet);
         log.info("Trying to cancel meet: {}", meet);
 
         meet.setStatus(MeetStatus.CANCELLED);
@@ -69,14 +70,14 @@ public class MeetService {
     }
 
     @Transactional
-    public MeetDto deleteMeetingParticipant(long meetId, long userId, HttpServletRequest request) {
+    public MeetDto deleteMeetingParticipant(long meetId, long userId) {
         Meet meet = findMeetById(meetId);
         log.info("Trying to delete meeting participant {} from: {}", userId, meet);
-        meetValidator.validateMeetUpdating(meet);
-        meetValidator.validateThatRequestWasSentByTheCreator(meet, request);
-        meetValidator.validateParticipants(userId, meet);
+        validateMeetUpdating(meet);
+        validateThatRequestWasSentByTheCreator(meet);
+        validateParticipants(userId, meet);
 
-        meet.getUserIds().remove(userId);
+        meet.deleteParticipant(userId);
         log.info("Participants {} success deleted from meet {}", userId, meet);
         return meetMapper.toDto(meet);
     }
@@ -108,12 +109,43 @@ public class MeetService {
         Meet meet = meetMapper.toMeet(meetDto);
         Project project = projectService.findProjectById(meetDto.projectId());
         meet.setProject(project);
-
         return meet;
     }
 
     public Meet findMeetById(long id) {
         return meetRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Meet with id %s does not exist".formatted(id)));
+    }
+
+    private void validateMeetUpdating(Meet meet) {
+        if (meet.getStatus().equals(MeetStatus.CANCELLED) || meet.getStatus().equals(MeetStatus.COMPLETED)) {
+            log.error("Trying to update cancelled or completed meet: {}", meet);
+            throw new DataValidationException("Meet already cancelled or completed");
+        }
+    }
+
+    private void validateThatRequestWasSentByTheCreator(Meet meet) {
+        long requesterId = userContext.getUserId();
+        validateUserExists(requesterId);
+
+        if (meet.getCreatorId() != requesterId) {
+            log.error("User with id {} is not the creator of the meeting {}", requesterId, meet);
+            throw new DataValidationException("Only the team member who created the meet can update it");
+        }
+    }
+
+    private void validateUserExists(long userId) {
+        try {
+            userServiceClient.getUser(userId);
+        } catch (FeignException e) {
+            throw new EntityNotFoundException("User with id %s does not exist".formatted(userId));
+        }
+    }
+
+    private void validateParticipants(Long userId, Meet meet) {
+        List<Long> participants = meet.getUserIds();
+        if (!participants.contains(userId)) {
+            throw new DataValidationException("User with id %s is not a participant in the meeting".formatted(userId));
+        }
     }
 }

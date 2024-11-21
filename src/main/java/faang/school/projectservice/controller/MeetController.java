@@ -36,20 +36,19 @@ public class MeetController {
     }
 
     @PutMapping("/update")
-    public MeetDto update(@Validated @RequestBody UpdateMeetDto updateMeetDto, HttpServletRequest request) {
-        return meetService.updateMeet(updateMeetDto, request);
+    public MeetDto update(@Validated @RequestBody UpdateMeetDto updateMeetDto) {
+        return meetService.updateMeet(updateMeetDto);
     }
 
     @PatchMapping("/{id}/cancel")
-    public MeetDto cancel(@PathVariable @Positive Long id, HttpServletRequest request) {
-        return meetService.cancelMeet(id, request);
+    public MeetDto cancel(@PathVariable @Positive Long id) {
+        return meetService.cancelMeet(id);
     }
 
     @DeleteMapping("/{meetId}/participants/delete/{userId}")
     public MeetDto delete(@PathVariable @Positive Long meetId,
-                          @PathVariable @Positive Long userId,
-                          HttpServletRequest request) {
-        return meetService.deleteMeetingParticipant(meetId, userId, request);
+                          @PathVariable @Positive Long userId) {
+        return meetService.deleteMeetingParticipant(meetId, userId);
     }
 
     @GetMapping("/{id}")
