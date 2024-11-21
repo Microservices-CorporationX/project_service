@@ -1,9 +1,9 @@
-package faang.school.projectservice.validator.team_member;
+package faang.school.projectservice.validator.teammember;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stageinvitation.StageInvitation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

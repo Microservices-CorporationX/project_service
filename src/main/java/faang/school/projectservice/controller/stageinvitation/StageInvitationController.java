@@ -1,9 +1,9 @@
-package faang.school.projectservice.controller.stage_invitation;
+package faang.school.projectservice.controller.stageinvitation;
 
-import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
-import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
-import faang.school.projectservice.dto.stage_invitation.StageInvitationRejectDto;
-import faang.school.projectservice.service.stage_invitation.StageInvitationService;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationDto;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageinvitation.StageInvitationRejectDto;
+import faang.school.projectservice.service.stageinvitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PatchMapping;
