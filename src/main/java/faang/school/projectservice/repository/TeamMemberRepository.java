@@ -27,4 +27,12 @@ public class TeamMemberRepository {
     public void delete(TeamMember teamMember) {
         jpaRepository.delete(teamMember);
     }
+
+    public void addTeamMemberToTeam(Long teamId, TeamMember teamMember) {
+        jpaRepository.addTeamMemberToTeam(teamId, teamMember);
+    }
+
+    public void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember) {
+        jpaRepository.removeTeamMemberFromTeam(teamId, teamMember);
+    }
 }

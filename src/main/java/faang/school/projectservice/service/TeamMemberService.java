@@ -85,7 +85,7 @@ public class TeamMemberService {
         Project project = team.getProject();
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
-        team.removeTeamMember(teamMember);
+        teamMemberRepository.removeTeamMemberFromTeam(team.getId(), teamMember);
         teamService.saveTeam(teamMember.getTeam());
         teamMemberRepository.delete(teamMember);
     }
@@ -163,7 +163,7 @@ public class TeamMemberService {
             return existingTeamMember;
         }
         teamMember.setTeam(team);
-        team.addTeamMember(teamMember);
+        teamMemberRepository.addTeamMemberToTeam(team.getId(), teamMember);
         return teamMember;
     }
 }

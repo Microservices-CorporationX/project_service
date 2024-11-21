@@ -1,10 +1,11 @@
 package faang.school.projectservice.jpa;
 
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,4 +19,14 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     TeamMember findByUserIdAndProjectId(long userId, long projectId);
 
     List<TeamMember> findByUserId(long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Team t SET t.teamMembers = CONCAT(t.teamMembers, :teamMember) WHERE t.id = :teamId")
+    void addTeamMemberToTeam(Long teamId, TeamMember teamMember);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Team t SET t.teamMembers = FUNCTION('array_remove', t.teamMembers, :teamMember) WHERE t.id = :teamId")
+    void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember);
 }
