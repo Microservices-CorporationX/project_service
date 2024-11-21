@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -36,4 +37,13 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
+
+    @Column(nullable = false)
+    private LocalDateTime lastModified;
+
+    @PrePersist
+    @PreUpdate
+    public void updateTimestamp() {
+        this.lastModified = LocalDateTime.now();
+    }
 }

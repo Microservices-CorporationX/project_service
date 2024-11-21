@@ -66,9 +66,8 @@ public class ProjectService {
 
         Stream<ProjectResponseDto> projectResponseDtoStream = filtersForProjects.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
-                .flatMap(filter -> filter.apply(projectStream, filterDto))
+                .reduce(projectStream, (streamProject, filter) -> filter.apply(streamProject, filterDto), (s1, s2) -> s1)
                 .map(projectMapper::toResponseDtoFromEntity);
-
         return projectResponseDtoStream.toList();
     }
 
@@ -83,5 +82,9 @@ public class ProjectService {
     public List<ProjectResponseDto> findAllProject() {
         List<Project> allProjects = projectRepository.findAll();
         return allProjects.stream().map(projectMapper::toResponseDtoFromEntity).toList();
+    }
+
+    public Project findProjectById(Long id) {
+        return projectRepository.findProjectById(id);
     }
 }
