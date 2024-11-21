@@ -12,6 +12,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -83,5 +84,13 @@ public class ProjectService {
     public List<ProjectResponseDto> findAllProject() {
         List<Project> allProjects = projectRepository.findAll();
         return allProjects.stream().map(projectMapper::toResponseDtoFromEntity).toList();
+    }
+
+    public Project getProjectById(@Positive long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public void saveProject(Project project) {
+        projectRepository.save(project);
     }
 }
