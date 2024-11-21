@@ -7,6 +7,7 @@ import faang.school.projectservice.dto.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exceptions.DataValidationException;
+import faang.school.projectservice.exceptions.ResourceNotFoundException;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -15,7 +16,6 @@ import faang.school.projectservice.model.TeamMemberActions;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,11 +40,11 @@ public class TeamMemberService {
     public ResponseTeamMemberDto addTeamMember(CreateTeamMemberDto teamMemberDto,
                                                long teamId) {
         long creatorId = userContext.getUserId();
-        ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD);
-
-        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
         Team team = teamService.getTeamById(teamId);
         Project project = team.getProject();
+        ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD, project.getId());
+
+        TeamMember teamMember = teamMemberMapper.toEntity(teamMemberDto);
 
         teamMember = createTeamMember(teamMember, team, project);
         return teamMemberMapper.toResponseDto(teamMember);
@@ -78,8 +78,9 @@ public class TeamMemberService {
     @Transactional
     public void deleteTeamMember(long memberId, long teamId) {
         long deleterId = userContext.getUserId();
-        ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE);
         Team team = teamService.getTeamById(teamId);
+        Project project = team.getProject();
+        ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
         team.removeTeamMember(teamMember);
         teamService.saveTeam(teamMember.getTeam());
@@ -118,13 +119,25 @@ public class TeamMemberService {
         return !teamMember.isCurator();
     }
 
-    private boolean hasAccess(Long memberId, List<TeamRole> requiredRoles) {
-        TeamMember teamMember = teamMemberRepository.findById(memberId);
-        return requiredRoles.stream().anyMatch(role -> teamMember.getRoles().contains(role));
+    private boolean TeamMemberExistsByUserAndProjectIds(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId) != null;
     }
 
-    private void ensureHasAccess(Long memberId, List<TeamRole> requiredRoles, TeamMemberActions action) {
-        if (!hasAccess(memberId, requiredRoles)) {
+    private boolean hasAccess(Long memberId, List<TeamRole> requiredRoles, Long projectId) {
+        if (TeamMemberExistsByUserAndProjectIds(memberId, projectId)) {
+            TeamMember teamMember = teamMemberRepository.findById(memberId);
+            return requiredRoles.stream().anyMatch(role -> teamMember.getRoles().contains(role));
+        } else {
+            log.warn("Team member with user ID {} does not exist", memberId);
+            throw new ResourceNotFoundException(
+                    String.format("Team member with user ID %d does not exist", memberId)
+            );
+        }
+    }
+
+    private void ensureHasAccess(Long memberId, List<TeamRole> requiredRoles,
+                                 TeamMemberActions action, Long projectId) {
+        if (!hasAccess(memberId, requiredRoles, projectId)) {
             log.warn("Member with ID {} has no access to {}", memberId, action.getDescription());
             throw new DataValidationException(String.format(
                     "Member with ID %d has no access to %s", memberId, action.getDescription())
