@@ -2,9 +2,9 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.CreateTeamMemberDto;
-import faang.school.projectservice.dto.ResponseTeamMemberDto;
-import faang.school.projectservice.dto.UpdateTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
+import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -165,7 +166,8 @@ public class TeamMemberServiceTest {
         when(teamService.getTeamById(teamId)).thenReturn(team);
         when(teamMemberMapper.toEntity(createDto)).thenReturn(teamMember);
         when(teamMemberMapper.toResponseDto(any(TeamMember.class))).thenReturn(responseDto);
-        when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId())).thenReturn(teamMember);
+        when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
+                .thenReturn(Optional.ofNullable(teamMember));
         when(teamMemberRepository.save(any(TeamMember.class))).thenReturn(teamMember);
 
         // Act
@@ -183,8 +185,9 @@ public class TeamMemberServiceTest {
         // Arrange
         when(userContext.getUserId()).thenReturn(updaterId);
         when(teamService.getTeamById(teamId)).thenReturn(team);
-        when(teamMemberRepository.findById(updaterId)).thenReturn(teamMember);
         when(teamMemberRepository.findById(memberId)).thenReturn(teamMember);
+        when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
+                .thenReturn(Optional.ofNullable(teamMember));
         when(teamMemberMapper.toResponseDto(teamMember)).thenReturn(responseDto);
 
         // Act
@@ -193,7 +196,6 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(updateDto.stageIds(), result.stageIds());
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).findById(updaterId);
         verify(teamMemberRepository).findById(memberId);
         verify(teamMemberRepository).save(teamMember);
     }
@@ -202,7 +204,8 @@ public class TeamMemberServiceTest {
         // Arrange
         when(userContext.getUserId()).thenReturn(deleterId);
         when(teamService.getTeamById(teamId)).thenReturn(team);
-        when(teamMemberRepository.findByUserIdAndProjectId(deleterId, project.getId())).thenReturn(teamMember);
+        when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
+                .thenReturn(Optional.ofNullable(teamMember));
         when(teamMemberRepository.findById(memberId)).thenReturn(teamMember);
 
         // Act
