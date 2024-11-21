@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.StageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -33,33 +34,36 @@ public class StageController {
     }
 
     @GetMapping("/{role}")
-    public List<StageDto> getByRole(@RequestBody StageDto stage, @PathVariable TeamRole role) {
+    public List<StageDto> getByRole(@RequestBody @Valid StageDto stage,
+                                    @PathVariable TeamRole role) {
         return stageService.getByRole(stage, role);
     }
 
     @GetMapping("/{status}")
-    public List<StageDto> getByStatus(@RequestBody StageDto stage, @PathVariable TaskStatus status) {
+    public List<StageDto> getByStatus(@RequestBody @Valid StageDto stage,
+                                      @PathVariable TaskStatus status) {
         return stageService.getByStatus(stage, status);
     }
 
     @DeleteMapping("/delete-with-tasks")
-    public StageDto deleteCascade(@RequestBody StageDto stage){
+    public StageDto deleteCascade(@RequestBody @Valid StageDto stage){
         return stageService.deleteCascade(stage);
     }
 
     @PostMapping("/postpone/{nextStageId}")
-    public StageDto postponeTasks(@RequestBody StageDto stage, @PathVariable Long nextStageId){
+    public StageDto postponeTasks(@RequestBody @Valid StageDto stage,
+                                  @PathVariable Long nextStageId){
         return stageService.postponeTasks(stage, nextStageId);
     }
 
     @PostMapping("/update")
-    public StageDto update(@RequestBody StageDto stage){
+    public StageDto update(@RequestBody @Valid StageDto stage){
         return stageService.update(stage);
     }
 
-    @GetMapping("/stages")
-    public List<StageDto> getAllStages(@RequestBody StageDto stage){
-        return stageService.getAllStages(stage);
+    @GetMapping("/projectId/stages")
+    public List<StageDto> getAllStages(@PathVariable Long projectId){
+        return stageService.getAllStages(projectId);
     }
 
     @GetMapping("/{stageId}")

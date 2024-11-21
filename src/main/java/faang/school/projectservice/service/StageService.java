@@ -71,15 +71,15 @@ public class StageService {
     public StageDto deleteCascade(StageDto stageDto){
         validateExisting(stageDto.getProjectId());
         Stage stage = stageRepository.getById(stageDto.getStageId());
-        List<Long> IdsTasksToDelete = stage.getTasks().stream().map(Task::getId).toList();
+        List<Long> idsTasksToDelete = stage.getTasks().stream().map(Task::getId).toList();
         Project project = projectService.getById(stageDto.getProjectId());
 
         List<Task> projectTasks = project.getTasks()
-                .stream().filter(t -> !IdsTasksToDelete.contains(t.getId())).toList();
+                .stream().filter(task -> !idsTasksToDelete.contains(task.getId())).toList();
         project.setTasks(projectTasks);
 
         List<Stage> projectStages = project.getStages().stream()
-                .filter(s -> !s.getStageId().equals(stageDto.getStageId())).toList();
+                .filter(stg -> !stg.getStageId().equals(stageDto.getStageId())).toList();
         project.setStages(projectStages);
 
         projectService.save(project);
@@ -90,8 +90,15 @@ public class StageService {
         Stage stage = stageRepository.getById(stageDto.getStageId());
         Stage postponeStage = stageRepository.getById(nextStageId);
         List<Task> tasksToPostpone = stage.getTasks();
+        tasksToPostpone.forEach(task -> task.setStage(postponeStage));
 
         deleteCascade(stageDto);
+
+        Project project = projectService.getById(stageDto.getProjectId());
+        List<Task> projectTasks = new ArrayList<>(project.getTasks());
+        projectTasks.addAll(tasksToPostpone);
+        project.setTasks(projectTasks);
+
         List<Task> updatedTasks = new ArrayList<>(tasksToPostpone);
         updatedTasks.addAll(postponeStage.getTasks());
         postponeStage.setTasks(updatedTasks);
@@ -112,9 +119,9 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stageOrig));
     }
 
-    public List<StageDto> getAllStages(StageDto stageDto){
-        validateExisting(stageDto.getProjectId());
-        Project project = projectService.getById(stageDto.getProjectId());
+    public List<StageDto> getAllStages(Long projectId){
+        validateExisting(projectId);
+        Project project = projectService.getById(projectId);
         List<Stage> stages = project.getStages();
         return stageMapper.toDto(stages);
     }

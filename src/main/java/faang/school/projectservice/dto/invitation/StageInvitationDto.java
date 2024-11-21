@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StageInvitationDto {
-    private Long id; // получаем только на возврате
-    private String description; // описание отказа
-    private StageInvitationStatus status; // получаем только на возврате
+    private Long id;
+    private String description;
+    private StageInvitationStatus status;
     @NotNull(message = "stageId must not be null")
     private Long stageId;
     @NotNull(message = "authorId must not be null")
