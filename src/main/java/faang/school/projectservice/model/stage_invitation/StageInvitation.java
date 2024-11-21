@@ -39,4 +39,16 @@ public class StageInvitation {
     @OneToOne
     @JoinColumn(name = "invited")
     private TeamMember invited;
+
+    public boolean isAuthor(long authorId) {
+        return author.getId().equals(authorId);
+    }
+
+    public boolean isInvited(long invitedId) {
+        return invited.getId().equals(invitedId);
+    }
+
+    public boolean isStage(long stageId) {
+        return stage.getStageId().equals(stageId);
+    }
 }

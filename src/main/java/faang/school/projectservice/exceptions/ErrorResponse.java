@@ -1,14 +1,14 @@
 package faang.school.projectservice.exceptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Builder
 public class ErrorResponse {
     private int status;
     private String message;
-    private LocalDateTime timestamp;
+    private LocalDateTime localDateTime;
 }

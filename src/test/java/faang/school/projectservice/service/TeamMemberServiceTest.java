@@ -265,4 +265,18 @@ public class TeamMemberServiceTest {
         verify(teamService).getTeamById(teamId);
         verify(teamMemberMapper).toResponseDto(List.of(member1, member2));
     }
+
+    @Test
+    public void testGetTeamMemberValidId() {
+        // arrange
+        long id = 5L;
+        TeamMember teamMember = new TeamMember();
+        when(teamMemberRepository.findById(id)).thenReturn(teamMember);
+
+        // act
+        TeamMember returnedTeamMember = teamMemberService.getTeamMember(id);
+
+        // assert
+        assertEquals(teamMember, returnedTeamMember);
+    }
 }

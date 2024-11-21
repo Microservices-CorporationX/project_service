@@ -15,10 +15,10 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -186,5 +186,10 @@ public class TeamMemberService {
                     return userDto.containsUsername(name) && member.hasRole(role);
                 })
                 .toList();
+    }
+
+    @Transactional
+    public TeamMember getTeamMember(long teamMemberId) {
+        return teamMemberRepository.findById(teamMemberId);
     }
 }
