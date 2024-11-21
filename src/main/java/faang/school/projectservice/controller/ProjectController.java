@@ -49,7 +49,9 @@ public class ProjectController {
     @GetMapping
     @Operation(summary = "Получить все проекты")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Get Projects"),
+            @ApiResponse(responseCode = "200", description = "Get Projects",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
             @ApiResponse(responseCode = "404", description = "Projects not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
@@ -62,7 +64,9 @@ public class ProjectController {
     @PostMapping("/with-filters")
     @Operation(summary = "Получить все проекты по фильтрам")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Get Projects"),
+            @ApiResponse(responseCode = "200", description = "Get Projects",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
             @ApiResponse(responseCode = "404", description = "Projects not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
@@ -75,7 +79,9 @@ public class ProjectController {
     @PostMapping
     @Operation(summary = "Создать проект")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Project created"),
+            @ApiResponse(responseCode = "201", description = "Project created",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
             @ApiResponse(responseCode = "400", description = "Non-validate parameters",
                     content = @Content),
             @ApiResponse(responseCode = "400", description = "Project already exists",
@@ -88,9 +94,11 @@ public class ProjectController {
     }
 
     @PutMapping
-    @Operation(summary = "Обновить проект по id")
+    @Operation(summary = "Обновить проект")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Project was updated"),
+            @ApiResponse(responseCode = "200", description = "Project was updated",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProjectDto.class))}),
             @ApiResponse(responseCode = "400", description = "Non-validate parameters",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Project not found",
