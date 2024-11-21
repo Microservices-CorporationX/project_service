@@ -18,13 +18,14 @@ import java.util.List;
 @AllArgsConstructor
 public class MomentDto {
 
-    @NotNull
     @Positive
     private Long id;
 
-    @NotBlank
+    @NotNull(message = "Moment name must not be null")
+    @NotBlank(message = "Moment name must not be blank")
     private String name;
-
+    @NotNull(message = "Moment description must not be null")
+    @NotBlank(message = "Moment description must not be blank")
     private String description;
 
     private LocalDateTime date;
