@@ -3,7 +3,6 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
@@ -66,10 +65,10 @@ public class StageService {
         Stage stage = getStageById(stageId);
         String role = teamMemberDto.getTeamRole().toString();
         if (!stageValidator.isExecutorExist(stage, role)) {
-            var teamMembers = getProjectMembersWithRole(stage, role);
-            int requiredNumberOfUsers = numberStageUsersWithRole(stage, role);
-            sendStageInvitations(stage, teamMembers, requiredNumberOfUsers);
-
+            var projectParticipants = teamMemberService.getProjectParticipantsWithRole(stage.getProject(), role);
+            int requiredNumberOfMembers = countStageMembersWithRole(stage, role);
+            stageInvitationService.sendStageInvitationToProjectParticipants(stage,
+                    projectParticipants, requiredNumberOfMembers);
         }
     }
 
@@ -112,18 +111,7 @@ public class StageService {
         return stageRepository.getById(stageId);
     }
 
-    private List<TeamMember> getProjectMembersWithRole(Stage stage, String role) {
-        return teamMemberService.getProjectParticipantsWithRole(stage.getProject(), role);
-    }
-
-    private Stage moveTasks(long stageId, long anotherStageId) {
-        Stage stage = stageRepository.getById(stageId);
-        Stage anotherStage = stageRepository.getById(anotherStageId);
-        anotherStage.setTasks(stage.getTasks());
-        return stage;
-    }
-
-    private int numberStageUsersWithRole(Stage stage, String role) {
+    public int countStageMembersWithRole(Stage stage, String role) {
         return stage.getStageRoles().stream()
                 .filter(stageRoles -> stageRoles.getTeamRole().toString().equalsIgnoreCase(role))
                 .mapToInt(StageRoles::getCount)
@@ -131,21 +119,11 @@ public class StageService {
                 .orElse(0);
     }
 
-    private void sendStageInvitations(Stage stage, List<TeamMember> teamMembers, int requiredNumberOfUsers) {
-        int invitationsToSend = Math.min(requiredNumberOfUsers, teamMembers.size());
-
-        for (int i = 0; i < invitationsToSend; i++) {
-            StageInvitationDto invitation = createStageInvitation(stage, teamMembers.get(i));
-            stageInvitationService.sendStageInvitation(invitation);
-        }
-    }
-
-    private StageInvitationDto createStageInvitation(Stage stage, TeamMember teamMember) {
-        return StageInvitationDto.builder()
-                .stageId(stage.getStageId())
-                .authorId(stage.getProject().getOwnerId())
-                .invitedId(teamMember.getId())
-                .build();
+    private Stage moveTasks(long stageId, long anotherStageId) {
+        Stage stage = stageRepository.getById(stageId);
+        Stage anotherStage = stageRepository.getById(anotherStageId);
+        anotherStage.setTasks(stage.getTasks());
+        return stage;
     }
 }
 

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.TeamMemberDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.Filter;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.StageInvitationService;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.TeamMemberService;
 import faang.school.projectservice.validator.StageValidator;
@@ -24,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +45,9 @@ class StageServiceTest {
 
     @Mock
     private TeamMemberService teamMemberService;
+
+    @Mock
+    private StageInvitationService stageInvitationService;
 
     @Mock
     private StageValidator stageValidator;
@@ -69,6 +75,7 @@ class StageServiceTest {
     public void setUp() {
         stageRoles = StageRoles.builder()
                 .teamRole(TeamRole.DESIGNER)
+                .count(5)
                 .build();
 
         task = Task
@@ -83,11 +90,10 @@ class StageServiceTest {
                 .stageName("Stage 1")
                 .stageRoles(List.of(stageRoles))
                 .tasks(List.of(task))
-                .project(
-                        Project
-                                .builder()
-                                .id(1L)
-                                .build()
+                .project(Project
+                        .builder()
+                        .id(1L)
+                        .build()
                 )
                 .executors(new ArrayList<>())
                 .build();
@@ -98,11 +104,10 @@ class StageServiceTest {
                 .stageName("Stage 2")
                 .stageRoles(List.of(stageRoles))
                 .tasks(List.of(task))
-                .project(
-                        Project
-                                .builder()
-                                .id(1L)
-                                .build()
+                .project(Project
+                        .builder()
+                        .id(1L)
+                        .build()
                 )
                 .executors(new ArrayList<>())
                 .build();
@@ -111,11 +116,11 @@ class StageServiceTest {
                 .builder()
                 .userId(1L)
                 .userId(1L)
-                .team(
-                        Team
-                                .builder()
-                                .teamMembers(List.of())
-                                .build()
+                .roles(List.of(TeamRole.DEVELOPER))
+                .team(Team
+                        .builder()
+                        .teamMembers(List.of())
+                        .build()
                 )
                 .stages(List.of(stage))
                 .build();
@@ -197,7 +202,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void testGetStagesByProjectIdFilteredSuccess() {
+    void testGetStagesByProjectIdFilteredSuccess() {
         when(stageRepository.findAllByProjectId(projectId)).thenReturn(setUpStageList());
         Filter filter = mock(StageTaskStatusFilter.class);
         when(filter.isApplicable(filters)).thenReturn(true);
@@ -212,7 +217,7 @@ class StageServiceTest {
     }
 
     @Test
-    public void testGetStagesByProjectIdFilteredEmptyProject() {
+    void testGetStagesByProjectIdFilteredEmptyProject() {
         when(stageRepository.findAllByProjectId(projectId)).thenReturn(List.of());
 
         List<StageDto> result = stageService.getStagesByProjectIdFiltered(projectId, filters);
@@ -311,8 +316,70 @@ class StageServiceTest {
                 String.format("Stage not found by id: %s", stage));
     }
 
+    @Test
+    void testCountStageUsersWithRole() {
+        Stage stage = setUpStage();
+
+        int countDeveloper = stageService.countStageMembersWithRole(stage, TeamRole.DEVELOPER.toString());
+        int countDesigner = stageService.countStageMembersWithRole(stage, TeamRole.DESIGNER.toString());
+        int countIntern = stageService.countStageMembersWithRole(stage, TeamRole.INTERN.toString());
+        int countNonExistentRole = stageService.countStageMembersWithRole(stage, TeamRole.MANAGER.toString());
+
+        assertEquals(4, countDeveloper);
+        assertEquals(5, countDesigner);
+        assertEquals(2, countIntern);
+        assertEquals(0, countNonExistentRole);
+    }
+
+    @Test
+    void testUpdateStageExecutorExistsShouldNotSendInvitation() {
+        when(stageValidator.isExecutorExist(stage, TeamRole.DEVELOPER.toString())).thenReturn(true);
+        when(stageRepository.getById(stageId)).thenReturn(Optional.of(stage).get());
+
+        stageService.updateStage(stageId, setUpTeamMemberDto());
+
+        verify(teamMemberService, never()).getProjectParticipantsWithRole(any(), any());
+        verify(stageValidator, times(1)).isExecutorExist(stage, TeamRole.DEVELOPER.toString());
+        verify(stageInvitationService, never()).sendStageInvitationToProjectParticipants(any(), any(), anyInt());
+    }
+
+    @Test
+    void testUpdateStageExecutorDoesNotExistShouldSendInvitation() {
+        when(stageValidator.isExecutorExist(stage, TeamRole.DEVELOPER.toString())).thenReturn(false);
+        when(stageRepository.getById(stageId)).thenReturn(Optional.of(stage).get());
+        when(teamMemberService.getProjectParticipantsWithRole(any(), any())).thenReturn(List.of());
+
+        stageService.updateStage(stageId, setUpTeamMemberDto());
+
+        verify(teamMemberService, times(1)).getProjectParticipantsWithRole(any(), any());
+        verify(stageValidator, times(1)).isExecutorExist(stage, TeamRole.DEVELOPER.toString());
+        verify(stageInvitationService, times(1)).sendStageInvitationToProjectParticipants(any(), any(), anyInt());
+    }
+
     private List<Stage> setUpStageList() {
         return List.of(stage, anotherStage);
     }
 
+    private List<StageRoles> setUpStageRolesList() {
+        StageRoles role1 = new StageRoles();
+        role1.setCount(4);
+        role1.setTeamRole(TeamRole.DEVELOPER);
+        StageRoles role2 = new StageRoles();
+        role2.setCount(2);
+        role2.setTeamRole(TeamRole.INTERN);
+        return List.of(stageRoles, role1, role2);
+    }
+
+    private Stage setUpStage() {
+        Stage stage = new Stage();
+        stage.setStageRoles(setUpStageRolesList());
+        return stage;
+    }
+
+    private TeamMemberDto setUpTeamMemberDto() {
+        TeamMemberDto dto = new TeamMemberDto();
+        dto.setUserId(1L);
+        dto.setTeamRole(TeamRole.DEVELOPER);
+        return dto;
+    }
 }

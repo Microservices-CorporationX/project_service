@@ -49,23 +49,23 @@ class TeamMemberServiceTest {
     }
 
     @Test
-    public void testGetProjectParticipantsWithRoleWithExistingRoleReturnsCorrectMembers() {
-        Team team1 = setUpTeam();
-        Team team2 = new Team();
-        team2.setTeamMembers(List.of(setUpDeveloper()));
+    void testGetProjectParticipantsWithRoleWithExistingRoleReturnsCorrectMembers() {
+        Team designerAndDeveloperTeam = setUpTeam();
+        Team developerTeam = new Team();
+        developerTeam.setTeamMembers(List.of(setUpDeveloper()));
         Project project = new Project();
-        project.setTeams(List.of(team1, team2));
+        project.setTeams(List.of(designerAndDeveloperTeam, developerTeam));
 
-        List<TeamMember> result = teamMemberService.getProjectParticipantsWithRole(
+        List<TeamMember> participantsList = teamMemberService.getProjectParticipantsWithRole(
                 project, TeamRole.DEVELOPER.toString());
 
-        assertEquals(2, result.size());
-        assertEquals(setUpDeveloper(), result.get(0));
-        assertEquals(setUpDeveloper(), result.get(1));
+        assertEquals(2, participantsList.size());
+        assertEquals(setUpDeveloper(), participantsList.get(0));
+        assertEquals(setUpDeveloper(), participantsList.get(1));
     }
 
     @Test
-    public void testGetProjectParticipantsWithRoleWithNonExistingRoleReturnsEmptyList() {
+    void testGetProjectParticipantsWithRoleWithNonExistingRoleReturnsEmptyList() {
         Project project = setUpProject();
 
         List<TeamMember> result = teamMemberService.getProjectParticipantsWithRole(
@@ -75,7 +75,7 @@ class TeamMemberServiceTest {
     }
 
     @Test
-    public void testGetProjectParticipantsWithRoleWithEmptyProjectReturnsEmptyList() {
+    void testGetProjectParticipantsWithRoleWithEmptyProjectReturnsEmptyList() {
         Project project = new Project();
         project.setTeams(Collections.emptyList());
 
