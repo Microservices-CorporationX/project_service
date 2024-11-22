@@ -2,6 +2,7 @@ package faang.school.projectservice.service.impl.vacancy;
 
 import faang.school.projectservice.dto.filter.VacancyDtoFilter;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -123,6 +125,13 @@ public class VacancyServiceImplTest {
     }
 
     @Test
+    void testToCheckIfTheCreatorIsMissingFromTheTeam() {
+        Project projectWithoutCreator = Project.builder().id(1L).teams(Collections.emptyList()).build();
+        when(projectRepository.getProjectById(vacancyDto.getIdProject())).thenReturn(projectWithoutCreator);
+        assertThrows(DataValidationException.class, () -> vacancyService.create(vacancyDto));
+    }
+
+    @Test
     void testupdateVacancy() {
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(projectRepository.getProjectById(vacancyDto.getIdProject())).thenReturn(project1);
@@ -135,10 +144,12 @@ public class VacancyServiceImplTest {
     @Test
     void testdeleteVacancy() {
         when(vacancyRepository.existsById(2L)).thenReturn(true);
-        vacancyRepository.deleteById(2L);
         when(projectRepository.getProjectById(project2.getId())).thenReturn(project2);
+        when(vacancyRepository.existsById(vacancyDto.getId())).thenReturn(true);
         teamRepository.deleteById(teamMember.getId());
+        vacancyService.deleteVacancy(vacancyDto);
         verify(vacancyRepository, times(1)).deleteById(2L);
+        verify(teamRepository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -153,9 +164,10 @@ public class VacancyServiceImplTest {
 
     @Test
     void testgetVacancyForId() {
+        Long id = 2L;
         when(vacancyRepository.getReferenceById(2L)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(vacancyDto);
-        VacancyDto result = vacancyService.getVacancyForId(vacancyDto);
+        VacancyDto result = vacancyService.getVacancyById(id);
         assertEquals(result, vacancyDto);
     }
 }

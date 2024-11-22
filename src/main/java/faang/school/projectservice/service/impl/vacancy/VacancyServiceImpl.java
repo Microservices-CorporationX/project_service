@@ -17,6 +17,7 @@ import faang.school.projectservice.service.filter.Filter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,8 @@ public class VacancyServiceImpl implements VacancyService {
     public VacancyDto create(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Project project = projectRepository.getProjectById(vacancyDto.getIdProject());
-        validationCreatedcontainedInTeam(project, vacancyDto);
-        validationCreatedhaveRole(vacancyDto);
+        validateCreatedContainedInTeam(project, vacancyDto);
+        validateCreatedHaveRole(vacancyDto);
         vacancyRepository.save(vacancy);
         return vacancyMapper.toDto(vacancy);
     }
@@ -64,13 +65,11 @@ public class VacancyServiceImpl implements VacancyService {
         }
         vacancyRepository.deleteById(vacancyDto.getId());
         Project project = projectRepository.getProjectById(vacancyDto.getIdProject());
-        if (!vacancyRepository.existsById(vacancyDto.getId())) {
-            List<TeamMember> teamMemberList = project.getTeams().stream()
-                    .flatMap(team -> team.getTeamMembers().stream())
-                    .filter(teamMember -> teamMember.getRoles().contains(TeamRole.INTERN))
-                    .toList();
-            teamMemberList.forEach((teamMember) -> teamRepository.deleteById(teamMember.getId()));
-        }
+        List<TeamMember> teamMemberList = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(teamMember -> teamMember.getRoles().contains(TeamRole.INTERN))
+                .toList();
+        teamMemberList.forEach((teamMember) -> teamRepository.deleteById(teamMember.getId()));
         log.info("Vacancy {} deleted", vacancyDto.getName());
     }
 
@@ -82,24 +81,24 @@ public class VacancyServiceImpl implements VacancyService {
                 .collect(Collectors.toList());
     }
 
-    public VacancyDto getVacancyForId(VacancyDto vacancyDto) {
-        Vacancy vacancy = vacancyRepository.getReferenceById(vacancyDto.getId());
+    public VacancyDto getVacancyById(Long id) {
+        Vacancy vacancy = vacancyRepository.getReferenceById(id);
         return vacancyMapper.toDto(vacancy);
     }
 
-    private void validationCreatedcontainedInTeam(Project project, VacancyDto vacancyDto) {
-        boolean isCreatedcontainedInTeam = project.getTeams().stream()
+    private void validateCreatedContainedInTeam(Project project, VacancyDto vacancyDto) {
+        boolean isCreatedContainedInTeam = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getId().equals(vacancyDto.getCreatedBy()));
-        if (!isCreatedcontainedInTeam) {
+        if (!isCreatedContainedInTeam) {
             throw new DataValidationException("Creator is not on the team");
         }
     }
 
-    private void validationCreatedhaveRole(VacancyDto vacancyDto) {
+    private void validateCreatedHaveRole(VacancyDto vacancyDto) {
         TeamMember teamMember = teamMemberRepository.findById(vacancyDto.getCreatedBy());
-        boolean isCreatedhaveRole = teamMember.getRoles().contains(TeamRole.OWNER);
-        if (!isCreatedhaveRole) {
+        boolean isCreatedHaveRole = teamMember.getRoles().contains(TeamRole.OWNER);
+        if (!isCreatedHaveRole) {
             throw new DataValidationException("The vacancy сreator does not have a suitable role");
         }
     }

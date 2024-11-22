@@ -9,5 +9,5 @@ public interface VacancyService {
     VacancyDto updateVacancy(VacancyDto vacancyDto);
     void deleteVacancy(VacancyDto vacancyDto);
     List<VacancyDto> vacancyFilter(VacancyDtoFilter vacancyDtoFilter);
-    VacancyDto getVacancyForId(VacancyDto vacancyDto);
+    VacancyDto getVacancyById(Long id);
 }
