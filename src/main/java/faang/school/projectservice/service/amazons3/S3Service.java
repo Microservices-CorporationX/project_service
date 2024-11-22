@@ -5,19 +5,22 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import faang.school.projectservice.exception.FileUploadException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
 
     private final AmazonS3 s3Client;
 
-    @Value("&{services.s3.bucketName}")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder) {
@@ -31,7 +34,7 @@ public class S3Service {
                     new PutObjectRequest(bucketName, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
-            throw new FileUploadException("File uploading interrupted");
+            throw new FileUploadException("File uploading interrupted" + Arrays.toString(e.getStackTrace()));
         }
         return key;
     }

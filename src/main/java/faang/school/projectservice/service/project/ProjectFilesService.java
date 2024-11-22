@@ -10,12 +10,14 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.amazons3.S3Service;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectFilesService {
@@ -27,22 +29,21 @@ public class ProjectFilesService {
 
     public void uploadFile(long projectId, long teamMemberId, MultipartFile file) {
         Project project = projectService.getProjectById(projectId);
-        BigInteger maxStorageSize = new BigInteger("2147483648");
-        project.setMaxStorageSize(maxStorageSize);
+
+        BigInteger maxStorageSize = project.getMaxStorageSize();
 
         BigInteger currentStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(maxStorageSize, currentStorageSize);
 
         String folder = projectId + project.getName();
-        TeamMember fileCreator = teamMemberService.findById(teamMemberId);
-
         String key = s3Service.uploadFile(file, folder);
 
+        TeamMember fileCreator = teamMemberService.findById(teamMemberId);
         Resource resource = Resource.builder()
                 .name(file.getOriginalFilename())
                 .key(key)
                 .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(fileCreator.getRoles())
+//                .allowedRoles()
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
@@ -57,6 +58,9 @@ public class ProjectFilesService {
 
     private void checkStorageSizeExceeded(BigInteger maxStorageSize,
                                           BigInteger currentStorageSize) {
+//        if (maxStorageSize == null) {
+//            throw new IllegalStateException("Max storage size is not set for the project.");
+//        }
         if (maxStorageSize.compareTo(currentStorageSize) < 0) {
             throw new StorageExceededException("Storage can't exceed 2 Gb ");
         }

@@ -10,11 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -91,10 +88,10 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
-    @PostMapping("/{projectId}/recourses/{teamMemberId}")
+    @PutMapping("/{projectId}/recourses/{teamMemberId}")
     public void uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
-                           @RequestBody @NotNull MultipartFile file) {
-        projectFilesService.uploadFile(projectId,teamMemberId, file);
+                           @RequestBody MultipartFile file) {
+        projectFilesService.uploadFile(projectId, teamMemberId, file);
     }
 
 //    @GetMapping("/recourses/{fileId}")
