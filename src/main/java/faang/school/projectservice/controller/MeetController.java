@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,30 +28,26 @@ public class MeetController {
     private final MeetService meetService;
 
 
-    @PostMapping("/create")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public MeetDto create(@Validated @RequestBody MeetDto meetDto) {
         return meetService.createMeet(meetDto);
     }
 
-    @PutMapping("/update")
-    public MeetDto update(@Validated @RequestBody UpdateMeetDto updateMeetDto) {
-        return meetService.updateMeet(updateMeetDto);
+    @PutMapping("/{id}")
+    public MeetDto update(@PathVariable @Positive long id,
+                          @Validated @RequestBody UpdateMeetDto updateMeetDto) {
+        return meetService.updateMeet(id, updateMeetDto);
     }
 
-    @PatchMapping("/{id}/cancel")
-    public MeetDto cancel(@PathVariable @Positive Long id) {
-        return meetService.cancelMeet(id);
-    }
-
-    @DeleteMapping("/{meetId}/participants/delete/{userId}")
-    public MeetDto delete(@PathVariable @Positive Long meetId,
-                          @PathVariable @Positive Long userId) {
+    @DeleteMapping("/{meetId}/participants/{userId}")
+    public MeetDto delete(@PathVariable @Positive long meetId,
+                          @PathVariable @Positive long userId) {
         return meetService.deleteMeetingParticipant(meetId, userId);
     }
 
     @GetMapping("/{id}")
-    public MeetDto get(@PathVariable @Positive Long id) {
+    public MeetDto get(@PathVariable @Positive long id) {
         return meetService.getMeetById(id);
     }
 

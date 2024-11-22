@@ -45,8 +45,8 @@ public class MeetService {
     }
 
     @Transactional
-    public MeetDto updateMeet(UpdateMeetDto updateMeetDto) {
-        Meet meet = findMeetById(updateMeetDto.id());
+    public MeetDto updateMeet(long id, UpdateMeetDto updateMeetDto) {
+        Meet meet = findMeetById(id);
         log.info("Trying to update meet from {} to {}", meet, updateMeetDto);
         validateMeetUpdating(meet);
         validateThatRequestWasSentByTheCreator(meet);
@@ -54,18 +54,6 @@ public class MeetService {
         meetMapper.updateMeetFromDto(updateMeetDto, meet);
 
         log.info("Meet success updated: {}", meet);
-        return meetMapper.toDto(meet);
-    }
-
-    @Transactional
-    public MeetDto cancelMeet(long id) {
-        Meet meet = findMeetById(id);
-        validateMeetUpdating(meet);
-        validateThatRequestWasSentByTheCreator(meet);
-        log.info("Trying to cancel meet: {}", meet);
-
-        meet.setStatus(MeetStatus.CANCELLED);
-        log.info("Meet success cancelled: {}", meet);
         return meetMapper.toDto(meet);
     }
 

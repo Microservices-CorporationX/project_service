@@ -121,7 +121,7 @@ public class MeetServiceTest {
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
         when(userContext.getUserId()).thenReturn(1L);
 
-        MeetDto dto = meetService.updateMeet(updateMeetDto);
+        MeetDto dto = meetService.updateMeet(1L, updateMeetDto);
 
         verify(meetRepository, times(1)).findById(anyLong());
         verify(userContext, times(1)).getUserId();
@@ -135,7 +135,7 @@ public class MeetServiceTest {
     public void testUpdateAlreadyCancelledMeet() {
         meet.setStatus(MeetStatus.CANCELLED);
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
-        assertThrows(DataValidationException.class, () -> meetService.updateMeet(updateMeetDto));
+        assertThrows(DataValidationException.class, () -> meetService.updateMeet(1L, updateMeetDto));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class MeetServiceTest {
         when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
         when(userContext.getUserId()).thenReturn(anyLong());
 
-        assertThrows(DataValidationException.class, () -> meetService.updateMeet(updateMeetDto));
+        assertThrows(DataValidationException.class, () -> meetService.updateMeet(1L, updateMeetDto));
         verify(meetRepository, times(1)).findById(anyLong());
     }
 
@@ -153,7 +153,7 @@ public class MeetServiceTest {
         when(userContext.getUserId()).thenReturn(1L);
         when(userServiceClient.getUser(1L)).thenThrow(FeignException.class);
 
-        assertThrows(EntityNotFoundException.class, () -> meetService.updateMeet(updateMeetDto));
+        assertThrows(EntityNotFoundException.class, () -> meetService.updateMeet(1L, updateMeetDto));
 
         verify(meetRepository, times(1)).findById(anyLong());
         verify(userContext, times(1)).getUserId();
@@ -185,27 +185,6 @@ public class MeetServiceTest {
     }
 
     @Test
-    public void testCancelMeet() {
-        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
-        when(userContext.getUserId()).thenReturn(1L);
-
-        MeetDto dto = meetService.cancelMeet(1L);
-
-        verify(meetRepository, times(1)).findById(anyLong());
-        verify(userContext, times(1)).getUserId();
-        assertEquals(dto.status(), MeetStatus.CANCELLED);
-    }
-
-    @Test
-    public void testCancelMeetAlreadyCancelled() {
-        meet.setStatus(MeetStatus.CANCELLED);
-        when(meetRepository.findById(anyLong())).thenReturn(Optional.of(meet));
-
-        assertThrows(DataValidationException.class, () -> meetService.cancelMeet(1L));
-        verify(meetRepository, times(1)).findById(anyLong());
-    }
-
-    @Test
     public void testGetMeets() {
         when(meetRepository.findAll()).thenReturn(meetList);
         meetService.getMeets();
@@ -218,6 +197,4 @@ public class MeetServiceTest {
         meetService.getMeetById(1L);
         verify(meetRepository, times(1)).findById(anyLong());
     }
-
-
 }
