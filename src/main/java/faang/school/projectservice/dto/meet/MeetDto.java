@@ -25,7 +25,7 @@ public class MeetDto {
     private String title;
 
     @NotBlank(message = "Description should not be blank", groups = {Before.class, After.class})
-    @Size(max = 512, message = "Description's length should not be greater than 128 characters", groups = {Before.class, After.class})
+    @Size(max = 512, message = "Description's length should not be greater than 512 characters", groups = {Before.class, After.class})
     private String description;
 
     @NotNull(message = "The meeting status cannot be null", groups = After.class)
