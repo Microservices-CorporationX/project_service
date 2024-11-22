@@ -13,10 +13,12 @@ import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.teammember.TeamMemberService;
+import faang.school.projectservice.specification.meet.MeetSpecifications;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -96,19 +98,27 @@ public class MeetService {
         log.info("The meeting with ID: {} was deleted by the user with ID: {}", meetId, userId);
     }
 
-    //TODO: think about date of a meeting
-    public List<MeetDto> getMeetingsByProjectFilteredByDateOrTitle(Long projectId, String title, LocalDateTime date) {
-        List<Meet> meets;
-        if (title != null && date != null) {
-            meets = meetRepository.findByProjectIdAndTitleContainingIgnoreCaseAndCreatedAtAfter(projectId, title, date);
-        } else if (title != null) {
-            meets = meetRepository.findByProjectIdAndTitleContainingIgnoreCase(projectId, title);
-        } else if (date != null) {
-            meets = meetRepository.findByProjectIdAndCreatedAtAfter(projectId, date);
-        } else {
-            meets = meetRepository.findByProjectId(projectId);
+    public List<MeetDto> getMeetingsByProjectFilteredByDateOrTitle(
+            Long projectId, String title, LocalDateTime dateFrom, LocalDateTime dateTo) {
+
+        Specification<Meet> specification = MeetSpecifications.hasProjectId(projectId);
+
+        if (title != null) {
+            specification = specification.and(MeetSpecifications.titleContains(title));
         }
-        log.info("Fetch meetings of the project with ID: {} and filtered by title: {} or date: {}", projectId, title, date);
+
+        if (dateFrom != null && dateTo != null) {
+            specification = specification.and(MeetSpecifications.meetDateBetween(dateFrom, dateTo));
+        } else if (dateFrom != null) {
+            specification = specification.and(MeetSpecifications.meetDateAfter(dateFrom));
+        } else if (dateTo != null) {
+            specification = specification.and(MeetSpecifications.meetDateBefore(dateTo));
+        }
+
+        List<Meet> meets = meetRepository.findAll(specification);
+
+        log.info("Fetch meetings of the project with ID: {} and filtered by title: {} and date: from {} to {}",
+                projectId, title, dateFrom, dateTo);
         return meetMapper.toDto(meets);
     }
 

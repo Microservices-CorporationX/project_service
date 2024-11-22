@@ -54,10 +54,11 @@ public class MeetController {
     public List<MeetDto> getMeetingsByProjectFilteredByDateOrTitle(
             @PathVariable Long projectId,
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
-        log.info("Received a request to fetch all meetings of the project with ID: {} and filtered by date: {} or title: {}",
-                projectId, title, date);
-        return meetService.getMeetingsByProjectFilteredByDateOrTitle(projectId, title, date);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo) {
+        log.info("Received a request to fetch all meetings of the project with ID: {} and filtered by date from {} to {} and/or by title: {}",
+                projectId, title, dateFrom, dateTo);
+        return meetService.getMeetingsByProjectFilteredByDateOrTitle(projectId, title, dateFrom, dateTo);
     }
 
     @GetMapping
