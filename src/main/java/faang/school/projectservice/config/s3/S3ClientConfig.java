@@ -5,28 +5,26 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-public class S3Config {
-    private final S3ConfigProperties s3ConfigProperties;
-
-    public S3Config(S3ConfigProperties s3ConfigProperties) {
-        this.s3ConfigProperties = s3ConfigProperties;
-    }
+@Configuration
+@RequiredArgsConstructor
+public class S3ClientConfig {
+    private final MinioConfigProperties minioConfigProperties;
 
     @Bean
     public AmazonS3 amazonS3() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(
-                s3ConfigProperties.getAccessKey(),
-                s3ConfigProperties.getSecretKey()
+                minioConfigProperties.getAccessKey(),
+                minioConfigProperties.getSecretKey()
         );
 
         return AmazonS3ClientBuilder.standard()
                 .withEndpointConfiguration(
                         new AwsClientBuilder.EndpointConfiguration(
-                                s3ConfigProperties.getEndpoint(),
+                                minioConfigProperties.getEndpoint(),
                                 ""
                         )
                 ).withCredentials(new AWSStaticCredentialsProvider(credentials))

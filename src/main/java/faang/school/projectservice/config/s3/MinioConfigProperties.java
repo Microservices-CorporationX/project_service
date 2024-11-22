@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @Setter
 @NoArgsConstructor
 @Component
-@ConfigurationProperties(prefix = "services.s3")
-public class S3ConfigProperties {
+@ConfigurationProperties(prefix = "services.minio")
+public class MinioConfigProperties {
     private String endpoint;
     private String accessKey;
     private String secretKey;
