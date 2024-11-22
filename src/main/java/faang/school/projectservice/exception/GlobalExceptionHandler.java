@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConstraintViolationException(ConstraintViolationException ex) {
         log.error(CONSTRAINT_VIOLATION, ex);
-        return getErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,34 +37,27 @@ public class GlobalExceptionHandler {
                 .reduce((msg1, msg2) -> msg1 + "; " + msg2)
                 .orElse("Validation error");
 
-        return getErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(errorMessage);
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({EntityNotFoundException.class, JpaObjectRetrievalFailureException.class})
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
         log.error(ENTITY_NOT_FOUND, ex);
-        return getErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+        return new ErrorResponse(ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorResponse handleAccessDeniedException(AccessDeniedException ex) {
         log.error(ACCESS_DENIED, ex);
-        return getErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+        return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnexpectedException(Exception ex) {
         log.error(UNEXPECTED_ERROR, ex);
-        return getErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private ErrorResponse getErrorResponse(String message, HttpStatus status) {
-        return ErrorResponse.builder()
-                .status(status.value())
-                .message(message)
-                .build();
+        return new ErrorResponse(ex.getMessage());
     }
 }

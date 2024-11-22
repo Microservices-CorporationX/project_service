@@ -64,7 +64,7 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testValidateProjectMembershipInvalidUser() {
+    public void testValidateProjectMembershipFails() {
         // arrange
         long fakeUserId = 25L;
         project.setTeams(List.of(team));
@@ -91,7 +91,7 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testValidateParentTaskActiveInactiveParentTaskIs() {
+    public void testValidateParentTaskActiveFails() {
         // arrange
         Task parentTask = Task.builder()
                 .status(TaskStatus.DONE)
@@ -122,7 +122,7 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testValidateStageFromTheSameProjectStageFromOtherProjectMatches() {
+    public void testValidateStageProjectMatchesFails() {
         // arrange
         Stage stage = Stage.builder()
                 .project(otherProject)
@@ -137,7 +137,7 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testIsParentTaskFromTheSameProject() {
+    public void testValidateParentTaskProjectMatches() {
         // arrange
         Task parentTask = Task.builder()
                 .project(project)
@@ -151,7 +151,7 @@ public class TaskValidatorTest {
     }
 
     @Test
-    public void testIsParentTaskFromTheSameProjectDifferentProjects() {
+    public void testValidateParentTaskProjectMatchesFails() {
         // arrange
         Task parentTask = Task.builder()
                 .project(otherProject)

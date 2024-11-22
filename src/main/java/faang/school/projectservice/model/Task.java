@@ -78,5 +78,9 @@ public class Task {
         return parentTask.status.equals(TaskStatus.DONE) ||
                 getParentTask().status.equals(TaskStatus.CANCELLED);
     }
+
+    public boolean isProjectNotEqual(Project otherProject) {
+        return !project.equals(otherProject);
+    }
 }
 
