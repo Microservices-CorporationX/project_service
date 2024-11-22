@@ -94,7 +94,7 @@ public class ProjectControllerTest {
                 .andExpect(jsonPath("$.name", is("Test project")))
                 .andExpect(jsonPath("$.status", is(String.valueOf(CREATED))));
 
-        verify(projectService, times(1)).getProjectById(1L);
+        verify(projectService, times(1)).getProject(1L);
     }
 
     @Test

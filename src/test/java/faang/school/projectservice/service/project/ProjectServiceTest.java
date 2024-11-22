@@ -75,7 +75,7 @@ public class ProjectServiceTest {
     @DisplayName("Must throw EntityNotFoundException")
     public void testGetProjectByIdThrowEntityNotFoundException() {
         when(projectRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(anyLong()));
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProject(anyLong()));
     }
 
     @Test

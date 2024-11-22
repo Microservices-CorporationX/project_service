@@ -86,7 +86,7 @@ public class ProjectService {
         return allProjects.stream().map(projectMapper::toResponseDtoFromEntity).toList();
     }
 
-    public Project getProjectById(@Positive long projectId) {
+    public Project getProject(@Positive long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 

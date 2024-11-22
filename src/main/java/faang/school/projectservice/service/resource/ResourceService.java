@@ -3,7 +3,6 @@ package faang.school.projectservice.service.resource;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.dto.resource.ResourceRequestDto;
 import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
@@ -14,7 +13,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -45,18 +43,13 @@ public class ResourceService {
 
     @Transactional
     public List<String> upload(@Size(min = 1) List<MultipartFile> files,
-                               @Valid ResourceRequestDto requestDto,
+                               @Positive long projectId,
                                @Positive long userId) {
-        TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, requestDto.getProjectId());
-        if (teamMember == null) {
-            log.error("TeamMember id={} not found in project id={}",
-                    userId, requestDto.getProjectId());
-            throw new IllegalArgumentException("TeamMember not found in project");
-        }
-        log.info("TeamMember id={} found in project id={}", userId, requestDto.getProjectId());
+        TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, projectId);
+        log.info("TeamMember id={} found in project id={}", userId, projectId);
 
-        Project project = projectService.getProjectById(requestDto.getProjectId());
-        log.info("Project id={} found", requestDto.getProjectId());
+        Project project = projectService.getProject(projectId);
+        log.info("Project id={} found", projectId);
 
         BigInteger filesSize = BigInteger.valueOf(files.stream()
                 .mapToLong(MultipartFile::getSize)
@@ -66,13 +59,13 @@ public class ResourceService {
         if (updateProjectStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             log.error("Project id={} has exceeded its max storage size:" +
                             " updateProjectStorageSize={}, projectMaxStorageSize={}",
-                    requestDto.getProjectId(),
+                    projectId,
                     updateProjectStorageSize,
                     project.getMaxStorageSize()
             );
             throw new IllegalArgumentException("Project has exceeded max storage size");
         }
-        log.info("Project id={} storage size updated to {}", requestDto.getProjectId(), updateProjectStorageSize);
+        log.info("Project id={} storage size updated to {}", projectId, updateProjectStorageSize);
 
         List<String> fileKeys = new ArrayList<>();
         List<Resource> resources = new ArrayList<>();
@@ -101,7 +94,7 @@ public class ResourceService {
                             .name(file.getOriginalFilename())
                             .key(fileKey)
                             .size(BigInteger.valueOf(file.getSize()))
-                            .allowedRoles(teamMember.getRoles())
+                            .allowedRoles(new ArrayList<>(teamMember.getRoles()))
                             .type(ResourceType.getResourceType(file.getContentType()))
                             .status(ResourceStatus.ACTIVE)
                             .createdAt(LocalDateTime.now())
