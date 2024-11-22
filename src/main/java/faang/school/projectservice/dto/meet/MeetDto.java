@@ -40,8 +40,8 @@ public class MeetDto {
     @NotEmpty(message = "The list of user IDs cannot be empty", groups = {Before.class, After.class})
     private List<Long> userIds;
 
-    @NotNull
-    @FutureOrPresent(message = "Meet date cannot be in the past")
+    @NotNull(groups = {Before.class, After.class})
+    @FutureOrPresent(message = "Meet date cannot be in the past", groups = {Before.class, After.class})
     private LocalDateTime meetDate;
 
     private LocalDateTime createdAt;
