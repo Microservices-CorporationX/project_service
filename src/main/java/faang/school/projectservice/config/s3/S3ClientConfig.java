@@ -1,13 +1,17 @@
 package faang.school.projectservice.config.s3;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+
+import java.net.URI;
 
 @Configuration
 @RequiredArgsConstructor
@@ -15,20 +19,34 @@ public class S3ClientConfig {
     private final MinioConfigProperties minioConfigProperties;
 
     @Bean
-    public AmazonS3 amazonS3() {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(
-                minioConfigProperties.getAccessKey(),
-                minioConfigProperties.getSecretKey()
+    public S3Client s3Client() {
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(
+                minioConfigProperties.getAccessKey(), minioConfigProperties.getSecretKey()
         );
 
-        return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(
-                        new AwsClientBuilder.EndpointConfiguration(
-                                minioConfigProperties.getEndpoint(),
-                                ""
-                        )
-                ).withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withPathStyleAccessEnabled(true)
+        return S3Client.builder()
+                .endpointOverride(URI.create(minioConfigProperties.getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .region((Region.US_EAST_1))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build())
+                .build();
+    }
+
+    @Bean
+    public S3AsyncClient s3AsyncClient() {
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(
+                minioConfigProperties.getAccessKey(), minioConfigProperties.getSecretKey()
+        );
+
+        return S3AsyncClient.builder()
+                .endpointOverride(URI.create(minioConfigProperties.getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .region(Region.US_EAST_1)
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build();
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,9 +72,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(InternshipDurationException.class)
     public ResponseEntity<String> handleInternshipDurationException(InternshipDurationException ex) {
         log.error("Internship duration exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<String> handleS3Exception(S3Exception ex) {
+        log.error("Error occurred during S3 operation. Service: {}, Code: {}, Message: {}",
+                ex.awsErrorDetails().serviceName(),
+                ex.awsErrorDetails().errorCode(),
+                ex.awsErrorDetails().errorMessage(),
+                ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 }
