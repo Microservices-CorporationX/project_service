@@ -1,9 +1,5 @@
 package faang.school.projectservice.service.resource;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -11,18 +7,18 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.s3.S3Util;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
+import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,11 +31,9 @@ import java.util.List;
 public class ResourceService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
-    private final AmazonS3 s3Client;
+    private final S3Util s3Util;
     private final ResourceRepository resourceRepository;
-
-    @Value("${services.s3.bucketName}")
-    private String bucketName;
+    private final ResourceValidator resourceValidator;
 
     @Transactional
     public List<String> upload(@Size(min = 1) List<MultipartFile> files,
@@ -56,39 +50,15 @@ public class ResourceService {
                 .sum()
         );
         BigInteger updateProjectStorageSize = project.getStorageSize().add(filesSize);
-        if (updateProjectStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
-            log.error("Project id={} has exceeded its max storage size:" +
-                            " updateProjectStorageSize={}, projectMaxStorageSize={}",
-                    projectId,
-                    updateProjectStorageSize,
-                    project.getMaxStorageSize()
-            );
-            throw new IllegalArgumentException("Project has exceeded max storage size");
-        }
+        resourceValidator.validateProjectStorageSizeExceeded(updateProjectStorageSize, project);
         log.info("Project id={} storage size updated to {}", projectId, updateProjectStorageSize);
 
         List<String> fileKeys = new ArrayList<>();
         List<Resource> resources = new ArrayList<>();
         String folder = project.getId() + project.getName();
         files.forEach(file -> {
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(file.getSize());
-            objectMetadata.setContentType(file.getContentType());
             String fileKey = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-            try {
-                PutObjectRequest putObjectRequest = new PutObjectRequest(
-                        bucketName, fileKey, file.getInputStream(), objectMetadata
-                );
-                s3Client.putObject(putObjectRequest);
-            } catch (IOException e) {
-                log.error("File not found", e);
-                throw new FileException("File not found");
-            } catch (Exception e) {
-                log.error("Error uploading file to S3", e);
-                throw new FileException("Error uploading file to S3");
-            }
-            log.info("File uploaded to S3: {}", fileKey);
-
+            s3Util.s3UploadFile(file, fileKey);
             resources.add(
                     Resource.builder()
                             .name(file.getOriginalFilename())
@@ -99,6 +69,7 @@ public class ResourceService {
                             .status(ResourceStatus.ACTIVE)
                             .createdAt(LocalDateTime.now())
                             .createdBy(teamMember)
+                            .updatedBy(teamMember)
                             .project(project)
                             .build()
             );
