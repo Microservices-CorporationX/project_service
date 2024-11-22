@@ -95,8 +95,19 @@ public class ResourceService {
         TeamMember teamMember = resource.getCreatedBy();
         Project project = resource.getProject();
         resourceValidator.checkUserInProject(userId, teamMember, project);
-
         log.info("User id={} can delete resource id={}", userId, resource.getId());
+
+        s3Util.s3DeleteFile(resource.getKey());
+        log.info("Resource id={} deleted from S3", resource.getId());
+
+        BigInteger updateProjectStorageSize = project.getStorageSize().subtract(resource.getSize());
+        if (updateProjectStorageSize.compareTo(BigInteger.ZERO) < 0) {
+            updateProjectStorageSize = BigInteger.ZERO;
+        }
+        project.setStorageSize(updateProjectStorageSize);
+        projectService.saveProject(project);
+        log.info("Project id={} updated", project.getId());
+
         resource.setStatus(ResourceStatus.DELETED);
         resource.setKey(null);
         resource.setSize(null);
@@ -104,13 +115,6 @@ public class ResourceService {
         resource.setUpdatedAt(LocalDateTime.now());
         resourceRepository.save(resource);
         log.info("Resource id={} status updated to deleted", dto.getId());
-        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
-        project.getResources().remove(resource);
-        projectService.saveProject(project);
-        log.info("Project id={} updated", project.getId());
-
-        s3Util.s3DeleteFile(resource.getKey());
-        log.info("Resource id={} deleted from S3", resource.getId());
     }
 
     public Resource getResource(@Positive long id) {
