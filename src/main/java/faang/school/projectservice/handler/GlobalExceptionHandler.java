@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.NonExistentDeletionTypeException;
 import faang.school.projectservice.exception.ProjectStatusValidationException;
 import faang.school.projectservice.exception.TeamMemberValidationException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
+import faang.school.projectservice.exception.Subproject.*;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
@@ -49,14 +50,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VacancyDuplicationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception){
+    public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception) {
         log.error("Vacancy Creation Error: {}", exception.getMessage());
         return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception){
+    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
         log.error("Illegal Argument Error: {}", exception.getMessage());
         return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
     }
@@ -87,5 +88,12 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleTeamMemberValidationException(TeamMemberValidationException e) {
         log.error("Team member validation failure", e);
         return new ErrorResponse("Team member validation failure", e.getMessage());
+    }
+
+    @ExceptionHandler(SubprojectBadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleSubprojectBadRequestException(SubprojectBadRequestException exception) {
+        log.error("Subproject Bad Request Error: {}", exception.getMessage());
+        return new ErrorResponse("Subproject Bad Request Error: {}", exception.getMessage());
     }
 }
