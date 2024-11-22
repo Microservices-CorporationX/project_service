@@ -35,6 +35,10 @@ dependencies {
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
+    implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("org.apache.tika:tika-core:3.0.0")
+
+
     /**
      * Utils & Logging
      */

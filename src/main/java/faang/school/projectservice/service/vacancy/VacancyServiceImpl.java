@@ -10,8 +10,8 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
-import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.candidate.CandidateService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.team.TeamService;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import faang.school.projectservice.validator.vacancy.VacancyServiceValidator;
@@ -21,11 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +43,7 @@ public class VacancyServiceImpl implements VacancyService {
 
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setId(null);
-        vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
+        vacancy.setProject(projectService.getProjectById(vacancyDto.getProjectId()));
         vacancy.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setStatus(VacancyStatus.OPEN);
 
@@ -67,7 +63,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setUpdatedBy(vacancyDto.getUpdatedBy());
         vacancy.setStatus(vacancyDto.getStatus());
-        vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
+        vacancy.setProject(projectService.getProjectById(vacancyDto.getProjectId()));
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }
