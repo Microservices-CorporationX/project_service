@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.service.project.ProjectFilesService;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,8 +10,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +22,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Tag(name = "Projects methods")
 @RestController
@@ -90,24 +91,32 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
-    @PostMapping("/{projectId}/files")
-    public void uploadFile(@PathVariable long projectId, @RequestParam MultipartFile file) {
-        projectFilesService.uploadFile(projectId, file);
+    @PostMapping("/{projectId}/recourses/{teamMemberId}")
+    public void uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
+                           @RequestBody @NotNull MultipartFile file) {
+        projectFilesService.uploadFile(projectId,teamMemberId, file);
     }
 
-    @GetMapping("/files/{fileId}")
-    public Stream<Byte> downloadFile(@PathVariable long fileId) {
-        return projectFilesService.downloadFile(fileId);
-    }
-
-    @DeleteMapping("/files/{fileId}")
-    public void deleteFile(@PathVariable long fileId) {
-        projectFilesService.deleteFile(fileId);
-    }
+//    @GetMapping("/recourses/{fileId}")
+//    public byte[] downloadFile(@PathVariable long fileId) {
+//        return projectFilesService.downloadFile(fileId);
+//    }
+//
+//    @DeleteMapping("/recourses/{fileId}")
+//    public ResponseEntity<String> deleteFile(@PathVariable long fileId) {
+//        projectFilesService.deleteFile(fileId);
+//        return ResponseEntity.ok("File deleted successfully");
+//    }
 
     //is this method necessary ???
-    @PostMapping("/files/{fileId}")
-    public void updateFile(@PathVariable long fileId, @RequestParam MultipartFile file) {
-        projectFilesService.updateFile(fileId, file);
-    }
+//    @PostMapping("/recourses/{fileId}")
+//    public void updateFile(@PathVariable long fileId, @RequestParam MultipartFile file) {
+//        projectFilesService.updateFile(fileId, file);
+//    }
+
+    //is this method necessary ???
+//    @GetMapping("/{projectId}/recourses")
+//    public byte[] getAllFiles(@PathVariable long projectId) {
+//        return projectFilesService.getAllFiles(projectId);
+//    }
 }
