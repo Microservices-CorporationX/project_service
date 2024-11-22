@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.resource;
 
+import faang.school.projectservice.dto.resource.RequestDeleteResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -10,7 +11,9 @@ import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Util;
 import faang.school.projectservice.service.teamMember.TeamMemberService;
 import faang.school.projectservice.validator.resource.ResourceValidator;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +39,9 @@ public class ResourceService {
     private final ResourceValidator resourceValidator;
 
     @Transactional
-    public List<String> upload(@Size(min = 1) List<MultipartFile> files,
-                               @Positive long projectId,
-                               @Positive long userId) {
+    public List<String> uploadResources(@Size(min = 1) List<MultipartFile> files,
+                                        @Positive long projectId,
+                                        @Positive long userId) {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, projectId);
         log.info("TeamMember id={} found in project id={}", userId, projectId);
 
@@ -50,7 +53,7 @@ public class ResourceService {
                 .sum()
         );
         BigInteger updateProjectStorageSize = project.getStorageSize().add(filesSize);
-        resourceValidator.validateProjectStorageSizeExceeded(updateProjectStorageSize, project);
+        resourceValidator.checkProjectStorageSizeExceeded(updateProjectStorageSize, project);
         log.info("Project id={} storage size updated to {}", projectId, updateProjectStorageSize);
 
         List<String> fileKeys = new ArrayList<>();
@@ -77,11 +80,42 @@ public class ResourceService {
         });
 
         List<Resource> savedResources = resourceRepository.saveAll(resources);
-        log.info("Resources saved to DB: {}", savedResources.size());
+        log.info("Resources count={} saved to DB", savedResources.size());
         project.getResources().addAll(savedResources);
         projectService.saveProject(project);
-        log.info("Project updated in DB: {}", project.getId());
+        log.info("Project id={} updated in DB", project.getId());
 
         return fileKeys;
+    }
+
+    @Transactional
+    public void deleteResource(@Positive long userId, @Valid RequestDeleteResourceDto dto) {
+        Resource resource = getResource(dto.getId());
+        log.info("Resource id={} found", resource.getId());
+        TeamMember teamMember = resource.getCreatedBy();
+        Project project = resource.getProject();
+        resourceValidator.checkUserInProject(userId, teamMember, project);
+
+        log.info("User id={} can delete resource id={}", userId, resource.getId());
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setUpdatedBy(teamMember);
+        resource.setUpdatedAt(LocalDateTime.now());
+        resourceRepository.save(resource);
+        log.info("Resource id={} status updated to deleted", dto.getId());
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
+        project.getResources().remove(resource);
+        projectService.saveProject(project);
+        log.info("Project id={} updated", project.getId());
+
+        s3Util.s3DeleteFile(resource.getKey());
+        log.info("Resource id={} deleted from S3", resource.getId());
+    }
+
+    public Resource getResource(@Positive long id) {
+        return resourceRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Resource not found by id: " + id)
+        );
     }
 }

@@ -1,6 +1,10 @@
 package faang.school.projectservice.validator.resource;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +13,7 @@ import java.math.BigInteger;
 @Slf4j
 @Component
 public class ResourceValidator {
-    public void validateProjectStorageSizeExceeded(BigInteger updateProjectStorageSize, Project project) {
+    public void checkProjectStorageSizeExceeded(BigInteger updateProjectStorageSize, Project project) {
         if (updateProjectStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             log.error("Project id={} has exceeded its max storage size:" +
                             " updateProjectStorageSize={}, projectMaxStorageSize={}",
@@ -18,6 +22,19 @@ public class ResourceValidator {
                     project.getMaxStorageSize()
             );
             throw new IllegalArgumentException("Project has exceeded max storage size");
+        }
+    }
+
+    public void checkUserInProject(@Positive long userId, TeamMember teamMember, Project project) {
+        String messageError = "You can't delete this resource";
+        if (teamMember.getUserId() != userId) {
+            throw new DataValidationException(messageError);
+        }
+        if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
+            throw new DataValidationException(messageError);
+        }
+        if (userId != project.getOwnerId()) {
+            throw new DataValidationException(messageError);
         }
     }
 }

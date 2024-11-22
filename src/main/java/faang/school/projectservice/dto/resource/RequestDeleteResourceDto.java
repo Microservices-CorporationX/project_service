@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResourceRequestDto {
-    @Positive(message = "Project id must be positive")
-    private long projectId;
+public class RequestDeleteResourceDto {
+    @Positive(message = "Id must be positive")
+    private long id;
 }

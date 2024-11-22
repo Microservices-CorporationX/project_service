@@ -16,9 +16,10 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class S3Util {
+    private final AmazonS3 s3Client;
+
     @Value("${services.s3.bucketName}")
     private String bucketName;
-    private final AmazonS3 s3Client;
 
     public void s3UploadFile(MultipartFile file, String fileKey) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -37,5 +38,14 @@ public class S3Util {
             throw new FileException("Error uploading file to S3");
         }
         log.info("File uploaded to S3: {}", fileKey);
+    }
+
+    public void s3DeleteFile(String key) {
+        try {
+            s3Client.deleteObject(bucketName, key);
+        } catch (Exception e) {
+            log.error("Error deleting file from S3", e);
+            throw new FileException("Error deleting file from S3");
+        }
     }
 }
