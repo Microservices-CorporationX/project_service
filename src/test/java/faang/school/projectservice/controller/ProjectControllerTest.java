@@ -2,12 +2,10 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectsIdsDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.service.ProjectService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +79,7 @@ class ProjectControllerTest {
     void testUpdateProjectSuccessful() {
         when(projectService.updateProject(updateProjectDto)).thenReturn(updateProjectDto);
 
-        ResponseEntity<UpdateProjectDto> response = projectController.updateProjectDescription(updateProjectDto);
+        ResponseEntity<UpdateProjectDto> response = projectController.updateProject(updateProjectDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updateProjectDto, response.getBody());
@@ -113,68 +111,12 @@ class ProjectControllerTest {
     @Test
     void testGetProjectByIdSuccess() {
         projectDto.setId(1L);
-        when(projectService.getAccessibleProjectsById(projectDto.getId(), ownerId)).thenReturn(projectDto);
+        when(projectService.getAccessibleProjectById(projectDto.getId(), ownerId)).thenReturn(projectDto);
 
         ResponseEntity<ProjectDto> response = projectController.getProjectById(projectDto.getId(), ownerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, response.getBody());
-        verify(projectService, times(1)).getAccessibleProjectsById(projectDto.getId(), ownerId);
-    }
-
-    @Test
-    void getProjectsByIdsWhenProjectsExistShouldReturnProjectDtos() {
-        ProjectsIdsDto ids = new ProjectsIdsDto(List.of(1L, 2L));
-
-        when(projectService.findAllById(ids.getIds())).thenReturn(List.of(projectDto));
-
-        List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
-
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        assertEquals(projectDto.getId(), response.get(0).getId());
-        assertEquals(projectDto.getName(), response.get(0).getName());
-
-        verify(projectService, times(1)).findAllById(ids.getIds());
-    }
-
-    @Test
-    void getProjectsByIdsWhenNoProjectsExistShouldReturnEmptyList() {
-        ProjectsIdsDto ids = new ProjectsIdsDto(List.of(1L, 2L));
-
-        when(projectService.findAllById(ids.getIds())).thenReturn(List.of());
-
-        List<ProjectDto> response = projectController.getProjectsByIds(ids).getBody();
-
-        assertNotNull(response);
-        assertTrue(response.isEmpty());
-
-        verify(projectService, times(1)).findAllById(ids.getIds());
-    }
-
-    @Test
-    void getProjectWhenProjectExistsShouldReturnProjectDto() {
-        long projectId = 1L;
-
-        when(projectService.findById(projectId)).thenReturn(projectDto);
-
-        ProjectDto response = projectController.getProject(projectId).getBody();
-
-        assertNotNull(response);
-        assertEquals(projectDto.getId(), response.getId());
-        assertEquals(projectDto.getName(), response.getName());
-
-        verify(projectService, times(1)).findById(projectId);
-    }
-
-    @Test
-    void getProjectWhenProjectDoesNotExistShouldThrowEntityNotFoundException() {
-        long projectId = 999L;
-
-        when(projectService.findById(projectId)).thenThrow(new EntityNotFoundException("Project not found"));
-
-        assertThrows(EntityNotFoundException.class, () -> projectController.getProject(projectId));
-
-        verify(projectService, times(1)).findById(projectId);
+        verify(projectService, times(1)).getAccessibleProjectById(projectDto.getId(), ownerId);
     }
 }
