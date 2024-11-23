@@ -32,8 +32,8 @@ public class MomentService {
         momentValidator.validateUniqueMoment(momentDto);
         log.info("Creating moment {}", momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
-        moment.setProjects(projectRepository.findAllByIds(momentDto.getProjectIds()));
         moment.setCreatedAt(LocalDateTime.now());
+        moment.setProjects(projectRepository.findAllByIds(momentDto.getProjectIds()));
         momentValidator.validateActiveMoment(moment);
         moment = momentRepository.save(moment);
         log.info("Created moment with id: {}", moment);
