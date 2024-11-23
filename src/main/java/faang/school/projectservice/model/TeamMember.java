@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class TeamMember {
 
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
+    @ToString.Exclude
     private Team team;
 
     @ManyToMany(mappedBy = "executors")
@@ -39,5 +41,9 @@ public class TeamMember {
 
     public boolean isCurator() {
         return roles.contains(TeamRole.OWNER) || roles.contains(TeamRole.MANAGER);
+    }
+
+    public boolean isManager(){
+        return roles.contains(TeamRole.MANAGER);
     }
 }
