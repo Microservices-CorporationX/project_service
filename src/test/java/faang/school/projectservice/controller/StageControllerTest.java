@@ -110,8 +110,7 @@ class StageControllerTest {
 
     @Test
     void testUpdateStageShouldReturnOk() throws Exception {
-        TeamMemberDto teamMemberDto = new TeamMemberDto();
-
+        TeamMemberDto teamMemberDto = setUpTeamMemberDto();
         mockMvc.perform(put("/api/v1/stages/{stageId}/executor", stageId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamMemberDto)))
@@ -173,6 +172,13 @@ class StageControllerTest {
         stage2.setProjectId(projectId);
 
         return List.of(stage1, stage2);
+    }
+
+    private TeamMemberDto setUpTeamMemberDto() {
+        TeamMemberDto teamMemberDto = new TeamMemberDto();
+        teamMemberDto.setUserId(1L);
+        teamMemberDto.setTeamRole(TeamRole.ANALYST);
+        return teamMemberDto;
     }
 }
 
