@@ -48,8 +48,7 @@ public class AmazonClientService {
 
     public byte[] getProjectCover(String fileName) {
 
-        InputStream inputStream = downloadFileTos3bucket(fileName);
-        try {
+        try (InputStream inputStream = downloadFileTos3bucket(fileName)){
             return inputStream.readAllBytes();
         } catch (IOException e) {
             log.warn("IOException: " + Arrays.toString(e.getStackTrace()));
@@ -58,19 +57,27 @@ public class AmazonClientService {
     }
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
+        String format = checkFormatFile(file);
+
+        BufferedImage outputImage;
+        try (InputStream inputStream = file.getInputStream()) {
+            outputImage = imageService.resizeImage(ImageIO.read(inputStream));
+        }
+
+        File outputFile = new File(file.getOriginalFilename());
+        ImageIO.write(outputImage, format, outputFile);
+
+        return outputFile;
+    }
+
+    private String checkFormatFile(MultipartFile file) {
         String format = file.getOriginalFilename().split("\\.")[1];
         if (!(format.equalsIgnoreCase("png") ||
                 format.equalsIgnoreCase("jpg") ||
                 format.equalsIgnoreCase("jpeg"))) {
             throw new InvalidFormatFile(format + " not supported format");
         }
-
-        BufferedImage outputImage = imageService.resizeImage(ImageIO.read(file.getInputStream()));
-
-        File outputFile = new File(file.getOriginalFilename());
-        ImageIO.write(outputImage, format, outputFile);
-
-        return outputFile;
+        return format;
     }
 
     private void uploadFileTos3bucket(String fileName, File file) {

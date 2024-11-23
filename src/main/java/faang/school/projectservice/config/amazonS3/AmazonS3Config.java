@@ -22,13 +22,16 @@ public class AmazonS3Config {
     @Value("${services.s3.secretKey}")
     private String secretKey;
 
+    @Value("${services.s3.region}")
+    private String region;
+
     @Bean
     public AmazonS3 amazonS3() {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withEndpointConfiguration(
-                        new AwsClientBuilder.EndpointConfiguration(endpointUrl, "us-east-1"))
+                        new AwsClientBuilder.EndpointConfiguration(endpointUrl, region))
                 .build();
     }
 }
