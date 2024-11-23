@@ -1,18 +1,16 @@
 package faang.school.projectservice.service.project;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import faang.school.projectservice.dto.CoverProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.S3Service;
 import faang.school.projectservice.validator.CoverProjectValidator;
 import lombok.RequiredArgsConstructor;
-import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
+import java.io.ByteArrayOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,18 +35,15 @@ public class ProjectCoverService {
     public CoverProjectDto addCoverProject(long projectId, MultipartFile coverImage) {
         Project project = projectService.getProjectById(projectId);
 
-        coverProjectValidator.validation(project);
+        coverProjectValidator.validation(project, coverImage);
 
-        System.out.println(coverImage.getContentType());
-        if (!coverImage.getContentType().startsWith("image")) {
-            throw new IllegalStateException("expected is image");
-        }
+        ByteArrayOutputStream outputStream = imageResizer.resizeImage(coverImage);
+        String key = URI + s3Service.uploadFile(
+                outputStream.toByteArray(),
+                setMetadata(coverImage.getContentType(), outputStream.size())
+        );
 
-//        imageResizer.resizeImage(coverImage);
-
-        String key = URI + s3Service.uploadFile(coverImage);
         project.setCoverImageId(key);
-
         projectService.saveProject(project);
 
         return CoverProjectDto.builder()
@@ -68,5 +63,13 @@ public class ProjectCoverService {
         return CoverProjectDto.builder()
                 .deleted(true)
                 .build();
+    }
+
+    private ObjectMetadata setMetadata(String contentType, long size) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType(contentType);
+        objectMetadata.setContentLength(size);
+
+        return objectMetadata;
     }
 }

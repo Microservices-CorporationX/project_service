@@ -20,6 +20,7 @@ import faang.school.projectservice.update.projects.OwnerIdUpdate;
 import faang.school.projectservice.update.projects.ParentProjectUpdate;
 import faang.school.projectservice.update.projects.StatusUpdate;
 import faang.school.projectservice.update.projects.VisibilityUpdate;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,6 +87,19 @@ class ProjectServiceTest {
                 projectMapper,
                 projectUpdates,
                 projectFilters);
+    }
+
+    @Test
+    void getProjectEntityByIdSuccess(){
+        Mockito.lenient().when(projectRepository.getProjectById(Mockito.anyLong())).thenReturn(new Project());
+        assertEquals(new Project(), projectService.getProjectById(1L));
+    }
+
+    @Test
+    void getProjectEntityByIdFail(){
+        Mockito.lenient().when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found by id: %s".formatted(1L)));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(1L));
+        assertEquals("Project not found by id: %s".formatted(1L), exception.getMessage());
     }
 
     @Test

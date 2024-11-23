@@ -3,6 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.CoverProjectDto;
 import faang.school.projectservice.service.project.ProjectCoverService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +20,7 @@ public class ProjectCoverController {
     private final ProjectCoverService projectCoverService;
 
     @PutMapping("/{projectId}/cover")
-    public CoverProjectDto uploadCoverToProject(@PathVariable long projectId, @RequestBody MultipartFile file) {
+    public CoverProjectDto uploadCoverToProject(@PathVariable long projectId, @RequestBody @Validated MultipartFile file) {
         return projectCoverService.addCoverProject(projectId, file);
     }
 
