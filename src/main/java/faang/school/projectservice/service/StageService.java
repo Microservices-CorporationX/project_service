@@ -12,6 +12,7 @@ import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.validator.StageValidator;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class StageService {
     private final StageValidator stageValidator;
     private final List<Filter<Stage, StageFilterDto>> stageFilters;
 
+    @Autowired
     public StageService(StageRepository stageRepository,
                         TeamMemberService teamMemberService,
                         ProjectService projectService,
