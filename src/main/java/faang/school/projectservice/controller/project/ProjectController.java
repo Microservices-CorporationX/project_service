@@ -103,17 +103,11 @@ public class ProjectController {
         return projectFilesService.downloadFile(resourceId);
     }
 
-    @DeleteMapping("/resources/{resourceId}")
-    public ResponseEntity<String> deleteFile(@PathVariable long resourceId) {
-        projectFilesService.deleteFile(resourceId);
+    @DeleteMapping("/resources/{resourceId}/{teamMemberId}")
+    public ResponseEntity<String> deleteFile(@PathVariable long resourceId, @PathVariable long teamMemberId) {
+        projectFilesService.deleteFile(resourceId,teamMemberId);
         return ResponseEntity.ok("File deleted successfully");
     }
-
-    //is this method necessary ???
-//    @PostMapping("/resources/{resourceId}")
-//    public void updateFile(@PathVariable long resourceId, @RequestParam MultipartFile file) {
-//        projectFilesService.updateFile(resourceId, file);
-//    }
 
     //is this method necessary ???
 //    @GetMapping("/{projectId}/resources")

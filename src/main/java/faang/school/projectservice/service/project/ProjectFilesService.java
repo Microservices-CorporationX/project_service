@@ -3,8 +3,8 @@ package faang.school.projectservice.service.project;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.FileDownloadException;
-import faang.school.projectservice.exception.StorageExceededException;
 import faang.school.projectservice.jpa.ResourceRepository;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -13,6 +13,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.amazons3.S3Service;
 import faang.school.projectservice.service.teammember.TeamMemberService;
+import faang.school.projectservice.validator.resource.ResourceValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,19 +30,22 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class ProjectFilesService {
 
-    private final ProjectService projectService;
-    private final TeamMemberService teamMemberService;
     private final S3Service s3Service;
     private final ResourceRepository resourceRepository;
+    private final ResourceValidator resourceValidator;
+    private final ProjectService projectService;
+    private final ProjectMapper projectMapper;
+    private final TeamMemberService teamMemberService;
 
     public void uploadFile(long projectId, long teamMemberId, MultipartFile file) {
         Project project = projectService.getProjectById(projectId);
         BigInteger maxStorageSize = project.getMaxStorageSize();
         BigInteger currentStorageSize = project.getStorageSize().
                 add(BigInteger.valueOf(file.getSize()));
+        project.setStorageSize(currentStorageSize);
 
-        checkMaxStorageSizeIsNotNull(maxStorageSize);
-        checkStorageSizeNotExceeded(maxStorageSize, currentStorageSize);
+        resourceValidator.checkMaxStorageSizeIsNotNull(maxStorageSize);
+        resourceValidator.checkStorageSizeNotExceeded(maxStorageSize, currentStorageSize);
         String folder = projectId + project.getName();
 
         String key = s3Service.uploadFile(file, folder);
@@ -63,12 +67,12 @@ public class ProjectFilesService {
                 .project(project)
                 .build();
 
+        projectService.updateProject(projectMapper.toDto(project));
         resourceRepository.save(resource);
     }
 
     public byte[] downloadFile(long resourceId) {
-        Resource resource = resourceRepository.findById(resourceId).orElseThrow(
-                () -> new EntityNotFoundException("Resource", resourceId));
+        Resource resource = getResource(resourceId);
         String key = resource.getKey();
 
         try (S3ObjectInputStream inputStream = s3Service.downloadFile(key)) {
@@ -79,20 +83,30 @@ public class ProjectFilesService {
         }
     }
 
-    public void deleteFile(long resourceId) {
+    public void deleteFile(long resourceId, long teamMemberId) {
+        TeamMember teamMember = teamMemberService.findById(teamMemberId);
+        Resource resource = getResource(resourceId);
+        String key = resource.getKey();
+        resourceValidator.validateAllowedToDeleteFile(resource, teamMember);
+
         s3Service.deleteFile(key);
+
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setUpdatedBy(teamMember);
+
+        Project project = projectService.getProjectById(resource.getProject().getId());
+        BigInteger renewStorageSize = project.getStorageSize().subtract(resource.getSize());
+        project.setStorageSize(renewStorageSize);
+
+        projectService.updateProject(projectMapper.toDto(project));
+        resourceRepository.save(resource);
     }
 
-    private void checkMaxStorageSizeIsNotNull(BigInteger maxStorageSize) {
-        if (maxStorageSize == null) {
-            throw new IllegalStateException("Max storage size is not set for the project.");
-        }
-    }
-
-    private void checkStorageSizeNotExceeded(BigInteger maxStorageSize,
-                                             BigInteger currentStorageSize) {
-        if (maxStorageSize.compareTo(currentStorageSize) < 0) {
-            throw new StorageExceededException("Storage can't exceed 2 Gb ");
-        }
+    private Resource getResource(long resourceId) {
+        return resourceRepository.findById(resourceId).orElseThrow(
+                () -> new EntityNotFoundException("Resource", resourceId));
     }
 }
