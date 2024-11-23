@@ -1,6 +1,5 @@
 package faang.school.projectservice.validator.resource;
 
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -27,14 +26,15 @@ public class ResourceValidator {
 
     public void checkUserInProject(@Positive long userId, TeamMember teamMember, Project project) {
         String messageError = "You can't delete this resource";
-        if (teamMember.getUserId() != userId) {
-            throw new DataValidationException(messageError);
+        if (teamMember.getUserId() == userId) {
+            return;
         }
-        if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
-            throw new DataValidationException(messageError);
+        if (teamMember.getRoles().contains(TeamRole.MANAGER)) {
+            return;
         }
-        if (userId != project.getOwnerId()) {
-            throw new DataValidationException(messageError);
+        if (userId == project.getOwnerId()) {
+            return;
         }
+        throw new IllegalArgumentException(messageError);
     }
 }

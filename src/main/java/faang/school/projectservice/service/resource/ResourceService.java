@@ -16,6 +16,7 @@ import faang.school.projectservice.validator.resource.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,8 @@ public class ResourceService {
 
     @Transactional
     public List<ResponseResourceDto> uploadResources(@Size(min = 1) List<MultipartFile> files,
-                                        @Positive long projectId,
-                                        @Positive long userId) {
+                                                     @Positive long projectId,
+                                                     @Positive long userId) {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, projectId);
         log.info("TeamMember id={} found in project id={}", userId, projectId);
 
@@ -116,12 +117,39 @@ public class ResourceService {
         resource.setUpdatedBy(teamMember);
         resource.setUpdatedAt(LocalDateTime.now());
         resourceRepository.save(resource);
-        log.info("Resource id={} status updated to deleted", dto.getId());
+        log.info("Resource id={} status updated to deleted", resource.getId());
     }
 
     public Resource getResource(@Positive long id) {
         return resourceRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Resource not found by id: " + id)
         );
+    }
+
+    @Transactional
+    public ResponseResourceDto updateResource(@NotNull MultipartFile file,
+                                              @Positive long resourceId,
+                                              @Positive long userId) {
+        Resource resource = getResource(resourceId);
+        Project project = resource.getProject();
+        TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, project.getId());
+
+        BigInteger subtractProjectStorageSize = project.getStorageSize().subtract(resource.getSize());
+        BigInteger updateProjectStorageSize = subtractProjectStorageSize.add(BigInteger.valueOf(file.getSize()));
+        resourceValidator.checkProjectStorageSizeExceeded(updateProjectStorageSize, project);
+
+        s3Util.s3DeleteFile(resource.getKey());
+        String fileKey = String.format("%s/%d%s", project.getId(), System.currentTimeMillis(), file.getOriginalFilename());
+        s3Util.s3UploadFile(file, fileKey);
+
+        projectService.saveProject(project);
+
+        resource.setKey(fileKey);
+        resource.setSize(BigInteger.valueOf(file.getSize()));
+        resource.setUpdatedBy(teamMember);
+        resource.setUpdatedAt(LocalDateTime.now());
+        resourceRepository.save(resource);
+        log.info("Resource id={} updated in DB", resource.getId());
+        return resourceMapper.toDtoFromEntity(resource);
     }
 }

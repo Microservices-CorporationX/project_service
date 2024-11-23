@@ -1,5 +1,6 @@
 package faang.school.projectservice.handler;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,12 +26,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        log.error("EntityNotFoundException occurred: Invalid input: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
         log.error("ConstraintViolationException occurred: Invalid input: {}", ex.getMessage());
         return ResponseEntity.badRequest().body("Invalid input: " + ex.getMessage());
     }
-
-
 }

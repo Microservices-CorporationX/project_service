@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -36,6 +37,7 @@ public class ResourceController {
     private final UserContext userContext;
 
     @PostMapping(value="/{projectId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<ResponseResourceDto>> upload(
             @RequestPart("files") @Size(min = 1) List<MultipartFile> files,
             @PathVariable @Positive long projectId) {
@@ -57,5 +59,12 @@ public class ResourceController {
         log.info("Try delete resources received: userId={}, fileId={}", userId, dto.getId());
         resourceService.deleteResource(userId, dto);
         log.info("Resources deleted successfully: userId={}, fileId={}", userId, dto.getId());
+    }
+
+    @PutMapping("/{resourceId}/update")
+    public ResponseResourceDto update(@RequestPart("file") MultipartFile file,
+                       @PathVariable @Positive long resourceId) {
+        long userId = userContext.getUserId();
+        return resourceService.updateResource(file, resourceId, userId);
     }
 }
