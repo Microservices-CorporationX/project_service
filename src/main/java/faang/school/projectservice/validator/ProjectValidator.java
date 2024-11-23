@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -71,6 +72,13 @@ public class ProjectValidator {
         if (!isMentorPresent(teamMembersId, mentorId.getId())) {
             log.error("Mentor with id #{} is not present in project team", mentorId.getId());
             throw new IllegalArgumentException("Mentor is not present in project team");
+        }
+    }
+
+    public void checkUserIsProjectOwner(Long currentUserId, long meetId, Project project) {
+        if (!project.getOwnerId().equals(currentUserId)) {
+            log.error("Only the project owner can delete this meeting {}", meetId);
+            throw new UnauthorizedAccessException("You are not allowed to delete this meeting");
         }
     }
 }

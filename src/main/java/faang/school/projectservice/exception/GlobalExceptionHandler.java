@@ -70,4 +70,10 @@ public class GlobalExceptionHandler {
         log.error("Insufficient candidates exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<String> handleUnknownException(UnauthorizedAccessException ex) {
+        log.error("Unauthorized access exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
 }
