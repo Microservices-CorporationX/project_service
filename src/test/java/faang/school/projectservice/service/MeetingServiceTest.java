@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.meet.MeetDto;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
