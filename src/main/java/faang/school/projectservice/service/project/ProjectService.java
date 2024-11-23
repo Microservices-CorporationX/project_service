@@ -21,4 +21,8 @@ public class ProjectService {
 
         return Optional.ofNullable(projectRepository.getProjectById(id));
     }
+
+    public Project updateProject(Project project){
+        return projectRepository.save(project);
+    }
 }
