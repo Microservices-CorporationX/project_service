@@ -40,11 +40,11 @@ public class ProjectCoverService {
         coverProjectValidator.validation(project);
 
         System.out.println(coverImage.getContentType());
-        if (coverImage.getContentType().startsWith("image")) {
+        if (!coverImage.getContentType().startsWith("image")) {
             throw new IllegalStateException("expected is image");
         }
 
-        imageResizer.resizeImage(coverImage);
+//        imageResizer.resizeImage(coverImage);
 
         String key = URI + s3Service.uploadFile(coverImage);
         project.setCoverImageId(key);
