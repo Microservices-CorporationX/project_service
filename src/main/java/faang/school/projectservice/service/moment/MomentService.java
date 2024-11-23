@@ -33,15 +33,17 @@ public class MomentService {
         log.info("Creating moment {}", momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         moment.setProjects(projectRepository.findAllByIds(momentDto.getProjectIds()));
+        moment.setCreatedAt(LocalDateTime.now());
         momentValidator.validateActiveMoment(moment);
         moment = momentRepository.save(moment);
         log.info("Created moment with id: {}", moment);
         return momentMapper.toDto(moment);
     }
 
-    public MomentDto updateMoment(MomentDto momentDto) {
-        momentValidator.validateMomentExists(momentDto.getId());
-        log.info("Updating moment {}", momentDto);
+    public MomentDto updateMoment(MomentDto momentDto, Long momentId) {
+        momentValidator.validateMomentExists(momentId);
+        log.info("Updating moment id:{}", momentId);
+        momentDto.setId(momentId);
         Moment moment = momentMapper.toEntity(momentDto);
         moment.setProjects(projectRepository.findAllByIds(momentDto.getProjectIds()));
         momentMapper.updateEntity(moment, momentDto);

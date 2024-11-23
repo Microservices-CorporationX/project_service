@@ -23,9 +23,10 @@ public class MomentController {
         return momentService.createMoment(momentDto);
     }
 
-    @PutMapping
-    public ResponseEntity<MomentDto> updateMoment(@Valid @RequestBody MomentDto momentDto) {
-        return ResponseEntity.ok(momentService.updateMoment(momentDto));
+    @PutMapping("/{momentId}")
+    public ResponseEntity<MomentDto> updateMoment(@Valid @RequestBody MomentDto momentDto,
+                                                  @Positive @PathVariable Long momentId) {
+        return ResponseEntity.ok(momentService.updateMoment(momentDto, momentId));
     }
 
     @GetMapping("/filters")

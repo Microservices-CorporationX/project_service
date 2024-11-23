@@ -71,19 +71,21 @@ class MomentServiceTest {
 
     @Test
     void testUpdateMoment() {
+        Long id = 1L;
+
         MomentDto momentDto = new MomentDto();
-        momentDto.setId(1L);
+        momentDto.setId(id);
         momentDto.setProjectIds(Collections.singletonList(1L));
 
         Moment moment = new Moment();
-        moment.setId(1L);
+        moment.setId(id);
 
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(projectRepository.findAllByIds(momentDto.getProjectIds())).thenReturn(Collections.emptyList());
         when(momentRepository.save(any(Moment.class))).thenReturn(moment);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
-        MomentDto updatedMoment = momentService.updateMoment(momentDto);
+        MomentDto updatedMoment = momentService.updateMoment(momentDto, id);
 
         assertNotNull(updatedMoment);
         assertEquals(momentDto, updatedMoment);

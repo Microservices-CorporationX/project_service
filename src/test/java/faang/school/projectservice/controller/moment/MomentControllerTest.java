@@ -29,9 +29,10 @@ class MomentControllerTest {
 
     @Test
     void testUpdateMoment() {
+        Long momentId = 1L;
         MomentDto momentDto = new MomentDto();
-        momentService.updateMoment(momentDto);
-        verify(momentService, times(1)).updateMoment(momentDto);
+        momentService.updateMoment(momentDto, momentId);
+        verify(momentService, times(1)).updateMoment(momentDto, momentId);
     }
 
     @Test
