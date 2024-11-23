@@ -1,0 +1,3 @@
+ALTER TABLE meet
+ADD COLUMN meet_date TIMESTAMP NOT NULL,
+ADD CONSTRAINT check_meet_date_future CHECK (meet_date >= CURRENT_TIMESTAMP);

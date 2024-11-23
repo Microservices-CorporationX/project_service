@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.dto.client.teammember.TeamMemberDto;
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
-import faang.school.projectservice.dto.client.vacancy.VacancyFilterDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import faang.school.projectservice.mapper.vacancy.VacancyDtoMapper;
 import faang.school.projectservice.model.*;

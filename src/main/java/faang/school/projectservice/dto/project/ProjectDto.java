@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.project;
+package faang.school.projectservice.dto.project;
 
 public record ProjectDto(
         Long id,

@@ -1,12 +1,12 @@
-package faang.school.projectservice.stage;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.InvalidStageTransferException;
 import faang.school.projectservice.exception.ProjectStatusValidationException;
 import faang.school.projectservice.jpa.TaskRepository;
-import faang.school.projectservice.mapper.StageMapper;
-import faang.school.projectservice.mapper.StageRolesMapper;
+import faang.school.projectservice.mapper.stage.StageMapper;
+import faang.school.projectservice.mapper.stage.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -17,7 +17,6 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.stage.StageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

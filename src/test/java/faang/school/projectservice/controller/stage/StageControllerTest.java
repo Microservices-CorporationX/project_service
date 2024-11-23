@@ -1,11 +1,11 @@
-package faang.school.projectservice.stage;
+package faang.school.projectservice.controller.stage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.controller.StageController;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.InvalidStageTransferException;
+import faang.school.projectservice.handler.GlobalExceptionHandler;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.DeletionType;
 import faang.school.projectservice.service.stage.StageService;
@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -30,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StageController.class)
+@Import(GlobalExceptionHandler.class)
+@ContextConfiguration(classes = {StageController.class})
 public class StageControllerTest {
 
     @Autowired

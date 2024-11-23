@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.vacancy;
 
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import faang.school.projectservice.model.*;
 import lombok.extern.slf4j.Slf4j;
