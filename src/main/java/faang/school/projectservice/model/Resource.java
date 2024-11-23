@@ -36,9 +36,9 @@ public class Resource {
 
     @Column(name = "name", nullable = false)
     private String name;
-
+    @Column(name = "key")
     private String key;
-
+    @Column(name = "size")
     private BigInteger size;
 
     @ElementCollection(targetClass = TeamRole.class)

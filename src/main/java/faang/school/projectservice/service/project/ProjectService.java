@@ -43,8 +43,8 @@ public class ProjectService {
 
         Project subProject = subProjectMapper.toProject(createSubProjectDto);
         addDependency(mainProject, subProject);
-        projectRepository.save(subProject);
-        projectRepository.save(mainProject);
+        saveProject(subProject);
+        saveProject(mainProject);
 
         return projectMapper.toProjectDto(subProject);
     }
@@ -65,7 +65,7 @@ public class ProjectService {
         }
 
         subProject.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(subProject);
+        saveProject(subProject);
 
         return projectMapper.toProjectDto(subProject);
     }
@@ -88,6 +88,10 @@ public class ProjectService {
                 .toList();
     }
 
+    public Project getProjectEntityById(Long id) {
+        return projectRepository.getProjectById(id);
+    }
+
     private boolean checkCancelledStatus(ProjectDto subProjectDto) {
         if (subProjectDto.getChildrenIds() == null || subProjectDto.getChildrenIds().isEmpty()) {
             return true;
@@ -96,7 +100,9 @@ public class ProjectService {
                 .map(projectRepository::getProjectById)
                 .allMatch(project -> project.getStatus() == ProjectStatus.CANCELLED);
     }
-
+    public void saveProject(Project project){
+        projectRepository.save(project);
+    }
     private void addDependency(Project parent, Project child) {
         if (parent.getChildren() == null) {
             parent.setChildren(new ArrayList<>());
