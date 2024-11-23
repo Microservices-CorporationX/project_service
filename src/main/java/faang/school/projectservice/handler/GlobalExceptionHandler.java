@@ -12,7 +12,6 @@ import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -52,9 +51,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VacancyDuplicationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleVacancyCreation(VacancyDuplicationException e){
-        log.error("Vacancy Creation Error", e);
-        return new ErrorResponse("Vacancy Creation Error: {}", e.getMessage());
     public ErrorResponse handleVacancyCreation(VacancyDuplicationException exception) {
         log.error("Vacancy Creation Error: {}", exception.getMessage());
         return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
@@ -62,23 +58,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleVacancyCreation(IllegalArgumentException e){
-        log.error("Illegal Argument Error", e);
-        return new ErrorResponse("Illegal Argument Error: {}", e.getMessage());
-    }
-
-    @ExceptionHandler(StorageSizeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleStorageSizeLimit(StorageSizeException e){
-        log.error("Storage size is exceeded", e);
-        return new ErrorResponse("Vacancy Creation Error: {}", e.getMessage());
-    }
-
-    @ExceptionHandler(PermissionDeniedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTeamMemberPermission(PermissionDeniedException e){
-        log.error("Team member userId not found", e);
-        return new ErrorResponse("Team member userId not found", e.getMessage());
     public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
         log.error("Illegal Argument Error: {}", exception.getMessage());
         return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
@@ -117,5 +96,19 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleSubprojectBadRequestException(SubprojectBadRequestException exception) {
         log.error("Subproject Bad Request Error: {}", exception.getMessage());
         return new ErrorResponse("Subproject Bad Request Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTeamMemberPermission(PermissionDeniedException e) {
+        log.error("Team  member does not have permission", e);
+        return new ErrorResponse("Team  member does not have permission", e.getMessage());
+    }
+
+    @ExceptionHandler(StorageSizeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTeamMemberPermission(StorageSizeException e) {
+        log.error("Storage size exceeded", e);
+        return new ErrorResponse("Storage size exceeded", e.getMessage());
     }
 }
