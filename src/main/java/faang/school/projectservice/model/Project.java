@@ -49,9 +49,11 @@ public class Project {
     private List<Project> children;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Task> tasks;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
     private List<Resource> resources;
 
     @CreationTimestamp
@@ -75,20 +77,32 @@ public class Project {
     private String coverImageId;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Team> teams;
 
     @OneToOne(mappedBy = "project")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Schedule schedule;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Stage> stages;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Vacancy> vacancies;
 
     @ManyToMany(mappedBy = "projects")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Moment> moments;
 
     @OneToMany(mappedBy = "project")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Meet> meets;
 }

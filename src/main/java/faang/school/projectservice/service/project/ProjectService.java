@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.filters.project.ProjectFilter;
 import faang.school.projectservice.helpers.ProjectSearcher;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -12,7 +13,9 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,6 +25,8 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    private final BigInteger DEFAULT_MAX_STORAGE_SIZE = BigInteger.valueOf(2000000000);
+
     private final UserContext userContext;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
@@ -32,6 +37,8 @@ public class ProjectService {
         project.setOwnerId(userContext.getUserId());
         project.setStatus(ProjectStatus.CREATED);
         validateName(project.getName(), project.getOwnerId());
+        project.setMaxStorageSize(DEFAULT_MAX_STORAGE_SIZE);
+        project.setStorageSize(BigInteger.valueOf(0));
         LocalDateTime currentTime = LocalDateTime.now();
         project.setCreatedAt(currentTime);
         project.setUpdatedAt(currentTime);
@@ -81,6 +88,19 @@ public class ProjectService {
             return Optional.of(projectMapper.toDto(project));
         }
         return Optional.empty();
+    }
+
+    public Project changeStorageSize(long projectId, long sizeToAdd) {
+        Project project = projectRepository.getProjectById(projectId);
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(sizeToAdd));
+        if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
+            log.info("Can not add new file to storage for project {}. " +
+                    "Storage size exceeded. " +
+                    "New storage size: {} Max storage size: {}", project, newStorageSize, project.getMaxStorageSize());
+            throw new StorageSizeExceededException("Storage size exceeded");
+        }
+        project.setStorageSize(newStorageSize);
+        return projectRepository.save(project);
     }
 
     private void validateName(String projectName, Long userId) {
