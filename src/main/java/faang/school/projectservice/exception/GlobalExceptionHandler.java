@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<String> handleUnknownException(UnauthorizedAccessException ex) {
+    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
         log.error("Unauthorized access exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
