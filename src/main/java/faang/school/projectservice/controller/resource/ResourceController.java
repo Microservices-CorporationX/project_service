@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.resource;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.RequestDeleteResourceDto;
+import faang.school.projectservice.dto.resource.ResponseResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -35,18 +36,18 @@ public class ResourceController {
     private final UserContext userContext;
 
     @PostMapping(value="/{projectId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String>> upload(
+    public ResponseEntity<List<ResponseResourceDto>> upload(
             @RequestPart("files") @Size(min = 1) List<MultipartFile> files,
             @PathVariable @Positive long projectId) {
         long userId = userContext.getUserId();
         log.info("Try upload resources received: projectId={}, userId={}, filesCount={}",
                 projectId, userId, files.size());
 
-        List<String> fileKeys = resourceService.uploadResources(files, projectId, userId);
+        List<ResponseResourceDto> responseDtos = resourceService.uploadResources(files, projectId, userId);
         log.info("Resources uploaded successfully: projectId={}, userId={}, filesCount={}",
                 projectId, userId, files.size());
 
-        return ResponseEntity.ok(fileKeys);
+        return ResponseEntity.ok(responseDtos);
     }
 
     @DeleteMapping("/delete")

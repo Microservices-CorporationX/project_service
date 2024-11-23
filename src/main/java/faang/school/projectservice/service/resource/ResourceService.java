@@ -1,7 +1,9 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.RequestDeleteResourceDto;
+import faang.school.projectservice.dto.resource.ResponseResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
+import faang.school.projectservice.mapper.resource.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
@@ -37,9 +39,10 @@ public class ResourceService {
     private final S3Util s3Util;
     private final ResourceRepository resourceRepository;
     private final ResourceValidator resourceValidator;
+    private final ResourceMapper resourceMapper;
 
     @Transactional
-    public List<String> uploadResources(@Size(min = 1) List<MultipartFile> files,
+    public List<ResponseResourceDto> uploadResources(@Size(min = 1) List<MultipartFile> files,
                                         @Positive long projectId,
                                         @Positive long userId) {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, projectId);
@@ -56,7 +59,6 @@ public class ResourceService {
         resourceValidator.checkProjectStorageSizeExceeded(updateProjectStorageSize, project);
         log.info("Project id={} storage size updated to {}", projectId, updateProjectStorageSize);
 
-        List<String> fileKeys = new ArrayList<>();
         List<Resource> resources = new ArrayList<>();
         String folder = project.getId() + project.getName();
         files.forEach(file -> {
@@ -76,16 +78,16 @@ public class ResourceService {
                             .project(project)
                             .build()
             );
-            fileKeys.add(fileKey);
         });
-
         List<Resource> savedResources = resourceRepository.saveAll(resources);
         log.info("Resources count={} saved to DB", savedResources.size());
         project.getResources().addAll(savedResources);
         projectService.saveProject(project);
         log.info("Project id={} updated in DB", project.getId());
-
-        return fileKeys;
+        List<ResponseResourceDto> responseDtos = savedResources.stream()
+                .map(resourceMapper::toDtoFromEntity)
+                .toList();
+        return responseDtos;
     }
 
     @Transactional
