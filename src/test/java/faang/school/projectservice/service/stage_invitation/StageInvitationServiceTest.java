@@ -16,7 +16,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.service.stage.StageService;
-import faang.school.projectservice.service.team_member.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,9 +98,9 @@ class StageInvitationServiceTest {
         invitation.setInvited(invited);
         invitation.setStage(stage);
 
-        when(teamMemberService.getTeamMemberEntity(dto.getAuthorId())).
+        when(teamMemberService.findById(dto.getAuthorId())).
                 thenReturn(author);
-        when(teamMemberService.getTeamMemberEntity(dto.getInvitedId())).
+        when(teamMemberService.findById(dto.getInvitedId())).
                 thenReturn(invited);
         when(stageService.getStageEntity(dto.getStageId())).
                 thenReturn(stage);
@@ -109,8 +109,8 @@ class StageInvitationServiceTest {
 
         ArgumentCaptor<StageInvitation> captor = ArgumentCaptor.forClass(StageInvitation.class);
 
-        verify(teamMemberService).getTeamMemberEntity(dto.getAuthorId());
-        verify(teamMemberService).getTeamMemberEntity(dto.getInvitedId());
+        verify(teamMemberService).findById(dto.getAuthorId());
+        verify(teamMemberService).findById(dto.getInvitedId());
         verify(stageService).getStageEntity(dto.getStageId());
         verify(repository).save(captor.capture());
 
@@ -155,7 +155,7 @@ class StageInvitationServiceTest {
                 thenReturn(Optional.of(invitation));
         doNothing().when(stageInvValidator).
                 validateIsInvitationSentToThisTeamMember(invitedId, invitation);
-        when(teamMemberService.getTeamMemberEntity(invitedId)).thenReturn(teamMember);
+        when(teamMemberService.findById(invitedId)).thenReturn(teamMember);
         doNothing().when(teamMemberValidator)
                 .validateIsTeamMemberParticipantOfProject(teamMember, invitation);
 
