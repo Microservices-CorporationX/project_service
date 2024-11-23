@@ -2,6 +2,10 @@ spring:
   mvc:
     servlet:
       path: /api/v1
+  servlet:
+     multipart:
+        max-file-size: 200MB
+        max-request-size: 500MB
 
   datasource:
     driver-class-name: org.postgresql.Driver

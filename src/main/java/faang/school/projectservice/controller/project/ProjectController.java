@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,31 +90,33 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
-    @PutMapping("/{projectId}/recourses/{teamMemberId}")
-    public void uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
+    //do teamMemberId through Header
+    @PutMapping("/{projectId}/resources/{teamMemberId}")
+    public ResponseEntity<String> uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
                            @RequestBody MultipartFile file) {
         projectFilesService.uploadFile(projectId, teamMemberId, file);
+        return ResponseEntity.ok("File uploaded successfully");
     }
 
-//    @GetMapping("/recourses/{fileId}")
-//    public byte[] downloadFile(@PathVariable long fileId) {
-//        return projectFilesService.downloadFile(fileId);
-//    }
-//
-//    @DeleteMapping("/recourses/{fileId}")
-//    public ResponseEntity<String> deleteFile(@PathVariable long fileId) {
-//        projectFilesService.deleteFile(fileId);
-//        return ResponseEntity.ok("File deleted successfully");
+    @GetMapping("/resources/{resourceId}")
+    public byte[] downloadFile(@PathVariable long resourceId) {
+        return projectFilesService.downloadFile(resourceId);
+    }
+
+    @DeleteMapping("/resources/{resourceId}")
+    public ResponseEntity<String> deleteFile(@PathVariable long resourceId) {
+        projectFilesService.deleteFile(resourceId);
+        return ResponseEntity.ok("File deleted successfully");
+    }
+
+    //is this method necessary ???
+//    @PostMapping("/resources/{resourceId}")
+//    public void updateFile(@PathVariable long resourceId, @RequestParam MultipartFile file) {
+//        projectFilesService.updateFile(resourceId, file);
 //    }
 
     //is this method necessary ???
-//    @PostMapping("/recourses/{fileId}")
-//    public void updateFile(@PathVariable long fileId, @RequestParam MultipartFile file) {
-//        projectFilesService.updateFile(fileId, file);
-//    }
-
-    //is this method necessary ???
-//    @GetMapping("/{projectId}/recourses")
+//    @GetMapping("/{projectId}/resources")
 //    public byte[] getAllFiles(@PathVariable long projectId) {
 //        return projectFilesService.getAllFiles(projectId);
 //    }
