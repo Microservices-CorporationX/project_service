@@ -1,10 +1,8 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -16,11 +14,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 @Validated
+@RequiredArgsConstructor
 public class S3Service {
     private final AmazonS3 s3Client;
 
@@ -42,7 +39,7 @@ public class S3Service {
                     bucketName, key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (Exception e) {
-            throw new DataValidationException("dcs");
+            throw new IllegalStateException("Unable to upload file to S3: " + e.getMessage(), e);
         }
 
         return Resource.builder()
