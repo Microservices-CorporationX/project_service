@@ -489,6 +489,7 @@ class ProjectServiceTest {
     void testFilterSubProjects_ProjectNotFound() {
         initializeForFilterSubProjectsTest();
         when (projectRepository.getProjectById(parentProject.getId())).thenThrow(EntityNotFoundException.class);
+
         assertThrows(EntityNotFoundException.class, () -> projectService.filterSubProjects(parentProject.getId(), projectFilterDto));
     }
 

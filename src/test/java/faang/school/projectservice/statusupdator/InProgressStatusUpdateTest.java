@@ -49,6 +49,7 @@ class InProgressStatusUpdateTest {
     @DisplayName("Is applicable")
     void testIsApplicableWhenStatusIsInProgress() {
         boolean result = inProgressStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertTrue(result);
     }
 
@@ -57,6 +58,7 @@ class InProgressStatusUpdateTest {
     void testIsApplicableWhenStatusIsNotInProgress() {
         updateSubProjectDto.setStatus(ProjectStatus.CANCELLED);
         boolean result = inProgressStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertFalse(result);
     }
 

@@ -140,11 +140,11 @@ public class ProjectService {
         projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, createProjectDto);
         projectValidator.validateUniqueProject(createProjectDto);
 
-        Project project = projectMapper.toEntity(createProjectDto);
-        initializeSubProject(project, parentProject);
+        Project subProject = projectMapper.toEntity(createProjectDto);
+        initializeSubProject(subProject, parentProject);
 
         projectRepository.save(parentProject);
-        Project savedProject = projectRepository.save(project);
+        Project savedProject = projectRepository.save(subProject);
         log.info("Subproject #{} created successfully for parent project #{}.", savedProject.getId(), parentId);
         return projectMapper.toResponseDto(savedProject);
     }
@@ -152,17 +152,17 @@ public class ProjectService {
     @Transactional
     public ProjectResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
         projectValidator.validateProjectExistsById(updateSubProjectDto.getId());
-        Project project = getProjectById(updateSubProjectDto.getId());
-        changeStatus(project, updateSubProjectDto);
-        changeVisibility(project, updateSubProjectDto);
-        Project parentProject = project.getParentProject();
+        Project subProject = getProjectById(updateSubProjectDto.getId());
+        changeStatus(subProject, updateSubProjectDto);
+        changeVisibility(subProject, updateSubProjectDto);
+        Project parentProject = subProject.getParentProject();
 
         if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
             createMomentAllSubProjectsCompleted(parentProject);
             log.info("Moment #All subprojects completed! successfully created for project #{}", parentProject.getId());
         }
-        project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
-        return projectMapper.toResponseDto(projectRepository.save(project));
+        subProject.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        return projectMapper.toResponseDto(projectRepository.save(subProject));
     }
 
     public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {

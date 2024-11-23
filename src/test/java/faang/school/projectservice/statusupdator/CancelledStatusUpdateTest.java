@@ -44,6 +44,7 @@ class CancelledStatusUpdateTest {
     @Test
     void testIsApplicableWhenStatusIsCancelled() {
         boolean result = cancelledStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertTrue(result);
     }
 
@@ -51,6 +52,7 @@ class CancelledStatusUpdateTest {
     void testIsApplicableWhenStatusIsNotCancelled() {
         updateSubProjectDto.setStatus(ProjectStatus.COMPLETED);
         boolean result = cancelledStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertFalse(result);
     }
 

@@ -77,6 +77,7 @@ class SubProjectControllerTest {
                 .andExpect(jsonPath("$.maxStorageSize").value(10))
                 .andExpect(jsonPath("$.ownerId").value(1))
                 .andExpect(jsonPath("$.visibility").value("PUBLIC"));
+
         verify(projectService).createSubProject(postId, createProjectDto);
     }
 

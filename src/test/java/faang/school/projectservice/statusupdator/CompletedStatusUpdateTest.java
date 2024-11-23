@@ -43,6 +43,7 @@ class CompletedStatusUpdateTest {
     @DisplayName("Is applicable")
     void testIsApplicableWhenStatusIsCompleted() {
         boolean result = completedStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertTrue(result);
     }
 
@@ -51,6 +52,7 @@ class CompletedStatusUpdateTest {
     void testIsApplicableWhenStatusIsNotCompleted() {
         updateSubProjectDto.setStatus(ProjectStatus.CANCELLED);
         boolean result = completedStatusUpdate.isApplicable(updateSubProjectDto);
+
         assertFalse(result);
     }
 
