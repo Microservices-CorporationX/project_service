@@ -32,7 +32,7 @@ public class StageController {
         stageService.deleteStageById(stageId);
     }
 
-    @PatchMapping("/{stageId}")
+    @PutMapping("/{stageId}")
     public StageDto updateStage(@PathVariable Long stageId) {
         return stageService.updateStage(stageId);
     }
