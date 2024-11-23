@@ -4,7 +4,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class StageInvitationServiceTest {
+class StageInvitationServiceTest {
 
     @Mock
     private StageInvitationRepository stageInvitationRepository;
@@ -53,7 +53,7 @@ public class StageInvitationServiceTest {
 
     @Test
     @DisplayName("Проверка sendInvitation - ")
-    public void testSendInvitation_shouldSaveInvitation() {
+    void testSendInvitation_shouldSaveInvitation() {
 
         stageInvitationService.sendInvitation(stageInvitation);
 
