@@ -45,6 +45,10 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, id));
     }
 
+    public List<TeamMember> findAllById(List<Long> id) {
+        return teamMemberRepository.findAllById(id);
+    }
+
     @Transactional
     public TeamMember save(TeamMember teamMember) {
         return teamMemberRepository.save(teamMember);
