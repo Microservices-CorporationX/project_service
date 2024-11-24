@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -176,7 +177,7 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(responseDto, result);
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).addTeamMemberToTeam(teamId, teamMember);
+        verify(teamMemberRepository).updateTeamMembers(teamId, new ArrayList<>(team.getTeamMembers()));
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
 
@@ -213,7 +214,6 @@ public class TeamMemberServiceTest {
 
         // Assert
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).removeTeamMemberFromTeam(teamId, teamMember);
         verify(teamMemberRepository).delete(teamMember);
     }
 

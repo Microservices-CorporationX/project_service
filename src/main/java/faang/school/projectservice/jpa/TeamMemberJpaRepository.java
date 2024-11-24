@@ -26,11 +26,6 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
 
     @Modifying
     @Transactional
-    @Query("UPDATE Team t SET t.teamMembers = CONCAT(t.teamMembers, :teamMember) WHERE t.id = :teamId")
-    void addTeamMemberToTeam(Long teamId, TeamMember teamMember);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Team t SET t.teamMembers = FUNCTION('array_remove', t.teamMembers, :teamMember) WHERE t.id = :teamId")
-    void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember);
+    @Query("UPDATE Team t SET t.teamMembers = :teamMembers WHERE t.id = :teamId")
+    void updateTeamMembers(Long teamId, List<TeamMember> teamMembers);
 }
