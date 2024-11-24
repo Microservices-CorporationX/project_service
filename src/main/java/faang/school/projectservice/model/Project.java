@@ -90,4 +90,8 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
 }
