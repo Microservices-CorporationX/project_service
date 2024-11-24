@@ -117,6 +117,7 @@ public class ProjectFilesService {
 
     private Resource getResource(long resourceId) {
         return resourceRepository.findById(resourceId).orElseThrow(
+
                 () -> new EntityNotFoundException("Resource", resourceId));
     }
 }

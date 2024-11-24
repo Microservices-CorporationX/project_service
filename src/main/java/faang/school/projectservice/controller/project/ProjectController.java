@@ -2,7 +2,8 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.exception.FileDownloadException;
+import faang.school.projectservice.exception.StreamingFileError;
+import faang.school.projectservice.exception.ZippingFileError;
 import faang.school.projectservice.service.project.ProjectFilesService;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +33,12 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 @Tag(name = "Projects methods")
 @RestController
 @RequestMapping("/projects")
@@ -101,10 +103,10 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
-    //do teamMemberId through Header
-    @PutMapping("/{projectId}/resources/{teamMemberId}")
-    public ResponseEntity<String> uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
-                                             @RequestBody MultipartFile file) {
+    @PostMapping("/{projectId}/resources")
+    public ResponseEntity<String> uploadFile(@PathVariable long projectId,
+                                             @RequestHeader("x-team-member-id") long teamMemberId,
+                                             @RequestBody @NotNull MultipartFile file) {
         projectFilesService.uploadFile(projectId, teamMemberId, file);
         return ResponseEntity.ok("File uploaded successfully");
     }
@@ -112,13 +114,44 @@ public class ProjectController {
     @GetMapping("/resources/{resourceId}")
     public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable long resourceId) {
         InputStream fileStream = projectFilesService.downloadFile(resourceId);
-        return getStreamingResponseBodyResponseEntity(fileStream);
+        return getStreamingResponseBodyInResponseEntity(fileStream);
+    }
+
+    @DeleteMapping("/resources/{resourceId}")
+    public ResponseEntity<String> deleteFile(@PathVariable long resourceId,
+                                             @RequestHeader("x-team-member-id") long teamMemberId) {
+        projectFilesService.deleteFile(resourceId, teamMemberId);
+        return ResponseEntity.ok("File deleted successfully");
     }
 
     @GetMapping("/{projectId}/resources")
     public ResponseEntity<StreamingResponseBody> downloadAllFiles(@PathVariable long projectId) {
         Map<String, InputStream> files = projectFilesService.downloadAllFiles(projectId);
 
+        return getStreamingResponseBodyInResponseEntityZip(files, projectId);
+    }
+
+    @NotNull(message = "Stream can't be empty")
+    private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyInResponseEntity(InputStream fileStream) {
+        StreamingResponseBody responseBody = outputStream -> {
+            try (fileStream) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                throw new StreamingFileError("Error streaming file");
+            }
+        };
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(responseBody);
+    }
+
+    @NotNull(message = "Stream can't be empty")
+    private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyInResponseEntityZip(
+            Map<String, InputStream> files, long projectId) {
         StreamingResponseBody responseBody = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
                 for (Map.Entry<String, InputStream> entry : files.entrySet()) {
@@ -135,42 +168,17 @@ public class ProjectController {
                         }
                         zipOut.closeEntry();
                     } catch (IOException e) {
-                        // Log the error and continue with other files
-                        System.err.println("Error processing file: " + fileName + ". Skipping...");
+                        log.error("Error processing file: {}. Skipping...", fileName);
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error while zipping files", e);
+                throw new ZippingFileError("Error while zipping files");
             }
         };
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +
                         projectId + "_resources.zip")
-                .body(responseBody);
-    }
-
-    @DeleteMapping("/resources/{resourceId}/{teamMemberId}")
-    public ResponseEntity<String> deleteFile(@PathVariable long resourceId, @PathVariable long teamMemberId) {
-        projectFilesService.deleteFile(resourceId, teamMemberId);
-        return ResponseEntity.ok("File deleted successfully");
-    }
-
-    @NotNull
-    private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyResponseEntity(InputStream fileStream) {
-        StreamingResponseBody responseBody = outputStream -> {
-            try (fileStream) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = fileStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                throw new FileDownloadException("Error streaming file" + Arrays.toString(e.getStackTrace()));
-            }
-        };
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(responseBody);
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +40,7 @@ public class S3Service {
                     key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
-            throw new FileUploadException("Error uploading file" +
-                    Arrays.toString(e.getStackTrace()));
+            throw new FileUploadException("Error uploading file");
         }
         return key;
     }
@@ -66,9 +64,7 @@ public class S3Service {
             S3Object s3Object = s3Client.getObject(bucketName, key);
             return s3Object.getObjectContent();
         } catch (AmazonS3Exception e) {
-            //  log.error(e.getMessage());
-            throw new FileDownloadException("Error downloading file" +
-                    Arrays.toString(e.getStackTrace()));
+            throw new FileDownloadException("Error downloading file");
         }
     }
 }
