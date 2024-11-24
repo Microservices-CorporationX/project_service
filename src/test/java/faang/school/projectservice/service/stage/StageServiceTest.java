@@ -1,10 +1,14 @@
 package faang.school.projectservice.service.stage;
 
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.task.TaskService;
@@ -16,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +57,7 @@ public class StageServiceTest {
     }
 
     @Test
-    @DisplayName("Create Stage - Удачное создание этапа")
+    @DisplayName("Проверка сreateStage - Удачное создание этапа")
     public void testCreateStage_Success() {
 
         when(stageMapper.toStage(stageDto)).thenReturn(stage);
@@ -68,7 +73,7 @@ public class StageServiceTest {
     }
 
     @Test
-    @DisplayName("Get All Stages by Filters - вернули все этапы")
+    @DisplayName("Проверка getAllStagesByFilters - Успешно получили все этапы по фильтрам")
     public void testGetAllStagesByFilters_Success() {
 
         StageFilterDto stageFilterDto = new StageFilterDto();
@@ -90,7 +95,7 @@ public class StageServiceTest {
     }
 
     @Test
-    @DisplayName("Get Stage by ID - Successfully Returned")
+    @DisplayName("Проверка getStageById - Успешно получили этап по id")
     public void testGetStageById_Success() {
 
         Long stageId = 1L;
@@ -101,5 +106,56 @@ public class StageServiceTest {
 
         verify(stageRepository, times(1)).getById(stageId);
         assertEquals(stageDto, result);
+    }
+
+    @Test
+    @DisplayName("Проверка deleteStageById - Успешное удаление этапа")
+    public void deleteStageById_shouldCancelTasksAndDeleteStage() {
+        Long stageId = 1L;
+        Stage stage = new Stage();
+        List<Task> tasks = new ArrayList<>();
+        stage.setTasks(tasks);
+
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+
+        stageService.deleteStageById(stageId);
+
+        verify(taskService, times(1)).saveAll(tasks.stream()
+                .peek(task -> task.setStatus(TaskStatus.CANCELLED))
+                .toList());
+        verify(stageRepository, times(1)).delete(stage);
+    }
+
+    @Test
+    @DisplayName("Проверка updateStage - Успешное обновление этапа")
+    public void updateStage_shouldUpdateStageRoles() {
+        Long stageId = 1L;
+        Stage stage = new Stage();
+        List<StageRoles> roles = new ArrayList<>();
+        stage.setStageRoles(roles);
+
+        when(stageRepository.getById(stageId)).thenReturn(stage);
+
+        stageService.updateStage(stageId);
+
+        verify(stageRepository, times(1)).save(stage);
+    }
+
+    @Test
+    @DisplayName("Проверка getAllStagesOfProject - Успешное получение всех этапов проекта")
+    public void getAllStagesOfProject_shouldReturnStageDto() {
+        long projectId = 1L;
+        ProjectDto projectDto = new ProjectDto();
+        List<Stage> stages = new ArrayList<>();
+        projectDto.setStages(stages);
+
+        when(projectService.getProjectById(projectId)).thenReturn(projectDto);
+        when(stageMapper.toStageDtos(stages)).thenReturn(new ArrayList<>());
+
+        List<StageDto> result = stageService.getAllStagesOfProject(projectId);
+
+        assertNotNull(result);
+        verify(projectService, times(1)).getProjectById(projectId);
+        verify(stageMapper, times(1)).toStageDtos(stages);
     }
 }
