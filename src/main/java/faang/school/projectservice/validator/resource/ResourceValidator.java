@@ -35,6 +35,7 @@ public class ResourceValidator {
         if (userId == project.getOwnerId()) {
             return;
         }
+        log.error("User id={} can't delete resource id={}", userId, teamMember.getId());
         throw new IllegalArgumentException(messageError);
     }
 }
