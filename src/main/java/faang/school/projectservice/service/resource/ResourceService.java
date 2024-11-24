@@ -21,7 +21,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +34,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Validated
-@ConditionalOnProperty(value = "service.s3", havingValue = "true")
 public class ResourceService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
