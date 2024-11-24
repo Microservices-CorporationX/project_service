@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.JiraAccountDto;
 import faang.school.projectservice.service.jira.JiraService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,29 +24,32 @@ public class JiraController {
     private final JiraService jiraService;
 
     @GetMapping("/issue/{issueKey}")
-    public IssueDto getIssue(@RequestBody JiraAccountDto jiraAccountDto, @PathVariable String issueKey) {
+    public IssueDto getIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto, @PathVariable String issueKey) {
         return jiraService.getIssueBiKey(jiraAccountDto, issueKey);
     }
 
     @GetMapping("/project/{projectKey}/issues")
-    public List<IssueDto> getAllIssue(@RequestBody JiraAccountDto jiraAccountDto, @PathVariable String projectKey) {
+    public List<IssueDto> getAllIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto,
+                                      @PathVariable String projectKey) {
         return jiraService.getAllIssues(jiraAccountDto, projectKey);
     }
 
     @GetMapping("/project/{projectKey}/issues/{statusId}")
-    public List<IssueDto> getIssueWithFilterByStatus(@RequestBody JiraAccountDto jiraAccountDto, @PathVariable String projectKey,
-                                                     @PathVariable Long statusId) {
+    public List<IssueDto> getIssueWithFilterByStatus(@Valid @RequestBody JiraAccountDto jiraAccountDto,
+                                                     @PathVariable String projectKey,
+                                                     @Positive @PathVariable Long statusId) {
         return jiraService.getIssueWithFilterByStatus(jiraAccountDto, projectKey, statusId);
     }
 
     @GetMapping("/project/{projectKey}/issues/assignee/")
-    public List<IssueDto> getIssuesByExecutorId(@RequestBody JiraAccountDto jiraAccountDto,
+    public List<IssueDto> getIssuesByExecutorId(@Valid @RequestBody JiraAccountDto jiraAccountDto,
                                                 @PathVariable String projectKey, @RequestParam String assigneeId) {
         return jiraService.getIssueByExecutorId(jiraAccountDto, projectKey, assigneeId);
     }
 
     @PostMapping("/issue")
-    public String createIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto, @RequestParam IssueDto issueDto) {
+    public String createIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto,
+                              @Valid @RequestParam IssueDto issueDto) {
         return jiraService.createIssue(jiraAccountDto, issueDto);
     }
 }

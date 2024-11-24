@@ -33,7 +33,6 @@ public class JiraClient {
 
     public Issue getIssue(String issueKey) {
         IssueRestClient client = restClient.getIssueClient();
-        System.out.println("Request URL: " + projectUrl);
         return client.getIssue(issueKey).claim();
     }
 
