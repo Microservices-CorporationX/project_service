@@ -61,6 +61,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2:2.3.232")
 }
 
 tasks.withType<Test> {
@@ -83,11 +84,12 @@ tasks.test {
 }
 
 val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
     "**/service/**",
-    "**/mapper/**"
+    "**/validator/**"
 )
 val jacocoExcludePackAgeList = listOf(
+    "**/controller/**",
+    "**/mapper/**",
     "**/model/**",
     "**/repository/**",
     "**/dto/**"
@@ -113,6 +115,13 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
+            element = "CLASS"
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    include(jacocoIncludePackagesList)
+                    exclude(jacocoExcludePackAgeList)
+                }
+            )
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
@@ -123,7 +132,6 @@ tasks.jacocoTestCoverageVerification {
                 value = "COVEREDRATIO"
                 minimum = "0.70".toBigDecimal()
             }
-
         }
     }
 }

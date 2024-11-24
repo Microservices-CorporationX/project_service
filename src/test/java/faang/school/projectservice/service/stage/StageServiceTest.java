@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.stage.ActionWithTaskDto;
 import faang.school.projectservice.dto.stage.StageDeleteDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage.StageFilter;
 import faang.school.projectservice.jpa.StageJpaRepository;
 import faang.school.projectservice.jpa.StageRolesRepository;
@@ -34,9 +35,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -371,4 +375,20 @@ public class StageServiceTest {
                 .getById(stage.getStageId());
     }
 
+    @Test
+    public void stageExists() {
+        long id = 1L;
+        Stage stage = new Stage();
+        stage.setStageId(id);
+        when(stageRepository.findById(id)).thenReturn(Optional.of(stage));
+
+        assertDoesNotThrow(() -> stageService.getStageEntity(id));
+    }
+
+    @Test
+    public void throwsException() {
+        long id = 1L;
+
+        assertThrows(EntityNotFoundException.class, () -> stageService.getStageEntity(id));
+    }
 }
