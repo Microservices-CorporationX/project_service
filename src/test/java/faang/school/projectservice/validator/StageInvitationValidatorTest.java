@@ -3,7 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.team_member.TeamMemberService;
-import faang.school.projectservice.validator.stage_invitation.ServiceStageInvitationValidator;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class ServiceStageInvitationValidatorTest {
+public class StageInvitationValidatorTest {
     @Mock
     private TeamMemberService teamMemberService;
 
@@ -24,7 +24,7 @@ public class ServiceStageInvitationValidatorTest {
     private StageInvitationRepository stageInvitationRepository;
 
     @InjectMocks
-    ServiceStageInvitationValidator serviceStageInvitationValidator;
+    StageInvitationValidator stageInvitationValidator;
 
     private Long invitedId;
     private Long stageInvitationId;
@@ -43,7 +43,7 @@ public class ServiceStageInvitationValidatorTest {
         when(stageInvitationRepository.stageInvitationExist(stageInvitationId)).thenReturn(true);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> {
-            serviceStageInvitationValidator.checkWhetherThisRequestExists(stageInvitationId);
+            stageInvitationValidator.checkWhetherThisRequestExists(stageInvitationId);
         });
 
         assertEquals("This invitation already exists", exception.getMessage());
@@ -56,7 +56,7 @@ public class ServiceStageInvitationValidatorTest {
         when(stageInvitationRepository.stageInvitationExist(stageInvitationId)).thenReturn(false);
 
         assertDoesNotThrow(() -> {
-            serviceStageInvitationValidator.checkWhetherThisRequestExists(stageInvitationId);
+            stageInvitationValidator.checkWhetherThisRequestExists(stageInvitationId);
         });
 
         verify(stageInvitationRepository).stageInvitationExist(stageInvitationId);
@@ -67,7 +67,7 @@ public class ServiceStageInvitationValidatorTest {
         when(teamMemberService.existedTeamMember(invitedId)).thenReturn(true);
 
         assertDoesNotThrow(() -> {
-            serviceStageInvitationValidator.checkTheExistenceOfTheInvitee(invitedId);
+            stageInvitationValidator.checkTheExistenceOfTheInvitee(invitedId);
         });
 
         verify(teamMemberService).existedTeamMember(invitedId);
@@ -78,7 +78,7 @@ public class ServiceStageInvitationValidatorTest {
         when(teamMemberService.existedTeamMember(invitedId)).thenReturn(false);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> {
-            serviceStageInvitationValidator.checkTheExistenceOfTheInvitee(invitedId);
+            stageInvitationValidator.checkTheExistenceOfTheInvitee(invitedId);
         });
 
         assertEquals("This team member does not exist", exception.getMessage());
@@ -96,7 +96,7 @@ public class ServiceStageInvitationValidatorTest {
         rejection = "  ";
 
         DataValidationException exception = assertThrows(DataValidationException.class, () -> {
-            serviceStageInvitationValidator.checkTheReasonForTheFailure(rejection);
+            stageInvitationValidator.checkTheReasonForTheFailure(rejection);
         });
 
         assertEquals("The reason for the refusal must be indicated", exception.getMessage());
@@ -107,7 +107,7 @@ public class ServiceStageInvitationValidatorTest {
         rejection = null;
 
          DataValidationException exception = assertThrows(DataValidationException.class, () -> {
-            serviceStageInvitationValidator.checkTheReasonForTheFailure(rejection);
+            stageInvitationValidator.checkTheReasonForTheFailure(rejection);
         });
 
         assertEquals("The reason for the refusal must exist", exception.getMessage());

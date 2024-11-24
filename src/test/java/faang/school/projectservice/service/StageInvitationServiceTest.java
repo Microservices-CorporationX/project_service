@@ -1,12 +1,10 @@
 package faang.school.projectservice.service;
 
-
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
@@ -15,34 +13,25 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.stage_invitation.StageInvitationService;
 import faang.school.projectservice.stage_invitation_filter.StageInvitationFilter;
-import faang.school.projectservice.validator.stage_invitation.ServiceStageInvitationValidator;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
-import static faang.school.projectservice.model.CandidateStatus.REJECTED;
 import static faang.school.projectservice.model.stage_invitation.StageInvitationStatus.PENDING;
-import static javax.management.Query.eq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +52,7 @@ public class StageInvitationServiceTest {
     private StageInvitationRepository stageInvitationRepository;
 
     @Mock
-    private ServiceStageInvitationValidator serviceStageInvitationValidator;
+    private StageInvitationValidator stageInvitationValidator;
 
     @InjectMocks
     StageInvitationService stageInvitationService;
@@ -98,15 +87,15 @@ public class StageInvitationServiceTest {
                 .status(PENDING)
                 .build();
 
-        doNothing().when(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
-        doNothing().when(serviceStageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
+        doNothing().when(stageInvitationValidator).checkWhetherThisRequestExists(1L);
+        doNothing().when(stageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
         when(stageInvitationMapper.toEntity(stageInvitationDto)).thenReturn(stageInvitation);
         doNothing().when(stageInvitationRepository).save(stageInvitation);
 
         StageInvitationDto result = stageInvitationService.sendAnInvitation(stageInvitationDto);
 
-        verify(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
-        verify(serviceStageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
+        verify(stageInvitationValidator).checkWhetherThisRequestExists(1L);
+        verify(stageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
         verify(stageInvitationMapper).toEntity(stageInvitationDto);
         verify(stageInvitationRepository).save(stageInvitation);
 
@@ -117,7 +106,7 @@ public class StageInvitationServiceTest {
     @Test
     void testSendAnInvitation_WhenRequestAlreadyExists_throwsException() {
         doThrow(new DataValidationException("This invitation already exists"))
-                .when(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
+                .when(stageInvitationValidator).checkWhetherThisRequestExists(1L);
 
         DataValidationException dataValidationException = assertThrows(DataValidationException.class,
                 () -> stageInvitationService.sendAnInvitation(stageInvitationDto)
@@ -125,16 +114,16 @@ public class StageInvitationServiceTest {
 
         assertEquals("This invitation already exists", dataValidationException.getMessage());
 
-        verify(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
-        verify(serviceStageInvitationValidator, never()).checkTheExistenceOfTheInvitee(any());
+        verify(stageInvitationValidator).checkWhetherThisRequestExists(1L);
+        verify(stageInvitationValidator, never()).checkTheExistenceOfTheInvitee(any());
         verify(stageInvitationRepository, never()).save(any());
     }
 
     @Test
     void testSendAnInvitation_WhenInviteeDoesNotExist_throwsException() {
-        doNothing().when(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
+        doNothing().when(stageInvitationValidator).checkWhetherThisRequestExists(1L);
         doThrow(new DataValidationException("This team member does not exist"))
-                .when(serviceStageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
+                .when(stageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
 
         DataValidationException dataValidationException = assertThrows(
                 DataValidationException.class,
@@ -142,8 +131,8 @@ public class StageInvitationServiceTest {
         );
 
         assertEquals("This team member does not exist", dataValidationException.getMessage());
-        verify(serviceStageInvitationValidator).checkWhetherThisRequestExists(1L);
-        verify(serviceStageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
+        verify(stageInvitationValidator).checkWhetherThisRequestExists(1L);
+        verify(stageInvitationValidator).checkTheExistenceOfTheInvitee(3L);
         verify(stageInvitationRepository, never()).save(any());
     }
 
@@ -163,7 +152,7 @@ public class StageInvitationServiceTest {
 
         StageInvitationDto result = stageInvitationService.rejectAnInvitation(stageInvitationDto);
 
-        verify(serviceStageInvitationValidator).checkTheReasonForTheFailure(rejectionReason);
+        verify(stageInvitationValidator).checkTheReasonForTheFailure(rejectionReason);
         assertNotNull(result);
         assertEquals(StageInvitationStatus.REJECTED, result.getStatus());
     }
@@ -174,7 +163,7 @@ public class StageInvitationServiceTest {
         stageInvitationDto.setRejection(rejectionReason);
 
         doThrow(new DataValidationException("The reason for the refusal must be indicated")).
-                when(serviceStageInvitationValidator).checkTheReasonForTheFailure(rejectionReason);
+                when(stageInvitationValidator).checkTheReasonForTheFailure(rejectionReason);
 
         DataValidationException dataValidationException = assertThrows(DataValidationException.class, () -> {
             stageInvitationService.rejectAnInvitation(stageInvitationDto);
@@ -185,7 +174,7 @@ public class StageInvitationServiceTest {
 
     @Test
     void testViewAllInvitationsForOneParticipant_withoutFilters() {
-        when(stageInvitationRepository.findByInvited_UserId(1L)).thenReturn(stageInvitations);
+        when(stageInvitationRepository.findByInvitedUserId(1L)).thenReturn(stageInvitations);
         when(stageInvitationMapper.toDto(stageInvitation)).thenReturn(stageInvitationDto);
 
         StageInvitationFilterDto filterDto = null;
@@ -196,7 +185,7 @@ public class StageInvitationServiceTest {
         assertEquals(1, result.size());
         assertEquals(stageInvitationDto, result.get(0));
 
-        verify(stageInvitationRepository).findByInvited_UserId(1L);
+        verify(stageInvitationRepository).findByInvitedUserId(1L);
         verify(stageInvitationMapper).toDto(stageInvitation);
     }
 }
