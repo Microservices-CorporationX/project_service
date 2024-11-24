@@ -1,8 +1,10 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.model.ProjectStatus;
@@ -47,7 +49,9 @@ class SubProjectControllerTest {
     private SubProjectController subProjectController;
 
     private CreateProjectDto createProjectDto;
-    private ProjectResponseDto projectResponseDto;
+    private ProjectCreateResponseDto projectCreateResponseDto;
+    private ProjectUpdateResponseDto projectUpdateResponseDto;
+    private ProjectDto projectDto;
     private UpdateSubProjectDto updateSubProjectDto;
     private ProjectFilterDto projectFilterDto;
     private Long postId = 1L;
@@ -57,15 +61,17 @@ class SubProjectControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(subProjectController).build();
         objectMapper = new ObjectMapper();
         createProjectDto = mockCreateProjectDto();
-        projectResponseDto = mockProjectResponseDto();
+        projectCreateResponseDto = mockProjectResponseDto();
+        projectUpdateResponseDto = mockProjectUpdateResponseDto();
         updateSubProjectDto = mockUpdateSubProjectDto();
+        projectDto = mockProjectDto();
         projectFilterDto = mockProjectFilterDto();
     }
 
     @Test
     @DisplayName("Create subproject success")
     void testCreateSubProject() throws Exception {
-        when(projectService.createSubProject(postId, createProjectDto)).thenReturn(projectResponseDto);
+        when(projectService.createSubProject(postId, createProjectDto)).thenReturn(projectCreateResponseDto);
 
         mockMvc.perform(post("/api/v1/subprojects/1/subprojects")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -73,8 +79,6 @@ class SubProjectControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.description").value("John description"))
-                .andExpect(jsonPath("$.storageSize").value(1))
-                .andExpect(jsonPath("$.maxStorageSize").value(10))
                 .andExpect(jsonPath("$.ownerId").value(1))
                 .andExpect(jsonPath("$.visibility").value("PUBLIC"));
 
@@ -92,17 +96,13 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("Update subproject success")
     void testUpdateSubProject() throws Exception {
-        when(projectService.updateSubProject(updateSubProjectDto)).thenReturn(projectResponseDto);
+        when(projectService.updateSubProject(updateSubProjectDto)).thenReturn(projectUpdateResponseDto);
 
         mockMvc.perform(put("/api/v1/subprojects")
                 .content(objectMapper.writeValueAsString(updateSubProjectDto))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John"))
-                .andExpect(jsonPath("$.description").value("John description"))
-                .andExpect(jsonPath("$.storageSize").value(1))
-                .andExpect(jsonPath("$.maxStorageSize").value(10))
-                .andExpect(jsonPath("$.ownerId").value(1))
                 .andExpect(jsonPath("$.visibility").value("PUBLIC"));
 
         verify(projectService).updateSubProject(updateSubProjectDto);
@@ -119,8 +119,8 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("Filter subprojects success")
     void testFilterSubProjects() throws Exception {
-        List<ProjectResponseDto> projectResponseDtos = List.of(projectResponseDto, projectResponseDto, projectResponseDto);
-        when(projectService.filterSubProjects(postId, projectFilterDto)).thenReturn(projectResponseDtos);
+        List<ProjectDto> projectDtos = List.of(projectDto, projectDto, projectDto);
+        when(projectService.filterSubProjects(postId, projectFilterDto)).thenReturn(projectDtos);
 
         mockMvc.perform(get("/api/v1/subprojects/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -141,6 +141,15 @@ class SubProjectControllerTest {
         assertThrows(EntityNotFoundException.class, () -> subProjectController.filterSubProjects(postId, projectFilterDto));
     }
 
+    private ProjectDto mockProjectDto() {
+        return ProjectDto.builder()
+                .name("John")
+                .description("John description")
+                .ownerId(1L)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+    }
+
     private CreateProjectDto mockCreateProjectDto() {
         return CreateProjectDto.builder()
                 .name("John")
@@ -152,13 +161,18 @@ class SubProjectControllerTest {
                 .build();
     }
 
-    private ProjectResponseDto mockProjectResponseDto() {
-        return ProjectResponseDto.builder()
+    private ProjectCreateResponseDto mockProjectResponseDto() {
+        return ProjectCreateResponseDto.builder()
                 .name("John")
                 .description("John description")
-                .storageSize(BigInteger.ONE)
-                .maxStorageSize(BigInteger.TEN)
                 .ownerId(1L)
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
+    }
+
+    private ProjectUpdateResponseDto mockProjectUpdateResponseDto() {
+        return ProjectUpdateResponseDto.builder()
+                .name("John")
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }

@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Team;
@@ -10,7 +11,7 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
-import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
@@ -135,7 +136,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
+    public ProjectCreateResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
         Project parentProject = projectRepository.getProjectById(parentId);
         projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, createProjectDto);
         projectValidator.validateUniqueProject(createProjectDto);
@@ -146,11 +147,11 @@ public class ProjectService {
         projectRepository.save(parentProject);
         Project savedProject = projectRepository.save(subProject);
         log.info("Subproject #{} created successfully for parent project #{}.", savedProject.getId(), parentId);
-        return projectMapper.toResponseDto(savedProject);
+        return projectMapper.toCreateResponseDto(savedProject);
     }
 
     @Transactional
-    public ProjectResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+    public ProjectUpdateResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
         projectValidator.validateProjectExistsById(updateSubProjectDto.getId());
         Project subProject = getProjectById(updateSubProjectDto.getId());
         changeStatus(subProject, updateSubProjectDto);
@@ -162,10 +163,10 @@ public class ProjectService {
             log.info("Moment #All subprojects completed! successfully created for project #{}", parentProject.getId());
         }
         subProject.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
-        return projectMapper.toResponseDto(projectRepository.save(subProject));
+        return projectMapper.toUpdateResponseDto(projectRepository.save(subProject));
     }
 
-    public List<ProjectResponseDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
+    public List<ProjectDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
 
         Project project = projectRepository.getProjectById(parentId);
         projectValidator.validateProjectPublic(project);
@@ -179,7 +180,7 @@ public class ProjectService {
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(childrenProjectsStream, (streamProject, filter) -> filter.apply(streamProject, filters),
                         (s1, s2) -> s1)
-                .map(projectMapper::toResponseDto)
+                .map(projectMapper::toDto)
                 .toList();
     }
 

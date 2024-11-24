@@ -30,7 +30,7 @@ public class ProjectValidator {
         Long ownerId = dto.getOwnerId();
         String name = dto.getName();
 
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
             log.error("Project '{}' with ownerId #{} already exists.", name, ownerId);
             throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
                     name, ownerId));
@@ -43,7 +43,7 @@ public class ProjectValidator {
         Long ownerId = dto.getOwnerId();
         String name = dto.getName();
 
-        if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
             log.error("SubProject '{}' with ownerId #{} already exists.", name, ownerId);
             throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
                     name, ownerId));

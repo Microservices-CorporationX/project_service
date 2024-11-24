@@ -28,6 +28,7 @@ class ProjectStatusFilterTest {
     @Test
     void testFilterIsNotApplicable() {
         filter.setStatus(null);
+
         assertFalse(projectStatusFilter.isApplicable(filter));
     }
 

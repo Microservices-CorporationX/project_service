@@ -71,9 +71,7 @@ class ProjectStatusFilterTest {
                 .status(ProjectStatus.CREATED)
                 .build();
 
-        Stream<Project> projects = Stream.empty();
-
-        Stream<Project> result = projectStatusFilter.apply(projects, filter);
+        Stream<Project> result = projectStatusFilter.apply(Stream.empty(), filter);
 
         assertEquals(0, result.count());
     }

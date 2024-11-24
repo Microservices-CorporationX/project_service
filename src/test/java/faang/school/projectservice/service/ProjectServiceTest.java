@@ -1,9 +1,10 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.CreateProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateResponseDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.ProjectVisibilityException;
@@ -399,14 +400,13 @@ class ProjectServiceTest {
         when(projectMapper.toEntity(createProjectDto)).thenReturn(subProject);
         when(projectRepository.save(parentProject)).thenReturn(parentProject);
         when(projectRepository.save(subProject)).thenReturn(subProject);
-        when(projectMapper.toResponseDto(subProject)).thenReturn(
-                ProjectResponseDto.builder()
-                        .id(subProject.getId())
+        when(projectMapper.toCreateResponseDto(subProject)).thenReturn(
+                ProjectCreateResponseDto.builder()
                         .name(subProject.getName())
                         .build()
         );
 
-        ProjectResponseDto responseDto = projectService.createSubProject(parentProject.getId(), createProjectDto);
+        ProjectCreateResponseDto responseDto = projectService.createSubProject(parentProject.getId(), createProjectDto);
 
         verify(projectRepository).getProjectById(parentProject.getId());
         verify(projectValidator).validateCreateSubprojectBasedOnVisibility(parentProject, createProjectDto);
@@ -415,7 +415,6 @@ class ProjectServiceTest {
         verify(projectRepository).save(subProject);
 
         assertNotNull(responseDto);
-        assertEquals(subProject.getId(), responseDto.getId());
         assertEquals(subProject.getName(), responseDto.getName());
     }
 
@@ -448,14 +447,13 @@ class ProjectServiceTest {
         initializeForUpdateSubProjectTest();
         when(projectRepository.getProjectById(updateSubProjectDto.getId())).thenReturn(subProject);
         when(projectRepository.save(subProject)).thenReturn(subProject);
-        ProjectResponseDto responseDto = projectService.updateSubProject(updateSubProjectDto);
+        ProjectUpdateResponseDto responseDto = projectService.updateSubProject(updateSubProjectDto);
 
         verify(projectRepository, times(1)).getProjectById(updateSubProjectDto.getId());
         verify(projectRepository, times(1)).save(subProject);
         verify(projectValidator, times(1)).validateProjectExistsById(updateSubProjectDto.getId());
         verify(projectValidator, times(1)).validateHasChildrenProjectsClosed(subProject.getParentProject());
 
-        assertEquals(subProject.getId(), responseDto.getId());
         assertEquals(subProject.getName(), responseDto.getName());
         assertEquals(ProjectVisibility.PRIVATE, responseDto.getVisibility());
     }
@@ -477,7 +475,7 @@ class ProjectServiceTest {
         when (projectRepository.getProjectById(parentProject.getId())).thenReturn(parentProject);
         when (projectValidator.isPublicProject(any(Project.class))).thenReturn(true);
 
-        List<ProjectResponseDto> result = projectService.filterSubProjects(parentProject.getId(), projectFilterDto);
+        List<ProjectDto> result = projectService.filterSubProjects(parentProject.getId(), projectFilterDto);
 
         verify(projectRepository, times(1)).getProjectById(any(Long.class));
         verify(projectValidator, times(2)).isPublicProject(any(Project.class));

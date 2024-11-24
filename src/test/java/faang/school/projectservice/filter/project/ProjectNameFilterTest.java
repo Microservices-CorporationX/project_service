@@ -70,9 +70,7 @@ class ProjectNameFilterTest {
                 .nameProjectPattern("test")
                 .build();
 
-        Stream<Project> projects = Stream.empty();
-
-        Stream<Project> result = projectNameFilter.apply(projects, filter);
+        Stream<Project> result = projectNameFilter.apply(Stream.empty(), filter);
 
         assertEquals(0, result.count());
     }
