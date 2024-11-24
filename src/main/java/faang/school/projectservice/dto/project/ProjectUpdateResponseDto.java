@@ -18,6 +18,4 @@ public class ProjectUpdateResponseDto {
     private String name;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-    private LocalDateTime updatedAt;
-    private List<Long> momentIds;
 }

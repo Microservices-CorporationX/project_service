@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,9 +14,6 @@ import java.time.LocalDateTime;
 public class ProjectCreateResponseDto {
     private String name;
     private String description;
-    private Long ownerId;
-    private Long parentProjectId;
     private ProjectStatus status;
     private ProjectVisibility visibility;
-    private LocalDateTime createdAt;
 }

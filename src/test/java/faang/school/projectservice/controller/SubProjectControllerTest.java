@@ -79,7 +79,6 @@ class SubProjectControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.description").value("John description"))
-                .andExpect(jsonPath("$.ownerId").value(1))
                 .andExpect(jsonPath("$.visibility").value("PUBLIC"));
 
         verify(projectService).createSubProject(postId, createProjectDto);
@@ -165,7 +164,6 @@ class SubProjectControllerTest {
         return ProjectCreateResponseDto.builder()
                 .name("John")
                 .description("John description")
-                .ownerId(1L)
                 .visibility(ProjectVisibility.PUBLIC)
                 .build();
     }
