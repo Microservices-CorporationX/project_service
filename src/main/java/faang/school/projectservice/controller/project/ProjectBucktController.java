@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-public class ProjectImageUploadController {
+public class ProjectBucktController {
     private final ProjectService projectService;
 
     @PutMapping("/{projectId}/add-cover-image")
