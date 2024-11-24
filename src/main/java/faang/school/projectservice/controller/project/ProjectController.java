@@ -134,6 +134,7 @@ public class ProjectController {
     @NotNull(message = "Stream can't be empty")
     private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyInResponseEntity(InputStream fileStream) {
         StreamingResponseBody responseBody = outputStream -> {
+            log.info("Start transform InputStream to StreamResponseBody");
             try (fileStream) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
@@ -144,6 +145,7 @@ public class ProjectController {
                 throw new StreamingFileError("Error streaming file");
             }
         };
+        log.info("Transform InputStream to StreamResponseBody successfully");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(responseBody);
@@ -153,6 +155,7 @@ public class ProjectController {
     private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyInResponseEntityZip(
             Map<String, InputStream> files, long projectId) {
         StreamingResponseBody responseBody = outputStream -> {
+            log.info("Start transform InputStream to StreamResponseBody in Zip format");
             try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
                 for (Map.Entry<String, InputStream> entry : files.entrySet()) {
                     String fileName = entry.getKey();
@@ -175,6 +178,7 @@ public class ProjectController {
                 throw new ZippingFileError("Error while zipping files");
             }
         };
+        log.info("Transform InputStream to StreamResponseBody in Zip format successfully");
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +

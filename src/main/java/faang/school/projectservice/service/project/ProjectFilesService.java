@@ -69,6 +69,8 @@ public class ProjectFilesService {
 
         projectService.updateProject(projectMapper.toDto(project));
         resourceRepository.save(resource);
+        log.info("Saving new Resource with key: {}, with status: {}",
+                resource.getKey(), resource.getStatus());
     }
 
     public InputStream downloadFile(long resourceId) {
@@ -80,12 +82,12 @@ public class ProjectFilesService {
 
     public Map<String, InputStream> downloadAllFiles(long projectId) {
         Project project = projectService.getProjectById(projectId);
-        Map<String, String> fileNamesWithKeys = new HashMap<>();
+        Map<String, String> filesNameWithKey = new HashMap<>();
         project.getResources().stream()
-                .filter(resource -> resource.getStatus() == ResourceStatus.ACTIVE)
-                .forEach(resource -> fileNamesWithKeys.put(resource.getId() + resource.getName(), resource.getKey()));
+                .filter(resource -> resource.getStatus().equals(ResourceStatus.ACTIVE))
+                .forEach(resource -> filesNameWithKey.put(resource.getId() + resource.getName(), resource.getKey()));
 
-        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(fileNamesWithKeys);
+        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(filesNameWithKey);
 
         Map<String, InputStream> files = new HashMap<>();
         s3ObjectInputStreams.forEach((key, value) -> files.put(key, value.getDelegateStream()));
@@ -113,11 +115,12 @@ public class ProjectFilesService {
 
         projectService.updateProject(projectMapper.toDto(project));
         resourceRepository.save(resource);
+        log.info("Saving Resource with id: {} , with status: {} ",
+                resource.getId(), resource.getStatus());
     }
 
     private Resource getResource(long resourceId) {
         return resourceRepository.findById(resourceId).orElseThrow(
-
                 () -> new EntityNotFoundException("Resource", resourceId));
     }
 }
