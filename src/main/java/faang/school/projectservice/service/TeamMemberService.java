@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -75,7 +76,7 @@ public class TeamMemberService {
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE_MEMBER, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
 
-        teamMemberRepository.removeTeamMemberFromTeam(team.getId(), teamMember);
+        removeTeamMemberFromTeam(team, teamMember);
         teamMemberRepository.delete(teamMember);
     }
 
@@ -97,6 +98,22 @@ public class TeamMemberService {
     public boolean curatorHasNoAccess(Long curatorId) {
         TeamMember teamMember = teamMemberRepository.findById(curatorId);
         return !teamMember.isCurator();
+    }
+
+    @Transactional
+    public void addTeamMemberToTeam(Team team, TeamMember teamMember) {
+        List<TeamMember> updatedTeamMembers = new ArrayList<>(team.getTeamMembers());
+        updatedTeamMembers.add(teamMember);
+        team.setTeamMembers(updatedTeamMembers);
+        teamMemberRepository.updateTeamMembers(team.getId(), updatedTeamMembers);
+    }
+
+    @Transactional
+    public void removeTeamMemberFromTeam(Team team, TeamMember teamMember) {
+        List<TeamMember> updatedTeamMembers = new ArrayList<>(team.getTeamMembers());
+        updatedTeamMembers.remove(teamMember);
+        team.setTeamMembers(updatedTeamMembers);
+        teamMemberRepository.updateTeamMembers(team.getId(), updatedTeamMembers);
     }
 
     private boolean hasAccess(Long userId, List<TeamRole> requiredRoles, Long projectId) {
@@ -130,7 +147,7 @@ public class TeamMemberService {
             return existingTeamMember;
         }
         teamMember.setTeam(team);
-        teamMemberRepository.addTeamMemberToTeam(team.getId(), teamMember);
+        addTeamMemberToTeam(team, teamMember);
         teamMemberRepository.save(teamMember);
         return teamMember;
     }
