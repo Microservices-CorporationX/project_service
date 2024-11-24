@@ -10,11 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-public class ProjectController {
+public class ProjectImageUploadController {
     private final ProjectService projectService;
 
-    @GetMapping("/{projectId}/add-cover-image")
-    public ProjectDto addCoverImage(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
+    @PutMapping("/{projectId}/add-cover-image")
+    public String addCoverImage(@PathVariable Long projectId, @RequestBody MultipartFile coverImage) {
         return null;
     }
 }
