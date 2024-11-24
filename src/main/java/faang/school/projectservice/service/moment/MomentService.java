@@ -79,14 +79,12 @@ public class MomentService {
 
     private Moment processMoments(@Valid MomentDto momentDto) {
         List<Long> projectIds = momentDto.getProjectIds();
-        momentServiceValidator.validateListContainUniqueItems(projectIds, "projectIds");
-        momentServiceValidator.validateProjectsExist(projectIds);
+        validateProjectIds(projectIds);
 
         Set<Long> teamIdsForProject = getTeamIdsForProject(projectIds);
         List<Long> teamMemberIds = momentDto.getTeamMemberIds();
         if (teamMemberIds != null && !teamMemberIds.isEmpty()) {
-            momentServiceValidator.validateListContainUniqueItems(teamMemberIds, "teamMemberIds");
-            momentServiceValidator.validateTeamMemberExists(teamMemberIds);
+            validateTeamMemberIds(teamMemberIds);
             teamIdsForProject.addAll(teamMemberIds);
         }
         momentDto.setTeamMemberIds(new ArrayList<>(teamIdsForProject));
@@ -96,6 +94,16 @@ public class MomentService {
         momentServiceValidator.validateProjectsAreActive(new ArrayList<>(projectIdsByTeamId));
         momentDto.setProjectIds(new ArrayList<>(projectIdsByTeamId));
         return momentMapper.toEntity(momentDto);
+    }
+
+    private void validateTeamMemberIds(List<Long> teamMemberIds) {
+        momentServiceValidator.validateListContainUniqueItems(teamMemberIds, "teamMemberIds");
+        momentServiceValidator.validateTeamMemberExists(teamMemberIds);
+    }
+
+    private void validateProjectIds(List<Long> projectIds) {
+        momentServiceValidator.validateListContainUniqueItems(projectIds, "projectIds");
+        momentServiceValidator.validateProjectsExist(projectIds);
     }
 
     private Set<Long> getTeamIdsForProject(List<Long> projectIds) {

@@ -13,10 +13,8 @@ import java.util.stream.Collectors;
 
 @Component
 @Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
-//@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
 
-    //    @Mapping(source = "projects", target = "projectIds", qualifiedByName = "projectIds")
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "projectsToProjectIds")
     @Mapping(source = "userIds", target = "teamMemberIds")
     MomentDto toDto(Moment moment);
@@ -25,11 +23,6 @@ public interface MomentMapper {
     @Mapping(source = "projectIds", target = "projects", qualifiedByName = "projectIdsToProjects")
     @Mapping(source = "teamMemberIds", target = "userIds")
     Moment toEntity(MomentDto momentDto);
-
-//    @Named("projectIds")
-//    default List<Long> getProjectIds(@NotNull List<Project> projects) {
-//        return projects.stream().map(Project::getId).toList();
-//    }
 
     @Named("projectsToProjectIds")
     default List<Long> mapProjectsToProjectIds(List<Project> projects) {

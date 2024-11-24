@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator.moment;
 
 import faang.school.projectservice.exception.ProjectNotFoundException;
-import faang.school.projectservice.exception.TeamMemberNotFoundException;
 import faang.school.projectservice.exception.vacancy.DataValidationException;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -60,7 +59,7 @@ public class MomentServiceValidator {
                     try {
                         teamMemberRepository.findById(teamId);
                     } catch (EntityNotFoundException e) {
-                        throw new TeamMemberNotFoundException("Team member not found: " + teamId);
+                        throw new EntityNotFoundException("Team member not found: " + teamId);
                     }
                 }
         );

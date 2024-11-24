@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator.moment;
 
 import faang.school.projectservice.exception.ProjectNotFoundException;
-import faang.school.projectservice.exception.TeamMemberNotFoundException;
 import faang.school.projectservice.exception.vacancy.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -100,7 +99,7 @@ public class MomentServiceValidatorTest {
     void testValidateTeamMemberExistsNotFound() {
         List<Long> teamIds = List.of(1L, 2L, 3L);
         when(teamMemberRepository.findById(anyLong())).thenThrow(EntityNotFoundException.class);
-        TeamMemberNotFoundException exception = assertThrows(TeamMemberNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> validator.validateTeamMemberExists(teamIds));
         Assertions.assertEquals("Team member not found: 1", exception.getMessage());
     }
