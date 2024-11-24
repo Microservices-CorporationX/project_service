@@ -3,14 +3,12 @@ package faang.school.projectservice.service.stage_invitation;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
-import faang.school.projectservice.exeption.DataValidationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.stage_invitation_filter.StageInvitationFilter;
-import faang.school.projectservice.validator.stage_invitation.ServiceStageInvitationValidator;
-import jakarta.validation.constraints.NotNull;
+import faang.school.projectservice.validator.stage_invitation.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,11 +28,11 @@ public class StageInvitationService {
     private StageInvitationMapper stageInvitationMapper;
     private List<StageInvitationFilter> stageInvitationFilters;
     private StageInvitationRepository stageInvitationRepository;
-    private ServiceStageInvitationValidator serviceStageInvitationValidator;
+    private StageInvitationValidator stageInvitationValidator;
 
     public StageInvitationDto sendAnInvitation(StageInvitationDto stageInvitationDto) {
-        serviceStageInvitationValidator.checkWhetherThisRequestExists(stageInvitationDto.getId());
-        serviceStageInvitationValidator.checkTheExistenceOfTheInvitee(stageInvitationDto.getInvitedId());
+        stageInvitationValidator.checkWhetherThisRequestExists(stageInvitationDto.getId());
+        stageInvitationValidator.checkTheExistenceOfTheInvitee(stageInvitationDto.getInvitedId());
 
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto);
         stageInvitationRepository.save(stageInvitation);
@@ -46,7 +44,7 @@ public class StageInvitationService {
     public StageInvitationDto acceptAnInvitation(StageInvitationDto stageInvitationDto) {
         Long id = stageInvitationDto.getStageId();
         StageDto dto = stageService.getById(id);
-       if(dto != null) {
+        if (dto != null) {
             dto.getExecutorsId().add(id);
         }
 
@@ -55,14 +53,14 @@ public class StageInvitationService {
     }
 
     public StageInvitationDto rejectAnInvitation(StageInvitationDto stageInvitationDto) {
-        serviceStageInvitationValidator.checkTheReasonForTheFailure(stageInvitationDto.getRejection());
+        stageInvitationValidator.checkTheReasonForTheFailure(stageInvitationDto.getRejection());
         stageInvitationDto = StageInvitationDto.builder().status(REJECTED).build();
 
         return stageInvitationDto;
     }
 
     public List<StageInvitationDto> viewAllInvitationsForOneParticipant(Long invitedId, StageInvitationFilterDto stageInvitationFilterDto) {
-        Stream<StageInvitation> stageInvitations = stageInvitationRepository.findByInvited_UserId(invitedId).stream();
+        Stream<StageInvitation> stageInvitations = stageInvitationRepository.findByInvitedUserId(invitedId).stream();
 
         if (stageInvitationFilterDto == null) {
             return stageInvitations.map(stageInvitationMapper::toDto).toList();

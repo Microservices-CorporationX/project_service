@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ServiceStageInvitationValidator {
+public class StageInvitationValidator {
     private TeamMemberService teamMemberService;
     private StageInvitationRepository stageInvitationRepository;
 
