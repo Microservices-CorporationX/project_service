@@ -12,9 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +26,7 @@ class WebClientErrorHandlerTest {
     private WebClientErrorHandler webClientErrorHandler;
 
     @Test
-    void handleBadRequestResponse() {
+    void handleBadRequestResponseTest() {
         String errorMessage = "Invalid request";
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.BAD_REQUEST);
@@ -35,11 +34,13 @@ class WebClientErrorHandlerTest {
 
         Mono<Void> result = webClientErrorHandler.handleResponse(clientResponse, Void.class);
 
-        assertThrows(DataValidationException.class, result::block);
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof DataValidationException)
+                .verify();
     }
 
     @Test
-    void handleUnauthorizedException() {
+    void handleUnauthorizedExceptionTest() {
         String errorMessage = "Unauthorized";
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
@@ -47,11 +48,13 @@ class WebClientErrorHandlerTest {
 
         Mono<Void> result = webClientErrorHandler.handleResponse(clientResponse, Void.class);
 
-        assertThrows(UnauthorizedException.class, result::block);
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof UnauthorizedException)
+                .verify();
     }
 
     @Test
-    void handleForbiddenException() {
+    void handleForbiddenExceptionTest() {
         String errorMessage = "Forbidden";
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.FORBIDDEN);
@@ -59,11 +62,13 @@ class WebClientErrorHandlerTest {
 
         Mono<Void> result = webClientErrorHandler.handleResponse(clientResponse, Void.class);
 
-        assertThrows(ForbiddenException.class, result::block);
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof ForbiddenException)
+                .verify();
     }
 
     @Test
-    void handleWebclientException() {
+    void handleWebclientExceptionTest() {
         String errorMessage = "Webclient exception";
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -71,11 +76,13 @@ class WebClientErrorHandlerTest {
 
         Mono<Void> result = webClientErrorHandler.handleResponse(clientResponse, Void.class);
 
-        assertThrows(ServiceCallException.class, result::block);
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof ServiceCallException)
+                .verify();
     }
 
     @Test
-    void handleSuccessResponse() {
+    void handleSuccessResponseTest() {
         String responseBody = "Success";
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
@@ -83,6 +90,9 @@ class WebClientErrorHandlerTest {
 
         Mono<String> result = webClientErrorHandler.handleResponse(clientResponse, String.class);
 
-        assertEquals(responseBody, result.block());
+        StepVerifier.create(result)
+                .expectNext(responseBody)
+                .expectComplete()
+                .verify();
     }
 }
