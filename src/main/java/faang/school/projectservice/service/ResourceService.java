@@ -32,7 +32,7 @@ public class ResourceService {
     private final S3Service s3Service;
 
     public ResourceDto uploadResource(long projectId, long userId, MultipartFile file) {
-        log.info("Starting uploadResource={} for projectId={} and userId={}", file, projectId, userId);
+        log.info("Starting uploadResource for projectId={} and userId={}", projectId, userId);
         Project project = projectService.findProjectById(projectId);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
         BigInteger newStorageSize = project.getStorageSize().add(fileSize);

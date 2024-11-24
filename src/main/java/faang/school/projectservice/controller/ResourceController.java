@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,8 +36,8 @@ public class ResourceController {
         return resourceService.deleteResource(resourceId, userId);
     }
 
-    @PutMapping("/resource/{resourceId}")
-    public ResourceDto updateResource(@PathVariable @Positive long resourceId, @RequestBody MultipartFile file) {
+    @PostMapping("/resource/{resourceId}")
+    public ResourceDto updateResource(@PathVariable @Positive long resourceId, @RequestPart MultipartFile file) {
         long userId = userContext.getUserId();
         validateUserId(userId);
         return resourceService.updateResource(resourceId, userId, file);
