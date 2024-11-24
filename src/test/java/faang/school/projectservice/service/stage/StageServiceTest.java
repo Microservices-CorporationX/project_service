@@ -3,7 +3,10 @@ package faang.school.projectservice.service.stage;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
+import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.filter.stage.StageNameFilter;
+import faang.school.projectservice.filter.stage.StageRolesFilter;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
@@ -22,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -73,26 +77,53 @@ public class StageServiceTest {
     }
 
     @Test
-    @DisplayName("Проверка getAllStagesByFilters - Успешно получили все этапы по фильтрам")
-    public void testGetAllStagesByFilters_Success() {
-
+    @DisplayName("Проверка getAllStagesByFilters - Успешно применены реальные фильтры")
+    public void testGetAllStagesByFilters_WithRealFilters() {
         StageFilterDto stageFilterDto = new StageFilterDto();
-        List<Stage> stages = List.of(stage);
-        List<StageFilter> applicableFilters = List.of();
+        stageFilterDto.setStageName("Stage A");
+
+        StageRolesDto rolesDto1 = new StageRolesDto();
+        rolesDto1.setStageRolesId(1L);
+
+        stageFilterDto.setStageRolesDto(List.of(rolesDto1));
+
+        StageRoles role1 = new StageRoles();
+        role1.setId(1L);
+
+        Stage matchingStage = new Stage();
+        matchingStage.setStageName("Stage A");
+        matchingStage.setStageRoles(List.of(role1));
+
+        Stage nonMatchingStage1 = new Stage();
+        nonMatchingStage1.setStageName("Stage B");
+        nonMatchingStage1.setStageRoles(List.of(role1));
+
+        Stage nonMatchingStage2 = new Stage();
+        nonMatchingStage2.setStageName("Stage A");
+        nonMatchingStage2.setStageRoles(List.of());
+
+        List<Stage> stages = List.of(matchingStage, nonMatchingStage1, nonMatchingStage2);
+
+        StageFilter nameFilter = new StageNameFilter();
+        StageFilter rolesFilter = new StageRolesFilter();
+        stageFilterList = List.of(nameFilter, rolesFilter);
 
         when(stageRepository.findAll()).thenReturn(stages);
-        when(stageFilterList.stream())
-                .thenReturn(applicableFilters.stream());
-
-        when(stageMapper.toStageDto(stage)).thenReturn(stageDto);
+        when(stageMapper.toStageDto(matchingStage)).thenReturn(stageDto);
 
         List<StageDto> result = stageService.getAllStagesByFilters(stageFilterDto);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(stageDto, result.get(0));
+
         verify(stageRepository, times(1)).findAll();
+        verify(stageMapper, times(1)).toStageDto(matchingStage);
+        verify(stageMapper, never()).toStageDto(nonMatchingStage1);
+        verify(stageMapper, never()).toStageDto(nonMatchingStage2);
     }
+
+
 
     @Test
     @DisplayName("Проверка getStageById - Успешно получили этап по id")
