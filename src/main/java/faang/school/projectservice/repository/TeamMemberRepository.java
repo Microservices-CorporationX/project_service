@@ -35,14 +35,6 @@ public class TeamMemberRepository {
         jpaRepository.delete(teamMember);
     }
 
-//    public void addTeamMemberToTeam(Long teamId, TeamMember teamMember) {
-//        jpaRepository.addTeamMemberToTeam(teamId, teamMember);
-//    }
-
-//    public void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember) {
-//        jpaRepository.removeTeamMemberFromTeam(teamId, teamMember);
-//    }
-
     public void updateTeamMembers(Long teamId, List<TeamMember> teamMembers) {
         jpaRepository.updateTeamMembers(teamId, teamMembers);
     }
