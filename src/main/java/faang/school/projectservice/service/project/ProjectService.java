@@ -105,10 +105,4 @@ public class ProjectService {
                         (stream, filter) -> filter.apply(stream, filters),
                         Stream::concat);
     }
-
-    public Project getProjectById(Long projectId) {
-        return projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException("Project not found by id: %s", projectId)
-        );
-    }
 }

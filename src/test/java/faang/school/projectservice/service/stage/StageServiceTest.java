@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -346,7 +347,7 @@ public class StageServiceTest {
     @Test
     @DisplayName("Verification of successful receipt of all stages of the project")
     public void checkGetStagesByProjectSuccessTest() {
-        when(projectService.getProjectById(any()))
+        when(projectService.getProjectById(anyLong()))
                 .thenReturn(project);
         when(stageMapper.toDto(stage))
                 .thenReturn(stageDto);
