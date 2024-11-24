@@ -125,7 +125,6 @@ public class JiraController {
     }
 
     @GetMapping("/{jiraDomain}/issues")
-    @PostMapping("/{jiraDomain}/issues/filter")
     public ResponseEntity<List<JiraIssueDto>> getIssues(
             @RequestHeader("x-user-id")
             @Min(value = 1, message = "Requester user ID must be greater than 0!")
