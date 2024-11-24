@@ -1,7 +1,7 @@
 package faang.school.projectservice.client;
 
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.userJira.UserJiraDto;
+import faang.school.projectservice.dto.user_jira.UserJiraDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "user-service", url = "${services.user-service.host}:${services.user-service.port}${services.user-service.path}")
+@FeignClient(
+        name = "user-service",
+        url = "${services.user-service.host}:${services.user-service.port}${services.user-service.path}",
+        configuration = FeignConfig.class
+)
 public interface UserServiceClient {
 
     @GetMapping("/users/{userId}")

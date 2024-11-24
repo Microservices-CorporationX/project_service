@@ -21,9 +21,24 @@ calculations_messages_processing:
   enabled: false
 
 services:
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: user
+    secretKey: password
+    bucketName: projectbucket
+    isMocked: false
+  jira:
+    protocol: https
+    host: atlassian.net
+    api-path: /rest/api/2
+    endpoints:
+      issue: /issue
+      issue-link: /issueLink
+      search: /search
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+    path: /api/v1

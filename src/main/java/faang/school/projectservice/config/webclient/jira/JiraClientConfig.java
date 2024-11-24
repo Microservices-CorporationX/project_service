@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 
@@ -18,12 +19,15 @@ public class JiraClientConfig {
     @Value("${services.jira.protocol}")
     private String protocol;
 
+    @Value("${services.jira.host}")
+    private String host;
+
     @Value("${services.jira.api-path}")
     private String apiPath;
 
     public WebClient getJiraClient(String domain, String email, String token) {
-        String basicAuth = Base64.getEncoder().encodeToString((email + ":" + token).getBytes());
-        String baseUrl = "%s://%s.%s".formatted(protocol, domain, apiPath);
+        String basicAuth = "Basic " + Base64.getEncoder().encodeToString((email + ":" + token).getBytes(StandardCharsets.UTF_8));
+        String baseUrl = "%s://%s.%s.%s".formatted(protocol, domain, host, apiPath);
 
         HttpClient httpClient = HttpClient.create()
                 .responseTimeout(Duration.ofSeconds(20))

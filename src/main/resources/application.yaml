@@ -48,7 +48,12 @@ services:
     isMocked: false
   jira:
     protocol: https
-    api-path: atlassian.net/rest/api/3
+    host: atlassian.net
+    api-path: /rest/api/2
+    endpoints:
+      issue: /issue
+      issue-link: /issueLink
+      search: /search
   payment-service:
     host: http://localhost
     port: 9080
