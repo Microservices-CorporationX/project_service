@@ -6,11 +6,13 @@ import faang.school.projectservice.utils.image.ResizeOptions;
 import faang.school.projectservice.validator.FileValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final FileValidator fileValidator;
@@ -18,6 +20,7 @@ public class ProjectService {
 
     @Transactional
     public void addCover(long projectId, MultipartFile file) {
+        log.info("Trying to add cover to project: {}", projectId);
         long maxAllowedSize = 5 * 1024 * 1024;
         fileValidator.validateFileSize(file, maxAllowedSize);
 

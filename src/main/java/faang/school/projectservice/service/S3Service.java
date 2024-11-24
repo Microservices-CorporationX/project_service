@@ -6,6 +6,7 @@ import faang.school.projectservice.exceptions.ImageProcessingException;
 import faang.school.projectservice.utils.image.ImageUtils;
 import faang.school.projectservice.utils.image.ResizeOptions;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3Service {
     private final AmazonS3 s3Client;
     private final ImageUtils imageUtils;
@@ -29,6 +31,7 @@ public class S3Service {
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
 
         if (resizeOptions.requiresResizing()) {
+            log.debug("Trying to resize image");
             BufferedImage image = resizeImage(file, resizeOptions);
             InputStream inputStream = imageUtils.getBufferedImageInputStream(file, image);
             s3Client.putObject(bucket, key, inputStream, objectMetadata);
