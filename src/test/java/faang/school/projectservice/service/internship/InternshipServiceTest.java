@@ -133,7 +133,7 @@ class InternshipServiceTest {
 
         Project project = new Project();
         project.setId(10L);
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        Mockito.lenient().when(projectService.getProjectById(projectId)).thenReturn(project);
 
         when(teamMemberService.save(any(TeamMember.class))).thenAnswer(invocation -> {
             TeamMember teamMember = invocation.getArgument(0);

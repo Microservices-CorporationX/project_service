@@ -8,8 +8,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Getter
+@Builder
 @Setter
 @AllArgsConstructor
 public class ErrorResponse {
