@@ -63,10 +63,6 @@ class FeignErrorDecoderBaseTest {
         assertInstanceOf(ServiceCallException.class, exception);
     }
 
-    @Test
-    void decodeSuccessCodeTest() {
-
-    }
     private Response createResponse(int status, String body) {
         Request request = Request.create(
                 Request.HttpMethod.GET,
