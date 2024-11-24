@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -46,6 +48,20 @@ public class S3Service {
     }
 
     public S3ObjectInputStream downloadFile(String key) {
+        return downloadFileFromS3(key);
+    }
+
+    public Map<String, S3ObjectInputStream> downloadAllFiles(Map<String, String> fileNamesWithKeys) {
+        Map<String, S3ObjectInputStream> result = new HashMap<>();
+        fileNamesWithKeys.forEach((name, key) -> result.put(name, downloadFileFromS3(key)));
+        return result;
+    }
+
+    public void deleteFile(String key) {
+        s3Client.deleteObject(bucketName, key);
+    }
+
+    private S3ObjectInputStream downloadFileFromS3(String key) {
         try {
             S3Object s3Object = s3Client.getObject(bucketName, key);
             return s3Object.getObjectContent();
@@ -54,9 +70,5 @@ public class S3Service {
             throw new FileDownloadException("Error downloading file" +
                     Arrays.toString(e.getStackTrace()));
         }
-    }
-
-    public void deleteFile(String key) {
-    s3Client.deleteObject(bucketName, key);
     }
 }

@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.exception.FileDownloadException;
 import faang.school.projectservice.service.project.ProjectFilesService;
 import faang.school.projectservice.service.project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,8 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +27,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Tag(name = "Projects methods")
 @RestController
@@ -93,25 +104,73 @@ public class ProjectController {
     //do teamMemberId through Header
     @PutMapping("/{projectId}/resources/{teamMemberId}")
     public ResponseEntity<String> uploadFile(@PathVariable long projectId, @PathVariable long teamMemberId,
-                           @RequestBody MultipartFile file) {
+                                             @RequestBody MultipartFile file) {
         projectFilesService.uploadFile(projectId, teamMemberId, file);
         return ResponseEntity.ok("File uploaded successfully");
     }
 
     @GetMapping("/resources/{resourceId}")
-    public byte[] downloadFile(@PathVariable long resourceId) {
-        return projectFilesService.downloadFile(resourceId);
+    public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable long resourceId) {
+        InputStream fileStream = projectFilesService.downloadFile(resourceId);
+        return getStreamingResponseBodyResponseEntity(fileStream);
+    }
+
+    @GetMapping("/{projectId}/resources")
+    public ResponseEntity<StreamingResponseBody> downloadAllFiles(@PathVariable long projectId) {
+        Map<String, InputStream> files = projectFilesService.downloadAllFiles(projectId);
+
+        StreamingResponseBody responseBody = outputStream -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
+                for (Map.Entry<String, InputStream> entry : files.entrySet()) {
+                    String fileName = entry.getKey();
+                    InputStream fileStream = entry.getValue();
+
+                    try (fileStream) {
+                        zipOut.putNextEntry(new ZipEntry(fileName));
+
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = fileStream.read(buffer)) != -1) {
+                            zipOut.write(buffer, 0, bytesRead);
+                        }
+                        zipOut.closeEntry();
+                    } catch (IOException e) {
+                        // Log the error and continue with other files
+                        System.err.println("Error processing file: " + fileName + ". Skipping...");
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error while zipping files", e);
+            }
+        };
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +
+                        projectId + "_resources.zip")
+                .body(responseBody);
     }
 
     @DeleteMapping("/resources/{resourceId}/{teamMemberId}")
     public ResponseEntity<String> deleteFile(@PathVariable long resourceId, @PathVariable long teamMemberId) {
-        projectFilesService.deleteFile(resourceId,teamMemberId);
+        projectFilesService.deleteFile(resourceId, teamMemberId);
         return ResponseEntity.ok("File deleted successfully");
     }
 
-    //is this method necessary ???
-//    @GetMapping("/{projectId}/resources")
-//    public byte[] getAllFiles(@PathVariable long projectId) {
-//        return projectFilesService.getAllFiles(projectId);
-//    }
+    @NotNull
+    private ResponseEntity<StreamingResponseBody> getStreamingResponseBodyResponseEntity(InputStream fileStream) {
+        StreamingResponseBody responseBody = outputStream -> {
+            try (fileStream) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                throw new FileDownloadException("Error streaming file" + Arrays.toString(e.getStackTrace()));
+            }
+        };
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(responseBody);
+    }
 }

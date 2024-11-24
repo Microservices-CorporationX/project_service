@@ -2,7 +2,6 @@ package faang.school.projectservice.service.project;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.exception.FileDownloadException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -19,11 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -71,35 +71,45 @@ public class ProjectFilesService {
         resourceRepository.save(resource);
     }
 
-    public byte[] downloadFile(long resourceId) {
+    public InputStream downloadFile(long resourceId) {
         Resource resource = getResource(resourceId);
         String key = resource.getKey();
 
-        try (S3ObjectInputStream inputStream = s3Service.downloadFile(key)) {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new FileDownloadException("Error reading content" +
-                    Arrays.toString(e.getStackTrace()));
-        }
+        return s3Service.downloadFile(key);
+    }
+
+    public Map<String, InputStream> downloadAllFiles(long projectId) {
+        Project project = projectService.getProjectById(projectId);
+        Map<String, String> fileNamesWithKeys = new HashMap<>();
+        project.getResources().stream()
+                .filter(resource -> resource.getStatus() == ResourceStatus.ACTIVE)
+                .forEach(resource -> fileNamesWithKeys.put(resource.getId() + resource.getName(), resource.getKey()));
+
+        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(fileNamesWithKeys);
+
+        Map<String, InputStream> files = new HashMap<>();
+        s3ObjectInputStreams.forEach((key, value) -> files.put(key, value.getDelegateStream()));
+        return files;
     }
 
     public void deleteFile(long resourceId, long teamMemberId) {
-        TeamMember teamMember = teamMemberService.findById(teamMemberId);
         Resource resource = getResource(resourceId);
-        String key = resource.getKey();
+        TeamMember teamMember = teamMemberService.findById(teamMemberId);
+        Project project = projectService.getProjectById(resource.getProject().getId());
+
         resourceValidator.validateAllowedToDeleteFile(resource, teamMember);
 
+        String key = resource.getKey();
         s3Service.deleteFile(key);
+
+        BigInteger renewStorageSize = project.getStorageSize().subtract(resource.getSize());
+        project.setStorageSize(renewStorageSize);
 
         resource.setKey(null);
         resource.setSize(null);
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedAt(LocalDateTime.now());
         resource.setUpdatedBy(teamMember);
-
-        Project project = projectService.getProjectById(resource.getProject().getId());
-        BigInteger renewStorageSize = project.getStorageSize().subtract(resource.getSize());
-        project.setStorageSize(renewStorageSize);
 
         projectService.updateProject(projectMapper.toDto(project));
         resourceRepository.save(resource);
