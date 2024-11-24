@@ -85,10 +85,9 @@ public class ResourceService {
         project.getResources().addAll(savedResources);
         projectService.saveProject(project);
         log.info("Project id={} updated in DB", project.getId());
-        List<ResponseResourceDto> responseDtos = savedResources.stream()
+        return savedResources.stream()
                 .map(resourceMapper::toDtoFromEntity)
                 .toList();
-        return responseDtos;
     }
 
     @Transactional
