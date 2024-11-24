@@ -9,12 +9,10 @@ import faang.school.projectservice.dto.jira.issue.JiraIssueUpdateDto;
 import faang.school.projectservice.dto.jira.issue.JiraIssueCreateResponseDto;
 import faang.school.projectservice.dto.jira.issue_transition.JiraIssueAvailableTransitionsDto;
 import faang.school.projectservice.service.jira.JiraService;
-import feign.Response;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -134,7 +132,7 @@ public class JiraController {
             @Parameter(description = "ID of user who sent the request") long requesterUserId,
             @PathVariable @NotBlank @Size(max = 64) String jiraDomain
     ) {
-        List<JiraIssueDto> responseDtos = jiraService.getIssues(jiraDomain);
+        List<JiraIssueDto> responseDtos = jiraService.getAllDomainIssues(jiraDomain);
         return ResponseEntity.ok(responseDtos);
     }
 
@@ -146,7 +144,7 @@ public class JiraController {
             @PathVariable @NotBlank @Size(max = 64) String jiraDomain,
             @RequestBody JiraIssueFilterDto filterDto
     ) {
-        List<JiraIssueDto> responseDtos = jiraService.filterIssues(jiraDomain, filterDto);
+        List<JiraIssueDto> responseDtos = jiraService.filterDomainIssues(jiraDomain, filterDto);
         return ResponseEntity.ok(responseDtos);
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class JiraFilteredIssuesDto {
+public class JiraIssuesDto {
 
     private List<JiraIssueDto> issues;
 }

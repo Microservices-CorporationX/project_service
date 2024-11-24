@@ -121,24 +121,24 @@ public class JiraService {
         return responseDto;
     }
 
-    public List<JiraIssueDto> getIssues(String jiraDomain) {
+    public List<JiraIssueDto> getAllDomainIssues(String jiraDomain) {
         long userId = userContext.getUserId();
         log.info("Received request from user with ID {} to get information about all issues in domain {}", userId, jiraDomain);
 
-        JiraFilteredIssuesDto filteredIssuesDto = executeJiraRequest(jiraDomain, HttpMethod.GET, searchEndpoint, null, JiraFilteredIssuesDto.class);
-        List<JiraIssueDto> issueDtos = filteredIssuesDto.getIssues();
+        JiraIssuesDto issuesDto = executeJiraRequest(jiraDomain, HttpMethod.GET, searchEndpoint, null, JiraIssuesDto.class);
+        List<JiraIssueDto> issueDtos = issuesDto.getIssues();
 
         log.info("Issues in domain {} were found for user with ID {}. Total: {}", jiraDomain, userId, issueDtos.size());
         return issueDtos;
     }
 
-    public List<JiraIssueDto> filterIssues(String jiraDomain, JiraIssueFilterDto filterDto) {
+    public List<JiraIssueDto> filterDomainIssues(String jiraDomain, JiraIssueFilterDto filterDto) {
         long userId = userContext.getUserId();
         log.info("Received request from user with ID {} to get information about issues in domain {} filtered by fields: {}",
                 userId, jiraDomain, filterDto);
 
         String issuesFilterEndpoint = "%s%s".formatted(searchEndpoint, getIssueFilterParam(filterDto));
-        JiraFilteredIssuesDto filteredIssuesDto = executeJiraRequest(jiraDomain, HttpMethod.GET, issuesFilterEndpoint, null, JiraFilteredIssuesDto.class);
+        JiraIssuesDto filteredIssuesDto = executeJiraRequest(jiraDomain, HttpMethod.GET, issuesFilterEndpoint, null, JiraIssuesDto.class);
         List<JiraIssueDto> issueDtos = filteredIssuesDto.getIssues();
 
         log.info("Issues in domain {} filtered by fields: {} were found for user with ID {}. Total: {}",
@@ -152,10 +152,6 @@ public class JiraService {
         if (issueType.equals("Subtask") && parent == null) {
             throw new DataValidationException("For issue type 'Subtask' you must set parent field!");
         }
-    }
-
-    private UserJiraDto getUserJiraInfo(long userId, String jiraDomain) {
-        return userServiceClient.getUserJiraInfo(userId, jiraDomain);
     }
 
     private <T> T executeJiraRequest(String jiraDomain, HttpMethod method, String endpoint, Object body, Class<T> responseType) {
@@ -172,6 +168,10 @@ public class JiraService {
         long userId = userContext.getUserId();
         UserJiraDto userJiraInfo = getUserJiraInfo(userId, jiraDomain);
         return jiraConfig.getJiraClient(jiraDomain, userJiraInfo.getJiraEmail(), userJiraInfo.getJiraToken());
+    }
+
+    private UserJiraDto getUserJiraInfo(long userId, String jiraDomain) {
+        return userServiceClient.getUserJiraInfo(userId, jiraDomain);
     }
 
     private String getIssueUri(String issueKey) {
