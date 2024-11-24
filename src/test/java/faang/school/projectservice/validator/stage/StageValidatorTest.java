@@ -1,8 +1,7 @@
-package faang.school.projectservice.validtor.stage;
+package faang.school.projectservice.validator.stage;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.validator.stage.StageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

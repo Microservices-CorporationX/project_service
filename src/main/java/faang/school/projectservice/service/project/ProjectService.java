@@ -9,7 +9,6 @@ import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -91,13 +90,15 @@ public class ProjectService {
     private boolean isProjectVisibleForUser(Project project, Long userId) {
         return project.getVisibility() == ProjectVisibility.PUBLIC
                 || project.getOwnerId().equals(userId);
-    public Project getProjectById(Long projectId) {
-        return projectRepository.findById(projectId).orElseThrow(
-                () -> new EntityNotFoundException(String.format("Project not found by id: %s", projectId))
-        );
     }
 
-    private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
+    private void validateProjectExistsForUser (Long userId, String name){
+        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
+            throw new AlreadyExistsException(PROJECT);
+        }
+    }
+
+    private Stream<Project> applyFilters (Project project, ProjectFilterDto filters){
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(Stream.of(project),
@@ -105,9 +106,9 @@ public class ProjectService {
                         Stream::concat);
     }
 
-    private void validateProjectExistsForUser(Long userId, String name) {
-        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
-            throw new AlreadyExistsException(PROJECT);
-        }
+    public Project getProjectById(Long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(
+                () -> new EntityNotFoundException("Project not found by id: %s", projectId)
+        );
     }
 }
