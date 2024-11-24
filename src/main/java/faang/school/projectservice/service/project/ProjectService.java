@@ -92,17 +92,17 @@ public class ProjectService {
                 || project.getOwnerId().equals(userId);
     }
 
-    private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
+    private void validateProjectExistsForUser (Long userId, String name){
+        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
+            throw new AlreadyExistsException(PROJECT);
+        }
+    }
+
+    private Stream<Project> applyFilters (Project project, ProjectFilterDto filters){
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(Stream.of(project),
                         (stream, filter) -> filter.apply(stream, filters),
                         Stream::concat);
-    }
-
-    private void validateProjectExistsForUser(Long userId, String name) {
-        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
-            throw new AlreadyExistsException(PROJECT);
-        }
     }
 }
