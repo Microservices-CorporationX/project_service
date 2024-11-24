@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class ProjectFilterDto {
+
     private String name;
+
     private ProjectStatus status;
 }

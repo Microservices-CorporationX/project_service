@@ -24,13 +24,21 @@ public class ProjectDto {
 
     @NotNull(message = "OwnerId must not be null")
     private Long ownerId;
+
     private Long parentProjectId;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
+
     private ProjectStatus status;
+
     @NotNull(message = "Visibility must not be null")
     private ProjectVisibility visibility;
+
     private String coverImageId;
+
     private List<Long> teamsIds;
+
     private List<Long> childrenIds;
 }
