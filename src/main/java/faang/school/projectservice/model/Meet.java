@@ -34,13 +34,17 @@ public class Meet {
     private long creatorId;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @ElementCollection
     @CollectionTable(name = "meet_participant", joinColumns = @JoinColumn(name = "meet_id"))
     @Column(name = "user_id")
     private List<Long> userIds;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "meet_date", nullable = false)
+    private LocalDateTime meetDate;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
