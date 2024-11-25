@@ -13,6 +13,9 @@ import java.util.List;
 
 @Data
 public class ProjectDto {
+
+    @NotNull(message = "Id must not be null")
+    @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
     @NotNull(message = "Name must not be null")
