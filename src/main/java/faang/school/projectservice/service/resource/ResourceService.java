@@ -25,7 +25,6 @@ import java.math.BigInteger;
 public class ResourceService {
     private static final String PROJECT_NOT_FOUND = "Project not found";
     private static final String RESOURCE_NOT_FOUND = "Resource not found";
-    private static final String TEAM_MEMBER_NOT_FOUND = "Team member not found";
 
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
@@ -138,10 +137,6 @@ public class ResourceService {
     private Resource getResource(Long resourceId) {
         return resourceRepository.findById(resourceId).orElseThrow(
                 () -> new EntityNotFoundException(RESOURCE_NOT_FOUND));
-    }
-
-    private TeamMember getTeamMember(Long userId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 
     private void checkStorageSize(BigInteger newFileSize, BigInteger maxStorageSize){
