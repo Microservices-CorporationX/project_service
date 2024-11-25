@@ -11,11 +11,12 @@ import java.util.stream.Stream;
 public class MeetDateFilter implements Filter<Meet, MeetDto> {
     @Override
     public boolean isApplicable(MeetDto filter) {
-        return filter.getCreatedAt() != null;
+        return filter.getCreatedAt() != null && filter.getUpdatedAt() != null;
     }
 
     @Override
     public Stream<Meet> apply(Stream<Meet> dataStream, MeetDto filter) {
-        return dataStream.filter(meet -> meet.getCreatedAt().equals(filter.getCreatedAt()));
+        return dataStream.filter(meet -> meet.getCreatedAt()
+                .isAfter(filter.getCreatedAt()) && meet.getCreatedAt().isBefore(filter.getUpdatedAt()));
     }
 }

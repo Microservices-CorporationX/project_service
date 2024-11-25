@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.MeetRepository;
@@ -26,12 +25,12 @@ public class MeetingService {
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
     private final MeetingValidator meetingValidator;
-    private final UserServiceClient userServiceClient;
+    private final TeamMemberService teamMemberService;
     private final List<Filter<Meet, MeetDto>> meetFilters;
 
     public MeetDto createMeeting(MeetDto createMeetDto) {
-        log.info("Trying to create meet: {}", createMeetDto);
-        validateUserExists(createMeetDto.getId());
+        projectValidator.validateProjectExistsById(createMeetDto.getProjectId());
+        teamMemberService.validateInvitedUsersExistInTeam(createMeetDto);
 
         Meet meet = initializeMeet(createMeetDto);
         meet = meetRepository.save(meet);
@@ -40,10 +39,9 @@ public class MeetingService {
 
     public MeetDto updateMeeting(MeetDto updateMeetDto, long meetId) {
         Meet meeting = meetRepository.findById(meetId)
-                .orElseThrow(() -> {
-                    logAndThrowMeetingNotFound(meetId);
-                    return new EntityNotFoundException("Meeting not found");
-                });
+                .orElseThrow(EntityNotFoundException::new);
+
+        projectValidator.validateProjectExistsById(updateMeetDto.getProjectId());
 
         meetingValidator.validateMeetingUpdate(updateMeetDto, meetId, meeting);
 
@@ -51,9 +49,11 @@ public class MeetingService {
     }
 
     public void deleteMeeting(Long projectId, Long currentUserId, long meetId) {
+        projectValidator.validateProjectExistsById(projectId);
+
         Project project = projectService.getProjectById(projectId);
 
-        projectValidator.checkUserIsProjectOwner(currentUserId, meetId, project);
+        projectValidator.checkUserIsProjectOwner(currentUserId, project);
 
         meetRepository.deleteById(meetId);
         log.info("Meeting #{} successfully deleted by User #{}", meetId, currentUserId);
@@ -69,17 +69,14 @@ public class MeetingService {
         return filterMeet.map(meetMapper::toDto).toList();
     }
 
-    public List<MeetDto> getAllMeetings() {
-        return meetRepository.findAll().stream().map(meetMapper::toDto).toList();
+    public List<MeetDto> getAllMeetings(Long projectId) {
+        return meetRepository.findById(projectId).stream().map(meetMapper::toDto).toList();
     }
 
 
     public MeetDto getMeetingById(long meetId) {
         return meetRepository.findById(meetId).map(meetMapper::toDto)
-                .orElseThrow(() -> {
-                    logAndThrowMeetingNotFound(meetId);
-                    return new EntityNotFoundException("Meeting not found");
-                });
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     private Meet initializeMeet(MeetDto meetDto) {
@@ -88,13 +85,5 @@ public class MeetingService {
         meet.setProject(project);
 
         return meet;
-    }
-
-    private void validateUserExists(long userId) {
-        userServiceClient.getUser(userId);
-    }
-
-    private void logAndThrowMeetingNotFound(long meetId) {
-        log.error("Meeting with ID {} not found", meetId);
     }
 }

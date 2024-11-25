@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -10,7 +11,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,8 +43,7 @@ public class ProjectValidator {
     public void validateProjectExistsById(Long projectId) {
         log.info("Validating project existence by id #{}", projectId);
         if (!projectRepository.existsById(projectId)) {
-            log.error("Project with id #{} doesn't exist", projectId);
-            throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
+            throw new ProjectNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
         log.info("Project with id #{} exists", projectId);
     }
@@ -75,9 +74,8 @@ public class ProjectValidator {
         }
     }
 
-    public void checkUserIsProjectOwner(Long currentUserId, long meetId, Project project) {
+    public void checkUserIsProjectOwner(Long currentUserId, Project project) {
         if (!project.getOwnerId().equals(currentUserId)) {
-            log.error("Only the project owner can delete this meeting {}", meetId);
             throw new UnauthorizedAccessException("You are not allowed to delete this meeting");
         }
     }

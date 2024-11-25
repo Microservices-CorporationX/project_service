@@ -2,11 +2,11 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -111,7 +111,7 @@ class ProjectValidatorTest {
         Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
+        Exception ex = assertThrows(ProjectNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
         assertEquals("Project with id 1 doesn't exist", ex.getMessage());
 
         verify(projectRepository, times(1)).existsById(projectId);
@@ -139,5 +139,13 @@ class ProjectValidatorTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         assertFalse(projectValidator.isOpenProject(projectId));
+    }
+
+
+    @Test
+    public void testCheckUserIsProjectOwner() {
+        Long currentUserId = 1L;
+        project.setOwnerId(currentUserId);
+        assertDoesNotThrow(() -> projectValidator.checkUserIsProjectOwner(currentUserId, project));
     }
 }
