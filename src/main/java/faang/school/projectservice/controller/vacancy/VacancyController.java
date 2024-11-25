@@ -4,7 +4,10 @@ import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyControllerValidator;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/project/vacancy")
 @RequiredArgsConstructor
+@Validated
 public class VacancyController {
 
     private final VacancyControllerValidator validator;
@@ -38,7 +42,7 @@ public class VacancyController {
     }
 
     @DeleteMapping("/{vacancyId}")
-    public void deleteVacancy(@PathVariable Long vacancyId) {
+    public void deleteVacancy(@NotNull @Min(0) @PathVariable Long vacancyId) {
         validator.validateVacancyId(vacancyId);
         vacancyService.deleteVacancy(vacancyId);
     }
@@ -49,7 +53,7 @@ public class VacancyController {
     }
 
     @GetMapping("/{vacancyId}")
-    public VacancyDto getVacancy(@PathVariable Long vacancyId) {
+    public VacancyDto getVacancy(@NotNull @Min(0) @PathVariable Long vacancyId) {
         validator.validateVacancyId(vacancyId);
         return vacancyService.getVacancy(vacancyId);
     }

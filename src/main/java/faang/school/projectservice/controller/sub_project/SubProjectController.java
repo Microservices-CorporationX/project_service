@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,21 +21,24 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/Projects")
+@Validated
 public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{Id}/createSubProject")
-    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId, @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
+    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+                                       @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
     }
 
     @PatchMapping("/{Id}/updateSubProject")
-    public ProjectDto updateSubProject(@Valid @RequestBody ProjectDto subProjectDto) {
+    public ProjectDto updateSubProject(@RequestBody ProjectDto subProjectDto) {
         return projectService.updateSubProject(subProjectDto);
     }
 
     @PostMapping("/{Id}/getSubProject")
-    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId, @RequestBody ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+                                           @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }
 }
