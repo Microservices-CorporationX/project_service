@@ -98,7 +98,7 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
-    @Operation(summary = "Upload a file to a project",
+    @Operation(summary = "Upload a file to the project",
             description = "Uploads a file to the specified project's common files.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File uploaded successfully"),
@@ -114,7 +114,7 @@ public class ProjectController {
         return ResponseEntity.ok("File uploaded successfully");
     }
 
-    @Operation(summary = "Download a file",
+    @Operation(summary = "Download a file of the project",
             description = "Downloads the specified file from common project's files.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File downloaded successfully"),
@@ -127,7 +127,7 @@ public class ProjectController {
         return fileStreamingService.getStreamingResponseBodyInResponseEntity(fileStream);
     }
 
-    @Operation(summary = "Delete a file",
+    @Operation(summary = "Delete a file from the project",
             description = "Deletes the specified file from the project's common files.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "File deleted successfully"),
