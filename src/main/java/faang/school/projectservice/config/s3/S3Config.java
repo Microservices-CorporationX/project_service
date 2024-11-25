@@ -17,10 +17,10 @@ public class S3Config {
     @Value("${services.s3.secretKey}")
     private String secretKey;
 
-    @Value("${services.s3.bucketName}}")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    @Value("${services.s3.region}}")
+    @Value("${services.s3.region}")
     private String region;
 
 

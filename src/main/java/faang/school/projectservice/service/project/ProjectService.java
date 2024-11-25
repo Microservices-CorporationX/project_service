@@ -3,6 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.s3.S3Service;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class ProjectService {
     public String uploadCoverImage(long projectId, MultipartFile file) {
         Project project = projectRepository.getProjectById(projectId);
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
-        checkStorageSize(project.getStorageSize(), newStorageSize);
+        checkStorageSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
         String key = s3Service.uploadCoverImage(file, folder);
@@ -41,10 +42,10 @@ public class ProjectService {
         return key;
     }
 
-    private void checkStorageSize(BigInteger currentStorageSize, BigInteger newStorageSize) {
-        if (currentStorageSize.compareTo(newStorageSize) == 0) {
+    private void checkStorageSize(BigInteger newStorageSize, BigInteger maxStorageSize) {
+        if (newStorageSize.compareTo(maxStorageSize) > 0) {
             log.error("Received a request to upload an image that exceeds the total storage");
-            throw new RuntimeException("Storage size exceeded! Choose a smaller image");
+            throw new IllegalArgumentException("Storage size exceeded! Choose a smaller image.");
         }
     }
 }

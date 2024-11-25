@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.project.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
 
-    @Value("services.s3.bucketName")
+    @Value("${services.s3.bucketName}")
     private String bucketName;
 
     @Override
@@ -27,14 +28,14 @@ public class S3ServiceImpl implements S3Service {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s", LocalDateTime.now(), folder, file.getOriginalFilename());
+        String key = String.format("%s/%s/%s", LocalDateTime.now(), folder, file.getOriginalFilename());
         try {
             PutObjectRequest request = new PutObjectRequest(
                     bucketName, key, file.getInputStream(), objectMetadata
             );
             s3Client.putObject(request);
-        } catch (Exception e) {
-            log.error("A request to upload an image has failed", e);
+        } catch (Exception ex) {
+            log.error("A request to upload an image has failed", ex);
             throw new RuntimeException("A request to upload an image has failed");
         }
         return key;

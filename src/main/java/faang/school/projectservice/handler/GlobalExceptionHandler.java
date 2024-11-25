@@ -55,12 +55,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
-        log.error("Illegal Argument Error: {}", exception.getMessage());
-        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
-    }
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
+//        log.error("Illegal Argument Error: {}", exception.getMessage());
+//        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
+//    }
 
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
