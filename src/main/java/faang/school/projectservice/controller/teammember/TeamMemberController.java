@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.teammember.TeamMemberDeleteDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.teammember.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberUpdateDto;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,8 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Team Members", description = "API for managing team members")
 public class TeamMemberController {
-
-    private static final String MEMBER_PATH = "/member/{id}";
 
     private final TeamMemberService teamMemberService;
 
@@ -71,16 +68,16 @@ public class TeamMemberController {
         return ResponseEntity.ok(members);
     }
 
-    @Operation(summary = "Get all team members")
-    @GetMapping()
+    @Operation(summary = "Get all team members from a project")
+    @GetMapping("/project/{projectId}")
     public ResponseEntity<List<TeamMemberDto>> getAllMembersFromTheProject(@PathVariable @Positive Long projectId) {
-        log.info("Getting all team members");
+        log.info("Getting all team members for project: {}", projectId);
         List<TeamMemberDto> members = teamMemberService.getAllMembersFromTheProject(projectId);
         return ResponseEntity.ok(members);
     }
 
     @Operation(summary = "Get a team member by id")
-    @GetMapping(MEMBER_PATH)
+    @GetMapping("/member/{id}")
     public ResponseEntity<TeamMemberDto> getMemberById(@PathVariable @Positive Long id) {
         log.info("Getting team member with id: {}", id);
         TeamMemberDto member = teamMemberService.getMemberById(id);

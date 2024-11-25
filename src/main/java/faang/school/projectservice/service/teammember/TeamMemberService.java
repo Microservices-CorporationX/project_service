@@ -1,11 +1,13 @@
 package faang.school.projectservice.service.teammember;
 
+import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDeleteDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.dto.teammember.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberUpdateDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.dto.teammember.TeamMemberFilterDto;
 import faang.school.projectservice.filter.teammember.TeamMemberFilter;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.team_member.TeamMemberMapper;
@@ -21,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +43,7 @@ public class TeamMemberService {
     private final ProjectService projectService;
     private final TeamService teamService;
     private final List<TeamMemberFilter> teamMemberFilters;
+    private final UserServiceClient userServiceClient;
 
     @Transactional
     public TeamMemberDto addMemberToTheTeam(TeamMemberDto teamMemberDto) {
@@ -51,8 +56,10 @@ public class TeamMemberService {
             throw new DataValidationException("You are not authorized to add team members");
         }
 
-        TeamMember addedUser = findById(teamMemberDto.getUserId());
-        Optional<TeamMember> existingMember = findExistingMember(project, addedUser);
+        Optional<TeamMember> existingMember = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(member -> member.getUserId().equals(teamMemberDto.getUserId()))
+                .findFirst();
 
         if (existingMember.isPresent()) {
             return updateExistingMember(existingMember.get(), teamMemberDto);
@@ -63,19 +70,17 @@ public class TeamMemberService {
 
     @Transactional
     public TeamMemberDto updateMemberInTheTeam(TeamMemberUpdateDto teamMemberUpdateDto) {
+        Team team = teamService.findById(teamMemberUpdateDto.getTeamId());
+        TeamMember updateUser = findById(teamMemberUpdateDto.getUpdateUserId());
         TeamMember currentUser = findById(teamMemberUpdateDto.getCurrentUserId());
-        Project project = projectService.getProjectById(teamMemberUpdateDto.getProjectId());
-        if (!isProjectMember(currentUser, project)) {
-            throw new DataValidationException("You are not a member of this project");
+
+        if (currentUser.getRoles().contains(TeamRole.TEAMLEAD)) {
+            return updateMemberAsTeamLead(teamMemberUpdateDto, team, updateUser);
+        } else if (currentUser.getUserId().equals(teamMemberUpdateDto.getUpdateUserId())) {
+            return updateMemberAsUser(teamMemberUpdateDto, updateUser);
+        } else {
+            throw new DataValidationException("You do not have permission to update this team member");
         }
-        TeamMember updatedUser = findById(teamMemberUpdateDto.getUpdateUserId());
-
-
-
-
-
-
-
     }
 
     @Transactional
@@ -91,7 +96,7 @@ public class TeamMemberService {
         deleteById(teamMemberDeleteDto.getDeleteUserId());
     }
 
-    public List<TeamMemberDto> getAllMembersWithFilter(TeamMemberFilterDto teamMemberFilterDto){
+    public List<TeamMemberDto> getAllMembersWithFilter(TeamMemberFilterDto teamMemberFilterDto) {
         Stream<TeamMember> teamMemberStream = findAll().stream();
 
         return teamMemberFilters.stream()
@@ -118,10 +123,36 @@ public class TeamMemberService {
         return teamMemberMapper.toDto(teamMember);
     }
 
-    private boolean isProjectMember(TeamMember user, Project project) {
-        return project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(member -> member.getId().equals(user.getId()));
+
+    private TeamMemberDto updateMemberAsTeamLead(TeamMemberUpdateDto dto, Team team, TeamMember updateUser) {
+        UserDto user = userServiceClient.getUser(dto.getUpdateUserId());
+
+        List<TeamRole> newRoles = dto.getRoles().stream()
+                .map(TeamRole::valueOf)
+                .toList();
+
+        updateUser.setTeam(team);
+
+        List<TeamRole> updatedRoles = new ArrayList<>(updateUser.getRoles());
+        updatedRoles.addAll(newRoles);
+        updateUser.setRoles(updatedRoles);
+
+        TeamMember savedMember = save(updateUser);
+
+        user.setUsername(dto.getUsername());
+        user.setUpdatedAt(LocalDateTime.now());
+        userServiceClient.saveUser(user);
+
+        return teamMemberMapper.toDto(savedMember);
+    }
+
+    private TeamMemberDto updateMemberAsUser(TeamMemberUpdateDto dto, TeamMember updateUser) {
+        UserDto user = userServiceClient.getUser(dto.getUpdateUserId());
+        user.setUsername(dto.getUsername());
+        user.setUpdatedAt(LocalDateTime.now());
+        userServiceClient.saveUser(user);
+
+        return teamMemberMapper.toDto(updateUser);
     }
 
     private boolean hasPermissionToAddMember(Project project, TeamMember currentUser, TeamMemberDto teamMemberDto) {
@@ -129,17 +160,7 @@ public class TeamMemberService {
                 currentUser.getRoles().stream().anyMatch(role -> role == TeamRole.TEAMLEAD);
     }
 
-    private Optional<TeamMember> findExistingMember(Project project, TeamMember addedUser) {
-        return project.getTeams().stream()
-                .flatMap(team -> team.getTeamMembers().stream())
-                .filter(member -> member.getUserId().equals(addedUser.getUserId()))
-                .findFirst();
-    }
-
     private TeamMemberDto updateExistingMember(TeamMember existingMember, TeamMemberDto teamMemberDto) {
-        log.warn("User with ID {} is already a member of project with ID {}. Updating roles.",
-                existingMember.getUserId(), existingMember.getTeam().getProject().getId());
-
         List<TeamRole> newRoles = teamMemberDto.getRole().stream()
                 .map(TeamRole::valueOf)
                 .collect(Collectors.toList());
@@ -151,7 +172,7 @@ public class TeamMemberService {
     }
 
     private TeamMemberDto addNewMember(TeamMemberDto teamMemberDto) {
-        Team team = teamService.getById(teamMemberDto.getTeam());
+        Team team = teamService.findById(teamMemberDto.getTeam());
         List<TeamRole> teamRoles = teamMemberDto.getRole().stream()
                 .map(TeamRole::valueOf)
                 .toList();
@@ -161,8 +182,8 @@ public class TeamMemberService {
                 .team(team)
                 .build();
 
-        TeamMember savedMember = teamMemberRepository.save(teamMember);
-        log.info("New team member added successfully: {}", savedMember.getId());
+        TeamMember savedMember = save(teamMember);
+        log.info("New team member added successfully: {}", savedMember.getUserId());
 
         return teamMemberMapper.toDto(savedMember);
     }
@@ -191,7 +212,7 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
     }
 
-    public List<TeamMember> findAll(){
+    public List<TeamMember> findAll() {
         return teamMemberRepository.findAll();
     }
 

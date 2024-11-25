@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.teammember;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,14 +27,12 @@ public class TeamMemberUpdateDto {
     @NotNull
     private Long updateUserId;
 
-    private String nickname;
-
-    private String description;
-
-    private List<String> roles;
-
     @NotNull
-    private Long projectId;
+    private String username;
+
+    @NotNull(message = "Role list must not be null")
+    @Size(min = 1, message = "At least one role must be specified")
+    private List<String> roles;
 
     @NotNull
     private Long teamId;
