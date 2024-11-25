@@ -31,14 +31,6 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
     private final ProjectValidator projectValidator;
 
-    public ProjectDto createProject(ProjectDto dto) {
-        projectValidator.validateUniqueProject(dto);
-        Project project = projectMapper.toEntity(dto);
-        project = projectRepository.save(project);
-        log.info("Created project {}", project);
-        return projectMapper.toDto(project);
-    }
-
     public CreateSubProjectDto createSubProject(CreateSubProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
         Project project = createSubProjectMapper.toEntity(dto);

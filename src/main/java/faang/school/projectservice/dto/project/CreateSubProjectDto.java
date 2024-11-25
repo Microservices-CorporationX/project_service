@@ -20,10 +20,14 @@ import java.util.List;
 public class CreateSubProjectDto {
     @Positive
     private Long id;
-    @NotBlank
+    @NotNull(message = "Project name must not be null")
+    @NotBlank(message = "Project name must not be blank")
     private String name;
+    @NotNull(message = "Project description must not be null")
+    @NotBlank(message = "Project description must not be blank")
+    private String description;
     @Positive
-    @NotNull
+    @NotNull(message = "Parent id must not be null")
     private Long parentId;
     private List<Long> childrenIds;
     private LocalDateTime createdAt;

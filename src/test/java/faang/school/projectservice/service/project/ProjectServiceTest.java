@@ -2,10 +2,9 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectNameFilter;
-import faang.school.projectservice.filter.project.ProjectStatusFilter;
+import faang.school.projectservice.filter.project.NameProjectFilter;
+import faang.school.projectservice.filter.project.StatusProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTests {
+public class ProjectServiceTest {
 
     @InjectMocks
     private ProjectService projectService;
@@ -46,22 +45,10 @@ public class ProjectServiceTests {
 
     @BeforeEach
     public void setUp() {
-        ProjectFilter nameFilter = mock(ProjectNameFilter.class);
-        ProjectFilter statusFilter = mock(ProjectStatusFilter.class);
+        ProjectFilter nameFilter = mock(NameProjectFilter.class);
+        ProjectFilter statusFilter = mock(StatusProjectFilter.class);
         projectFilters = new ArrayList<>(List.of(nameFilter, statusFilter));
         projectService = new ProjectService(projectMapper, createSubProjectMapper, projectRepository, projectFilters, projectValidator);
-    }
-
-    @Test
-    public void testCreateProject() {
-        Project project = new Project();
-        ProjectDto projectDto = new ProjectDto();
-        when(projectMapper.toEntity(projectDto)).thenReturn(project);
-        when(projectMapper.toDto(any())).thenReturn(projectDto);
-        ProjectDto result = projectService.createProject(projectDto);
-        assertEquals(projectDto, result);
-        verify(projectValidator, times(1)).validateUniqueProject(projectDto);
-        verify(projectRepository, times(1)).save(project);
     }
 
     @Test

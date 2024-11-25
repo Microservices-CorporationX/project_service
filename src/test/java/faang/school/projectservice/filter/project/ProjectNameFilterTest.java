@@ -7,9 +7,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProjectNameFilterTests {
+public class ProjectNameFilterTest {
 
-    private final ProjectNameFilter projectNameFilter = new ProjectNameFilter();
+    private final NameProjectFilter projectNameFilter = new NameProjectFilter();
 
     @Test
     public void testIsApplicable(){

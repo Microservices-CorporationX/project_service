@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProjectStatusFilterTests {
+public class ProjectStatusFilterTest {
 
-    private final ProjectStatusFilter projectStatusFilter = new ProjectStatusFilter();
+    private final StatusProjectFilter projectStatusFilter = new StatusProjectFilter();
 
     @Test
     public void testIsApplicable(){
