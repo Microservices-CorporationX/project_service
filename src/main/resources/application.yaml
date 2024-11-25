@@ -42,7 +42,7 @@ calculations_messages_processing:
 
 services:
   s3:
-    endpoint: http://localhost:9000
+    endpoint: ${S3_ENDPOINT}
     accessKey: ${S3_ACCESS_KEY}
     secretKey: ${S3_SECRET_ACCESS_KEY}
     bucketName: corporationx-project-service
