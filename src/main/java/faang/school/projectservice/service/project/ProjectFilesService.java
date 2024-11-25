@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,10 +59,8 @@ public class ProjectFilesService {
                 .allowedRoles(allowedRoles)
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
                 .createdBy(fileCreator)
                 .updatedBy(fileCreator)
-                .updatedAt(LocalDateTime.now())
                 .project(project)
                 .build();
 
@@ -82,12 +79,12 @@ public class ProjectFilesService {
 
     public Map<String, InputStream> downloadAllFiles(long projectId) {
         Project project = projectService.getProjectById(projectId);
-        Map<String, String> filesNameWithKey = new HashMap<>();
+        Map<String, String> filesNamesWithKeys = new HashMap<>();
         project.getResources().stream()
                 .filter(resource -> resource.getStatus().equals(ResourceStatus.ACTIVE))
-                .forEach(resource -> filesNameWithKey.put(resource.getId() + resource.getName(), resource.getKey()));
+                .forEach(resource -> filesNamesWithKeys.put(resource.getId() + resource.getName(), resource.getKey()));
 
-        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(filesNameWithKey);
+        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(filesNamesWithKeys);
 
         Map<String, InputStream> files = new HashMap<>();
         s3ObjectInputStreams.forEach((key, value) -> files.put(key, value.getDelegateStream()));
@@ -110,7 +107,6 @@ public class ProjectFilesService {
         resource.setKey(null);
         resource.setSize(null);
         resource.setStatus(ResourceStatus.DELETED);
-        resource.setUpdatedAt(LocalDateTime.now());
         resource.setUpdatedBy(teamMember);
 
         projectService.updateProject(projectMapper.toDto(project));

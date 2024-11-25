@@ -16,7 +16,7 @@ public class ResourceValidator {
     public void validateAllowedToDeleteFile(Resource resource, TeamMember teamMember) {
         if (!resource.getCreatedBy().getId().equals(teamMember.getId())
                 && teamMember.getRoles().stream()
-                .anyMatch(teamRole -> teamRole.equals(TeamRole.MANAGER))) {
+                .noneMatch(teamRole -> teamRole.equals(TeamRole.MANAGER))) {
             throw new DataValidationException("Delete file allowed only creator or manager");
         }
     }

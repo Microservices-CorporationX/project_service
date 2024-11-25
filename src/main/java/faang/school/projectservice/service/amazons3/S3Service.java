@@ -29,21 +29,22 @@ public class S3Service {
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder) {
-        log.info("Start uploading file {}", file.getOriginalFilename());
+        String key = (String.format("%s/%d/%s", folder,
+                System.currentTimeMillis(), file.getOriginalFilename()));
+        log.info("Start uploading file with key: {}", key);
+
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         objectMetadata.setContentLength(file.getSize());
-        String key = (String.format("%s/%d/%s", folder,
-                System.currentTimeMillis(), file.getOriginalFilename()));
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName,
                     key, file.getInputStream(), objectMetadata);
             s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
-            throw new FileUploadException("Error uploading file");
+            throw new FileUploadException("Error uploading file with key: " + key);
         }
-        log.info("End uploading file {}", file.getOriginalFilename());
+        log.info("End uploading file with key: {}", key);
         return key;
     }
 
@@ -51,17 +52,11 @@ public class S3Service {
         return downloadFileFromS3(key);
     }
 
-    public Map<String, S3ObjectInputStream> downloadAllFiles(Map<String, String> fileNamesWithKeys) {
+    public Map<String, S3ObjectInputStream> downloadAllFiles(Map<String, String> filesNamesWithKeys) {
         Map<String, S3ObjectInputStream> result = new HashMap<>();
-        fileNamesWithKeys.forEach((name, key) -> result.put(name, downloadFileFromS3(key)));
+        filesNamesWithKeys.forEach((name, key) -> result.put(name, downloadFileFromS3(key)));
         return result;
     }
-
-    public void deleteFile(String key) {
-        log.info("Deleting file with key {}", key);
-        s3Client.deleteObject(bucketName, key);
-    }
-
     private S3ObjectInputStream downloadFileFromS3(String key) {
         log.info("Start downloading file with key: {}", key);
         try {
@@ -70,7 +65,24 @@ public class S3Service {
             log.info("End downloading file with key: {}", key);
             return fileStream;
         } catch (AmazonS3Exception e) {
-            throw new FileDownloadException("Error downloading file");
+            throw new FileDownloadException("Error downloading file with key: " + key);
         }
     }
+
+    public void deleteFile(String key) {
+        log.info("Deleting file with key {}", key);
+        s3Client.deleteObject(bucketName, key);
+    }
+
+//    private S3ObjectInputStream downloadFileFromS3(String key) {
+//        log.info("Start downloading file with key: {}", key);
+//        try {
+//            S3Object s3Object = s3Client.getObject(bucketName, key);
+//            S3ObjectInputStream fileStream = s3Object.getObjectContent();
+//            log.info("End downloading file with key: {}", key);
+//            return fileStream;
+//        } catch (AmazonS3Exception e) {
+//            throw new FileDownloadException("Error downloading file with key: " + key);
+//        }
+//    }
 }
