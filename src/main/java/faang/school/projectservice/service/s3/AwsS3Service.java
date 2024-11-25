@@ -29,7 +29,6 @@ public class AwsS3Service {
     private String bucketName;
 
     public Resource uploadFile(String folder, MultipartFile file) {
-        validateInputs(folder, file);
         ObjectMetadata metadata = createMetadata(file.getSize(), file.getContentType());
         String key = String.format("%s/%s_%s",
                 folder,
@@ -57,8 +56,6 @@ public class AwsS3Service {
     }
 
     public Resource updateResource(String key, MultipartFile file) {
-        validateInputs(key, file);
-
         ObjectMetadata metadata = createMetadata(file.getSize(), file.getContentType());
 
         try {
@@ -97,14 +94,5 @@ public class AwsS3Service {
         metadata.setContentLength(size);
         metadata.setContentType(contentType);
         return metadata;
-    }
-
-    private void validateInputs(String folder, MultipartFile file) {
-        if (folder == null || folder.isBlank()) {
-            throw new IllegalArgumentException("Folder must not be null or empty");
-        }
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File must not be null or empty");
-        }
     }
 }
