@@ -20,6 +20,6 @@ public class InvitationDescriptionFilterImpl implements StageInvitationFilter {
                                          StageInvitationFilterDto filterDto) {
         return invitationStream.filter(stageInvitation ->
                 stageInvitation.getStatus().equals(StageInvitationStatus.REJECTED) &&
-                        stageInvitation.getDescription().contains(filterDto.getDescription()));
+                        stageInvitation.getDescription().toLowerCase().contains(filterDto.getDescription().toLowerCase()));
     }
 }
