@@ -38,8 +38,7 @@ class ProjectServiceApplicationTests {
     @InjectMocks
     private ProjectService projectService;
 
-@Nested
-class Tests {
+
 
     @Test
     void createProject_Success() {
@@ -121,7 +120,7 @@ class Tests {
         assertThat(result.get(0).getName()).isEqualTo("Test Project");
         assertThat(result).allMatch(dto -> "Test Project".equals(dto.getName()));
     }
-}
+
 
     private Project createTestProject() {
         return Project.builder()
