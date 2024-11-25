@@ -1,8 +1,7 @@
-package faang.school.projectservice.service.impl;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.abstracts.StageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
-package faang.school.projectservice.service.abstracts;
+package faang.school.projectservice.service.stageinvitation;
 
-import faang.school.projectservice.dto.invitation.RejectionDto;
+import faang.school.projectservice.dto.RejectionDto;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 

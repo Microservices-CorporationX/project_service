@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.invitation;
+package faang.school.projectservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

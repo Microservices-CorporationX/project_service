@@ -1,7 +1,7 @@
-package faang.school.projectservice.filters.impl;
+package faang.school.projectservice.filters.stageinvitation;
 
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,18 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class InvitationAuthorFilterImplTest {
-    private static final Long AUTHOR_ID = 1L;
+class InvitationStageFilterImplTest {
+    private final static Long STAGE_ID = 1L;
 
-    private final InvitationAuthorFilterImpl authorFilter = new InvitationAuthorFilterImpl();
+    private final InvitationStageFilterImpl stageFilter = new InvitationStageFilterImpl();
 
     @Test
     public void testIsApplicable() {
         StageInvitationFilterDto filterDto = StageInvitationFilterDto.builder()
-                .authorId(1L)
+                .stageId(STAGE_ID)
                 .build();
 
-        boolean isApplicable = authorFilter.isApplicable(filterDto);
+        boolean isApplicable = stageFilter.isApplicable(filterDto);
 
         assertTrue(isApplicable);
     }
@@ -35,33 +35,33 @@ class InvitationAuthorFilterImplTest {
     public void testIsNotApplicable() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
 
-        boolean isApplicable = authorFilter.isApplicable(filterDto);
+        boolean isApplicable = stageFilter.isApplicable(filterDto);
 
         assertFalse(isApplicable);
     }
 
     @Test
-    public void testApplyAuthorFilter() {
+    public void testApplyStageFilter() {
         StageInvitationFilterDto filterDto = StageInvitationFilterDto.builder()
-                .authorId(AUTHOR_ID)
+                .stageId(STAGE_ID)
                 .build();
-        TeamMember firstMember = TeamMember.builder()
-                .id(AUTHOR_ID)
+        Stage firstStage = Stage.builder()
+                .stageId(STAGE_ID)
                 .build();
-        TeamMember secondMember = TeamMember.builder()
-                .id(AUTHOR_ID + 1)
+        Stage secondStage = Stage.builder()
+                .stageId(STAGE_ID + 1)
                 .build();
         StageInvitation firstInvitation = StageInvitation.builder()
-                .author(firstMember)
+                .stage(firstStage)
                 .build();
         StageInvitation secondInvitation = StageInvitation.builder()
-                .author(secondMember)
+                .stage(secondStage)
                 .build();
         Stream<StageInvitation> invitationStream = Stream.of(firstInvitation, secondInvitation);
 
-        List<StageInvitation> resultList = authorFilter.apply(invitationStream, filterDto).toList();
+        List<StageInvitation> resultList = stageFilter.apply(invitationStream, filterDto).toList();
 
         assertEquals(1, resultList.size());
-        assertEquals(AUTHOR_ID, resultList.get(0).getAuthor().getId());
+        assertEquals(STAGE_ID, resultList.get(0).getStage().getStageId());
     }
 }

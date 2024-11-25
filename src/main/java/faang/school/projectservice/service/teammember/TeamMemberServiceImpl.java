@@ -1,8 +1,7 @@
-package faang.school.projectservice.service.impl;
+package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.abstracts.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

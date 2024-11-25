@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.abstracts;
+package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.model.TeamMember;
 

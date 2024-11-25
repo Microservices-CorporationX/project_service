@@ -1,8 +1,8 @@
-package faang.school.projectservice.filters.impl;
+package faang.school.projectservice.filters.stageinvitation;
 
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,18 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class InvitationStageFilterImplTest {
-    private final static Long STAGE_ID = 1L;
+class InvitationDescriptionFilterImplTest {
+    private static final String TEST_DESCRIPTION = "test";
 
-    private final InvitationStageFilterImpl stageFilter = new InvitationStageFilterImpl();
+    private final InvitationDescriptionFilterImpl descriptionFilter = new InvitationDescriptionFilterImpl();
 
     @Test
     public void testIsApplicable() {
         StageInvitationFilterDto filterDto = StageInvitationFilterDto.builder()
-                .stageId(STAGE_ID)
+                .description(TEST_DESCRIPTION)
                 .build();
 
-        boolean isApplicable = stageFilter.isApplicable(filterDto);
+        boolean isApplicable = descriptionFilter.isApplicable(filterDto);
 
         assertTrue(isApplicable);
     }
@@ -35,33 +35,29 @@ class InvitationStageFilterImplTest {
     public void testIsNotApplicable() {
         StageInvitationFilterDto filterDto = new StageInvitationFilterDto();
 
-        boolean isApplicable = stageFilter.isApplicable(filterDto);
+        boolean isApplicable = descriptionFilter.isApplicable(filterDto);
 
         assertFalse(isApplicable);
     }
 
     @Test
-    public void testApplyStageFilter() {
+    public void testApplyDescriptionFilter() {
         StageInvitationFilterDto filterDto = StageInvitationFilterDto.builder()
-                .stageId(STAGE_ID)
-                .build();
-        Stage firstStage = Stage.builder()
-                .stageId(STAGE_ID)
-                .build();
-        Stage secondStage = Stage.builder()
-                .stageId(STAGE_ID + 1)
+                .description(TEST_DESCRIPTION)
                 .build();
         StageInvitation firstInvitation = StageInvitation.builder()
-                .stage(firstStage)
+                .status(StageInvitationStatus.REJECTED)
+                .description("test123")
                 .build();
         StageInvitation secondInvitation = StageInvitation.builder()
-                .stage(secondStage)
+                .status(StageInvitationStatus.REJECTED)
+                .description("123")
                 .build();
         Stream<StageInvitation> invitationStream = Stream.of(firstInvitation, secondInvitation);
 
-        List<StageInvitation> resultList = stageFilter.apply(invitationStream, filterDto).toList();
+        List<StageInvitation> resultList = descriptionFilter.apply(invitationStream, filterDto).toList();
 
         assertEquals(1, resultList.size());
-        assertEquals(STAGE_ID, resultList.get(0).getStage().getStageId());
+        assertTrue(resultList.get(0).getDescription().contains(TEST_DESCRIPTION));
     }
 }

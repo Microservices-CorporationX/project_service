@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator.impl;
+package faang.school.projectservice.validator.stageinvitation;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
@@ -6,7 +6,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.service.abstracts.StageService;
+import faang.school.projectservice.service.stage.StageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
