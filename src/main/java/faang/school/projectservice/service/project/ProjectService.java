@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.s3.S3Service;
@@ -45,7 +46,7 @@ public class ProjectService {
     private void checkStorageSize(BigInteger newStorageSize, BigInteger maxStorageSize) {
         if (newStorageSize.compareTo(maxStorageSize) > 0) {
             log.error("Received a request to upload an image that exceeds the total storage");
-            throw new IllegalArgumentException("Storage size exceeded! Choose a smaller image.");
+            throw new StorageSizeExceededException("Storage size exceeded! Choose a smaller image.");
         }
     }
 }

@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +37,7 @@ public class S3ServiceImpl implements S3Service {
             s3Client.putObject(request);
         } catch (Exception ex) {
             log.error("A request to upload an image has failed", ex);
-            throw new RuntimeException("A request to upload an image has failed");
+            throw new StorageSizeExceededException("A request to upload an image has failed because storage size exceeded");
         }
         return key;
     }

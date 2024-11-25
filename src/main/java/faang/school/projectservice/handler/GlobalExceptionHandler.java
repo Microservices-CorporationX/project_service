@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.ProjectStatusValidationException;
 import faang.school.projectservice.exception.TeamMemberValidationException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.Subproject.*;
+import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
@@ -55,12 +56,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("Vacancy Creation Error: {}", exception.getMessage());
     }
 
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
-//    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
-//        log.error("Illegal Argument Error: {}", exception.getMessage());
-//        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
-//    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleVacancyCreation(IllegalArgumentException exception) {
+        log.error("Illegal Argument Error: {}", exception.getMessage());
+        return new ErrorResponse("Illegal Argument Error: {}", exception.getMessage());
+    }
 
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -95,5 +96,12 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleSubprojectBadRequestException(SubprojectBadRequestException exception) {
         log.error("Subproject Bad Request Error: {}", exception.getMessage());
         return new ErrorResponse("Subproject Bad Request Error: {}", exception.getMessage());
+    }
+
+    @ExceptionHandler(StorageSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleStorageSizeExceededException(StorageSizeExceededException exception) {
+        log.error("Storage Size Exceeded Error: {}", exception);
+        return new ErrorResponse("Storage Size Exceeded Error", exception.getMessage());
     }
 }
