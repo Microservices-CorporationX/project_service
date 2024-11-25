@@ -29,7 +29,7 @@ public class CreateSubProjectDto {
     @Positive
     @NotNull(message = "Parent id must not be null")
     private Long parentId;
-    private List<Long> childrenIds;
+    private List<@NotNull Long> childrenIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private ProjectVisibility visibility;

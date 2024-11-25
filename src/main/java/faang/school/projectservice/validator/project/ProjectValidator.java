@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -16,7 +17,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectValidator {
 
+    private final UserContext userContext;
     private final ProjectRepository projectRepository;
+
+    public void validateName(String projectName, Long userId) {
+        if (projectRepository.existsByOwnerUserIdAndName(userId, projectName)) {
+            log.info("User with id {} tried to create a project with the same name", userContext.getUserId());
+            throw new DataValidationException("Can not create new project with this project name, " +
+                    "this name is already used for another project of this user");
+        }
+    }
 
     public void validateUniqueProject(ProjectDto dto) {
         if (projectRepository.existsById(dto.getId())) {

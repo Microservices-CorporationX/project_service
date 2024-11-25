@@ -1,28 +1,28 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.NameProjectFilter;
-import faang.school.projectservice.filter.project.StatusProjectFilter;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filters.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
-import faang.school.projectservice.mapper.project.ProjectMapper;
-import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.mapper.project.ProjectMapperImpl;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,25 +30,216 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
 
+    private static final String NOT_OWNER_UPDATING_MESSAGE = "The user is not the owner of this project";
+
     @InjectMocks
     private ProjectService projectService;
 
-    @Mock
-    private ProjectMapper projectMapper;
+    @Spy
+    private ProjectMapperImpl projectMapper;
     @Mock
     private CreateSubProjectMapper createSubProjectMapper;
-    private List<ProjectFilter> projectFilters;
+    @Spy
+    private faang.school.projectservice.filters.project.NameProjectFilter nameProjectFilter;
+    @Spy
+    private faang.school.projectservice.filters.project.StatusProjectFilter statusProjectFilter;
     @Mock
     private ProjectRepository projectRepository;
     @Mock
     private ProjectValidator projectValidator;
+    @Mock
+    private UserContext userContext;
 
     @BeforeEach
-    public void setUp() {
-        ProjectFilter nameFilter = mock(NameProjectFilter.class);
-        ProjectFilter statusFilter = mock(StatusProjectFilter.class);
-        projectFilters = new ArrayList<>(List.of(nameFilter, statusFilter));
-        projectService = new ProjectService(projectMapper, createSubProjectMapper, projectRepository, projectFilters, projectValidator);
+    void setUp() {
+        List<ProjectFilter> filters = List.of(nameProjectFilter, statusProjectFilter);
+        projectService = new ProjectService(userContext, projectMapper, createSubProjectMapper, projectRepository, filters, projectValidator);
+    }
+
+    @Test
+    void testCreateCreated() {
+        ProjectDto projectDto = ProjectDto.builder()
+                .name("Project")
+                .description("Description")
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
+        long userId = 1L;
+        long generatedId = 1L;
+        when(userContext.getUserId()).thenReturn(userId);
+        Project expectedCreatedProject = projectMapper.toEntity(projectDto);
+        expectedCreatedProject.setChildren(new ArrayList<>());
+        expectedCreatedProject.setStatus(ProjectStatus.CREATED);
+        expectedCreatedProject.setId(generatedId);
+        when(projectRepository.save(any(Project.class))).thenReturn(expectedCreatedProject);
+
+        ProjectDto createdProjectDto = projectService.create(projectDto);
+
+        ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
+        verify(projectRepository).save(projectCaptor.capture());
+        Project capturedProject = projectCaptor.getValue();
+        assertNotNull(capturedProject);
+        assertEquals(ProjectStatus.CREATED, capturedProject.getStatus());
+        assertNotNull(capturedProject.getCreatedAt());
+        assertNotNull(capturedProject.getUpdatedAt());
+        assertEquals(expectedCreatedProject, projectMapper.toEntity(createdProjectDto));
+    }
+
+    @Test
+    void testUpdateStatusWithUserNotOwner() {
+        long userId = 1L;
+        long projectId = 1L;
+        when(userContext.getUserId()).thenReturn(userId);
+        when(projectRepository.getProjectById(projectId))
+                .thenReturn(Project.builder().ownerId(2L).build());
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> projectService.updateStatus(ProjectStatus.CANCELLED, projectId));
+        assertEquals(NOT_OWNER_UPDATING_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void testUpdateStatusUpdated() {
+        long userId = 1L;
+        long projectId = 1L;
+        when(userContext.getUserId()).thenReturn(userId);
+        Project project = Project.builder().ownerId(userId).children(new ArrayList<>()).status(ProjectStatus.CREATED).build();
+        when(projectRepository.getProjectById(projectId))
+                .thenReturn(project);
+        ProjectDto expectedDto = projectMapper.toDto(project);
+        expectedDto.setStatus(ProjectStatus.IN_PROGRESS);
+        Project updatedProject = projectMapper.toEntity(expectedDto);
+        updatedProject.setChildren(new ArrayList<>());
+        when(projectRepository.save(any(Project.class))).thenReturn(updatedProject);
+
+        ProjectDto actualDto = projectService.updateStatus(ProjectStatus.IN_PROGRESS, projectId);
+
+        ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
+        verify(projectRepository).save(projectCaptor.capture());
+        assertEquals(updatedProject.getStatus(), projectCaptor.getValue().getStatus());
+        assertNotNull(projectCaptor.getValue().getUpdatedAt());
+        assertEquals(expectedDto, actualDto);
+    }
+
+    @Test
+    void testUpdateDescriptionWithUserNotOwner() {
+        long userId = 1L;
+        long projectId = 1L;
+        when(userContext.getUserId()).thenReturn(userId);
+        when(projectRepository.getProjectById(projectId))
+                .thenReturn(Project.builder().ownerId(2L).build());
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> projectService.updateDescription("New description", projectId));
+        assertEquals(NOT_OWNER_UPDATING_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void testUpdateDescriptionUpdated() {
+        long userId = 1L;
+        long projectId = 1L;
+        when(userContext.getUserId()).thenReturn(userId);
+        Project project = Project.builder().ownerId(userId).children(new ArrayList<>()).description("Old").build();
+        when(projectRepository.getProjectById(projectId))
+                .thenReturn(project);
+        ProjectDto expectedDto = projectMapper.toDto(project);
+        expectedDto.setDescription("New");
+        Project updatedProject = projectMapper.toEntity(expectedDto);
+        updatedProject.setChildren(new ArrayList<>());
+        when(projectRepository.save(any(Project.class))).thenReturn(updatedProject);
+
+        ProjectDto actualDto = projectService.updateDescription("New", projectId);
+
+        ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
+        verify(projectRepository).save(projectCaptor.capture());
+        assertEquals(updatedProject.getDescription(), projectCaptor.getValue().getDescription());
+        assertNotNull(projectCaptor.getValue().getUpdatedAt());
+        assertEquals(expectedDto, actualDto);
+    }
+
+    @Test
+    void testFindWithFiltersFoundPublic() {
+        Project project1 = Project.builder()
+                .visibility(ProjectVisibility.PUBLIC).id(1L).ownerId(2L).name("name").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+        Project project2 = Project.builder()
+                .visibility(ProjectVisibility.PUBLIC).id(2L).ownerId(2L).name("name").children(new ArrayList<>()).status(ProjectStatus.CANCELLED)
+                .build();
+        Project project3 = Project.builder()
+                .visibility(ProjectVisibility.PUBLIC).id(3L).ownerId(1L).name("no").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+
+        List<Project> projects = List.of(project1, project2, project3);
+        List<Project> filteredProjects = List.of(project1);
+        List<ProjectDto> expected = filteredProjects.stream().map(project -> projectMapper.toDto(project)).toList();
+        when(projectRepository.findAll()).thenReturn(projects);
+        ProjectFilterDto projectFilterDto = new ProjectFilterDto("name", ProjectStatus.CREATED);
+        List<ProjectDto> actual = projectService.findWithFilters(projectFilterDto);
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testFindWithFiltersFoundPrivate() {
+        Project project1 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(1L).ownerId(1L).name("name").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+        Project project2 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(2L).ownerId(2L).name("name").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+        Team team = Team.builder().teamMembers(List.of(TeamMember.builder().userId(1L).build())).build();
+        Project project3 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(3L).ownerId(2L).teams(List.of(team)).name("name")
+                .status(ProjectStatus.CREATED)
+                .children(new ArrayList<>())
+                .build();
+
+        List<Project> projects = List.of(project1, project2, project3);
+        List<Project> filteredProjects = List.of(project1, project3);
+        List<ProjectDto> expected = filteredProjects.stream().map(project -> projectMapper.toDto(project)).toList();
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(userContext.getUserId()).thenReturn(1L);
+        ProjectFilterDto projectFilterDto = new ProjectFilterDto("name", ProjectStatus.CREATED);
+        List<ProjectDto> actual = projectService.findWithFilters(projectFilterDto);
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testFindAll() {
+        Project project1 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(1L).ownerId(1L).name("name").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+        Project project2 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(2L).ownerId(2L).name("name").children(new ArrayList<>()).status(ProjectStatus.CREATED)
+                .build();
+        Team team = Team.builder().teamMembers(List.of(TeamMember.builder().userId(1L).build())).build();
+        Project project3 = Project.builder()
+                .visibility(ProjectVisibility.PRIVATE).id(3L).ownerId(2L).teams(List.of(team)).name("name")
+                .status(ProjectStatus.CREATED)
+                .children(new ArrayList<>())
+                .build();
+
+        List<Project> projects = List.of(project1, project2, project3);
+        List<Project> allowedToSee = List.of(project1, project3);
+        List<ProjectDto> expected = allowedToSee.stream().map(project -> projectMapper.toDto(project)).toList();
+        when(projectRepository.findAll()).thenReturn(projects);
+        when(userContext.getUserId()).thenReturn(1L);
+        List<ProjectDto> actual = projectService.findAll();
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    void testFindByIdWithPrivateProject() {
+        when(projectRepository.getProjectById(1L))
+                .thenReturn(Project.builder().ownerId(2L).visibility(ProjectVisibility.PRIVATE).build());
+        when(userContext.getUserId()).thenReturn(1L);
+        assertTrue(projectService.findById(1L).isEmpty());
+    }
+
+    @Test
+    void testFindByFound() {
+        Project expected = Project.builder().ownerId(2L).children(new ArrayList<>()).visibility(ProjectVisibility.PUBLIC).build();
+        when(projectRepository.getProjectById(1L))
+                .thenReturn(expected);
+        Optional<ProjectDto> actual = projectService.findById(1L);
+        assertTrue(actual.isPresent());
+        assertEquals(projectMapper.toDto(expected), actual.get());
     }
 
     @Test
@@ -86,7 +277,7 @@ public class ProjectServiceTest {
                 .visibility(ProjectVisibility.PUBLIC)
                 .children(children)
                 .build();
-        projectService.updateVisibility(parent, ProjectVisibility.PRIVATE, parent.getChildren());
+        projectService.updateSubProjectsVisibility(parent, ProjectVisibility.PRIVATE, parent.getChildren());
         assertEquals(ProjectVisibility.PRIVATE, parent.getVisibility());
         verify(projectRepository, times(1)).save(child1);
         verify(projectRepository, times(1)).save(child2);
@@ -110,7 +301,7 @@ public class ProjectServiceTest {
                 .visibility(ProjectVisibility.PRIVATE)
                 .children(children)
                 .build();
-        projectService.updateVisibility(parent, ProjectVisibility.PUBLIC, parent.getChildren());
+        projectService.updateSubProjectsVisibility(parent, ProjectVisibility.PUBLIC, parent.getChildren());
         assertEquals(ProjectVisibility.PUBLIC, parent.getVisibility());
         assertEquals(ProjectVisibility.PUBLIC, child1.getVisibility());
         assertEquals(ProjectVisibility.PRIVATE, child2.getVisibility());
@@ -125,7 +316,7 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         when(projectValidator.validateAllChildProjectsCompleted(project)).thenReturn(true);
-        projectService.updateStatus(project, ProjectStatus.COMPLETED, project.getChildren());
+        projectService.updateSubProjectsStatus(project, ProjectStatus.COMPLETED, project.getChildren());
         assertEquals(ProjectStatus.COMPLETED, project.getStatus());
         Moment completed = new Moment();
         completed.setName(String.format("Project with id = %s has been completed", project.getId()));
@@ -151,7 +342,7 @@ public class ProjectServiceTest {
                 .status(ProjectStatus.ON_HOLD)
                 .children(children)
                 .build();
-        projectService.updateStatus(parent, ProjectStatus.IN_PROGRESS, parent.getChildren());
+        projectService.updateSubProjectsStatus(parent, ProjectStatus.IN_PROGRESS, parent.getChildren());
         assertEquals(ProjectStatus.IN_PROGRESS, parent.getStatus());
         assertEquals(ProjectStatus.IN_PROGRESS, child1.getStatus());
         assertEquals(ProjectStatus.IN_PROGRESS, child2.getStatus());
@@ -174,7 +365,7 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(projectValidator.needToUpdateVisibility(project, dto)).thenReturn(true);
         when(projectValidator.needToUpdateStatus(project, dto)).thenReturn(true);
-        projectService.update(dto);
+        projectService.updateSubProject(dto);
 
         verify(projectRepository, times(1)).save(project);
         assertEquals(ProjectVisibility.PUBLIC, project.getVisibility());
@@ -221,12 +412,6 @@ public class ProjectServiceTest {
                 .build();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(parent);
-
-        when(projectFilters.get(0).isApplicable(filterDto)).thenReturn(true);
-        when(projectFilters.get(1).isApplicable(filterDto)).thenReturn(true);
-        when(projectFilters.get(0).apply(any(), any())).thenReturn(Stream.of(child1));
-        when(projectFilters.get(1).apply(any(), any())).thenReturn(Stream.of(child1));
-
         when(createSubProjectMapper.toDto(child1)).thenReturn(child1Dto);
 
         List<CreateSubProjectDto> expected = List.of(child1Dto);
@@ -268,10 +453,6 @@ public class ProjectServiceTest {
                 .build();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(parent);
-        when(projectFilters.get(0).isApplicable(filterDto)).thenReturn(true);
-        when(projectFilters.get(1).isApplicable(filterDto)).thenReturn(true);
-        when(projectFilters.get(0).apply(any(), any())).thenReturn(Stream.of(child1));
-        when(projectFilters.get(1).apply(any(), any())).thenReturn(Stream.of(child1));
 
         List<CreateSubProjectDto> expected = List.of();
         List<CreateSubProjectDto> result = projectService.getProjectsByFilters(projectId, filterDto);

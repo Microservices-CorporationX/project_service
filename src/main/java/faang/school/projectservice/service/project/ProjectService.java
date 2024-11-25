@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filters.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Moment;
@@ -21,10 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,10 +41,11 @@ public class ProjectService {
         Project project = projectMapper.toEntity(projectDto);
         project.setOwnerId(userContext.getUserId());
         project.setStatus(ProjectStatus.CREATED);
-        validateName(project.getName(), project.getOwnerId());
+        projectValidator.validateName(project.getName(), project.getOwnerId());
         LocalDateTime currentTime = LocalDateTime.now();
         project.setCreatedAt(currentTime);
         project.setUpdatedAt(currentTime);
+        project.setChildren(new ArrayList<>());
         project = projectRepository.save(project);
         log.info("User with id {} created a project {}", userContext.getUserId(), project);
         return projectMapper.toDto(project);
@@ -65,6 +63,7 @@ public class ProjectService {
         LocalDateTime currentTime = LocalDateTime.now();
         project.setCreatedAt(currentTime);
         project.setUpdatedAt(currentTime);
+        project.setChildren(new ArrayList<>());
         project = projectRepository.save(project);
         projectRepository.save(parent);
         log.info("User with id {} created subproject {}", userContext.getUserId(), project);
@@ -167,14 +166,6 @@ public class ProjectService {
             return Optional.of(projectMapper.toDto(project));
         }
         return Optional.empty();
-    }
-
-    private void validateName(String projectName, Long userId) {
-        if (projectRepository.existsByOwnerUserIdAndName(userId, projectName)) {
-            log.info("User with id {} tried to create a project with the same name", userContext.getUserId());
-            throw new DataValidationException("Can not create new project with this project name, " +
-                    "this name is already used for another project of this user");
-        }
     }
 
     private Project getProjectForOwner(long projectId) {

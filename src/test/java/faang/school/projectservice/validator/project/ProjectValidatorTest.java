@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectValidatorTest {
@@ -26,11 +28,27 @@ public class ProjectValidatorTest {
 
     @Mock
     private ProjectRepository projectRepository;
+    @Mock
+    private UserContext userContext;
+
+    @Test
+    void testValidateName(){
+        Long id = 1L;
+        String name = "name";
+        when(projectRepository.existsByOwnerUserIdAndName(id, name)).thenReturn(true);
+        when(userContext.getUserId()).thenReturn(1L);
+        DataValidationException exception = assertThrows(DataValidationException.class,
+                () -> projectValidator.validateName(name, id));
+        assertEquals("Can not create new project with this project name, " +
+                "this name is already used for another project of this user", exception.getMessage());
+    }
+
+
 
     @Test
     public void testValidateUniqueProject(){
         ProjectDto projectDto = ProjectDto.builder().id(1L).build();
-        Mockito.when(projectRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        when(projectRepository.existsById(Mockito.anyLong())).thenReturn(true);
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateUniqueProject(projectDto));
         assertEquals("Project with id 1 already exists", exception.getMessage());
@@ -39,7 +57,7 @@ public class ProjectValidatorTest {
     @Test
     public void testValidateUniqueSubProject(){
         CreateSubProjectDto createSubProjectDto = CreateSubProjectDto.builder().id(1L).build();
-        Mockito.when(projectRepository.existsById(Mockito.anyLong())).thenReturn(true);
+        when(projectRepository.existsById(Mockito.anyLong())).thenReturn(true);
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateUniqueProject(createSubProjectDto));
         assertEquals("Project with id 1 already exists", exception.getMessage());
@@ -83,7 +101,7 @@ public class ProjectValidatorTest {
     @Test
     public void testValidateProjectExists(){
         CreateSubProjectDto dto = CreateSubProjectDto.builder().id(1L).build();
-        Mockito.when(projectRepository.existsById(Mockito.anyLong())).thenReturn(false);
+        when(projectRepository.existsById(Mockito.anyLong())).thenReturn(false);
         DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> projectValidator.validateProjectExists(dto));
         assertEquals("Project with id " + dto.getId() + " does not exist", exception.getMessage());

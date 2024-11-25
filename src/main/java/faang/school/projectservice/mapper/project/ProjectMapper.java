@@ -1,6 +1,5 @@
 package faang.school.projectservice.mapper.project;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
@@ -20,7 +19,7 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     @Named("getChildrenIds")
-    default List<Long> getChildrenIds(List<Project> projects) {
-        return projects.stream().map(Project::getId).toList();
+    default List<Long> getChildrenIds(List<Project> children) {
+        return children.stream().map(Project::getId).toList();
     }
 }
