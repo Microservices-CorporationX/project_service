@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.resource;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,12 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class ResourceController {
     private final ResourceService resourceService;
+    private final UserContext userContext;
 
-    @PostMapping(value = "/{projectId}/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/projects/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResourceDto uploadFile(@PathVariable Long projectId,
-                                  @PathVariable Long userId,
-                                  @RequestParam("file") MultipartFile file){
+                                  @RequestBody MultipartFile file){
+        Long userId = userContext.getUserId();
         log.info("Received a request to upload file: {} ", file.getName());
         return resourceService.uploadFile(projectId, userId, file);
     }
@@ -35,18 +37,18 @@ public class ResourceController {
         return new ResponseEntity<>(new InputStreamResource(resourceStream), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/{resourceId}/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{resourceId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResourceDto updateResource(@PathVariable Long resourceId,
-                                      @PathVariable Long userId,
-                                      @RequestParam("file") MultipartFile file){
+                                      @RequestBody MultipartFile file){
+        Long userId = userContext.getUserId();
         log.info("Received a request to update a resource with id: {}", resourceId);
         return resourceService.updateResource(userId, resourceId, file);
     }
 
-    @DeleteMapping(value = "/{resourceId}/users/{userId}")
+    @DeleteMapping(value = "/{resourceId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void deleteResource(@PathVariable Long resourceId,
-                               @PathVariable Long userId){
+    public void deleteResource(@PathVariable Long resourceId){
+        Long userId = userContext.getUserId();
         log.info("Received a request to delete a resource with id: {}", resourceId);
         resourceService.deleteResource(resourceId, userId);
     }

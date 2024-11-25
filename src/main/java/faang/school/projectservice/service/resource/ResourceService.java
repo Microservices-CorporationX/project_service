@@ -35,43 +35,43 @@ public class ResourceService {
 
     @Transactional
     public ResourceDto uploadFile(Long projectId, Long userId, MultipartFile file) {
-        Project project = getProjectOrThrow(projectId);
-        TeamMember teamMember = getTeamMemberOrThrow(userId);
+        Project project = getProject(projectId);
+
+        if (!teamMemberRepository.isUserInAnyTeamOfProject(projectId, userId)){
+            throw new PermissionDeniedException("User with id: " + userId + " is not in the project with name: " + project.getName());
+        }
 
         if(project.getStorageSize() == null){
             project.setStorageSize(BigInteger.ZERO);
         }
 
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
-        checkStorageSize(project.getStorageSize(), newStorageSize, project.getMaxStorageSize());
+        checkStorageSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
         Resource resource = awsS3Service.uploadFile(folder, file);
         resource.setProject(project);
-        resource.setCreatedBy(teamMember);
-        resource.setUpdatedBy(teamMember);
 
         resource = resourceRepository.save(resource);
 
         project.setStorageSize(newStorageSize);
-        projectService.updateProject(project);
 
         return resourceDtoMapper.toDto(resource);
     }
 
     @Transactional
     public ResourceDto updateResource(Long userId, Long resourceId, MultipartFile file){
-        Resource existingResource = getResourceOrThrow(resourceId);
-        Project existingProject = getProjectOrThrow(existingResource.getProject().getId());
+        Resource existingResource = getResource(resourceId);
+        Project existingProject = getProject(existingResource.getProject().getId());
 
-        TeamMember teamMember = checkPermissionToDeleteResource(existingResource, userId);
+        checkTeamMemberPermissionToManageResource(existingResource, userId);
 
         BigInteger existingStorageSize = existingProject.getStorageSize().subtract(existingResource.getSize());
         BigInteger updatedStorageSize = existingStorageSize.add(BigInteger.valueOf(file.getSize()));
 
         BigInteger newStorageSize = existingProject.getStorageSize().add(BigInteger.valueOf(file.getSize()));
 
-        checkStorageSize(existingProject.getStorageSize(), newStorageSize, existingProject.getMaxStorageSize());
+        checkStorageSize(newStorageSize, existingProject.getMaxStorageSize());
 
         Resource updatedResource = awsS3Service.updateResource(existingResource.getKey(), file);
         existingResource.setProject(existingProject);
@@ -80,13 +80,10 @@ public class ResourceService {
         existingResource.setName(file.getOriginalFilename());
         existingResource.setStatus(ResourceStatus.ACTIVE);
         existingResource.setType(updatedResource.getType());
-        existingResource.setCreatedBy(teamMember);
-        existingResource.setUpdatedBy(teamMember);
 
         existingResource = resourceRepository.save(existingResource);
 
         existingProject.setStorageSize(updatedStorageSize);
-        projectService.updateProject(existingProject);
 
         return resourceDtoMapper.toDto(existingResource);
     }
@@ -101,9 +98,9 @@ public class ResourceService {
 
     @Transactional
     public void deleteResource(Long resourceId, Long userId){
-        Resource resource = getResourceOrThrow(resourceId);
-        Project project = getProjectOrThrow(resource.getProject().getId());
-        TeamMember teamMember = checkPermissionToDeleteResource(resource, userId);
+        Resource resource = getResource(resourceId);
+        Project project = getProject(resource.getProject().getId());
+        checkTeamMemberPermissionToManageResource(resource, userId);
 
         BigInteger actualStorageSize = project.getStorageSize();
         project.setStorageSize(actualStorageSize.subtract(resource.getSize()));
@@ -113,51 +110,42 @@ public class ResourceService {
         resource.setKey(null);
         resource.setSize(null);
         resource.setStatus(ResourceStatus.DELETED);
-        resource.setUpdatedBy(teamMember);
 
         resourceRepository.save(resource);
-        projectService.updateProject(project);
 
         log.info("Resource with id {} was successfully deleted", resourceId);
     }
 
-    private TeamMember checkPermissionToDeleteResource(Resource resource, Long userId){
-        TeamMember teamMember = teamMemberRepository.findByUserId(userId)
+    private void checkTeamMemberPermissionToManageResource(Resource resource, Long userId){
+        boolean hasPermission = teamMemberRepository.findByUserId(userId)
                 .stream()
-                .filter(member ->
-                        member.getId().equals(resource.getCreatedBy().getId()) ||
+                .anyMatch(member ->
+                        member.getId().equals(resource.getCreatedBy()) ||
                                 member.getRoles().contains(TeamRole.MANAGER)
-                )
-                .findFirst()
-                .orElse(null);
+                );
 
-        if (teamMember == null) {
-            log.error("Team member does not have permission to delete this resource");
+        if (!hasPermission) {
+            log.error("Team member does not have permission to manage this resource");
             throw new EntityNotFoundException("Invalid team member or role");
         }
-
-        return teamMember;
     }
 
-    private Project getProjectOrThrow(Long projectId) {
+    private Project getProject(Long projectId) {
         return projectService.findProject(projectId).orElseThrow(
                 () -> new EntityNotFoundException(PROJECT_NOT_FOUND));
     }
 
-    private Resource getResourceOrThrow(Long resourceId) {
+    private Resource getResource(Long resourceId) {
         return resourceRepository.findById(resourceId).orElseThrow(
                 () -> new EntityNotFoundException(RESOURCE_NOT_FOUND));
     }
 
-    private TeamMember getTeamMemberOrThrow(Long userId) {
-        return teamMemberRepository.findByUserId(userId).stream().findFirst().orElseThrow(
-                () -> new PermissionDeniedException(TEAM_MEMBER_NOT_FOUND));
+    private TeamMember getTeamMember(Long userId, Long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
     }
 
-    private void checkStorageSize(BigInteger currentSize, BigInteger newFileSize, BigInteger maxStorageSize){
-        BigInteger totalSize = currentSize.add(newFileSize);
-
-        if (totalSize.compareTo(maxStorageSize) > 0) {
+    private void checkStorageSize(BigInteger newFileSize, BigInteger maxStorageSize){
+        if (newFileSize.compareTo(maxStorageSize) > 0) {
             log.error("Storage size is exceeded");
             throw new StorageSizeException("Storage size is exceeded");
         }
