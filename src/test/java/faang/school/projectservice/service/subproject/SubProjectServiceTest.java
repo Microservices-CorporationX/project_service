@@ -207,9 +207,8 @@ public class SubProjectServiceTest {
     @DisplayName("Test create sub project with nonexistent owner")
     public void createSubProjectWithNonexistentOwnerTest() {
         Long parentId = 1L;
-        Long userId = 2L;
+        Long userId = 11L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
-                .ownerId(1L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)
@@ -227,7 +226,6 @@ public class SubProjectServiceTest {
         Long parentId = 1L;
         Long userId = 2L;
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
-                .ownerId(1L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)

@@ -15,9 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateSubProjectDto {
 
-    @NotNull
-    private Long ownerId;
-
     @NotBlank
     @Size(max = 128)
     private String name;

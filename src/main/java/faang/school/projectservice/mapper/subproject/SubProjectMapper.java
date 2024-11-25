@@ -15,7 +15,6 @@ import java.util.List;
 public interface SubProjectMapper {
 
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "ownerId", target = "ownerId")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "visibility", target = "visibility")

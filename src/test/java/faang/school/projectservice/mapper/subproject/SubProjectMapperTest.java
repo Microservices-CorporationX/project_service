@@ -1,9 +1,7 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.mapper.subproject.SubProjectMapper;
-import faang.school.projectservice.mapper.subproject.SubProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -24,7 +22,6 @@ public class SubProjectMapperTest {
     @DisplayName("Test creation dto to entity mapping")
     public void toEntityTest() {
         CreateSubProjectDto dto = CreateSubProjectDto.builder()
-                .ownerId(1L)
                 .name("cool name")
                 .description("cool description")
                 .visibility(ProjectVisibility.PUBLIC)
@@ -32,7 +29,6 @@ public class SubProjectMapperTest {
 
         Project result = mapper.toEntity(dto);
 
-        assertEquals(dto.getOwnerId(), result.getOwnerId());
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getDescription(), result.getDescription());
         assertEquals(dto.getVisibility(), result.getVisibility());
