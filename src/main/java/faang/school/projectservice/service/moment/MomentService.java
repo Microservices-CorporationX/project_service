@@ -6,6 +6,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.moment.MomentValidator;
@@ -35,6 +36,9 @@ public class MomentService {
         moment.setCreatedAt(LocalDateTime.now());
         moment.setProjects(projectRepository.findAllByIds(momentDto.getProjectIds()));
         momentValidator.validateActiveMoment(moment);
+        for (Project project : moment.getProjects()) {
+            project.getMoments().add(moment);
+        }
         moment = momentRepository.save(moment);
         log.info("Created moment with id: {}", moment);
         return momentMapper.toDto(moment);

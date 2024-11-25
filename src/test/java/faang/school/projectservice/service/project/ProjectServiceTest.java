@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
@@ -10,6 +11,7 @@ import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,11 +52,13 @@ public class ProjectServiceTest {
     private ProjectValidator projectValidator;
     @Mock
     private UserContext userContext;
+    @Mock
+    private MomentService momentService;
 
     @BeforeEach
     void setUp() {
         List<ProjectFilter> filters = List.of(nameProjectFilter, statusProjectFilter);
-        projectService = new ProjectService(userContext, projectMapper, createSubProjectMapper, projectRepository, filters, projectValidator);
+        projectService = new ProjectService(userContext, projectMapper, createSubProjectMapper, projectRepository, filters, projectValidator, momentService);
     }
 
     @Test
@@ -310,6 +315,7 @@ public class ProjectServiceTest {
     @Test
     public void testUpdateStatusToCompleted() {
         Project project = Project.builder()
+                .name("Test")
                 .id(1L)
                 .moments(new ArrayList<>())
                 .children(new ArrayList<>())
@@ -318,9 +324,13 @@ public class ProjectServiceTest {
         when(projectValidator.validateAllChildProjectsCompleted(project)).thenReturn(true);
         projectService.updateSubProjectsStatus(project, ProjectStatus.COMPLETED, project.getChildren());
         assertEquals(ProjectStatus.COMPLETED, project.getStatus());
-        Moment completed = new Moment();
-        completed.setName(String.format("Project with id = %s has been completed", project.getId()));
-        assertTrue(project.getMoments().contains(completed));
+        MomentDto momentDto = MomentDto.builder()
+                .name(project.getName() + " completed")
+                .description("Project with id: " + project.getId() + " has been completed")
+                .date(LocalDateTime.now())
+                .projectIds(List.of(project.getId()))
+                .build();
+        verify(momentService, times(1)).createMoment(any());
     }
 
     @Test

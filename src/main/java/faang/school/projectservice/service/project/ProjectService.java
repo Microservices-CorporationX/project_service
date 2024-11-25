@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.filter.ProjectFilterDto;
@@ -15,6 +16,7 @@ import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.helpers.ProjectSearcher;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
     private final ProjectValidator projectValidator;
+    private final MomentService momentService;
 
     public ProjectDto create(ProjectDto projectDto) {
         projectValidator.validateUniqueProject(projectDto);
@@ -98,10 +101,13 @@ public class ProjectService {
         projectValidator.validateProjectAlreadyCompleted(project);
         if (statusToUpdate == ProjectStatus.COMPLETED){
             if (projectValidator.validateAllChildProjectsCompleted(project)) {
-                String message = String.format("Project with id = %s has been completed", project.getId());
-                Moment completed = new Moment();
-                completed.setName(message);
-                project.getMoments().add(completed);
+                MomentDto momentDto = MomentDto.builder()
+                        .name(project.getName() + " completed")
+                        .description("Project with id: " + project.getId() + " has been completed")
+                        .date(LocalDateTime.now())
+                        .projectIds(List.of(project.getId()))
+                        .build();
+                momentService.createMoment(momentDto);
             }
         } else {
             children.forEach(e -> updateSubProjectsStatus(e, statusToUpdate, e.getChildren()));
