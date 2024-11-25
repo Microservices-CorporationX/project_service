@@ -15,6 +15,8 @@ import faang.school.projectservice.filter.jira.issue.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
@@ -29,6 +31,7 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,6 +43,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JiraServiceTest {
+
+    private static final String SEARCH_ENDPOINT = "/search";
 
     @Mock
     private UserContext userContext;
@@ -53,7 +58,9 @@ class JiraServiceTest {
     @Mock
     private WebClientErrorHandler webClientErrorHandler;
 
-    private List<JiraIssueFilter> issueFilters;
+    @Captor
+    ArgumentCaptor<String> uriCaptor;
+
     private JiraService jiraService;
 
     @BeforeEach
@@ -272,6 +279,10 @@ class JiraServiceTest {
 
     @Test
     void filterDomainIssuesTest() {
+        long userId = 2L;
+        String userJiraEmail = "example@gmail.com";
+        String userJiraToken = "901284v09182489124m9812984";
+
         Class<JiraIssuesDto> responseType = JiraIssuesDto.class;
         JiraIssuesDto response = new JiraIssuesDto();
         response.setIssues(new ArrayList<>());
@@ -279,11 +290,40 @@ class JiraServiceTest {
         String jiraDomain = "mad1x";
 
         JiraIssueFilterDto filterDto = new JiraIssueFilterDto();
+        filterDto.setProjectKey("TEST");
+        filterDto.setAssigneeUsername("mad1x");
+        filterDto.setStatus("To Do");
 
-        prepareMockActions(jiraDomain, method, responseType, response);
+        UserJiraDto userJiraInfo = new UserJiraDto();
+        userJiraInfo.setJiraEmail(userJiraEmail);
+        userJiraInfo.setJiraToken(userJiraToken);
+
+        WebClient jiraClient = mock(WebClient.class);
+        WebClient.RequestBodyUriSpec requestUriSpec = mock(WebClient.RequestBodyUriSpec.class);
+        WebClient.RequestBodySpec requestBodySpec = mock(WebClient.RequestBodySpec.class);
+
+        when(userContext.getUserId()).thenReturn(userId);
+        when(userServiceClient.getUserJiraInfo(userId, jiraDomain)).thenReturn(userJiraInfo);
+        when(jiraClientConfig.getJiraClient(jiraDomain, userJiraEmail, userJiraToken)).thenReturn(jiraClient);
+        when(jiraClient.method(method)).thenReturn(requestUriSpec);
+        when(requestUriSpec.uri(any(String.class))).thenReturn(requestBodySpec);
+
+        when(requestBodySpec.exchangeToMono(any()))
+                .thenAnswer(invocation -> {
+                    Function<ClientResponse, Mono<Void>> handler = invocation.getArgument(0);
+                    ClientResponse mockResponse = mock(ClientResponse.class);
+                    return handler.apply(mockResponse);
+                });
+        when(webClientErrorHandler.handleResponse(any(ClientResponse.class), eq(responseType)))
+                .thenAnswer(invocation -> Mono.just(response));
 
         assertDoesNotThrow(() -> jiraService.filterDomainIssues(jiraDomain, filterDto));
 
+        verify(requestUriSpec).uri(uriCaptor.capture());
+        assertTrue(uriCaptor.getValue().contains("%s?jql=".formatted(SEARCH_ENDPOINT)));
+        assertTrue(uriCaptor.getValue().contains("project=TEST"));
+        assertTrue(uriCaptor.getValue().contains("assignee='mad1x'"));
+        assertTrue(uriCaptor.getValue().contains("status='To Do'"));
         verify(userContext, times(2)).getUserId();
         verify(userServiceClient, times(1)).getUserJiraInfo(anyLong(), anyString());
         verify(jiraClientConfig, times(1)).getJiraClient(anyString(), anyString(), anyString());
