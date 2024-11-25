@@ -17,12 +17,21 @@ public class TeamMemberService {
         return teamMemberRepository.findById(id);
     }
 
-    public void setTeamMembersRoleNonIntern(List<Long> teamMemberIds) {
-        teamMemberRepository.findByIds(teamMemberIds)
-                .forEach(intern -> removeTeamRole(intern, TeamRole.INTERN));
+    public List<TeamMember> getAllTeamMembersByIds(List<Long> ids) {
+        return teamMemberRepository.findAllByIds(ids);
+    }
+
+    public void setTeamMembersRoleAndRemoveInternRole(List<Long> teamMemberIds, TeamRole teamRole) {
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByIds(teamMemberIds);
+        teamMembers.forEach(intern -> {
+            intern.getRoles().add(teamRole);
+            intern.getRoles().remove(TeamRole.INTERN);
+        });
+        teamMemberRepository.saveAll(teamMembers);
     }
 
     public void removeTeamRole(TeamMember teamMember, TeamRole teamRole) {
         teamMember.getRoles().remove(teamRole);
+        teamMemberRepository.save(teamMember);
     }
 }

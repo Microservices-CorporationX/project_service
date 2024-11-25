@@ -18,12 +18,20 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
-    public List<TeamMember> findByIds(List<Long> ids) {
+    public List<TeamMember> findAllByIds(List<Long> ids) {
         List<TeamMember> teamMembers = jpaRepository.findAllById(ids);
         if (teamMembers.isEmpty()) {
             throw new EntityNotFoundException(String.format("Team members doesn't exist by ids: %s", ids));
         }
 
         return teamMembers;
+    }
+
+    public void saveAll(List<TeamMember> teamMembers) {
+        jpaRepository.saveAll(teamMembers);
+    }
+
+    public void save(TeamMember teamMember) {
+        jpaRepository.save(teamMember);
     }
 }

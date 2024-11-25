@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.InternshipDto;
+import faang.school.projectservice.dto.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -9,6 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,33 +25,54 @@ public class InternshipService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
 
-    public void createInternship(InternshipDto internshipDto) {
+    public Long createInternship(InternshipDto internshipDto) {
         if (ChronoUnit.MONTHS.between(internshipDto.startDate(), internshipDto.endDate()) > 3) {
             throw new DataValidationException("Продолжительность стажировки более 3х месяцев");
         }
-        internshipRepository.save(internshipMapper.toEntity(internshipDto));
+        Internship internship = internshipMapper.toEntity(internshipDto, teamMemberService, projectService);
+
+        return internshipRepository.save(internship).getId();
     }
 
     public void updateInternship(InternshipDto internshipDto) {
         if (projectService.isProjectComplete(internshipDto.projectId())) {
-            teamMemberService.setTeamMembersRoleNonIntern(internshipDto.internIds());
+            teamMemberService.setTeamMembersRoleAndRemoveInternRole(internshipDto.internIds(), internshipDto.role());
         } else {
-            internshipDto.internIds().clear();
+            Internship internship = getInternshipById(internshipDto.id());
+            List<TeamMember> teamMembers = teamMemberService.getAllTeamMembersByIds(internshipDto.internIds());
+            internship.getInterns().removeAll(teamMembers);
+            internshipRepository.save(internship);
         }
     }
 
+    public void changeInternshipStatus(long internshipId, InternshipStatus status) {
+        Internship internship = getInternshipById(internshipId);
+        internship.setStatus(status);
+        internshipRepository.save(internship);
+    }
+
+    @Transactional
     public void completeInternship(long internshipId, long teamMemberId) {
-        removeTeamMembersFromInternship(internshipId, teamMemberId);
+        Internship internship = getInternshipById(internshipId);
+        TeamMember teamMember = teamMemberService.getTeamMemberById(teamMemberId);
+
+        internship.getInterns().remove(teamMember);
         teamMemberService.removeTeamRole(teamMemberService.getTeamMemberById(internshipId), TeamRole.INTERN);
+        internshipRepository.save(internship);
     }
 
     public void dismissTeamMember(long internshipId, long teamMemberId) {
-        removeTeamMembersFromInternship(internshipId, teamMemberId);
+        Internship internship = getInternshipById(internshipId);
+        TeamMember teamMember = teamMemberService.getTeamMemberById(teamMemberId);
+
+        internship.getInterns().remove(teamMember);
+        internshipRepository.save(internship);
     }
 
-    public List<InternshipDto> getFilteredInternships(InternshipStatus internshipStatus) {
+    public List<InternshipDto> getFilteredInternships(InternshipFilterDto internshipFilterDto) {
         return getAllInternships().stream()
-                .filter(internship -> internship.status() == internshipStatus)
+                .filter(intern -> internshipFilterDto.status() == null || intern.status() == internshipFilterDto.status())
+                .filter(intern -> internshipFilterDto.status() == null || intern.role() == internshipFilterDto.role())
                 .toList();
     }
 
@@ -62,19 +85,9 @@ public class InternshipService {
     }
 
     private Internship getInternshipById(long internshipId) {
-        Internship internship = internshipRepository.findById(internshipId).orElse(null);
-        if (internship == null) {
-            throw new EntityNotFoundException("Пользователь с id:%d не найден".formatted(internshipId));
-        }
-
-        return internship;
-    }
-
-    private void removeTeamMembersFromInternship(long internshipId, long teamMemberId) {
-        Internship internship = getInternshipById(internshipId);
-        TeamMember teamMember = teamMemberService.getTeamMemberById(teamMemberId);
-
-        internship.getInterns().remove(teamMember);
+        return internshipRepository.findById(internshipId).orElseThrow(
+                () -> new EntityNotFoundException("Пользователь с id:%d не найден".formatted(internshipId))
+        );
     }
 
 }
