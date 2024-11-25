@@ -10,6 +10,8 @@ import faang.school.projectservice.service.ProjectService;
 import lombok.Builder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.junit.jupiter.api.Nested;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,30 +38,8 @@ class ProjectServiceApplicationTests {
     @InjectMocks
     private ProjectService projectService;
 
-    private Project createTestProject() {
-        return Project.builder()
-                .id(1L)
-                .name("Test Project")
-                .description("A sample project description")
-                .ownerId(100L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .createdAt(LocalDateTime.now())
-                .build();
-    }
-
-
-    private ProjectDto createTestProjectDto() {
-        return ProjectDto.builder()
-                .id(1L)
-                .name("Test Project")
-                .description("A sample project description")
-                .ownerId(100L)
-                .status(ProjectStatus.CREATED)
-                .visibility(ProjectVisibility.PUBLIC)
-                .createdAt(LocalDateTime.now())
-                .build();
-    }
+@Nested
+class Tests {
 
     @Test
     void createProject_Success() {
@@ -140,5 +120,31 @@ class ProjectServiceApplicationTests {
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getName()).isEqualTo("Test Project");
         assertThat(result).allMatch(dto -> "Test Project".equals(dto.getName()));
+    }
+}
+
+    private Project createTestProject() {
+        return Project.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("A sample project description")
+                .ownerId(100L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+
+    private ProjectDto createTestProjectDto() {
+        return ProjectDto.builder()
+                .id(1L)
+                .name("Test Project")
+                .description("A sample project description")
+                .ownerId(100L)
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 }
