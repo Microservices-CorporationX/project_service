@@ -98,6 +98,14 @@ public class ProjectController {
         return projectService.updateProject(projectDto);
     }
 
+    @Operation(summary = "Upload a file to a project",
+            description = "Uploads a file to the specified project's common files.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "File uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file data or request"),
+            @ApiResponse(responseCode = "404", description = "Project not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
+    })
     @PostMapping("/{projectId}/resources")
     public ResponseEntity<String> uploadFile(@PathVariable long projectId,
                                              @RequestHeader("x-team-member-id") long teamMemberId,
@@ -106,12 +114,25 @@ public class ProjectController {
         return ResponseEntity.ok("File uploaded successfully");
     }
 
+    @Operation(summary = "Download a file",
+            description = "Downloads the specified file from common project's files.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "File downloaded successfully"),
+            @ApiResponse(responseCode = "404", description = "File not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
+    })
     @GetMapping("/resources/{resourceId}")
     public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable long resourceId) {
         InputStream fileStream = projectFilesService.downloadFile(resourceId);
         return fileStreamingService.getStreamingResponseBodyInResponseEntity(fileStream);
     }
 
+    @Operation(summary = "Delete a file",
+            description = "Deletes the specified file from the project's common files.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "File deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "File or project not found")
+    })
     @DeleteMapping("/resources/{resourceId}")
     public ResponseEntity<String> deleteFile(@PathVariable long resourceId,
                                              @RequestHeader("x-team-member-id") long teamMemberId) {
@@ -119,6 +140,13 @@ public class ProjectController {
         return ResponseEntity.ok("File deleted successfully");
     }
 
+    @Operation(summary = "Download all project files",
+            description = "Downloads all files for the specified project as a zip archive.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Files downloaded successfully"),
+            @ApiResponse(responseCode = "404", description = "Project or files not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
+    })
     @GetMapping("/{projectId}/resources")
     public ResponseEntity<StreamingResponseBody> downloadAllFiles(@PathVariable long projectId) {
         Map<String, InputStream> files = projectFilesService.downloadAllFiles(projectId);
