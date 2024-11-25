@@ -1,5 +1,6 @@
-package faang.school.projectservice.dto.team_member;
+package faang.school.projectservice.dto.teammember;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,12 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @ToString
-public class TeamMemberDto {
+public class TeamMemberDeleteDto {
 
-    private Long id;
+    @NotNull
+    private Long projectId;
 
-    private Long userId;
+    @NotNull
+    private Long currentUserId;
 
-    private String role;
-
+    @NotNull
+    private Long deleteUserId;
 }

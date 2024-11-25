@@ -3,11 +3,11 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     jacoco
+    kotlin("jvm")
 }
 
 group = "faang.school"
 version = "1.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -62,6 +62,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2:2.3.232")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {
@@ -134,4 +135,7 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+}
+kotlin {
+    jvmToolchain(17)
 }

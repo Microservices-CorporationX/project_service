@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TeamService {
@@ -14,5 +16,13 @@ public class TeamService {
     @Transactional
     public Team save(Team team) {
         return teamRepository.save(team);
+    }
+
+    public Team getById(Long id) {
+        return teamRepository.getById(id);
+    }
+
+    public List<Team> findAllById(List<Long> ids) {
+        return teamRepository.findAllById(ids);
     }
 }

@@ -1,7 +1,9 @@
 package faang.school.projectservice.controller.teammember;
 
-import faang.school.projectservice.dto.team_member.TeamMemberDto;
-import faang.school.projectservice.filter.team_member.TeamMemberFilterDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDeleteDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.dto.teammember.TeamMemberFilterDto;
+import faang.school.projectservice.dto.teammember.TeamMemberUpdateDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,38 +46,36 @@ public class TeamMemberController {
     }
 
     @Operation(summary = "Update an existing team member")
-    @PutMapping(MEMBER_PATH)
-    public ResponseEntity<TeamMemberDto> updateMemberInTheTeam(
-            @PathVariable @Positive Long id,
-            @Valid @RequestBody TeamMemberDto teamMemberDto) {
-        log.info("Updating team member with id {}: {}", id, teamMemberDto);
-        TeamMemberDto updatedMember = teamMemberService.updateMemberInTheTeam(teamMemberDto, id);
+    @PutMapping()
+    public ResponseEntity<TeamMemberDto> updateMemberInTheTeam(@Valid @RequestBody TeamMemberUpdateDto teamMemberUpdateDto) {
+        log.info("Updating team member with id {}: {}", teamMemberUpdateDto.getUpdateUserId(), teamMemberUpdateDto);
+        TeamMemberDto updatedMember = teamMemberService.updateMemberInTheTeam(teamMemberUpdateDto);
         log.info("Team member updated successfully: {}", updatedMember);
         return ResponseEntity.ok(updatedMember);
     }
 
     @Operation(summary = "Delete a team member")
-    @DeleteMapping(MEMBER_PATH)
-    public ResponseEntity<Void> deleteMemberFromTheTeam(@PathVariable Long id) {
-        log.info("Deleting team member with id: {}", id);
-        teamMemberService.deleteMemberFromTheTeam(id);
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteMemberFromTheTeam(@RequestBody @Valid TeamMemberDeleteDto teamMemberDeleteDto) {
+        log.info("Deleting team member with id: {}", teamMemberDeleteDto);
+        teamMemberService.deleteMemberFromTheTeam(teamMemberDeleteDto);
         log.info("Team member deleted successfully");
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get all team members by filter")
     @GetMapping("/filter")
-    public ResponseEntity<List<TeamMember>> getAllMembersByFilter(@RequestBody TeamMemberFilterDto teamMemberFilter) {
+    public ResponseEntity<List<TeamMemberDto>> getAllMembersByFilter(@RequestBody TeamMemberFilterDto teamMemberFilter) {
         log.info("Getting all team members with filter: {}", teamMemberFilter);
-        List<TeamMember> members = teamMemberService.getAllMembersWithFilter(teamMemberFilter);
+        List<TeamMemberDto> members = teamMemberService.getAllMembersWithFilter(teamMemberFilter);
         return ResponseEntity.ok(members);
     }
 
     @Operation(summary = "Get all team members")
     @GetMapping()
-    public ResponseEntity<List<TeamMemberDto>> getAllMembers() {
+    public ResponseEntity<List<TeamMemberDto>> getAllMembersFromTheProject(@PathVariable @Positive Long projectId) {
         log.info("Getting all team members");
-        List<TeamMemberDto> members = teamMemberService.getAllMembers();
+        List<TeamMemberDto> members = teamMemberService.getAllMembersFromTheProject(projectId);
         return ResponseEntity.ok(members);
     }
 

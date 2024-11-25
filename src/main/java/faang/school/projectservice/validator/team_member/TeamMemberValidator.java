@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator.team_member;
 
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
@@ -7,6 +8,9 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -30,4 +34,5 @@ public class TeamMemberValidator {
             throw new DataValidationException(message);
         }
     }
+
 }

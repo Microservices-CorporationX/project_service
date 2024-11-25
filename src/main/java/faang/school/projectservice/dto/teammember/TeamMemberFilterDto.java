@@ -1,7 +1,8 @@
-package faang.school.projectservice.filter.team_member;
+package faang.school.projectservice.dto.teammember;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public interface TeamMemberFilterDto {
+
 }
