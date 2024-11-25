@@ -6,15 +6,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import faang.school.projectservice.dto.event.EventDto;
 
 import java.util.List;
 
 @FeignClient(name = "user-service", url = "${services.user-service.host}:${services.user-service.port}")
 public interface UserServiceClient {
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("api/v1/users/{userId}")
     UserDto getUser(@PathVariable long userId);
 
-    @PostMapping("/users")
+    @PostMapping("api/v1/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+
+    @GetMapping("api/v1/events/{id}")
+    EventDto getEventById(@PathVariable("id") Long id);
 }
