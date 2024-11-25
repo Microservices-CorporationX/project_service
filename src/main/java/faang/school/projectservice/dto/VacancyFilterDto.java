@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VacancyFilterDto {
+
     private String name;
+
     private Long projectId;
 }
