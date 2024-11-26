@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,9 +33,9 @@ public class StageInvitationService {
     public StageInvitationDTO sendInvitation(StageInvitationDTO stageInvitationDTO) {
         log.info("Получен запрос на отправку приглашения: {}", stageInvitationDTO);
 
-        Stage stage = stageRepository.getById((stageInvitationDTO.getStageId()));
-        TeamMember invited = teamMemberRepository.findById((stageInvitationDTO.getInvitedId()));
-        TeamMember author = teamMemberRepository.findById((stageInvitationDTO.getAuthorId()));
+        Stage stage = stageRepository.getById(stageInvitationDTO.getStageId());
+        TeamMember invited = teamMemberRepository.findById(stageInvitationDTO.getInvitedId());
+        TeamMember author = teamMemberRepository.findById(stageInvitationDTO.getAuthorId());
 
         StageInvitation invitation = stageInvitationMapper.toEntity(stageInvitationDTO);
         invitation.setStage(stage);
@@ -50,7 +51,7 @@ public class StageInvitationService {
     public StageInvitationDTO acceptInvitation(Long invitationId) {
         log.info("Принятие приглашения с ID: {}", invitationId);
 
-        StageInvitation invation = ((stageInvitationRepository.findById(invitationId)));
+        StageInvitation invation = stageInvitationRepository.findById(invitationId);
 
         invation.setStatus(StageInvitationStatus.ACCEPTED);
         invation.getStage().getExecutors().add(invation.getInvited());
@@ -63,7 +64,7 @@ public class StageInvitationService {
     public StageInvitationDTO rejectInvitation(Long invitationId, String rejectionReason) {
         log.info("Отклонение приглашения с ID: {}. Причина: {}", invitationId, rejectionReason);
 
-        StageInvitation invitation = (stageInvitationRepository.findById(invitationId));
+        StageInvitation invitation = stageInvitationRepository.findById(invitationId);
 
         invitation.setStatus(StageInvitationStatus.REJECTED);
         invitation.setRejectionReason(rejectionReason);
@@ -78,8 +79,8 @@ public class StageInvitationService {
         List<StageInvitation> invitations = stageInvitationRepository.findAll();
 
         if (invitations == null || invitations.isEmpty()) {
-            log.warn("Не найдено приглашений, соответствующих фильтру: {}", invitationFilterDTO);
-            return List.of();
+            log.warn("Не найдено приглашений");
+            return Collections.emptyList();
         }
 
         Stream<StageInvitation> filteredInvitations = invitations.stream();

@@ -17,7 +17,7 @@ public class invitedIdFilter implements InvitationFilter{
     @Override
     public Stream<StageInvitation> apply(Stream<StageInvitation> stageInvitationStream, StageInvitationDTO filterDTO) {
         return stageInvitationStream.filter(invitation ->
-            Objects.equals(invitation.getInvited(), filterDTO.getInvitedId())
+            Objects.equals(invitation.getInvited().getId(), filterDTO.getInvitedId())
         );
     }
 }

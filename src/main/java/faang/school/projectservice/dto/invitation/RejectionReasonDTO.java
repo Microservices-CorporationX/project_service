@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RejectionReasonDTO {
-    @NotNull(message = "Причина отклонения не может быть null")
+    @NotBlank(message = "Причина отклонения не может быть null")
     private String rejectReason;
 }
 

@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/stageInvitation")
+@RequestMapping("/stage-invitation")
 public class StageInvitationController {
 
     private final StageInvitationService stageInvitationService;;
@@ -33,7 +33,6 @@ public class StageInvitationController {
     }
 
     @PatchMapping("/{invitationId}/accept")
-    @ResponseStatus(HttpStatus.OK)
     public StageInvitationDTO acceptInvitation(@PathVariable Long invitationId) {
         log.info("Получен запрос на принятие приглашения: {}", invitationId);
         return stageInvitationService.acceptInvitation(invitationId);
