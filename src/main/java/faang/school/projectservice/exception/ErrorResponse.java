@@ -16,10 +16,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ErrorResponse {
 
-    private String message;
-
     private String error;
 
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private String message;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
 }
