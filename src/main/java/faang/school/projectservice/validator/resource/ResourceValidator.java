@@ -21,16 +21,22 @@ public class ResourceValidator {
         }
     }
 
-    public void checkMaxStorageSizeIsNotNull(BigInteger maxStorageSize) {
+    public void validateMaxStorageSizeIsNotNull(BigInteger maxStorageSize) {
         if (maxStorageSize == null) {
             throw new IllegalStateException("Max storage size is not set for the project.");
         }
     }
 
-    public void checkStorageSizeNotExceeded(BigInteger maxStorageSize,
-                                             BigInteger currentStorageSize) {
+    public void validateStorageSizeNotExceeded(BigInteger maxStorageSize,
+                                               BigInteger currentStorageSize) {
         if (maxStorageSize.compareTo(currentStorageSize) < 0) {
             throw new StorageExceededException("Storage can't exceed 2 Gb ");
+        }
+    }
+
+    public void validateFileSizeNotBigger2Gb(Long fileSize) {
+        if (fileSize > 2L * 1024 * 1024 * 1024) {
+            throw new DataValidationException("Max uploading file size can't be more than 2GB");
         }
     }
 }

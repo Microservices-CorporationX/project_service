@@ -105,21 +105,25 @@ class ProjectFilesServiceTest {
                 .project(savingProject)
                 .build();
 
+        doNothing().when(resourceValidator).validateFileSizeNotBigger2Gb(file.getSize());
         when(projectService.getProjectById(projectId)).thenReturn(project);
         doNothing().when(resourceValidator).
-                checkMaxStorageSizeIsNotNull(maxStorageSize);
-        doNothing().when(resourceValidator).checkStorageSizeNotExceeded(maxStorageSize,
+                validateMaxStorageSizeIsNotNull(maxStorageSize);
+        doNothing().when(resourceValidator).validateStorageSizeNotExceeded(maxStorageSize,
                 currentStorageSize.add(BigInteger.valueOf(file.getSize())));
         when(teamMemberService.findById(teamMemberId)).thenReturn(teamMember);
         when(s3Service.uploadFile(file, folder)).thenReturn(key);
 
         projectFilesService.uploadFile(projectId, teamMemberId, file);
 
+        verify(resourceValidator).validateFileSizeNotBigger2Gb(file.getSize());
         verify(projectService, times(1)).getProjectById(projectId);
         verify(resourceValidator, times(1)).
-                checkMaxStorageSizeIsNotNull(maxStorageSize);
-        verify(resourceValidator, times(1)).checkStorageSizeNotExceeded(
+                validateMaxStorageSizeIsNotNull(maxStorageSize);
+        verify(resourceValidator, times(1)).validateStorageSizeNotExceeded(
                 maxStorageSize, currentStorageSize.add(BigInteger.valueOf(file.getSize())));
+        verify(teamMemberService, times(1)).findById(teamMemberId);
+        verify(s3Service, times(1)).uploadFile(file, folder);
         verify(projectService, times(1)).
                 updateProject(projectMapper.toDto(savingProject));
         verify(resourceRepository, times(1)).save(updatedResource);

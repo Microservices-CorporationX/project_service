@@ -37,14 +37,15 @@ public class ProjectFilesService {
     private final TeamMemberService teamMemberService;
 
     public void uploadFile(long projectId, long teamMemberId, MultipartFile file) {
+        resourceValidator.validateFileSizeNotBigger2Gb(file.getSize());
         Project project = projectService.getProjectById(projectId);
         BigInteger maxStorageSize = project.getMaxStorageSize();
         BigInteger currentStorageSize = project.getStorageSize().
                 add(BigInteger.valueOf(file.getSize()));
         project.setStorageSize(currentStorageSize);
 
-        resourceValidator.checkMaxStorageSizeIsNotNull(maxStorageSize);
-        resourceValidator.checkStorageSizeNotExceeded(maxStorageSize, currentStorageSize);
+        resourceValidator.validateMaxStorageSizeIsNotNull(maxStorageSize);
+        resourceValidator.validateStorageSizeNotExceeded(maxStorageSize, currentStorageSize);
         String folder = projectId + project.getName();
 
         String key = s3Service.uploadFile(file, folder);

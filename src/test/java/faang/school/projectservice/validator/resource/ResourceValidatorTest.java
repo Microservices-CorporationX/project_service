@@ -69,7 +69,7 @@ class ResourceValidatorTest {
         BigInteger maxStorageSize = null;
 
         assertThrows(IllegalStateException.class,
-                () -> resourceValidator.checkMaxStorageSizeIsNotNull(maxStorageSize));
+                () -> resourceValidator.validateMaxStorageSizeIsNotNull(maxStorageSize));
     }
 
     @Test
@@ -77,7 +77,7 @@ class ResourceValidatorTest {
         BigInteger maxStorageSize = new BigInteger("1");
 
         assertDoesNotThrow(
-                () -> resourceValidator.checkMaxStorageSizeIsNotNull(maxStorageSize));
+                () -> resourceValidator.validateMaxStorageSizeIsNotNull(maxStorageSize));
     }
 
     @Test
@@ -86,7 +86,7 @@ class ResourceValidatorTest {
         BigInteger maxSize = new BigInteger("10");
 
         assertThrows(StorageExceededException.class,
-                () -> resourceValidator.checkStorageSizeNotExceeded(maxSize, currentSize));
+                () -> resourceValidator.validateStorageSizeNotExceeded(maxSize, currentSize));
     }
 
     @Test
@@ -95,6 +95,21 @@ class ResourceValidatorTest {
         BigInteger maxSize = new BigInteger("10");
 
         assertDoesNotThrow(
-                () -> resourceValidator.checkStorageSizeNotExceeded(maxSize, currentSize));
+                () -> resourceValidator.validateStorageSizeNotExceeded(maxSize, currentSize));
+    }
+
+    @Test
+    public void fileSizeNotBigger2GbThrowsExceptionTest() {
+        long fileSize = 2147483650L;
+
+        assertThrows(DataValidationException.class,
+                () -> resourceValidator.validateFileSizeNotBigger2Gb(fileSize));
+    }
+
+    @Test
+    public void fileSizeNotBigger2GbTest() {
+        long fileSize = 100L;
+
+        assertDoesNotThrow(() -> resourceValidator.validateFileSizeNotBigger2Gb(fileSize));
     }
 }

@@ -4,8 +4,8 @@ spring:
       path: /api/v1
   servlet:
      multipart:
-        max-file-size: 200MB
-        max-request-size: 500MB
+        max-file-size: 10GB
+        max-request-size: 10GB
 
   datasource:
     driver-class-name: org.postgresql.Driver
