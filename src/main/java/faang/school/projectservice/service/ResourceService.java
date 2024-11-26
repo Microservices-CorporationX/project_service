@@ -8,6 +8,7 @@ import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +37,8 @@ public class ResourceService {
         Project project = projectService.findProjectById(projectId);
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
         BigInteger newStorageSize = project.getStorageSize().add(fileSize);
+        String type = file.getContentType();
+        String originalName = file.getOriginalFilename();
 
         validateUserExists(userId);
         validateUserIsTeamMember(userId, projectId);
@@ -44,13 +47,21 @@ public class ResourceService {
         String folder = project.getId() + project.getName();
         TeamMember creatorMember = teamMemberService.getMemberProject(userId, projectId);
 
-        Resource resource = s3Service.uploadFile(file, folder);
-        resource.setProject(project);
-        resource.setCreatedBy(creatorMember);
-        resource.setUpdatedBy(creatorMember);
-        resource.setAllowedRoles(new ArrayList<>(creatorMember.getRoles()));
-        resource = resourceRepository.save(resource);
+        String key = s3Service.uploadFile(file, folder);
 
+        Resource resource = Resource.builder()
+                .name(originalName)
+                .key(key)
+                .size(fileSize)
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(type))
+                .project(project)
+                .createdBy(creatorMember)
+                .updatedBy(creatorMember)
+                .allowedRoles(new ArrayList<>(creatorMember.getRoles()))
+                .build();
+
+        resource = resourceRepository.save(resource);
         projectService.updateStorageSize(newStorageSize, project);
 
         log.info("File={} uploaded successfully for projectId={}", resource, projectId);
@@ -89,6 +100,8 @@ public class ResourceService {
         Project project = oldResource.getProject();
         BigInteger fileSize = BigInteger.valueOf(file.getSize());
         BigInteger newStorageSize = project.getStorageSize().subtract(oldResource.getSize()).add(fileSize);
+        String type = file.getContentType();
+        String originalName = file.getOriginalFilename();
 
         validateUserExists(userId);
         validateUserIsTeamMember(userId, project.getId());
@@ -101,7 +114,16 @@ public class ResourceService {
         s3Service.deleteResource(oldResource.getKey());
         projectService.updateStorageSize(newStorageSize, project);
 
-        Resource updatedResource = s3Service.uploadFile(file, folder);
+        String key = s3Service.uploadFile(file, folder);
+
+        Resource updatedResource = Resource.builder()
+                .name(originalName)
+                .key(key)
+                .size(fileSize)
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(type))
+                .build();
+
         resourceMapper.updateOldResourceWithUpdateDataResource(updatedResource, oldResource);
         oldResource.setUpdatedBy(updaterMember);
         oldResource.setUpdatedAt(LocalDateTime.now());

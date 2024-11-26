@@ -24,7 +24,7 @@ public class S3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public Resource uploadFile(MultipartFile file, String folder) {
+    public String uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         String type = file.getContentType();
         String originalName = file.getOriginalFilename();
@@ -36,19 +36,14 @@ public class S3Service {
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
+                    bucketName, key, file.getInputStream(), objectMetadata
+            );
             s3Client.putObject(putObjectRequest);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to upload file to S3: " + e.getMessage(), e);
         }
 
-        return Resource.builder()
-                .name(originalName)
-                .key(key)
-                .size(BigInteger.valueOf(fileSize))
-                .status(ResourceStatus.ACTIVE)
-                .type(ResourceType.getResourceType(type))
-                .build();
+        return key;
     }
 
     public void deleteResource(@NotBlank String key) {

@@ -23,7 +23,7 @@ public class ResourceController {
 
     @PostMapping("/project/{projectId}/resource")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDto uploadResource(@PathVariable @Positive long projectId, @RequestBody MultipartFile file) {
+    public ResourceDto uploadResource(@PathVariable @Positive long projectId, @RequestPart MultipartFile file) {
         long userId = userContext.getUserId();
         validateUserId(userId);
         return resourceService.uploadResource(projectId, userId, file);
@@ -43,7 +43,7 @@ public class ResourceController {
         return resourceService.updateResource(resourceId, userId, file);
     }
 
-    private void validateUserId(Long userId) {
+    private void validateUserId(long userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("User id must be more 0");
         }

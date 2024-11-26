@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import jdk.jshell.Snippet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

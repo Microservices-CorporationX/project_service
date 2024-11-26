@@ -59,13 +59,14 @@ class ResourceServiceTest {
     private Project project;
     private TeamMember teamMember;
     private Resource resource;
+    private String key;
     private MultipartFile file;
 
     @BeforeEach
     public void setUp() {
         long projectId = 1L;
         long userId = 1L;
-        long resourceId = 1L;
+        key = "test-key";
 
         project = new Project();
         project.setId(projectId);
@@ -96,13 +97,27 @@ class ResourceServiceTest {
     public void testUploadResourceWithSuccessfulData() {
         when(projectService.findProjectById(1L)).thenReturn(project);
         when(teamMemberService.getMemberProject(1L, 1L)).thenReturn(teamMember);
-        when(s3Service.uploadFile(file, "1Test Project")).thenReturn(resource);
-        when(resourceRepository.save(resource)).thenReturn(resource);
+        when(s3Service.uploadFile(file, "1Test Project")).thenReturn(key);
+
+        Resource expectedResource = Resource.builder()
+                .id(1L)
+                .name(file.getOriginalFilename())
+                .key(key)  // Ключ файла
+                .size(BigInteger.valueOf(file.getSize()))
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.AUDIO)
+                .project(project)
+                .createdBy(teamMember)
+                .updatedBy(teamMember)
+                .allowedRoles(new ArrayList<>(teamMember.getRoles()))
+                .build();
+
+        when(resourceRepository.save(any(Resource.class))).thenReturn( expectedResource);
 
         ResourceDto result = resourceService.uploadResource(1L, 1L, file);
 
         assertNotNull(result);
-        assertEquals(resource.getId(), result.id());
+        assertEquals(expectedResource.getId(), result.id());
         verify(resourceRepository).save(any(Resource.class));
         verify(s3Service).uploadFile(any(), any());
     }
@@ -169,11 +184,14 @@ class ResourceServiceTest {
         newResource.setSize(new BigInteger("20"));
         newResource.setKey("test-key");
 
+        when(file.getContentType()).thenReturn("text/plain");
+        when(file.getOriginalFilename()).thenReturn("test.txt");
+        when(file.getSize()).thenReturn(20L);
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
         when(teamMemberService.getMemberProject(1L, 1L)).thenReturn(teamMember);
         when(userServiceClient.getUser(1L)).thenReturn(new UserDto());
         doNothing().when(s3Service).deleteResource(resource.getKey());
-        when(s3Service.uploadFile(file, "1Test Project")).thenReturn(newResource);
+        when(s3Service.uploadFile(file, "1Test Project")).thenReturn(key);
         when(resourceRepository.save(resource)).thenReturn(resource);
 
         ResourceDto result = resourceService.updateResource(1L, 1L, file);
