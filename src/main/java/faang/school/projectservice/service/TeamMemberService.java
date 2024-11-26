@@ -15,7 +15,7 @@ public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
 
-    public TeamMember getMemberProject(long userId, long projectId) {
+    public TeamMember getProjectMember(long userId, long projectId) {
         TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
         if (teamMember == null) {
             log.error("TeamMember not found for userId={} and projectId={}", userId , projectId);
@@ -33,5 +33,4 @@ public class TeamMemberService {
         TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(userId, projectId);
         return teamMember == null;
     }
-
 }

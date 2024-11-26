@@ -3,9 +3,7 @@ package faang.school.projectservice.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.exception.FileUploadException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigInteger;
 
 @Service
 @Validated
@@ -40,7 +37,7 @@ public class S3Service {
             );
             s3Client.putObject(putObjectRequest);
         } catch (Exception e) {
-            throw new IllegalStateException("Unable to upload file to S3: " + e.getMessage(), e);
+            throw new FileUploadException("Unable to upload file to S3: " + e.getMessage(), e);
         }
 
         return key;

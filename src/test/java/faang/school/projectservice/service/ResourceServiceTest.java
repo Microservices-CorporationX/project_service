@@ -96,7 +96,7 @@ class ResourceServiceTest {
     @Test
     public void testUploadResourceWithSuccessfulData() {
         when(projectService.findProjectById(1L)).thenReturn(project);
-        when(teamMemberService.getMemberProject(1L, 1L)).thenReturn(teamMember);
+        when(teamMemberService.getProjectMember(1L, 1L)).thenReturn(teamMember);
         when(s3Service.uploadFile(file, "1Test Project")).thenReturn(key);
 
         Resource expectedResource = Resource.builder()
@@ -135,7 +135,7 @@ class ResourceServiceTest {
     @Test
     public void testDeleteResourceWithCorrectData() {
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
-        when(teamMemberService.getMemberProject(1L, 1L)).thenReturn(teamMember);
+        when(teamMemberService.getProjectMember(1L, 1L)).thenReturn(teamMember);
         when(resourceRepository.save(resource)).thenReturn(resource);
 
         ResourceDto result = resourceService.deleteResource(1L, 1L);
@@ -166,7 +166,7 @@ class ResourceServiceTest {
         teamMember.getRoles().add(TeamRole.DESIGNER);
 
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
-        when(teamMemberService.getMemberProject(2L, 1L)).thenReturn(teamMember);
+        when(teamMemberService.getProjectMember(2L, 1L)).thenReturn(teamMember);
 
         DataValidationException exception = assertThrows(DataValidationException.class, () ->
                 resourceService.deleteResource(1L, 2L)
@@ -188,7 +188,7 @@ class ResourceServiceTest {
         when(file.getOriginalFilename()).thenReturn("test.txt");
         when(file.getSize()).thenReturn(20L);
         when(resourceRepository.findById(1L)).thenReturn(Optional.of(resource));
-        when(teamMemberService.getMemberProject(1L, 1L)).thenReturn(teamMember);
+        when(teamMemberService.getProjectMember(1L, 1L)).thenReturn(teamMember);
         when(userServiceClient.getUser(1L)).thenReturn(new UserDto());
         doNothing().when(s3Service).deleteResource(resource.getKey());
         when(s3Service.uploadFile(file, "1Test Project")).thenReturn(key);

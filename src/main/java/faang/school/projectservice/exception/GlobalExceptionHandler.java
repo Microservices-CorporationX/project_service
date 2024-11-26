@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DataValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDataValidationException(DataValidationException e) {
-        log.error("Data Validation Exception: ", e);
-        return new ErrorResponse(e.getMessage());
-    }
+//    @ExceptionHandler(DataValidationException.class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ErrorResponse handleDataValidationException(DataValidationException e) {
+//        log.error("Data Validation Exception: ", e);
+//        return new ErrorResponse(e.getMessage());
+//    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

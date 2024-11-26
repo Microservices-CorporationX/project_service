@@ -42,10 +42,10 @@ public class ResourceService {
 
         validateUserExists(userId);
         validateUserIsTeamMember(userId, projectId);
-        validateStorageSizeExisted(newStorageSize, project.getMaxStorageSize());
+        validateStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        TeamMember creatorMember = teamMemberService.getMemberProject(userId, projectId);
+        TeamMember creatorMember = teamMemberService.getProjectMember(userId, projectId);
 
         String key = s3Service.uploadFile(file, folder);
 
@@ -72,9 +72,8 @@ public class ResourceService {
         log.info("Starting deleteResource for recourseId={} and userId={}", recourseId, userId);
         Resource resource = getResourceById(recourseId);
         Project project = resource.getProject();
-        TeamMember requestingMember = teamMemberService.getMemberProject(userId, project.getId());
+        TeamMember requestingMember = teamMemberService.getProjectMember(userId, project.getId());
 
-        log.debug("Validating user permissions to delete resourceId={} for projectId={}", recourseId, project.getId());
         validateUserExists(userId);
         validateUserIsTeamMember(userId, project.getId());
         validateMemberCanDelete(requestingMember, resource);
@@ -105,10 +104,10 @@ public class ResourceService {
 
         validateUserExists(userId);
         validateUserIsTeamMember(userId, project.getId());
-        validateStorageSizeExisted(newStorageSize, project.getMaxStorageSize());
+        validateStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        TeamMember updaterMember = teamMemberService.getMemberProject(userId, project.getId());
+        TeamMember updaterMember = teamMemberService.getProjectMember(userId, project.getId());
 
         log.debug("Deleting old file with key={} from S3", oldResource.getKey());
         s3Service.deleteResource(oldResource.getKey());
@@ -165,7 +164,7 @@ public class ResourceService {
         }
     }
 
-    private void validateStorageSizeExisted(BigInteger newStorageSize, BigInteger maxStorageSizeProject) {
+    private void validateStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSizeProject) {
         if (newStorageSize.compareTo(maxStorageSizeProject) > 0) {
             log.error("the file size={} is larger than the project storage size={}"
                     , newStorageSize, maxStorageSizeProject);
