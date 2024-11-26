@@ -27,11 +27,13 @@ public interface ProjectJpaRepository extends JpaRepository<Project, Long> {
                     "                               UNION ALL" +
                     "                              SELECT p.id" +
                     "                                FROM project p" +
-                    "                                     INNER JOIN search s ON s.id = p.parent_project_id)"  +
+                    "                                     INNER JOIN search s ON s.id = p.parent_project_id)" +
                     "SELECT p.*" +
                     "  FROM project p" +
                     "       INNER JOIN search s ON s.id = p.parent_project_id", nativeQuery = true
     )
     List<Project> findAllSubProjectsByParentId(@Param("id") Long id);
+
+    Project findProjectById(long id);
 }
 
