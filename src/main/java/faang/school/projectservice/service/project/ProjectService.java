@@ -72,6 +72,15 @@ public class ProjectService {
         return projectMapper.toDto(savedProject);
     }
 
+    @Transactional
+    public List<Project> findProjectsByIds(List<Long> projectIds) {
+        return projectIds.stream()
+                .map(id -> projectRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(PROJECT, id)))
+                .collect(Collectors.toList());
+    }
+
+
     public boolean isProjectExists(long projectId) {
         return projectRepository.existsById(projectId);
     }
@@ -111,17 +120,17 @@ public class ProjectService {
                 || project.getOwnerId().equals(userId);
     }
 
-    private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
+    private void validateProjectExistsForUser (Long userId, String name){
+        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
+            throw new AlreadyExistsException(PROJECT);
+        }
+    }
+
+    private Stream<Project> applyFilters (Project project, ProjectFilterDto filters){
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(Stream.of(project),
                         (stream, filter) -> filter.apply(stream, filters),
                         Stream::concat);
-    }
-
-    private void validateProjectExistsForUser(Long userId, String name) {
-        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
-            throw new AlreadyExistsException(PROJECT);
-        }
     }
 }

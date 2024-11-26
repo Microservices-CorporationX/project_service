@@ -1,0 +1,29 @@
+spring:
+  mvc:
+    servlet:
+      path: /api/v1
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: false
+  sql:
+    init:
+      mode: never
+
+calculations_messages_processing:
+  enabled: false
+
+services:
+  payment-service:
+    host: http://localhost
+    port: 9080
+  user-service:
+    host: http://localhost
+    port: 8080
