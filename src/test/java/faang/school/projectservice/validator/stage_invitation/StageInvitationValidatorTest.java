@@ -1,8 +1,8 @@
-package faang.school.projectservice.validator.stageinvitation;
+package faang.school.projectservice.validator.stage_invitation;
 
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stageinvitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

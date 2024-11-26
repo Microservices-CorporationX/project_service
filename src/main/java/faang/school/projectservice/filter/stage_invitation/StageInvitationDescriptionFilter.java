@@ -1,8 +1,8 @@
-package faang.school.projectservice.filter.stageinvitation;
+package faang.school.projectservice.filter.stage_invitation;
 
-import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.filter.Filter;
-import faang.school.projectservice.model.stageinvitation.StageInvitation;
+import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
