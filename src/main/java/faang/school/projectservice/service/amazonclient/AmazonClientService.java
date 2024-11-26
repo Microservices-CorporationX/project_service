@@ -37,7 +37,7 @@ public class AmazonClientService {
                 multipartFile.getOriginalFilename().replace(" ", "_");
         try {
             File file = convertMultiPartToFile(multipartFile);
-            uploadFileTos3bucket(fileName, file);
+            uploadFileToS3Bucket(fileName, file);
             file.delete();
         } catch (IOException e) {
             log.warn("IOException: " + Arrays.toString(e.getStackTrace()));
@@ -48,7 +48,7 @@ public class AmazonClientService {
 
     public byte[] getProjectCover(String fileName) {
 
-        try (InputStream inputStream = downloadFileTos3bucket(fileName)){
+        try (InputStream inputStream = downloadFileFromS3Bucket(fileName)){
             return inputStream.readAllBytes();
         } catch (IOException e) {
             log.warn("IOException: " + Arrays.toString(e.getStackTrace()));
@@ -80,12 +80,12 @@ public class AmazonClientService {
         return format;
     }
 
-    private void uploadFileTos3bucket(String fileName, File file) {
+    private void uploadFileToS3Bucket(String fileName, File file) {
         s3client.putObject(new PutObjectRequest(bucketName, fileName, file)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
     }
 
-    private InputStream downloadFileTos3bucket(String fileName) {
+    private InputStream downloadFileFromS3Bucket(String fileName) {
         GetObjectRequest request = new GetObjectRequest(bucketName, fileName);
         return s3client.getObject(request).getObjectContent();
     }
