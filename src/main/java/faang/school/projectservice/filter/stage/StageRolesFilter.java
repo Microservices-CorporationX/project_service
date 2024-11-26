@@ -3,30 +3,25 @@ package faang.school.projectservice.filter.stage;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage.StageRoles;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 @Component
-public class StageRolesFilter implements StageFilter {
+public class StageRolesFilter implements Filter<Stage, StageFilterDto> {
 
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
-        return stageFilterDto.getStageRolesDto() != null;
+        return (stageFilterDto.getTeamRoles() != null) && (!stageFilterDto.getTeamRoles().isEmpty());
     }
 
     @Override
     public Stream<Stage> apply(Stream<Stage> stages, StageFilterDto stageFilterDto) {
-        return stages.filter(stage -> {
-            AtomicBoolean isApply = new AtomicBoolean(false);
-            stage.getStageRoles().forEach(stageRoles -> {
-                List<StageRolesDto> stageRolesList = stageFilterDto.getStageRolesDto().stream().filter(stageRolesDto ->
-                        stageRoles.getId().equals(stageRolesDto.getStageRolesId())).toList();
-                isApply.set(stageRolesList.size() == stageFilterDto.getStageRolesDto().size());
-            });
-            return isApply.get();
-        });
+        return stages.filter(stage -> stage.getStageRoles().stream()
+                .map(StageRoles::getTeamRole)
+                .anyMatch(teamRole -> stageFilterDto.getTeamRoles().contains(teamRole))
+        );
+
     }
 }

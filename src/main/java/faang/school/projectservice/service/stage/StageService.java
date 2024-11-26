@@ -2,7 +2,7 @@ package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
-import faang.school.projectservice.filter.stage.StageFilter;
+import faang.school.projectservice.filter.stage.Filter;
 import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
-    private final List<StageFilter> stageFilterList;
+    private final List<Filter<Stage,StageFilterDto>> filterList;
     private final TaskService taskService;
     private final ProjectService projectService;
     private final StageInvitationService stageInvitationService;
@@ -38,7 +38,7 @@ public class StageService {
 
         Stream<Stage> stageStream = stageRepository.findAll().stream();
 
-        return stageFilterList.stream()
+        return filterList.stream()
                 .filter(filter -> filter.isApplicable(stageFilterDto))
                 .reduce(stageStream,
                         (stream, filter) -> filter.apply(stream, stageFilterDto),

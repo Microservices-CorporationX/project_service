@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class StageNameFilter implements StageFilter {
+public class StageNameFilter implements Filter<Stage, StageFilterDto> {
 
     @Override
     public boolean isApplicable(StageFilterDto stageFilterDto) {
-        return stageFilterDto.getStageName()!=null;
+        return stageFilterDto.getStageName() != null;
     }
 
     @Override
