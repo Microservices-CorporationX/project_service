@@ -67,7 +67,7 @@ class ResourceServiceTest {
                 .build();
 
         when(teamMemberService.getTeamMemberByUserIdAndProjectId(1L, 1L)).thenReturn(teamMember);
-        when(projectService.getProject(1L)).thenReturn(project);
+        when(projectService.findProjectById(1L)).thenReturn(project);
         doNothing().when(resourceValidator).checkProjectStorageSizeExceeded(any(), any());
         doNothing().when(s3Util).s3UploadFile(any(), any());
         when(multipartFile.getOriginalFilename()).thenReturn("TestName");

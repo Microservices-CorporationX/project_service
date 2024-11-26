@@ -49,7 +49,7 @@ public class ResourceService {
         TeamMember teamMember = teamMemberService.getTeamMemberByUserIdAndProjectId(userId, projectId);
         log.info("TeamMember id={} found in project id={}", userId, projectId);
 
-        Project project = projectService.getProject(projectId);
+        Project project = projectService.findProjectById(projectId);
         log.info("Project id={} found", projectId);
 
         BigInteger filesSize = BigInteger.valueOf(files.stream()
