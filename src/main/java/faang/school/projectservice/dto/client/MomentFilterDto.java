@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @Validated
 public class MomentFilterDto {
-
     private Month month;
 
     @NotEmpty(message = "Project IDs list cannot be empty")
