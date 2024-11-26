@@ -14,7 +14,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.moment.MomentServiceValidator;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,50 +50,16 @@ class MomentServiceTest {
     private List<MomentFilter> momentFilters;
     @InjectMocks
     private MomentService momentService;
-    private MomentDto momentDto;
-    private Moment moment;
-    private Project project;
-    private MomentFilterDto filterDto;
-    private Team team;
-    private TeamMember teamMember;
-
-    @BeforeEach
-    void setUp() {
-        momentDto = MomentDto.builder()
-                .name("Test Moment")
-                .description("Test Description")
-                .date(LocalDateTime.now())
-                .imageId("imageId")
-                .projectIds(Arrays.asList(1L, 2L))
-                .teamMemberIds(Arrays.asList(1L, 2L))
-                .build();
-
-        moment = momentMapper.toEntity(momentDto);
-
-        filterDto = MomentFilterDto.builder()
-                .fromDate(LocalDateTime.now().minusDays(1))
-                .toDate(LocalDateTime.now().plusDays(1))
-                .build();
-
-        teamMember = TeamMember.builder().id(1L).build();
-
-        team = Team.builder()
-                .id(1L)
-                .teamMembers(List.of(teamMember))
-                .build();
-
-        project = Project.builder()
-                .id(1L)
-                .name("Test Project")
-                .teams(List.of(team))
-                .build();
-
-        team.setProject(project);
-        teamMember.setTeam(team);
-    }
 
     @Test
     void testCreateMoment() {
+        MomentDto momentDto = buildMomentDto();
+        Moment moment = momentMapper.toEntity(momentDto);
+        Project project = buildProject();
+        Team team = buildTeam();
+        team.setProject(project);
+        TeamMember teamMember = buildTeamMember();
+        teamMember.setTeam(team);
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(moment)).thenReturn(moment);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
@@ -111,6 +76,13 @@ class MomentServiceTest {
 
     @Test
     void testUpdateMoment() {
+        MomentDto momentDto = buildMomentDto();
+        Moment moment = momentMapper.toEntity(momentDto);
+        Project project = buildProject();
+        Team team = buildTeam();
+        team.setProject(project);
+        TeamMember teamMember = buildTeamMember();
+        teamMember.setTeam(team);
         when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         when(momentMapper.toEntity(momentDto)).thenReturn(moment);
         when(momentRepository.save(moment)).thenReturn(moment);
@@ -126,6 +98,7 @@ class MomentServiceTest {
 
     @Test
     void testDeleteMoment() {
+        Moment moment = momentMapper.toEntity(buildMomentDto());
         when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         momentService.deleteMoment(1L);
         verify(momentRepository, times(1)).delete(moment);
@@ -133,7 +106,9 @@ class MomentServiceTest {
 
     @Test
     void testGetAllMoments() {
-        List<Moment> moments = Arrays.asList(moment);
+        MomentDto momentDto = buildMomentDto();
+        Moment moment = momentMapper.toEntity(momentDto);
+        List<Moment> moments = List.of(moment);
         when(momentRepository.findAll()).thenReturn(moments);
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
@@ -146,6 +121,8 @@ class MomentServiceTest {
 
     @Test
     void testGetMomentById() {
+        MomentDto momentDto = buildMomentDto();
+        Moment moment = momentMapper.toEntity(momentDto);
         when(momentRepository.findById(1L)).thenReturn(Optional.of(moment));
         when(momentMapper.toDto(moment)).thenReturn(momentDto);
 
@@ -157,11 +134,13 @@ class MomentServiceTest {
 
     @Test
     void testFilterMomentsByDate() {
-        List<MomentFilter> filters = Arrays.asList(new MomentFilterToFromDate());
-        when(momentRepository.findAll()).thenReturn(Arrays.asList(moment));
+        MomentDto momentDto = buildMomentDto();
+        Moment moment = momentMapper.toEntity(momentDto);
+        List<MomentFilter> filters = List.of(new MomentFilterToFromDate());
+        when(momentRepository.findAll()).thenReturn(List.of(moment));
         when(momentFilters.stream()).thenReturn(filters.stream());
 
-        List<MomentDto> result = momentService.filterMomentsByDate(filterDto);
+        List<MomentDto> result = momentService.filterMomentsByDate(buildFilterDto());
 
         verify(momentRepository, times(1)).findAll();
         assertEquals(1, result.size());
@@ -170,6 +149,7 @@ class MomentServiceTest {
 
     @Test
     void updateMomentMomentNotFound() {
+        MomentDto momentDto = buildMomentDto();
         when(momentRepository.findById(1L)).thenReturn(Optional.empty());
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> momentService.updateMoment(1L, momentDto));
@@ -182,5 +162,44 @@ class MomentServiceTest {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> momentService.deleteMoment(1L));
         assertEquals("Moment doesn't exist by id: 1", exception.getMessage());
+    }
+
+    private MomentDto buildMomentDto() {
+        return MomentDto.builder()
+                .name("Test Moment")
+                .description("Test Description")
+                .date(LocalDateTime.now())
+                .imageId("imageId")
+                .projectIds(Arrays.asList(1L, 2L))
+                .teamMemberIds(Arrays.asList(1L, 2L))
+                .build();
+    }
+
+    private MomentFilterDto buildFilterDto() {
+        return MomentFilterDto.builder()
+                .fromDate(LocalDateTime.now().minusDays(1))
+                .toDate(LocalDateTime.now().plusDays(1))
+                .build();
+    }
+
+    private Project buildProject() {
+        return Project.builder()
+                .id(1L)
+                .name("Test Project")
+                .teams(List.of(buildTeam()))
+                .build();
+    }
+
+    private Team buildTeam() {
+        return Team.builder()
+                .id(1L)
+                .teamMembers(List.of(buildTeamMember()))
+                .build();
+    }
+
+    private TeamMember buildTeamMember() {
+        return TeamMember.builder()
+                .id(1L)
+                .build();
     }
 }
