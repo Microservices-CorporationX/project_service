@@ -125,4 +125,16 @@ public class ProjectService {
     private void logUpdate(Project project) {
         log.info("User with id {} updated project {}", userContext.getUserId(), project);
     }
+
+    public boolean existsById (Long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
+    public Project getById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public void save(Project project) {
+        projectRepository.save(project);
+    }
 }
