@@ -17,6 +17,4 @@ public class JiraAccountDto {
     private String username;
     @NotBlank
     private String password;
-    @NotBlank
-    private String projectUrl;
 }

@@ -4,8 +4,10 @@ import faang.school.projectservice.dto.jira.IssueDto;
 import faang.school.projectservice.dto.jira.JiraAccountDto;
 import faang.school.projectservice.service.jira.JiraService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,12 +21,14 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/jira")
+@Validated
 public class JiraController {
 
     private final JiraService jiraService;
 
     @GetMapping("/issue/{issueKey}")
-    public IssueDto getIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto, @PathVariable String issueKey) {
+    public IssueDto getIssue(@Valid @RequestBody JiraAccountDto jiraAccountDto,
+                             @NotNull @PathVariable String issueKey) {
         return jiraService.getIssueBiKey(jiraAccountDto, issueKey);
     }
 
@@ -37,13 +41,14 @@ public class JiraController {
     @GetMapping("/project/{projectKey}/issues/{statusId}")
     public List<IssueDto> getIssueWithFilterByStatus(@Valid @RequestBody JiraAccountDto jiraAccountDto,
                                                      @PathVariable String projectKey,
-                                                     @Positive @PathVariable Long statusId) {
+                                                     @PathVariable @NotNull Long statusId) {
         return jiraService.getIssueWithFilterByStatus(jiraAccountDto, projectKey, statusId);
     }
 
     @GetMapping("/project/{projectKey}/issues/assignee/")
     public List<IssueDto> getIssuesByExecutorId(@Valid @RequestBody JiraAccountDto jiraAccountDto,
-                                                @PathVariable String projectKey, @RequestParam String assigneeId) {
+                                                @PathVariable String projectKey,
+                                                @RequestParam @NotBlank String assigneeId) {
         return jiraService.getIssueByExecutorId(jiraAccountDto, projectKey, assigneeId);
     }
 

@@ -12,6 +12,7 @@ import faang.school.projectservice.mapper.jira.IssueMapper;
 import faang.school.projectservice.mapper.jira.IssueTypeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -21,12 +22,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class JiraService {
-    private static final String PROJECT_URL = "https://faang-school.atlassian.net/";
-
+    @Value("${jira.PROJECT_URL}")
+    private String projectUrl;
     private final JiraClient jiraClient;
     private final IssueMapper issueMapper;
     private final IssueTypeMapper issueTypeMapper;
-
 
     public List<IssueDto> getAllIssues(JiraAccountDto jiraAccountDto, String projectKey) {
         userIdentification(jiraAccountDto);
@@ -64,13 +64,12 @@ public class JiraService {
                 .build();
     }
 
-
     private void userIdentification(JiraAccountDto jiraAccountDto) {
         jiraClient.setUsername(jiraAccountDto.getUsername());
         jiraClient.setPassword(jiraAccountDto.getPassword());
-        jiraClient.setProjectUrl(PROJECT_URL);
+        jiraClient.setProjectUrl(projectUrl);
 
-        JiraRestClient jiraRestClient = new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(URI.create(PROJECT_URL), jiraAccountDto.getUsername(), jiraAccountDto.getPassword());
+        JiraRestClient jiraRestClient = new AsynchronousJiraRestClientFactory().createWithBasicHttpAuthentication(URI.create(projectUrl), jiraAccountDto.getUsername(), jiraAccountDto.getPassword());
         jiraClient.setRestClient(jiraRestClient);
         log.info("User authentication {} completed", jiraAccountDto.getUsername());
     }
