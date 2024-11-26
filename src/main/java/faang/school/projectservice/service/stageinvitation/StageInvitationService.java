@@ -37,8 +37,8 @@ public class StageInvitationService {
     private final StageService stageService;
 
     public void sendStageInvitation(StageInvitationDto dto) {
-        TeamMember author = teamMemberService.getTeamMemberEntity(dto.getAuthorId());
-        TeamMember invited = teamMemberService.getTeamMemberEntity(dto.getInvitedId());
+        TeamMember author = teamMemberService.findById(dto.getAuthorId());
+        TeamMember invited = teamMemberService.findById(dto.getInvitedId());
         Stage stageToInvite = stageService.getStageEntity(dto.getStageId());
 
         StageInvitation stageInvitation = stageInvitationMapper.toEntity(dto);
@@ -56,7 +56,7 @@ public class StageInvitationService {
         StageInvitation invitation = getStageInvitation(dto.getId());
         stageInvValidator.validateIsInvitationSentToThisTeamMember(dto.getInvitedId(), invitation);
 
-        TeamMember teamMember = teamMemberService.getTeamMemberEntity(dto.getInvitedId());
+        TeamMember teamMember = teamMemberService.findById(dto.getInvitedId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(teamMember, invitation);
 
         invitation.setStatus(StageInvitationStatus.ACCEPTED);
