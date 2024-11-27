@@ -19,6 +19,7 @@ public class S3BucketManager {
         String bucketname = minioConfigProperties.getBucketName();
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketname).build());
+            log.info("Bucket '{}' exists. Continue execution", bucketname);
         } catch (NoSuchBucketException e) {
             log.warn("Bucket '{}' doesn't exist. Creating new bucket", bucketname);
             try {
