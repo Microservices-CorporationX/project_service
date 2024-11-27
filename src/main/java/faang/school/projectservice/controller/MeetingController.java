@@ -67,9 +67,9 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.filterMeetings(meetDto));
     }
 
-    @GetMapping
+    @GetMapping("/projects/{projectId}")
     @Operation(summary = "Get all meetings of a project")
-    public ResponseEntity<List<MeetDto>> getAllMeetings(@RequestParam Long projectId) {
+    public ResponseEntity<List<MeetDto>> getAllMeetings(@PathVariable Long projectId) {
         log.info("Getting all meetings of project {}", projectId);
         return ResponseEntity.ok(meetingService.getAllMeetings(projectId));
     }

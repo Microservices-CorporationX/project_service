@@ -38,6 +38,7 @@ public class MeetingControllerTest {
     private static final String CREATE_URL = "/meeting";
     private static final String UPDATE_URL = "/{meetId}";
     private static final String DELETE_URL = "/{projectId}/{userId}/{meetId}";
+    private static final String GET_ALL_URL = "/projects/{projectId}";
     private static final String FILTER_URL = "/filters";
     private static final String GET_BY_ID_URL = "/meeting/{meetId}";
 
@@ -124,8 +125,7 @@ public class MeetingControllerTest {
     void testGetAllMeetings() throws Exception {
         when(meetingService.getAllMeetings(anyLong())).thenReturn(List.of(meetDto));
 
-        mockMvc.perform(get(BASE_URL)
-                        .param("projectId", "100"))
+        mockMvc.perform(get(BASE_URL + "/projects/{projectId}", 100))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].title").value(meetDto.getTitle()))
