@@ -1,12 +1,17 @@
 package faang.school.projectservice.dto.project.meet;
 
 import faang.school.projectservice.model.MeetStatus;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
+import jdk.jfr.Timestamp;
 import lombok.Data;
+import org.hibernate.annotations.TimeZoneColumn;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,8 +26,9 @@ public class MeetDto {
 
     private String description;
 
-    @NotNull(message = "Start time must not be null")
+//    @NotNull(message = "Start time must not be null")
     private LocalDateTime startDateTime;
+    private Instant instant;
 
     private MeetStatus status;
     private Long creatorId;
