@@ -29,7 +29,7 @@ class FileStreamingServiceTest {
         InputStream fileStream = new ByteArrayInputStream(content.getBytes());
 
         ResponseEntity<StreamingResponseBody> response =
-                fileStreamingService.getStreamingResponseBodyInResponseEntity(fileStream);
+                fileStreamingService.getStreamingResponseBody(fileStream);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         StreamingResponseBody body = response.getBody();
@@ -47,7 +47,7 @@ class FileStreamingServiceTest {
         files.put("file2.txt", new ByteArrayInputStream("Content of file 2".getBytes()));
 
         ResponseEntity<StreamingResponseBody> response =
-                fileStreamingService.getStreamingResponseBodyInResponseEntityZip(files, projectId);
+                fileStreamingService.getStreamingResponseBodyInZip(files, projectId);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         StreamingResponseBody body = response.getBody();

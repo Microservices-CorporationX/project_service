@@ -47,8 +47,6 @@ public class AmazonS3Config {
         if (!s3Client.doesBucketExistV2(bucketName)) {
             s3Client.createBucket(bucketName);
             log.info("Bucket created successfully: {}", bucketName);
-        } else {
-            log.warn("Bucket already exists: {} ", bucketName);
         }
     }
 }

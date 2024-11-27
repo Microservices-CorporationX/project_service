@@ -1,7 +1,6 @@
 package faang.school.projectservice.validator.resource;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.IllegalStateException;
 import faang.school.projectservice.exception.StorageExceededException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;

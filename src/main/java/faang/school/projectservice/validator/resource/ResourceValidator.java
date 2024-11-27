@@ -1,17 +1,20 @@
 package faang.school.projectservice.validator.resource;
 
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.exception.IllegalStateException;
 import faang.school.projectservice.exception.StorageExceededException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 
 @Component
 public class ResourceValidator {
+
+    @Value("${project-files.max-project-file-size}")
+    long maxProjectFileSize;
 
     public void validateAllowedToDeleteFile(Resource resource, TeamMember teamMember) {
         if (!resource.getCreatedBy().getId().equals(teamMember.getId())
@@ -35,7 +38,7 @@ public class ResourceValidator {
     }
 
     public void validateFileSizeNotBigger2Gb(Long fileSize) {
-        if (fileSize > 2L * 1024 * 1024 * 1024) {
+        if (fileSize > maxProjectFileSize) {
             throw new DataValidationException("Max uploading file size can't be more than 2GB");
         }
     }

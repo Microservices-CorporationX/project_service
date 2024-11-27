@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import faang.school.projectservice.exception.FileDeleteException;
 import faang.school.projectservice.exception.FileDownloadException;
 import faang.school.projectservice.exception.FileUploadException;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,12 @@ public class S3Service {
 
     public void deleteFile(String key) {
         log.info("Deleting file with key {}", key);
-        s3Client.deleteObject(bucketName, key);
+        try {
+            s3Client.deleteObject(bucketName, key);
+            log.info("Successfully deleted file with key {}", key);
+        } catch (AmazonS3Exception e) {
+            throw new FileDeleteException("Error deleting file with key: " + key);
+        }
     }
 
     private S3ObjectInputStream downloadFileFromS3(String key) {

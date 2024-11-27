@@ -3,9 +3,9 @@ spring:
     servlet:
       path: /api/v1
   servlet:
-     multipart:
-        max-file-size: 10GB
-        max-request-size: 10GB
+    multipart:
+      max-file-size: 10GB
+      max-request-size: 10GB
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -56,3 +56,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+project-files:
+  max-project-file-size: 2147483648

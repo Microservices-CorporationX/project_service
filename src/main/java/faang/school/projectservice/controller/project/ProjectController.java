@@ -15,6 +15,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -124,7 +126,11 @@ public class ProjectController {
     @GetMapping("/resources/{resourceId}")
     public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable long resourceId) {
         InputStream fileStream = projectFilesService.downloadFile(resourceId);
-        return fileStreamingService.getStreamingResponseBodyInResponseEntity(fileStream);
+        StreamingResponseBody responseBody = fileStreamingService.getStreamingResponseBody(fileStream);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(responseBody);
     }
 
     @Operation(summary = "Delete a file from the project",
@@ -150,7 +156,13 @@ public class ProjectController {
     @GetMapping("/{projectId}/resources")
     public ResponseEntity<StreamingResponseBody> downloadAllFiles(@PathVariable long projectId) {
         Map<String, InputStream> files = projectFilesService.downloadAllFiles(projectId);
+        StreamingResponseBody responseBody = fileStreamingService.
+                getStreamingResponseBodyInZip(files);
 
-        return fileStreamingService.getStreamingResponseBodyInResponseEntityZip(files, projectId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +
+                        projectId + "_resources.zip")
+                .body(responseBody);
     }
 }
