@@ -35,4 +35,18 @@ public class ProjectFilterTest {
         filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, null);
         assertThat(filter.apply(project)).isTrue();
     }
+    @Test
+    void testAllFields() {
+        Project project = Project.builder()
+
+                .name("Test Project")
+
+                .status(ProjectStatus.CREATED)
+                .visibility(ProjectVisibility.PUBLIC)
+
+                .build();
+
+        ProjectFilter filter = new ProjectFilter("Test Project", ProjectStatus.CREATED, ProjectVisibility.PUBLIC);
+        assertThat(filter.apply(project)).isTrue();
+    }
 }
