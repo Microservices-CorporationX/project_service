@@ -110,9 +110,28 @@ public class MeetingServiceTest {
 
     @Test
     void testDeleteMeeting() {
-        meetingService.deleteMeeting(project.getId(), meetDto.getCreatorId(), meetDto.getId());
+        long projectId = 1L;
+        long creatorId = 2L;
+        long meetId = 3L;
 
-        verify(meetRepository, times(1)).deleteById(meetDto.getId());
+        Project project = new Project();
+        project.setId(projectId);
+
+        Meet meet = new Meet();
+        meet.setId(meetId);
+        meet.setCreatorId(creatorId);
+
+        MeetDto deleteDto = new MeetDto();
+        deleteDto.setCreatorId(creatorId);
+
+        doNothing().when(projectValidator).validateProjectExistsById(projectId);
+
+        when(meetRepository.findById(creatorId)).thenReturn(Optional.of(meet));
+
+        meetingService.deleteMeeting(deleteDto, projectId, meetId);
+
+        verify(meetRepository, times(1)).deleteById(meetId);
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
     }
 
     @Test

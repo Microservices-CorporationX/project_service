@@ -11,10 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +35,7 @@ public class MeetingControllerTest {
     private static final String BASE_URL = "/api/v1/meetings";
     private static final String CREATE_URL = "/meeting";
     private static final String UPDATE_URL = "/{meetId}";
-    private static final String DELETE_URL = "/{projectId}/{userId}/{meetId}";
+    private static final String DELETE_URL = "/{projectId}/{meetId}";
     private static final String GET_ALL_URL = "/projects/{projectId}";
     private static final String FILTER_URL = "/filters";
     private static final String GET_BY_ID_URL = "/meeting/{meetId}";
@@ -97,13 +95,16 @@ public class MeetingControllerTest {
 
     @Test
     void testDeleteMeeting() throws Exception {
-        doNothing().when(meetingService).deleteMeeting(anyLong(), anyLong(), anyLong());
+        doNothing().when(meetingService).deleteMeeting(any(MeetDto.class), anyLong(), anyLong());
 
-        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L, 1L, 1L))
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(meetDto)))
                 .andExpect(status().isNoContent());
 
-        verify(meetingService, times(1)).deleteMeeting(anyLong(), anyLong(), anyLong());
+        verify(meetingService, times(1)).deleteMeeting(any(MeetDto.class), anyLong(), anyLong());
     }
+
     @Test
     void testFilterMeetings() throws Exception {
         when(meetingService.filterMeetings(any(MeetDto.class))).thenReturn(List.of(meetDto));
@@ -125,7 +126,7 @@ public class MeetingControllerTest {
     void testGetAllMeetings() throws Exception {
         when(meetingService.getAllMeetings(anyLong())).thenReturn(List.of(meetDto));
 
-        mockMvc.perform(get(BASE_URL + "/projects/{projectId}", 100))
+        mockMvc.perform(get(BASE_URL + GET_ALL_URL, 100))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].title").value(meetDto.getTitle()))

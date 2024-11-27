@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
@@ -9,6 +10,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.validator.MeetingValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,17 +50,17 @@ public class MeetingService {
         return meetMapper.toDto(meeting);
     }
 
-    public void deleteMeeting(Long projectId, Long currentUserId, long meetId) {
+    @Transactional
+    public void deleteMeeting(MeetDto deleteDto, Long projectId, long meetId ) {
         projectValidator.validateProjectExistsById(projectId);
-
-        Project project = projectService.getProjectById(projectId);
-
-        projectValidator.checkUserIsProjectOwner(currentUserId, project);
+        validateMeetCreator(deleteDto);
 
         meetRepository.deleteById(meetId);
-        log.info("Meeting #{} successfully deleted by User #{}", meetId, currentUserId);
+        log.info("Meeting #{} successfully deleted by User #{}", meetId, deleteDto.getCreatorId());
     }
 
+
+    @Transactional
     public List<MeetDto> filterMeetings(MeetDto filters) {
         Stream<Meet> meet = meetRepository.findAll().stream();
 
@@ -85,5 +87,13 @@ public class MeetingService {
         meet.setProject(project);
 
         return meet;
+    }
+
+    private void validateMeetCreator(MeetDto deleteDto) {
+        Meet meetCreatorId = meetRepository.findById(deleteDto.getCreatorId()).orElseThrow(EntityNotFoundException::new);
+
+        if (!deleteDto.getCreatorId().equals(meetCreatorId.getCreatorId())) {
+            throw new UnauthorizedAccessException("User is not allowed to delete this meeting");
+        }
     }
 }

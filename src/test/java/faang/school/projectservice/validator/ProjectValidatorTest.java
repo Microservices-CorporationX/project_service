@@ -140,12 +140,4 @@ class ProjectValidatorTest {
 
         assertFalse(projectValidator.isOpenProject(projectId));
     }
-
-
-    @Test
-    public void testCheckUserIsProjectOwner() {
-        Long currentUserId = 1L;
-        project.setOwnerId(currentUserId);
-        assertDoesNotThrow(() -> projectValidator.checkUserIsProjectOwner(currentUserId, project));
-    }
 }

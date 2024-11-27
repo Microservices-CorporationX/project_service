@@ -73,10 +73,4 @@ public class ProjectValidator {
             throw new IllegalArgumentException("Mentor is not present in project team");
         }
     }
-
-    public void checkUserIsProjectOwner(Long currentUserId, Project project) {
-        if (!project.getOwnerId().equals(currentUserId)) {
-            throw new UnauthorizedAccessException("You are not allowed to delete this meeting");
-        }
-    }
 }

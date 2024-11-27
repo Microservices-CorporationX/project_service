@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -48,14 +47,14 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.updateMeeting(updateMeetDto, meetId));
     }
 
-    @DeleteMapping("/{projectId}/{userId}/{meetId}")
+    @DeleteMapping("/{projectId}/{meetId}")
     @Operation(summary = "Delete a meeting, only if the user is the project owner")
     public ResponseEntity<Void> deleteMeeting(
             @PathVariable @Positive(message = "Project ID must be a positive number") Long projectId,
-            @PathVariable @Positive(message = "User ID must be a positive number") Long userId,
-            @PathVariable @Positive(message = "Meeting ID must be a positive number") long meetId) {
-        log.info("Deleting meeting with id {} by user {}", meetId, userId);
-        meetingService.deleteMeeting(projectId, userId, meetId);
+            @PathVariable @Positive(message = "Meeting ID must be a positive number") long meetId,
+            @RequestBody MeetDto deleteDto) {
+        log.info("Deleting meeting with id {} by user {}", meetId, deleteDto.getCreatorId());
+        meetingService.deleteMeeting(deleteDto, projectId, meetId);
         return ResponseEntity.noContent().build();
     }
 
