@@ -26,6 +26,9 @@ public class Meet {
     @Column(name = "description", length = 512, nullable = false)
     private String description;
 
+    @Column(name = "start_date_time", nullable = false)
+    private LocalDateTime startDateTime;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MeetStatus status;

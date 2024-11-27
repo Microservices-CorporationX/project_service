@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

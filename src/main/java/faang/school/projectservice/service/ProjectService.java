@@ -2,8 +2,8 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -129,6 +129,13 @@ public class ProjectService {
 
     public boolean existsByOwnerUserIdAndName(Long userId, String projectName) {
         return projectRepository.existsByOwnerUserIdAndName(userId, projectName);
+    }
+
+    public boolean hasUserInProject(long projectId, long userId) {
+        return projectRepository.getProjectById(projectId).getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
+
     }
 
     private boolean isUserMemberOfPrivateProject(Project project, long userId) {
