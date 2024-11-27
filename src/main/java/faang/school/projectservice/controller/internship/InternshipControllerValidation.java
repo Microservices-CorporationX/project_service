@@ -31,11 +31,6 @@ class InternshipControllerValidation {
         }
     }
 
-    /**
-     * The internship cannot be created in the past.
-     *
-     * @param internshipDto dto object of internship
-     */
     public void validateInternshipDates(InternshipDto internshipDto) {
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();

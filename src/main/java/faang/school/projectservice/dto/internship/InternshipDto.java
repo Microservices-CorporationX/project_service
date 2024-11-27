@@ -33,7 +33,7 @@ public class InternshipDto {
     @NotNull(message = "The internship must have a mentor.")
     private Long mentorId;
 
-    @NotEmpty(message = "The internship can only be created with interns.")
+    @NotEmpty(message = "The internship must have at least one intern.")
     private List<@NotNull(message = "Cannot process null-valued intern id.") Long> internsIds;
 
     @NotNull(message = "The internship must have a start date.")
