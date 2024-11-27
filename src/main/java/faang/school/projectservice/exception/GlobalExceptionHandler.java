@@ -111,8 +111,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
-    @ExceptionHandler(EmptyFileException.class)
-    public ResponseEntity<String> handleEmptyFileException(EmptyFileException ex) {
+    @ExceptionHandler(EmptyResourceException.class)
+    public ResponseEntity<String> handleEmptyFileException(EmptyResourceException ex) {
         log.error("Provided file is empty: {}",  ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }

@@ -2,9 +2,7 @@ package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -97,7 +97,6 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Check project exists")
     void testValidateProjectExistsById() {
-        Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(true);
 
         assertDoesNotThrow(() -> projectValidator.validateProjectExistsById(projectId));
@@ -108,7 +107,6 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Check project doesn't exist")
     void testValidateProjectInVacancyNotExists() {
-        Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
         Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
@@ -118,7 +116,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusInProgress() {
+    void testIsOpenProjectWhenStatusInProgress() {
         project.setStatus(ProjectStatus.IN_PROGRESS);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
@@ -126,7 +124,7 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusCompleted() {
+    void testIsOpenProjectWhenStatusCompleted() {
         project.setStatus(ProjectStatus.COMPLETED);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
@@ -134,10 +132,42 @@ class ProjectValidatorTest {
     }
 
     @Test
-    public void testIsOpenProjectWhenStatusCancelled() {
+    void testIsOpenProjectWhenStatusCancelled() {
         project.setStatus(ProjectStatus.CANCELLED);
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
         assertFalse(projectValidator.isOpenProject(projectId));
+    }
+
+    @Test
+    @DisplayName("Test user belongs to the project team by valid userId: success")
+    void validateUserInProjectTeam_ValidParameters_Success(){
+        TeamMember teamMember = TeamMember.builder().userId(1L).build();
+        Team team = Team.builder().teamMembers(List.of(teamMember)).build();
+        project.setTeams(List.of(team));
+
+        assertDoesNotThrow(() -> projectValidator.validateUserInProjectTeam(1L, project));
+    }
+
+    @Test
+    @DisplayName("Test user doesn't belong to the project team: fail")
+    void validateUserInProjectTeam_ValidParametersNoTeam_FailException(){
+        TeamMember teamMember = TeamMember.builder().userId(2L).build();
+        Team team = Team.builder().teamMembers(List.of(teamMember)).build();
+        project.setId(5L);
+        project.setTeams(List.of(team));
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(1L, project));
+        assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test project doesn't have a team: fail")
+    void validateUserInProjectTeam_ProjectWithoutAnyTeam_FailException(){
+        project.setId(5L);
+        project.setTeams(List.of());
+
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(1L, project));
+        assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
     }
 }
