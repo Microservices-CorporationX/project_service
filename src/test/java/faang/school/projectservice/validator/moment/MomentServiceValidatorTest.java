@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator.moment;
 
 import faang.school.projectservice.exception.ProjectNotFoundException;
-import faang.school.projectservice.exception.vacancy.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Team;

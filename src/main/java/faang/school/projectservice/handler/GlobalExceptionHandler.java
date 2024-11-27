@@ -2,7 +2,7 @@ package faang.school.projectservice.handler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import faang.school.projectservice.exception.ProjectNotFoundException;
-import faang.school.projectservice.exception.vacancy.DataValidationException;
+import faang.school.projectservice.exception.DataValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
