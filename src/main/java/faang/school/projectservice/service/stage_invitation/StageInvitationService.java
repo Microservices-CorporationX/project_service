@@ -60,11 +60,20 @@ public class StageInvitationService {
     }
 
     public StageInvitationDto rejectInvitation(Long invintationId, Long invitedId, String rejectDescription) {
+        if (rejectDescription == null && rejectDescription.isEmpty()) {
+            throw new IllegalArgumentException("description не может быть равен null или быть пустым");
+        }
+
         StageInvitation stageInvitation = invitationRepository.findById(invintationId);
 
         if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
             throw new IllegalStateException("Invitation is not in a PENDING state");
         }
+
+        if (!stageInvitation.getInvited().getId().equals(invitedId)) {
+            throw new IllegalArgumentException("");
+        }
+
         stageInvitation.setDescription(rejectDescription);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
 
