@@ -21,11 +21,11 @@ public class ResourceController {
     private final UserContext userContext;
 
     @PostMapping(value = "/projects/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResourceDto uploadFile(@PathVariable Long projectId,
-                                  @RequestBody MultipartFile file){
+    public ResourceDto uploadResource(@PathVariable Long projectId,
+                                      @RequestBody MultipartFile file){
         Long userId = userContext.getUserId();
         log.info("Received a request to upload file: {} ", file.getName());
-        return resourceService.uploadFile(projectId, userId, file);
+        return resourceService.uploadResource(projectId, userId, file);
     }
 
     @GetMapping(value = "/{resourceId}", produces = "application/octet-stream")

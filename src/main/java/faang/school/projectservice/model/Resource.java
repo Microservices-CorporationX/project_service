@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,7 @@ import java.util.List;
 @Table(name = "project_resource")
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Resource {
@@ -51,11 +53,11 @@ public class Resource {
     private LocalDateTime createdAt;
 
     @CreatedBy
-    @JoinColumn(name = "created_by")
+    @Column(name = "created_by")
     private Long createdBy;
 
     @LastModifiedBy
-    @JoinColumn(name = "updated_by")
+    @Column(name = "updated_by")
     private Long updatedBy;
 
     @UpdateTimestamp

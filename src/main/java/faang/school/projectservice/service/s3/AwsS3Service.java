@@ -28,7 +28,7 @@ public class AwsS3Service {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-    public Resource uploadFile(String folder, MultipartFile file) {
+    public Resource uploadResource(String folder, MultipartFile file) {
         ObjectMetadata metadata = createMetadata(file.getSize(), file.getContentType());
         String key = String.format("%s/%s_%s",
                 folder,
@@ -42,10 +42,10 @@ public class AwsS3Service {
             throw new IllegalStateException("Error uploading file", e);
         }
 
-        return getResource(file, key);
+        return createResource(file, key);
     }
 
-    public InputStream downloadFile(String key){
+    public InputStream downloadResource(String key){
         try{
             S3Object resource = awsS3Client.s3Config().getObject(bucketName, key);
             return resource.getObjectContent();
@@ -64,7 +64,7 @@ public class AwsS3Service {
             throw new IllegalStateException(e);
         }
 
-        return getResource(file, key);
+        return createResource(file, key);
     }
 
     public void deleteResource(String key){
@@ -78,7 +78,7 @@ public class AwsS3Service {
     }
 
     @NotNull
-    private Resource getResource(MultipartFile file, String key) {
+    private Resource createResource(MultipartFile file, String key) {
         Resource createdResource = new Resource();
         createdResource.setKey(key);
         createdResource.setSize(BigInteger.valueOf(file.getSize()));

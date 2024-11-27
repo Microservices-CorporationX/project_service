@@ -7,7 +7,7 @@ import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.resource.ResourceDtoMapper;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.AwsS3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +23,16 @@ import java.math.BigInteger;
 @Slf4j
 @RequiredArgsConstructor
 public class ResourceService {
-    private static final String PROJECT_NOT_FOUND = "Project not found";
     private static final String RESOURCE_NOT_FOUND = "Resource not found";
 
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
-    private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
     private final AwsS3Service awsS3Service;
     private final ResourceDtoMapper resourceDtoMapper;
 
     @Transactional
-    public ResourceDto uploadFile(Long projectId, Long userId, MultipartFile file) {
+    public ResourceDto uploadResource(Long projectId, Long userId, MultipartFile file) {
         Project project = getProject(projectId);
 
         if (!teamMemberRepository.isUserInAnyTeamOfProject(projectId, userId)){
@@ -48,7 +47,7 @@ public class ResourceService {
         checkStorageSize(newStorageSize, project.getMaxStorageSize());
 
         String folder = project.getId() + project.getName();
-        Resource resource = awsS3Service.uploadFile(folder, file);
+        Resource resource = awsS3Service.uploadResource(folder, file);
         resource.setProject(project);
 
         resource = resourceRepository.save(resource);
@@ -92,7 +91,7 @@ public class ResourceService {
                 () -> new EntityNotFoundException(RESOURCE_NOT_FOUND)
         );
 
-        return awsS3Service.downloadFile(resource.getKey());
+        return awsS3Service.downloadResource(resource.getKey());
     }
 
     @Transactional
@@ -130,8 +129,7 @@ public class ResourceService {
     }
 
     private Project getProject(Long projectId) {
-        return projectService.findProject(projectId).orElseThrow(
-                () -> new EntityNotFoundException(PROJECT_NOT_FOUND));
+        return projectRepository.getProjectById(projectId);
     }
 
     private Resource getResource(Long resourceId) {
