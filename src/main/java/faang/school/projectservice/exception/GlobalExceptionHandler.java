@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
         return buildResponse(e);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e) {
+        return buildResponse(e);
+    }
+
     @ExceptionHandler({ZippingFileError.class, StreamingFileError.class,
             FileDownloadException.class, FileUploadException.class, Exception.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import faang.school.projectservice.exception.FileDeleteException;
 import faang.school.projectservice.exception.FileDownloadException;
 import faang.school.projectservice.exception.FileUploadException;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,18 +17,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,15 +68,26 @@ class S3ServiceTest {
     }
 
     @Test
-    public void uploadFileThrowsExceptionTest() {
-        MockMultipartFile file = new MockMultipartFile("file", "test.txt",
-                "text/plain", "This is a test".getBytes());
+    public void uploadFileThrowsExceptionTest() throws IOException {
         String folder = "test-folder";
+        String contentType = "text/plain";
+        String fileName = "test.txt";
+        MockMultipartFile file = new MockMultipartFile(
+                "file", fileName, contentType,
+                new ByteArrayInputStream("This is a test".getBytes())
+        );
 
-        doThrow(FileUploadException.class).when(s3Client).putObject(any(PutObjectRequest.class));
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getOriginalFilename()).thenReturn(fileName);
+        when(mockFile.getContentType()).thenReturn(contentType);
+        when(mockFile.getSize()).thenReturn(file.getSize());
+        when(mockFile.getInputStream()).thenThrow(new IOException("Stream error"));
 
-        assertThrows(FileUploadException.class,
-                () -> s3Service.uploadFile(file, folder));
+        FileUploadException exception = assertThrows(FileUploadException.class,
+                () -> s3Service.uploadFile(mockFile, folder));
+        assertTrue(exception.getMessage().contains("Error uploading file with key"));
+
+        verify(s3Client, never()).putObject(any(PutObjectRequest.class));
     }
 
     @Test
@@ -146,8 +162,20 @@ class S3ServiceTest {
     public void deleteFileTest() {
         String key = "test-key";
 
-        s3Service.deleteFile(key);
+        assertDoesNotThrow(() -> s3Service.deleteFile(key));
 
         verify(s3Client).deleteObject("test-bucket", key);
+    }
+
+    @Test
+    public void deleteFileThrowExceptionTest() {
+        String key = "test-key";
+        doThrow(new AmazonS3Exception("S3 error")).when(s3Client).deleteObject("test-bucket", key);
+
+        FileDeleteException exception = assertThrows(FileDeleteException.class,
+                () -> s3Service.deleteFile(key));
+        assertEquals("Error deleting file with key: " + key, exception.getMessage());
+
+        verify(s3Client, times(1)).deleteObject("test-bucket", key);
     }
 }

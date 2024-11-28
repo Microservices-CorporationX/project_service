@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ResourceValidatorTest {
@@ -99,14 +100,18 @@ class ResourceValidatorTest {
 
     @Test
     public void fileSizeNotBigger2GbThrowsExceptionTest() {
+        resourceValidator.maxProjectFileSize = 2147483648L;
         long fileSize = 2147483650L;
 
-        assertThrows(DataValidationException.class,
+        DataValidationException exception = assertThrows(DataValidationException.class,
                 () -> resourceValidator.validateFileSizeNotBigger2Gb(fileSize));
+
+        assertEquals("Max uploading file size can't be more than 2GB", exception.getMessage());
     }
 
     @Test
     public void fileSizeNotBigger2GbTest() {
+        resourceValidator.maxProjectFileSize = 2147483648L;
         long fileSize = 100L;
 
         assertDoesNotThrow(() -> resourceValidator.validateFileSizeNotBigger2Gb(fileSize));

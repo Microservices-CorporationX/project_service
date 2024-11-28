@@ -2,9 +2,11 @@ package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.service.file_streaming.FileStreamingService;
 import faang.school.projectservice.service.project.ProjectFilesService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.resource.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -46,6 +49,7 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectFilesService projectFilesService;
     private final FileStreamingService fileStreamingService;
+    private final ResourceService resourceService;
 
     @Operation(summary = "Create a new project",
             description = "Creates a new project with the provided details.")
@@ -133,7 +137,7 @@ public class ProjectController {
         StreamingResponseBody responseBody = fileStreamingService.getStreamingResponseBody(fileStream);
 
         return CompletableFuture.completedFuture(ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .contentType(MediaType.parseMediaType(getMimeType(resourceId)))
                 .body(responseBody));
     }
 
@@ -169,5 +173,10 @@ public class ProjectController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +
                         projectId + "_resources.zip")
                 .body(responseBody));
+    }
+
+    private String getMimeType(Long resourceId) {
+        Resource resource = resourceService.getResource(resourceId);
+        return URLConnection.guessContentTypeFromName(resource.getName());
     }
 }

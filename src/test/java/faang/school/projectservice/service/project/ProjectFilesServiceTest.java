@@ -1,8 +1,6 @@
 package faang.school.projectservice.service.project;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
@@ -11,6 +9,7 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.amazons3.S3Service;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import org.junit.jupiter.api.Test;
@@ -29,15 +28,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,7 +44,7 @@ class ProjectFilesServiceTest {
     private S3Service s3Service;
 
     @Mock
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Mock
     private ResourceValidator resourceValidator;
@@ -126,25 +121,7 @@ class ProjectFilesServiceTest {
         verify(s3Service, times(1)).uploadFile(file, folder);
         verify(projectService, times(1)).
                 updateProject(projectMapper.toDto(savingProject));
-        verify(resourceRepository, times(1)).save(updatedResource);
-    }
-
-    @Test
-    public void getResourceThrowsExceptionTest() {
-        long resourceId = 1L;
-        doThrow(EntityNotFoundException.class).when(resourceRepository).findById(resourceId);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> projectFilesService.downloadFile(resourceId));
-    }
-
-    @Test
-    public void getResourceTest() {
-        long resourceId = 1L;
-        Resource resource = Resource.builder().id(resourceId).build();
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
-
-        assertDoesNotThrow(() -> projectFilesService.downloadFile(resourceId));
+        verify(resourceService, times(1)).save(updatedResource);
     }
 
     @Test
@@ -159,12 +136,12 @@ class ProjectFilesServiceTest {
         ByteArrayInputStream mockInputStream = new ByteArrayInputStream(mockFileContent.getBytes());
         S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(mockInputStream, null);
 
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
+        when(resourceService.getResource(resourceId)).thenReturn(resource);
         when(s3Service.downloadFile(key)).thenReturn(s3ObjectInputStream);
 
         InputStream result = projectFilesService.downloadFile(resourceId);
 
-        verify(resourceRepository, times(1)).findById(resourceId);
+        verify(resourceService, times(1)).getResource(resourceId);
         verify(s3Service, times(1)).downloadFile(key);
 
         String resultContent = new String(result.readAllBytes());
@@ -277,7 +254,7 @@ class ProjectFilesServiceTest {
                 .project(project)
                 .build();
 
-        when(resourceRepository.findById(resourceId)).thenReturn(Optional.of(resource));
+        when(resourceService.getResource(resourceId)).thenReturn(resource);
         when(teamMemberService.findById(teamMemberId)).thenReturn(teamMember);
         when(projectService.getProjectById(projectId)).thenReturn(project);
         doNothing().when(resourceValidator).validateAllowedToDeleteFile(resource, teamMember);
@@ -286,6 +263,6 @@ class ProjectFilesServiceTest {
 
         verify(s3Service, times(1)).deleteFile(key);
         verify(projectService, times(1)).updateProject(projectMapper.toDto(updatedProject));
-        verify(resourceRepository, times(1)).save(updatedResource);
+        verify(resourceService, times(1)).save(updatedResource);
     }
 }
