@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.dto.internship.InternshipStatusDto;
 import faang.school.projectservice.dto.internship.RoleDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectStatusDto;
+import faang.school.projectservice.dto.project.ProjectVisibilityDto;
 import faang.school.projectservice.mapper.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.Project;
@@ -46,6 +49,9 @@ public class InternshipServiceImplTest {
     private static final LocalDateTime START_DATE = LocalDateTime.of(2024, 4, 1, 0, 0, 0);
     private static final LocalDateTime END_DATE = LocalDateTime.of(2024, 6, 1, 0, 0, 0);
     private static final Long PROJECT_ID = 111L;
+    private static final String PROJECT_NAME = "projectName";
+    private static final String PROJECT_DESCRIPTION = "projectDescription";
+    private static final Long PROJECT_OWNER_ID = 10L;
     private static final ProjectStatus PROJECT_STATUS = ProjectStatus.CREATED;
     private static final ProjectVisibility PROJECT_VISIBILITY = ProjectVisibility.PUBLIC;
     private final TeamMember mentor = TeamMember.builder().id(1L).userId(21L).roles(List.of(TeamRole.DEVELOPER)).build();
@@ -89,10 +95,12 @@ public class InternshipServiceImplTest {
 
     @Test
     public void testCreatePositive() {
+        ProjectDto projectDto = new ProjectDto(PROJECT_ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_OWNER_ID, List.of(2L),
+                List.of(100L), null, ProjectStatusDto.IN_PROGRESS, ProjectVisibilityDto.PUBLIC);
         InternshipDto internshipDto = new InternshipDto(INTERNSHIP_DTO_ID, INTERNSHIP_DTO_NAME, MENTOR_ID,
                 PROJECT_ID, InternshipStatusDto.IN_PROGRESS, RoleDto.DEVELOPER, INTERN_IDS, START_DATE, END_DATE);
 
-        when(projectService.getProjectById(internshipDto.ownedProjectId())).thenReturn(project);
+        when(projectService.getProjectById(internshipDto.ownedProjectId())).thenReturn(projectDto);
         when(teamMemberService.findById(2L)).thenReturn(firstIntern);
         when(teamMemberService.findById(3L)).thenReturn(secondIntern);
         when(teamMemberService.findById(4L)).thenReturn(thirdIntern);
@@ -109,6 +117,8 @@ public class InternshipServiceImplTest {
 
     @Test
     public void testUpdatePositive() {
+        ProjectDto projectDto = new ProjectDto(PROJECT_ID, PROJECT_NAME, PROJECT_DESCRIPTION, PROJECT_OWNER_ID, List.of(2L),
+                List.of(100L), null, ProjectStatusDto.IN_PROGRESS, ProjectVisibilityDto.PUBLIC);
         InternshipDto internshipDto = new InternshipDto(INTERNSHIP_DTO_ID, INTERNSHIP_DTO_NAME, MENTOR_ID,
                 PROJECT_ID, InternshipStatusDto.COMPLETED, RoleDto.DEVELOPER, INTERN_IDS, START_DATE, END_DATE);
         Internship internship = new Internship();
@@ -117,7 +127,7 @@ public class InternshipServiceImplTest {
         internship.setProject(project);
         internship.setMentorId(mentor);
         internship.setName(INTERNSHIP_DTO_NAME);
-        when(projectService.getProjectById(internshipDto.ownedProjectId())).thenReturn(project);
+        when(projectService.getProjectById(internshipDto.ownedProjectId())).thenReturn(projectDto);
         when(internshipRepository.getReferenceById(internshipDto.id())).thenReturn(internship);
         when(teamMemberService.findById(2L)).thenReturn(firstIntern);
         when(teamMemberService.findById(3L)).thenReturn(secondIntern);

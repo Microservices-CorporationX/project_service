@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.ProjectService;
@@ -12,7 +11,7 @@ import faang.school.projectservice.service.TeamMemberService;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +32,9 @@ public class InternshipServiceValidator {
     }
 
     public void validateMentor(InternshipDto internshipDto) {
-        Project project = projectService.getProjectById(internshipDto.ownedProjectId());
-        boolean isMentorExistInProject = project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream())
-                .anyMatch(teamMember -> Objects.equals(teamMember.getId(), internshipDto.mentorId()));
+        List<Long> projectTeamMembersIds = projectService.getAllTeamMembersIds(internshipDto.ownedProjectId());
+        boolean isMentorExistInProject = projectTeamMembersIds.stream()
+                .anyMatch(id -> id.equals(internshipDto.mentorId()));
 
         if (!isMentorExistInProject) {
             throw new DataValidationException("Mentor is absent in internship's project");
