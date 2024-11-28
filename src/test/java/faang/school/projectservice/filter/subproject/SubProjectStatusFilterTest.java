@@ -1,6 +1,6 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filter.subproject;
 
-import faang.school.projectservice.dto.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.UpdateSubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import org.mapstruct.BeanMapping;
@@ -12,7 +12,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -20,8 +19,6 @@ public interface ProjectMapper {
 
     @Mapping(target = "stages", ignore = true)
     @Mapping(target = "status", expression = "java(mapProjectStatus())")
-    @Mapping(target = "createdAt", expression = "java(mapTime())")
-    @Mapping(target = "updatedAt", expression = "java(mapTime())")
     Project toEntity(CreateSubProjectDto createSubProjectDto);
 
     ProjectDto toDto(Project project);
@@ -33,9 +30,5 @@ public interface ProjectMapper {
 
     default ProjectStatus mapProjectStatus() {
         return ProjectStatus.CREATED;
-    }
-
-    default LocalDateTime mapTime() {
-        return LocalDateTime.now();
     }
 }

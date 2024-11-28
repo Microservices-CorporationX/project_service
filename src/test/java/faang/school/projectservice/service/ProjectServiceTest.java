@@ -1,11 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.SubProjectFilterDto;
-import faang.school.projectservice.dto.UpdateSubProjectDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.SubProjectFilter;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.mapper.ProjectMomentMapper;

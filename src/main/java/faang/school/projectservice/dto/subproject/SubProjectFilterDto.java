@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.subproject;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.Builder;

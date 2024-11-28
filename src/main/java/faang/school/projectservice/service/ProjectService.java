@@ -1,11 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.StageDto;
-import faang.school.projectservice.dto.SubProjectFilterDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.UpdateSubProjectDto;
-import faang.school.projectservice.filter.SubProjectFilter;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMomentMapper;
 import faang.school.projectservice.model.Moment;
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +68,6 @@ public class ProjectService {
         projectValidator.validateUpdateSubProject(subProject, updateDto);
 
         projectMapper.update(updateDto, subProject);
-        subProject.setUpdatedAt(LocalDateTime.now());
         if (subProject.isPrivate() && subProject.hasChildren()) {
             subProject.setPrivateVisibility();
         }

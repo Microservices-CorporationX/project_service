@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.StageDto;
+import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
