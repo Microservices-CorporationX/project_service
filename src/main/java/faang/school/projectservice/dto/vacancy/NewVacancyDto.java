@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.WorkSchedule;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class NewVacancyDto {
     private Long projectId;
 
     @NotNull(message = "Created by id cannot be empty")
-    @Positive(message = "Created by id must be a positive integer")
+    @Positive(message = "Creator id must be a positive integer")
     private Long createdById;
 
     @NotNull(message = "Slavery is prohibited")
@@ -35,6 +36,7 @@ public class NewVacancyDto {
     @NotNull(message = "Work schedule cannot be empty")
     private WorkSchedule workSchedule;
 
+    @Schema(description = "Number of employees needed")
     @NotNull(message = "Number of vacancies cannot be empty")
     @Positive(message = "Number of vacancies must be a positive integer")
     private Integer count;

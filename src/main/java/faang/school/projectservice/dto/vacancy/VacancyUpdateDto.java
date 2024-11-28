@@ -16,7 +16,7 @@ public class VacancyUpdateDto {
     private Long id;
 
     @NotNull(message = "Updated by id cannot be empty")
-    @Positive(message = "Updated by id must be a positive integer")
+    @Positive(message = "Updater id must be a positive integer")
     private Long updatedById;
 
     @NotNull(message = "Vacancy status cannot be empty")
