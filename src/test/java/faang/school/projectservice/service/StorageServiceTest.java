@@ -15,8 +15,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -41,6 +44,9 @@ class StorageServiceTest {
     @Mock
     private S3AsyncClient s3AsyncClient;
 
+    @Mock
+    private S3Client s3Client;
+
     @InjectMocks
     private StorageService storageService;
 
@@ -58,7 +64,7 @@ class StorageServiceTest {
                 "Test content".getBytes());
 
         cachedThreadPool = Executors.newCachedThreadPool();
-        storageService = new StorageService(s3AsyncClient, minioConfigProperties, cachedThreadPool);
+        storageService = new StorageService(s3AsyncClient, s3Client, minioConfigProperties, cachedThreadPool);
     }
 
     @AfterEach
@@ -151,5 +157,23 @@ class StorageServiceTest {
         CompletableFuture.allOf(tasks).join();
 
         verify(s3AsyncClient, times(numFiles)).putObject(any(PutObjectRequest.class), any(AsyncRequestBody.class));
+    }
+
+    @Test
+    @DisplayName("Delete resource: success")
+    void deleteResource_Success() {
+
+        storageService.deleteResource(key);
+
+        verify(s3Client, times(1)).deleteObject(any(DeleteObjectRequest.class));
+    }
+
+    @Test
+    @DisplayName("Delete resource: fail")
+    void deleteResource_Fail() {
+        doThrow(S3Exception.class).when(s3Client).deleteObject(any(DeleteObjectRequest.class));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> storageService.deleteResource(key));
+        assertEquals("Failed to delete file with key: " + key, ex.getMessage());
     }
 }

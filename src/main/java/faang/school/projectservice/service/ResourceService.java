@@ -48,11 +48,39 @@ public class ResourceService {
 
         storageService.uploadResourceAsync(file, key);
 
-        projectService.updateStorageSizeAfterFileUpload(project, file);
+        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
 
         resource = resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
+    }
+
+    @Transactional
+    public void deleteResource(Long projectId, Long resourceId, Long userId) {
+        projectValidator.validateProjectExistsById(projectId);
+        resourceValidator.validateResourceExistsById(resourceId);
+        teamMemberValidator.validateTeamMemberExistsById(userId);
+
+        TeamMember teamMember = teamMemberService.getTeamMemberByUserId(userId);
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        Project project = projectService.getProjectById(projectId);
+
+        projectValidator.validateUserInProjectTeam(userId, project);
+        resourceValidator.validateTeamMemberHasPermissionsToModifyResource(teamMember, resource);
+
+        String key = resource.getKey();
+
+        storageService.deleteResource(key);
+
+        projectService.decreaseOccupiedStorageSizeAfterFileDelete(project, resource.getSize());
+
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setKey(null);
+        resource.setSize(BigInteger.ZERO);
+        resource.setUpdatedBy(teamMember);
+
+        resourceRepository.save(resource);
+        log.info("File id: {} was deleted successfully from project id: {}", resourceId, projectId);
     }
 
     private Resource createNewUploadResource(MultipartFile file, String key, Long userId, Project project) {

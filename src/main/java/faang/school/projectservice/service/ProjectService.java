@@ -120,11 +120,20 @@ public class ProjectService {
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
-    public void updateStorageSizeAfterFileUpload(Project project, MultipartFile file) {
+    public void increaseOccupiedStorageSizeAfterFileUpload(Project project, MultipartFile file) {
         resourceValidator.validateResourceNotEmpty(file);
 
         BigInteger currentStorageSize = project.getStorageSize();
         BigInteger updatedStorageSize = currentStorageSize.add(BigInteger.valueOf(file.getSize()));
+
+        project.setStorageSize(updatedStorageSize);
+        projectRepository.save(project);
+    }
+
+    public void decreaseOccupiedStorageSizeAfterFileDelete(Project project, BigInteger fileSize) {
+
+        BigInteger currentStorageSize = project.getStorageSize();
+        BigInteger updatedStorageSize = currentStorageSize.subtract(fileSize);
 
         project.setStorageSize(updatedStorageSize);
         projectRepository.save(project);

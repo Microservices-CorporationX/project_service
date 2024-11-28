@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -76,7 +77,7 @@ class ResourceServiceTest {
 
     @Test
     @DisplayName("Upload file with all valid parameters: success")
-    void UploadResource_ValidParameters_Success() {
+    void uploadResource_ValidParameters_Success() {
 
         when(projectService.getProjectById(projectId)).thenReturn(project);
         when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
@@ -91,7 +92,7 @@ class ResourceServiceTest {
         verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
         verify(storageService, times(1)).uploadResourceAsync(any(MultipartFile.class), anyString());
-        verify(projectService, times(1)).updateStorageSizeAfterFileUpload(project, file);
+        verify(projectService, times(1)).increaseOccupiedStorageSizeAfterFileUpload(project, file);
 
         assertNotNull(result);
         assertEquals(resource.getId(), result.getId());
@@ -108,7 +109,7 @@ class ResourceServiceTest {
 
     @Test
     @DisplayName("Upload file with invalid project id: fail")
-    void UploadResource_InvalidProjectId_Fail() {
+    void uploadResource_InvalidProjectId_Fail() {
 
         doThrow(new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId)))
                 .when(projectValidator).validateProjectExistsById(projectId);
@@ -121,12 +122,12 @@ class ResourceServiceTest {
         verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, never()).validateEnoughSpaceInStorage(project, file);
         verify(storageService, never()).uploadResourceAsync(any(MultipartFile.class), anyString());
-        verify(projectService, never()).updateStorageSizeAfterFileUpload(project, file);
+        verify(projectService, never()).increaseOccupiedStorageSizeAfterFileUpload(project, file);
     }
 
     @Test
     @DisplayName("Upload file with invalid user id: fail")
-    void UploadResource_InvalidUserId_Fail() {
+    void uploadResource_InvalidUserId_Fail() {
 
         doThrow(new EntityNotFoundException(String.format("Team member not found, id: %d", userId)))
                 .when(teamMemberValidator).validateTeamMemberExistsById(userId);
@@ -139,6 +140,93 @@ class ResourceServiceTest {
         verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, never()).validateEnoughSpaceInStorage(project, file);
     }
+
+    @Test
+    @DisplayName("Delete file with all valid parameters: success")
+    void deleteResource_ValidParameters_Success() {
+
+        when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
+        when(resourceRepository.getReferenceById(anyLong())).thenReturn(resource);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
+        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
+
+        resourceService.deleteResource(projectId, resource.getId(), userId);
+
+        ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(resourceValidator, times(1)).validateResourceExistsById(resource.getId());
+        verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, times(1)).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
+        verify(storageService, times(1)).deleteResource(anyString());
+        verify(projectService, times(1)).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
+        verify(resourceRepository, times(1)).save(resourceCaptor.capture());
+
+        assertEquals(resource.getId(), resourceCaptor.getValue().getId());
+        assertEquals(ResourceStatus.DELETED, resourceCaptor.getValue().getStatus());
+    }
+
+    @Test
+    @DisplayName("Delete file fail: invalid project id")
+    void deleteResource_InvalidProjectId_Fail() {
+
+        doThrow(new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId)))
+                .when(projectValidator).validateProjectExistsById(projectId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Project with id %d doesn't exist", projectId), ex.getMessage());
+
+        verify(resourceValidator, never()).validateResourceExistsById(resource.getId());
+        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
+        verify(storageService, never()).deleteResource(anyString());
+        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
+        verify(resourceRepository, never()).save(resource);
+    }
+
+    @Test
+    @DisplayName("Delete file fail: invalid resource id")
+    void deleteResource_InvalidResourceId_Fail() {
+        Long resourceId = 1L;
+
+        doThrow(new EntityNotFoundException(String.format("Resource not found, id: %d", resourceId)))
+                .when(resourceValidator).validateResourceExistsById(resourceId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Resource not found, id: %d", resourceId), ex.getMessage());
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
+        verify(storageService, never()).deleteResource(anyString());
+        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
+        verify(resourceRepository, never()).save(resource);
+    }
+
+    @Test
+    @DisplayName("Delete file fail: invalid user id")
+    void deleteResource_InvalidUserId_Fail() {
+
+        doThrow(new EntityNotFoundException(String.format("Team member not found, id: %d", userId)))
+                .when(teamMemberValidator).validateTeamMemberExistsById(userId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Team member not found, id: %d", userId), ex.getMessage());
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(resourceValidator, times(1)).validateResourceExistsById(anyLong());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
+        verify(storageService, never()).deleteResource(anyString());
+        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
+        verify(resourceRepository, never()).save(resource);
+    }
+
+
 
     private Project createMockProject() {
         return Project.builder()

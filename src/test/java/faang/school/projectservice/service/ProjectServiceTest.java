@@ -328,13 +328,13 @@ class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("Update storage size after file upload with valid input: success")
-    void UpdateStorageSizeAfterFileUpload_ValidInput_Success() {
+    @DisplayName("Increase storage size after file upload with valid input: success")
+    void increaseOccupiedStorageSizeAfterFileUpload_ValidInput_Success() {
         MockMultipartFile file = new MockMultipartFile("file", "content".getBytes());
 
         project.setStorageSize(BigInteger.valueOf(10L));
 
-        projectService.updateStorageSizeAfterFileUpload(project, file);
+        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
 
         verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
 
@@ -342,16 +342,29 @@ class ProjectServiceTest {
     }
 
     @Test
-    @DisplayName("Update storage size with empty file: fail")
-    void UpdateStorageSizeAfterFileUpload_EmptyFile_Fail() {
+    @DisplayName("Increase storage size with empty file: fail")
+    void increaseOccupiedStorageSizeAfterFileUpload_EmptyFile_Fail() {
         MockMultipartFile file = new MockMultipartFile("file", new byte[0]);
         doThrow(new InsufficientStorageException("Not enough space to store files"))
                 .when(resourceValidator).validateResourceNotEmpty(file);
 
-        RuntimeException ex = assertThrows(InsufficientStorageException.class, () -> projectService.updateStorageSizeAfterFileUpload(project, file));
+        RuntimeException ex = assertThrows(InsufficientStorageException.class, () ->
+                projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file));
         assertEquals("Not enough space to store files", ex.getMessage());
 
         verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+    }
+
+    @Test
+    @DisplayName("Decrease storage size after file deleted with valid input: success")
+    void decreaseOccupiedStorageSizeAfterFileDelete_ValidInput_Success() {
+        BigInteger fileSize = BigInteger.valueOf(5L);
+
+        project.setStorageSize(BigInteger.valueOf(10L));
+
+        projectService.decreaseOccupiedStorageSizeAfterFileDelete(project, fileSize);
+
+        assertEquals(BigInteger.valueOf(5L), project.getStorageSize());
     }
 
     private List<Project> getProjectsList() {
