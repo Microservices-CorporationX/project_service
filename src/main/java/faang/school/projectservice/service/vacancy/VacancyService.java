@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.dto.filter.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.VacancyFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
@@ -30,7 +30,7 @@ public class VacancyService {
     private final VacancyMapper vacancyMapper;
     private final CandidateService candidateService;
     private final TeamMemberService teamMemberService;
-    private final List<VacancyFilter> vacancyFilters;
+    private final List<Filter<Vacancy, VacancyFilterDto>> vacancyFilters;
 
     public VacancyDto createVacancy(VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
