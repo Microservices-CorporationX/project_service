@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.StageInvitationDto;
-import faang.school.projectservice.dto.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stage.invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
 import faang.school.projectservice.model.TeamMember;

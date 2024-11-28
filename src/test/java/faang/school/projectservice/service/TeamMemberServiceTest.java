@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -176,7 +176,7 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(responseDto, result);
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).addTeamMemberToTeam(teamId, teamMember);
+        //verify(teamMemberRepository).addTeamMemberToTeam(teamId, teamMember);
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
 
@@ -213,7 +213,7 @@ public class TeamMemberServiceTest {
 
         // Assert
         verify(teamService).getTeamById(teamId);
-        verify(teamMemberRepository).removeTeamMemberFromTeam(teamId, teamMember);
+        //verify(teamMemberRepository).removeTeamMemberFromTeam(teamId, teamMember);
         verify(teamMemberRepository).delete(teamMember);
     }
 

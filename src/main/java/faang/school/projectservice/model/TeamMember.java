@@ -37,6 +37,9 @@ public class TeamMember {
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
 
+    @Column(name = "jira_username")
+    private String jiraUsername;
+
     public boolean isCurator() {
         return roles.contains(TeamRole.OWNER) || roles.contains(TeamRole.MANAGER);
     }

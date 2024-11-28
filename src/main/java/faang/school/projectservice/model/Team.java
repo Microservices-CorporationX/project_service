@@ -2,6 +2,7 @@ package faang.school.projectservice.model;
 
 import java.util.List;
 
+import faang.school.projectservice.model.project.Project;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,4 +36,12 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public void addTeamMember(TeamMember teamMember) {
+        teamMembers.add(teamMember);
+    }
+
+    public void removeTeamMember(TeamMember teamMember) {
+        teamMembers.remove(teamMember);
+    }
 }

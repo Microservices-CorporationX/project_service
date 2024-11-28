@@ -1,5 +1,6 @@
 package faang.school.projectservice.model;
 
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -70,5 +71,12 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    @Column(name = "jira_key")
+    private String jiraIssueKey;
+
+    @Column(name = "task_type")
+    @Enumerated(EnumType.ORDINAL)
+    private TaskType taskType;
 }
 

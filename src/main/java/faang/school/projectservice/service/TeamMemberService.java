@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamMemberActions;
@@ -75,7 +75,7 @@ public class TeamMemberService {
         ensureHasAccess(deleterId, List.of(TeamRole.OWNER), TeamMemberActions.REMOVE_MEMBER, project.getId());
         TeamMember teamMember = teamMemberRepository.findById(memberId);
 
-        teamMemberRepository.removeTeamMemberFromTeam(team.getId(), teamMember);
+        team.removeTeamMember(teamMember);
         teamMemberRepository.delete(teamMember);
     }
 
@@ -130,7 +130,7 @@ public class TeamMemberService {
             return existingTeamMember;
         }
         teamMember.setTeam(team);
-        teamMemberRepository.addTeamMemberToTeam(team.getId(), teamMember);
+        team.addTeamMember(teamMember);
         teamMemberRepository.save(teamMember);
         return teamMember;
     }

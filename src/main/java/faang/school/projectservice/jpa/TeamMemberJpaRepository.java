@@ -24,7 +24,7 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     @Query("SELECT tm FROM TeamMember tm JOIN tm.team t WHERE t.project.id = :projectId")
     List<TeamMember> findAllMembersByProjectId(long projectId);
 
-    @Modifying
+    /*@Modifying
     @Transactional
     @Query("UPDATE Team t SET t.teamMembers = CONCAT(t.teamMembers, :teamMember) WHERE t.id = :teamId")
     void addTeamMemberToTeam(Long teamId, TeamMember teamMember);
@@ -32,5 +32,5 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
     @Modifying
     @Transactional
     @Query("UPDATE Team t SET t.teamMembers = FUNCTION('array_remove', t.teamMembers, :teamMember) WHERE t.id = :teamId")
-    void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember);
+    void removeTeamMemberFromTeam(Long teamId, TeamMember teamMember);*/
 }
