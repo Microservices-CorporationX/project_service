@@ -37,10 +37,12 @@ public class ProjectFilesService {
 
     public void uploadFile(long projectId, long teamMemberId, MultipartFile file) {
         resourceValidator.validateFileSizeNotBigger2Gb(file.getSize());
-        Project project = projectService.getProjectById(projectId);
-        BigInteger maxStorageSize = project.getMaxStorageSize();
+        Project projectToCheck = projectService.getProjectById(projectId);
+        Project project = setZeroIfStorageSizeNull(projectToCheck);
+
         BigInteger estimatedStorageSize = project.getStorageSize().
                 add(BigInteger.valueOf(file.getSize()));
+        BigInteger maxStorageSize = project.getMaxStorageSize();
         resourceValidator.validateMaxStorageSizeIsNotNull(maxStorageSize);
         resourceValidator.validateStorageSizeNotExceeded(maxStorageSize, estimatedStorageSize);
 
@@ -113,5 +115,12 @@ public class ProjectFilesService {
         resourceService.save(resource);
         log.info("Saving Resource with id: {} , with status: {} ",
                 resource.getId(), resource.getStatus());
+    }
+
+    private Project setZeroIfStorageSizeNull(Project project) {
+        if (project.getStorageSize() == null) {
+            project.setStorageSize(new BigInteger("0"));
+        }
+        return project;
     }
 }

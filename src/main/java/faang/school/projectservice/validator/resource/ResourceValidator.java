@@ -26,7 +26,7 @@ public class ResourceValidator {
 
     public void validateMaxStorageSizeIsNotNull(BigInteger maxStorageSize) {
         if (maxStorageSize == null) {
-            throw new IllegalStateException("Max storage size is not set for the project.");
+            throw new IllegalStateException("Max storage size not set for the project.");
         }
     }
 

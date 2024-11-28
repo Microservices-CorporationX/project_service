@@ -30,7 +30,7 @@ public class S3Service {
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folder) {
-        String key = (String.format("%s/%d/%s", folder,
+        String key = (String.format("%s/%d%s", folder,
                 System.currentTimeMillis(), file.getOriginalFilename()));
         log.info("Start uploading file with key: {}", key);
 

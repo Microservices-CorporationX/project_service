@@ -68,13 +68,13 @@ class ProjectFilesServiceTest {
         String folder = "1name";
         String key = "key";
         BigInteger maxStorageSize = new BigInteger("1000");
-        BigInteger currentStorageSize = new BigInteger("100");
+        BigInteger currentStorageSize = new BigInteger("0");
         MockMultipartFile file = new MockMultipartFile("file", "test.txt",
                 "text/plain", "This is a test".getBytes());
         Project project = Project.builder()
                 .id(projectId)
                 .name("name")
-                .storageSize(currentStorageSize)
+                .storageSize(null)
                 .maxStorageSize(maxStorageSize)
                 .description("description")
                 .build();
