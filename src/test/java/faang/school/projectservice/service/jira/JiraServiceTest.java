@@ -310,7 +310,7 @@ class JiraServiceTest {
 
         when(requestBodySpec.exchangeToMono(any()))
                 .thenAnswer(invocation -> {
-                    Function<ClientResponse, Mono<Void>> handler = invocation.getArgument(0);
+                    Function<ClientResponse, Mono<JiraIssuesDto>> handler = invocation.getArgument(0);
                     ClientResponse mockResponse = mock(ClientResponse.class);
                     return handler.apply(mockResponse);
                 });
@@ -351,7 +351,7 @@ class JiraServiceTest {
 
         when(requestBodySpec.exchangeToMono(any()))
                 .thenAnswer(invocation -> {
-                    Function<ClientResponse, Mono<Void>> handler = invocation.getArgument(0);
+                    Function<ClientResponse, Mono<T>> handler = invocation.getArgument(0);
                     ClientResponse mockResponse = mock(ClientResponse.class);
                     return handler.apply(mockResponse);
                 });
