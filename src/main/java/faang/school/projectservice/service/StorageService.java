@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +51,22 @@ public class StorageService {
                     .build());
         } catch (S3Exception e) {
             throw new RuntimeException(String.format("Failed to delete file with key: %s", key), e);
+        }
+    }
+
+    public byte[] downloadResource(String key) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(minioConfigProperties.getBucketName())
+                .key(key)
+                .build();
+
+        CompletableFuture<ResponseBytes<GetObjectResponse>> futureTask = s3AsyncClient.getObject(
+                getObjectRequest,
+                AsyncResponseTransformer.toBytes());
+        try {
+            return futureTask.join().asByteArray();
+        } catch(CompletionException e) {
+            throw new RuntimeException(String.format("Failed to download file with key: %s", key), e);
         }
     }
 

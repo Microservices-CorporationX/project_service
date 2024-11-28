@@ -64,7 +64,6 @@ class ResourceServiceTest {
     private Resource resource;
     private TeamMember teamMember = createMockTeamMember();
 
-
     @BeforeEach
     void setUp() {
         userId = 1L;
@@ -261,6 +260,75 @@ class ResourceServiceTest {
         assertEquals(resource.getUpdatedBy().getUserId(), result.getUpdatedById());
     }
 
+    @Test
+    @DisplayName("Download file with all valid parameters: success")
+    void downloadResource_ValidParameters_Success() {
+        byte[] contentFile = "content".getBytes();
+
+        when(resourceRepository.getReferenceById(anyLong())).thenReturn(resource);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(storageService.downloadResource(anyString())).thenReturn(contentFile);
+
+        byte[] result = resourceService.downloadResource(projectId, resource.getId(), userId);
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(resourceValidator, times(1)).validateResourceExistsById(resource.getId());
+        verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
+        verify(storageService, times(1)).downloadResource(anyString());
+
+        assertNotNull(result);
+        assertEquals(contentFile, result);
+    }
+
+    @Test
+    @DisplayName("Download file fail: invalid project id")
+    void DownloadResource_InvalidProjectId_Fail() {
+
+        doThrow(new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId)))
+                .when(projectValidator).validateProjectExistsById(projectId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Project with id %d doesn't exist", projectId), ex.getMessage());
+
+        verify(resourceValidator, never()).validateResourceExistsById(resource.getId());
+        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(storageService, never()).downloadResource(anyString());
+    }
+
+    @Test
+    @DisplayName("Download file fail: invalid resource id")
+    void downloadResource_InvalidResourceId_Fail() {
+        Long resourceId = 1L;
+
+        doThrow(new EntityNotFoundException(String.format("Resource not found, id: %d", resourceId)))
+                .when(resourceValidator).validateResourceExistsById(resourceId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Resource not found, id: %d", resourceId), ex.getMessage());
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(storageService, never()).downloadResource(anyString());
+    }
+
+    @Test
+    @DisplayName("Download file fail: invalid user id")
+    void downloadResource_InvalidUserId_Fail() {
+
+        doThrow(new EntityNotFoundException(String.format("Team member not found, id: %d", userId)))
+                .when(teamMemberValidator).validateTeamMemberExistsById(userId);
+
+        RuntimeException ex = assertThrows(EntityNotFoundException.class, () -> resourceService.deleteResource(projectId, resource.getId(), userId));
+        assertEquals(String.format("Team member not found, id: %d", userId), ex.getMessage());
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(resourceValidator, times(1)).validateResourceExistsById(anyLong());
+        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
+        verify(storageService, never()).downloadResource(anyString());
+    }
 
     private Project createMockProject() {
         return Project.builder()

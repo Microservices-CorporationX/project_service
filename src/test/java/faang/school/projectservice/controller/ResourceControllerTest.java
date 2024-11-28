@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,6 +35,7 @@ class ResourceControllerTest {
     private static final String UPLOAD_SINGLE_RESOURCE_URL = "/{projectId}";
     private static final String DELETE_URL = "/{projectId}/{resourceId}";
     private static final String UPDATE_URL = "/{projectId}/{resourceId}";
+    private static final String GET_URL = "/{projectId}/{resourceId}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -305,6 +307,61 @@ class ResourceControllerTest {
                 .andExpect(jsonPath("$.file").value("Value not provided"));
     }
 
+    @Test
+    @DisplayName("Download file success")
+    void getResource_ValidFileAndParams_Success() throws Exception {
+        byte[] content = "content".getBytes();
+        when(resourceService.downloadResource(projectId, resourceId, userId)).thenReturn(content);
+
+        mockMvc.perform(get(BASE_URL + GET_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(content().bytes(content));
+    }
+
+    @Test
+    @DisplayName("Download file fail: negative project id")
+    void getResource_NegativeProjectId_Fail() throws Exception {
+        projectId = -1L;
+
+        mockMvc.perform(get(BASE_URL + GET_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['getResource.projectId']").value("Project id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("Download file fail: negative resource id")
+    void getResource_NegativeResourceId_Fail() throws Exception {
+        resourceId = -1L;
+
+        mockMvc.perform(get(BASE_URL + GET_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['getResource.resourceId']").value("File id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("Download file fail: negative user id")
+    void getResource_NegativeUserId_Fail() throws Exception {
+        userId = -1L;
+
+        mockMvc.perform(get(BASE_URL + GET_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['getResource.userId']").value("User id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("Download file fail: missed user id")
+    void getResource_MissedUserId_Fail() throws Exception {
+
+        mockMvc.perform(get(BASE_URL + GET_URL, projectId, resourceId)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.userId").value("Parameter cannot be null"));
+    }
 
     private ResourceResponseDto mockResourceResponseDto() {
         return ResourceResponseDto.builder()

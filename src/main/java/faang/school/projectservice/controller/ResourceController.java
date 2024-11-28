@@ -8,10 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.function.ServerRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,5 +80,26 @@ public class ResourceController {
         response.put("data", resourceResponseDto);
         response.put("message", String.format("File id: %d updated successfully", resourceResponseDto.getId()));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{projectId}/{resourceId}")
+    @Operation(summary = "Get project file from storage")
+    public ResponseEntity<byte[]> getResource(
+            @PathVariable
+            @Positive(message = "Project id must be a positive integer") Long projectId,
+            @PathVariable
+            @Positive(message = "File id must be a positive integer") Long resourceId,
+            @RequestParam(name = "userId")
+            @Positive(message = "User id must be a positive integer") Long userId
+    ) {
+        log.info("Request to get file id {} in the project id: {} received", resourceId, projectId);
+
+        byte[] resource = resourceService.downloadResource(projectId, resourceId, userId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/octet-stream");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; resourceId=\"" + resourceId + "\"");
+
+        return ResponseEntity.ok().headers(headers).body(resource);
     }
 }

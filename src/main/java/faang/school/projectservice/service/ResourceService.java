@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -117,6 +119,18 @@ public class ResourceService {
 
         log.info("File id: {} in project id: {}was updated successfully", resourceId, projectId);
         return resourceMapper.toDto(resource);
+    }
+
+    public byte[] downloadResource(Long projectId, Long resourceId, Long userId) {
+        projectValidator.validateProjectExistsById(projectId);
+        resourceValidator.validateResourceExistsById(resourceId);
+        teamMemberValidator.validateTeamMemberExistsById(userId);
+
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        Project project = projectService.getProjectById(projectId);
+        projectValidator.validateUserInProjectTeam(userId, project);
+
+        return storageService.downloadResource(resource.getKey());
     }
 
     private Resource createNewUploadResource(MultipartFile file, String key, Long userId, Project project) {

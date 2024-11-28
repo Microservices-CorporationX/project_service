@@ -13,13 +13,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -175,5 +174,38 @@ class StorageServiceTest {
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> storageService.deleteResource(key));
         assertEquals("Failed to delete file with key: " + key, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Download multiple files concurrently: success")
+    void downloadResourceAsync_Success() {
+        byte[] contentFile = "content".getBytes();
+        ResponseBytes<GetObjectResponse> mockResponse = ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), contentFile);
+
+        when(s3AsyncClient.getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class)))
+                .thenReturn(CompletableFuture.completedFuture(mockResponse));
+        int numFiles = 10;
+
+        CompletableFuture<?>[] tasks = new CompletableFuture<?>[numFiles];
+        for (int i = 0; i < numFiles; i++) {
+            tasks[i] = CompletableFuture.runAsync(() -> storageService.downloadResource(key), cachedThreadPool);
+        }
+
+        CompletableFuture.allOf(tasks).join();
+
+        verify(s3AsyncClient, times(numFiles)).getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class));
+    }
+
+    @Test
+    @DisplayName("Download multiple files concurrently: fail")
+    void downloadResourceAsync_Fail() {
+        when(s3AsyncClient.getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class)))
+                .thenReturn(CompletableFuture.failedFuture(new CompletionException("Test exception", null)));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> storageService.downloadResource(key));
+
+        verify(s3AsyncClient, times(1)).getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class));
+
+        assertEquals(String.format("Failed to download file with key: %s", key), ex.getMessage());
     }
 }
