@@ -1,7 +1,7 @@
 package faang.school.projectservice.dto.project.meet;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import faang.school.projectservice.deserialization.UnixTimestampToLocalDateTimeDeserializer;
+import faang.school.projectservice.deserialization.EpochSecondToLocalDateTimeDeserializer;
 import faang.school.projectservice.model.MeetStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class MeetDto {
     private String description;
 
     @NotNull(message = "Start time must not be null")
-    @JsonDeserialize(using = UnixTimestampToLocalDateTimeDeserializer.class)
+    @JsonDeserialize(using = EpochSecondToLocalDateTimeDeserializer.class)
     private LocalDateTime startDateTime;
 
     private MeetStatus status;

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Component
-public class UnixTimestampToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+public class EpochSecondToLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
 
     @Override
     public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
