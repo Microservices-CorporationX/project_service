@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.intership;
 
 import faang.school.projectservice.dto.internship.InternshipCreationDto;
 import faang.school.projectservice.dto.internship.InternshipDto;
