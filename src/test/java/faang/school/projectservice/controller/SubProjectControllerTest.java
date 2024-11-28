@@ -73,7 +73,7 @@ class SubProjectControllerTest {
     void testCreateSubProject() throws Exception {
         when(projectService.createSubProject(postId, createProjectDto)).thenReturn(projectCreateResponseDto);
 
-        mockMvc.perform(post("/api/v1/subprojects/1/subprojects")
+        mockMvc.perform(post("/subprojects/1/children")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createProjectDto)))
                 .andExpect(status().isCreated())
@@ -97,7 +97,7 @@ class SubProjectControllerTest {
     void testUpdateSubProject() throws Exception {
         when(projectService.updateSubProject(updateSubProjectDto)).thenReturn(projectUpdateResponseDto);
 
-        mockMvc.perform(put("/api/v1/subprojects")
+        mockMvc.perform(put("/subprojects")
                 .content(objectMapper.writeValueAsString(updateSubProjectDto))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -118,18 +118,25 @@ class SubProjectControllerTest {
     @Test
     @DisplayName("Filter subprojects success")
     void testFilterSubProjects() throws Exception {
+        ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
+                .name("John")
+                .nameProjectPattern("Pattern")
+                .status(ProjectStatus.IN_PROGRESS)
+                .build();
         List<ProjectDto> projectDtos = List.of(projectDto, projectDto, projectDto);
-        when(projectService.filterSubProjects(postId, projectFilterDto)).thenReturn(projectDtos);
+        when(projectService.filterSubProjects(1L, projectFilterDto)).thenReturn(projectDtos);
 
-        mockMvc.perform(get("/api/v1/subprojects/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(projectFilterDto)))
+        mockMvc.perform(get("/subprojects/1")
+                        .param("name", projectFilterDto.getName())
+                        .param("nameProjectPattern", projectFilterDto.getNameProjectPattern())
+                        .param("status", projectFilterDto.getStatus().name())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("John description"))
                 .andExpect(jsonPath("$[2].name").value("John"))
                 .andExpect(jsonPath("$", hasSize(3)));
 
-        verify(projectService).filterSubProjects(postId, projectFilterDto);
+        verify(projectService).filterSubProjects(1L, projectFilterDto);
     }
 
     @Test

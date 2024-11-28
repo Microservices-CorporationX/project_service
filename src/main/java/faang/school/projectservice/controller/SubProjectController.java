@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/subprojects")
+@RequestMapping("/subprojects")
 @RequiredArgsConstructor
 @Validated
 @Slf4j
 public class SubProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/{parentId}/subprojects")
+    @PostMapping("/{parentId}/children")
     public ResponseEntity<ProjectCreateResponseDto> createSubProject(
             @PathVariable
             @NotNull(message = "Parent project Id must not be empty")
@@ -52,7 +52,6 @@ public class SubProjectController {
             @Positive (message = "Parent project Id must be positive integer")
             Long parentId,
             @Valid
-            @RequestBody
             ProjectFilterDto filters) {
         log.info("Request for all subprojects for parent project id #{}", parentId);
         return ResponseEntity.status(HttpStatus.OK).body(projectService.filterSubProjects(parentId, filters));

@@ -92,7 +92,7 @@ public class ProjectValidator {
 
     public void validateProjectPublic(Project project) {
         if (project.getVisibility() != ProjectVisibility.PUBLIC) {
-            throw new ProjectVisibilityException("Only public projects are allowed for this operation");
+            throw new ProjectVisibilityException(String.format("Only public projects are allowed for this operation, projectId: %s", project.getId()));
         }
     }
 
@@ -110,32 +110,37 @@ public class ProjectValidator {
 
     public void validateSameProjectStatus(Project project, UpdateSubProjectDto updateSubProjectDto) {
         if (project.getStatus() == updateSubProjectDto.getStatus()) {
-            throw new NoStatusChangeException("Project status can't be the same");
+            throw new NoStatusChangeException(String.format("Project %d status is already '%s'. Cannot change to the same status.",
+                    project.getId(), project.getStatus()));
         }
     }
 
     public void validateProjectStatusCompletedOrCancelled(Project project) {
         if (project.getStatus() == ProjectStatus.COMPLETED || project.getStatus() == ProjectStatus.CANCELLED) {
-            throw new NoStatusChangeException("Status can't change since project is completed or cancelled");
+            throw new NoStatusChangeException(String.format("Project %d is already '%s' and cannot have its status changed.",
+                    project.getId(), project.getStatus()));
         }
     }
 
     public void validateProjectStatusValidToHold(Project project) {
         if (project.getStatus() == ProjectStatus.CREATED) {
-            throw new NoStatusChangeException("To hold project it must be in progress first");
+            throw new NoStatusChangeException(String.format("Project %d is '%s'. It must be in progress before being held.",
+                    project.getId(), project.getStatus()));
         }
     }
 
     public void validateProjectIsValidToComplete(Project project) {
         if (!project.getChildren().stream().allMatch(child ->
                 child.getStatus() == ProjectStatus.COMPLETED) || project.getStatus() == ProjectStatus.CANCELLED) {
-            throw new NoStatusChangeException("All subprojects should be completed or cancelled first");
+            throw new NoStatusChangeException(String.format("Project %d cannot be completed. Ensure all subprojects are completed and the project is not cancelled.",
+                    project.getId()));
         }
     }
 
     public void validateCreateSubprojectBasedOnVisibility(Project parentProject, CreateProjectDto projectDto) {
         if (parentProject.getVisibility() != projectDto.getVisibility()) {
-            throw new ProjectVisibilityException("The parent project and subproject must have the same visibility");
+            throw new ProjectVisibilityException(String.format("Parent project %d and subproject must have the same visibility. Parent: '%s', Subproject: '%s'.",
+                    parentProject.getId(), parentProject.getVisibility(), projectDto.getVisibility()));
         }
     }
 

@@ -129,12 +129,6 @@ public class ProjectService {
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
-    private List<Project> getAllAccessibleProjects(Long currentUserId) {
-        return projectRepository.findAll().stream()
-                .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
-                .toList();
-    }
-
     @Transactional
     public ProjectCreateResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
         Project parentProject = projectRepository.getProjectById(parentId);
@@ -220,5 +214,12 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
         parentProject.getChildren().add(project);
     }
+
+    private List<Project> getAllAccessibleProjects(Long currentUserId) {
+        return projectRepository.findAll().stream()
+                .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
+                .toList();
+    }
+
 }
 

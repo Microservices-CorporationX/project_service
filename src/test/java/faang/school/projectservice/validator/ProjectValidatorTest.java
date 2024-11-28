@@ -151,13 +151,15 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Validate project public throws exception if private")
     void testValidateProjectPublicThrowsExceptionIfPrivate() {
-        Project project = Project.builder().build();
+        Project project = Project.builder()
+                .id(123L)
+                .build();
         project.setVisibility(ProjectVisibility.PRIVATE);
 
         ProjectVisibilityException exception = assertThrows(ProjectVisibilityException.class,
                 () -> projectValidator.validateProjectPublic(project));
 
-        assertEquals("Only public projects are allowed for this operation", exception.getMessage());
+        assertEquals("Only public projects are allowed for this operation, projectId: 123", exception.getMessage());
     }
 
     @Test
@@ -225,45 +227,53 @@ class ProjectValidatorTest {
     @Test
     @DisplayName("Validate same project status throws exception if same")
     void testValidateSameProjectStatusThrowsExceptionIfSame() {
-        Project project = Project.builder().build();
-        project.setStatus(ProjectStatus.CREATED);
-        UpdateSubProjectDto dto = new UpdateSubProjectDto();
-        dto.setStatus(ProjectStatus.CREATED);
+        Project project = Project.builder()
+                .id(123L)
+                .status(ProjectStatus.CREATED)
+                .build();
+        UpdateSubProjectDto dto = UpdateSubProjectDto.builder()
+                .status(ProjectStatus.CREATED)
+                .build();
 
         NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
                 () -> projectValidator.validateSameProjectStatus(project, dto));
 
-        assertEquals("Project status can't be the same", exception.getMessage());
+        assertEquals("Project 123 status is already 'CREATED'. Cannot change to the same status.", exception.getMessage());
     }
 
     @Test
     @DisplayName("Validate project status completed or cancelled throws exception if status completed")
     void testValidateProjectStatusCompletedOrCancelledThrowsExceptionIfStatusCompleted() {
-        Project project = Project.builder().build();
-        project.setStatus(ProjectStatus.COMPLETED);
+        Project project = Project.builder()
+                .id(123L)
+                .status(ProjectStatus.COMPLETED)
+                .build();
 
         NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
                 () -> projectValidator.validateProjectStatusCompletedOrCancelled(project));
 
-        assertEquals("Status can't change since project is completed or cancelled", exception.getMessage());
+        assertEquals("Project 123 is already 'COMPLETED' and cannot have its status changed.", exception.getMessage());
     }
 
     @Test
     @DisplayName("Validate project status valid to hold throws exception if not in progress")
     void testValidateProjectStatusValidToHoldThrowsExceptionIfNotInProgress() {
-        Project project = Project.builder().build();
-        project.setStatus(ProjectStatus.CREATED);
+        Project project = Project.builder()
+                .id(123L)
+                .status(ProjectStatus.CREATED)
+                .build();
 
         NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
                 () -> projectValidator.validateProjectStatusValidToHold(project));
 
-        assertEquals("To hold project it must be in progress first", exception.getMessage());
+        assertEquals("Project 123 is 'CREATED'. It must be in progress before being held.", exception.getMessage());
     }
 
     @Test
     @DisplayName("Validate project is valid to complete throws exception if not in progress")
     void testValidateProjectIsValidToCompleteThrowsExceptionIfNotInProgress() {
         Project project = Project.builder()
+                .id(123L)
                 .status(ProjectStatus.CREATED)
                 .build();
         Project childProject = Project.builder()
@@ -275,22 +285,25 @@ class ProjectValidatorTest {
         NoStatusChangeException exception = assertThrows(NoStatusChangeException.class,
                 () -> projectValidator.validateProjectIsValidToComplete(project));
 
-        assertEquals("All subprojects should be completed or cancelled first", exception.getMessage());
+        assertEquals("Project 123 cannot be completed. Ensure all subprojects are completed and the project is not cancelled.", exception.getMessage());
     }
 
     @Test
     @DisplayName("Validate create subproject based on visibility throws exception if visibility different")
     void testValidateCreateSubprojectBasedOnVisibilityThrowsExceptionIfVisibilityDifferent() {
-        Project parentProject = new Project();
-        parentProject.setVisibility(ProjectVisibility.PRIVATE);
+        Project parentProject = Project.builder()
+                .id(123L)
+                .visibility(ProjectVisibility.PRIVATE)
+                .build();
 
-        CreateProjectDto dto = new CreateProjectDto();
-        dto.setVisibility(ProjectVisibility.PUBLIC);
+        CreateProjectDto dto = CreateProjectDto.builder()
+                .visibility(ProjectVisibility.PUBLIC)
+                .build();
 
         ProjectVisibilityException exception = assertThrows(ProjectVisibilityException.class,
                 () -> projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, dto));
 
-        assertEquals("The parent project and subproject must have the same visibility", exception.getMessage());
+        assertEquals("Parent project 123 and subproject must have the same visibility. Parent: 'PRIVATE', Subproject: 'PUBLIC'.", exception.getMessage());
     }
 
     @Test
