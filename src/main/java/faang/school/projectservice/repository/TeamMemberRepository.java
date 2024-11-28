@@ -33,4 +33,14 @@ public class TeamMemberRepository {
         }
         return result;
     }
+
+    public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
+        var result = jpaRepository.findByUserIdAndProjectId(userId, projectId);
+        if (result == null) {
+            throw new EntityNotFoundException(
+                    String.format("Team member doesn't exist by user id: %s and project id: %s", userId, projectId)
+            );
+        }
+        return result;
+    }
 }

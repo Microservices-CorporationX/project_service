@@ -139,4 +139,8 @@ public class TeamMemberService {
     private Team getTeam(long teamId) {
         return teamService.getTeamById(teamId);
     }
+
+    public TeamMember getTeamMemberByUserIdAndProjectId(long userId, long projectId) {
+        return teamMemberRepository.findByUserIdAndProjectId(userId, projectId);
+    }
 }
