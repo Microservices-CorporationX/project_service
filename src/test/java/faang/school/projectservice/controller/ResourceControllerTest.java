@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
@@ -30,6 +32,7 @@ class ResourceControllerTest {
 
     private static final String BASE_URL = "/resources";
     private static final String UPLOAD_SINGLE_RESOURCE_URL = "/{projectId}";
+    private static final String DELETE_URL = "/{projectId}/{resourceId}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,6 +43,7 @@ class ResourceControllerTest {
     ResourceResponseDto resourceResponseDto;
     MockMultipartFile file;
     Long projectId;
+    Long resourceId;
     Long userId;
     @Autowired
     private ResourceController resourceController;
@@ -53,6 +57,7 @@ class ResourceControllerTest {
         file = mockMultipartFile();
         projectId = 1L;
         userId = 2L;
+        resourceId = 3L;
     }
 
     @Test
@@ -130,6 +135,74 @@ class ResourceControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.file").value("Value not provided"))
                 .andExpect(content().string(containsString("Value not provided")));
+    }
+
+    @Test
+    @DisplayName("File delete success")
+    void deleteResource_ValidFileAndParams_Success() throws Exception {
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(String.format("File id: %d was deleted successfully", resourceId)));
+    }
+
+    @Test
+    @DisplayName("File delete fail: negative projectId")
+    void deleteResource_NegativeProjectId_Fail() throws Exception {
+        projectId = -1L;
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andExpect(content().string(containsString("Project id must be a positive integer")))
+                .andExpect(jsonPath("$.['deleteResource.projectId']").value("Project id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("File delete fail: null projectId")
+    void deleteResource_NullProjectId_Fail() throws Exception {
+        projectId = null;
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("File delete fail: negative resourceId")
+    void deleteResource_NegativeResourceId_Fail() throws Exception {
+        resourceId = -1L;
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("File id must be a positive integer")))
+                .andExpect(jsonPath("$.['deleteResource.resourceId']").value("File id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("File delete fail: user id not provided")
+    void deleteResource_UserIdNotProvided_FailBadRequest() throws Exception {
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.userId").value("Parameter cannot be null"))
+                .andExpect(content().string(containsString("Parameter cannot be null")));
+    }
+
+    @Test
+    @DisplayName("File delete fail: user id is negative")
+    void deleteResource_NegativeUserId_FailBadRequest() throws Exception {
+        userId = -1L;
+
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['deleteResource.userId']").value("User id must be a positive integer"))
+                .andExpect(content().string(containsString("User id must be a positive integer")));
     }
 
     private ResourceResponseDto mockResourceResponseDto() {

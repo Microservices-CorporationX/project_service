@@ -31,16 +31,36 @@ public class ResourceController {
             @PathVariable
                 @Positive(message = "Project id must be a positive integer") Long projectId,
             @RequestParam(name = "userId")
-                @NotNull(message = "User id must be a positive integer")
                 @Positive(message = "User id must be a positive integer") Long userId,
             @RequestParam(name = "file")
             @NotNull(message = "You should add a file") MultipartFile file
             ) {
         log.info("Request to upload of {} file in the project id: {} received", file.getName(), projectId);
-        Map<String, Object> response = new HashMap<>();
         ResourceResponseDto resourceResponseDto = resourceService.uploadResource(projectId, userId, file);
+        Map<String, Object> response = new HashMap<>();
         response.put("data", resourceResponseDto);
         response.put("message", String.format("File %s uploaded successfully", file.getName()));
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{projectId}/{resourceId}")
+    @Operation(summary = "Delete project file from storage")
+    public ResponseEntity<Map<String, String>> deleteResource(
+            @PathVariable
+            @Positive(message = "Project id must be a positive integer") Long projectId,
+            @PathVariable
+            @Positive(message = "File id must be a positive integer") Long resourceId,
+            @RequestParam(name = "userId")
+            @NotNull(message = "User id must be a positive integer")
+            @Positive(message = "User id must be a positive integer") Long userId
+    ) {
+        log.info("Request to delete of file id: {} in the project id: {} received", resourceId, projectId);
+        resourceService.deleteResource(projectId, resourceId, userId);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", String.format("File id: %d was deleted successfully", resourceId));
+        return ResponseEntity.ok(response);
+    }
+
+
+
 }
