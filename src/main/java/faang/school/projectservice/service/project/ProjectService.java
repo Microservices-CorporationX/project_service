@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
@@ -26,7 +26,7 @@ public class ProjectService {
     private final static String PROJECT = "Project";
 
     private final ProjectMapper projectMapper;
-    private final List<ProjectFilter> projectFilters;
+    private final List<Filter<Project,ProjectFilterDto>> projectFilters;
     private final ProjectJpaRepository projectRepository;
 
     @Transactional(readOnly = true)
@@ -92,17 +92,17 @@ public class ProjectService {
                 || project.getOwnerId().equals(userId);
     }
 
-    private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
+    private void validateProjectExistsForUser (Long userId, String name){
+        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
+            throw new AlreadyExistsException(PROJECT);
+        }
+    }
+
+    private Stream<Project> applyFilters (Project project, ProjectFilterDto filters){
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(Stream.of(project),
                         (stream, filter) -> filter.apply(stream, filters),
                         Stream::concat);
-    }
-
-    private void validateProjectExistsForUser(Long userId, String name) {
-        if (projectRepository.existsByOwnerIdAndName(userId, name)) {
-            throw new AlreadyExistsException(PROJECT);
-        }
     }
 }
