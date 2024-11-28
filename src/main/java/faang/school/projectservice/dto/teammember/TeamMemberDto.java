@@ -23,14 +23,8 @@ import java.util.List;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class TeamMemberDto {
 
-    @NotNull(message = "Current user ID must not be null")
-    private Long currentUserId;
-
     @NotNull(message = "User ID must not be null")
     private Long userId;
-
-    @NotNull(message = "Project ID must not be null")
-    private Long projectId;
 
     @NotNull(message = "Role list must not be null")
     @Size(min = 1, message = "At least one role must be specified")

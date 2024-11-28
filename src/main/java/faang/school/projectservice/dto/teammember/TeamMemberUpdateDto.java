@@ -22,9 +22,6 @@ import java.util.List;
 public class TeamMemberUpdateDto {
 
     @NotNull
-    private Long currentUserId;
-
-    @NotNull
     private Long updateUserId;
 
     @NotNull

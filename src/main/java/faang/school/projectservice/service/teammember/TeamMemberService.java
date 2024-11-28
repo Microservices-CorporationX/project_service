@@ -1,8 +1,8 @@
 package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.teammember.TeamMemberDeleteDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.teammember.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberUpdateDto;
@@ -44,15 +44,17 @@ public class TeamMemberService {
     private final TeamService teamService;
     private final List<TeamMemberFilter> teamMemberFilters;
     private final UserServiceClient userServiceClient;
+    private final UserContext userContext;
 
     @Transactional
     public TeamMemberDto addMemberToTheTeam(TeamMemberDto teamMemberDto) {
-        log.info("Adding team member to the project: {}", teamMemberDto.getTeam());
+        log.info("Adding team member to the team: {}", teamMemberDto.getTeam());
 
-        Project project = projectService.getProjectById(teamMemberDto.getProjectId());
-        TeamMember currentUser = findById(teamMemberDto.getCurrentUserId());
+        Project project = teamService.findById(teamMemberDto.getTeam()).getProject();
+        TeamMember currentUser = findSingleByUserId(userContext.getUserId());
 
-        if (!hasPermissionToAddMember(project, currentUser, teamMemberDto)) {
+        if (!hasPermissionToAddMember(project, currentUser)) {
+            log.warn("User {} attempted to add a team member without proper authorization", currentUser.getUserId());
             throw new DataValidationException("You are not authorized to add team members");
         }
 
@@ -61,18 +63,23 @@ public class TeamMemberService {
                 .filter(member -> member.getUserId().equals(teamMemberDto.getUserId()))
                 .findFirst();
 
+        TeamMemberDto result;
         if (existingMember.isPresent()) {
-            return updateExistingMember(existingMember.get(), teamMemberDto);
+            result = updateExistingMember(existingMember.get(), teamMemberDto);
+            log.info("Updated existing team member: {}", result.getUserId());
         } else {
-            return addNewMember(teamMemberDto);
+            result = addNewMember(teamMemberDto);
+            log.info("Added new team member: {}", result.getUserId());
         }
+
+        return result;
     }
 
     @Transactional
     public TeamMemberDto updateMemberInTheTeam(TeamMemberUpdateDto teamMemberUpdateDto) {
         Team team = teamService.findById(teamMemberUpdateDto.getTeamId());
         TeamMember updateUser = findById(teamMemberUpdateDto.getUpdateUserId());
-        TeamMember currentUser = findById(teamMemberUpdateDto.getCurrentUserId());
+        TeamMember currentUser = findSingleByUserId(userContext.getUserId());
 
         if (currentUser.getRoles().contains(TeamRole.TEAMLEAD)) {
             return updateMemberAsTeamLead(teamMemberUpdateDto, team, updateUser);
@@ -84,16 +91,19 @@ public class TeamMemberService {
     }
 
     @Transactional
-    public void deleteMemberFromTheTeam(TeamMemberDeleteDto teamMemberDeleteDto) {
-        log.info("Deleting team members from the project: {}", teamMemberDeleteDto);
+    public void deleteMemberFromTheTeam(Long id) {
+        log.info("Deleting team members from the project: {}", id);
 
-        Project project = projectService.getProjectById(teamMemberDeleteDto.getProjectId());
+        TeamMember currentUser = findSingleByUserId(userContext.getUserId());
+        TeamMember deletedMember = findById(id);
 
-        if (!project.getOwnerId().equals(teamMemberDeleteDto.getCurrentUserId())) {
+        Project project = projectService.getProjectById(currentUser.getTeam().getProject().getId());
+
+        if (!project.getOwnerId().equals(currentUser.getId())) {
             throw new DataValidationException("You are not authorized to delete team members");
         }
 
-        deleteById(teamMemberDeleteDto.getDeleteUserId());
+        deleteById(deletedMember.getId());
     }
 
     public List<TeamMemberDto> getAllMembersWithFilter(TeamMemberFilterDto teamMemberFilterDto) {
@@ -117,7 +127,6 @@ public class TeamMemberService {
 
     public TeamMemberDto getMemberById(Long id) {
         log.debug("Retrieving team member by ID: {}", id);
-        teamMemberValidator.validationOnNullLessThanOrEqualToZero(id, "Id null or less than zero");
         TeamMember teamMember = findById(id);
         log.info("Team member successfully retrieved, ID: {}", id);
         return teamMemberMapper.toDto(teamMember);
@@ -155,8 +164,8 @@ public class TeamMemberService {
         return teamMemberMapper.toDto(updateUser);
     }
 
-    private boolean hasPermissionToAddMember(Project project, TeamMember currentUser, TeamMemberDto teamMemberDto) {
-        return project.getOwnerId().equals(teamMemberDto.getCurrentUserId()) ||
+    private boolean hasPermissionToAddMember(Project project, TeamMember currentUser) {
+        return project.getOwnerId().equals(currentUser.getId()) ||
                 currentUser.getRoles().stream().anyMatch(role -> role == TeamRole.TEAMLEAD);
     }
 
@@ -209,6 +218,11 @@ public class TeamMemberService {
 
     public TeamMember findByUserIdAndProjectId(long userId, long projectId) {
         return teamMemberRepository.findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
+    }
+
+    public TeamMember findSingleByUserId(long userId) {
+        return teamMemberRepository.findSingleByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
     }
 
