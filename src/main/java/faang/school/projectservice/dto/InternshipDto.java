@@ -18,6 +18,7 @@ public record InternshipDto(
         @NotNull long projectId,
         @NotNull InternshipStatus status,
         @NotNull long mentorId,
+        String description,
         @NotNull List<Long> internIds,
         @Future LocalDateTime startDate,
         @Future LocalDateTime endDate

@@ -26,10 +26,11 @@ public class InternshipService {
     private final TeamMemberService teamMemberService;
 
     public Long createInternship(InternshipDto internshipDto) {
-        if (ChronoUnit.MONTHS.between(internshipDto.startDate(), internshipDto.endDate()) > 3) {
-            throw new DataValidationException("Продолжительность стажировки более 3х месяцев");
-        }
-        Internship internship = internshipMapper.toEntity(internshipDto, teamMemberService, projectService);
+        validateInternship(internshipDto);
+
+        Internship internship = internshipMapper.toEntity(internshipDto);
+        internship.setMentorId(teamMemberService.getTeamMemberById(internshipDto.mentorId()));
+        internship.setInterns(teamMemberService.getAllTeamMembersByIds(internshipDto.internIds()));
 
         return internshipRepository.save(internship).getId();
     }
@@ -77,17 +78,23 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getAllInternships() {
-        return internshipMapper.toDtos(internshipRepository.findAll());
+        return internshipMapper.toInternshipDtos(internshipRepository.findAll());
     }
 
     public InternshipDto getInternshipDtoById(long internshipId) {
-        return internshipMapper.toDto(getInternshipById(internshipId));
+        return internshipMapper.toInternshipDto(getInternshipById(internshipId));
     }
 
     private Internship getInternshipById(long internshipId) {
         return internshipRepository.findById(internshipId).orElseThrow(
                 () -> new EntityNotFoundException("Пользователь с id:%d не найден".formatted(internshipId))
         );
+    }
+
+    private void validateInternship(InternshipDto internshipDto) {
+        if (ChronoUnit.MONTHS.between(internshipDto.startDate(), internshipDto.endDate()) > 3) {
+            throw new DataValidationException("Продолжительность стажировки более 3х месяцев");
+        }
     }
 
 }

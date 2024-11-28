@@ -9,20 +9,14 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/internship")
-public class InternshipController {
+@RequestMapping("/api/v1/internships")
+public class InternshipV1Controller {
     private final InternshipService internshipService;
 
     @PostMapping
@@ -30,13 +24,13 @@ public class InternshipController {
         return ResponseEntity.ok(internshipService.createInternship(internshipDto));
     }
 
-    @PutMapping
+    @PutMapping("/update/{internshipId}")
     public ResponseEntity<Void> updateInternship(@Valid @RequestBody InternshipDto internshipDto) {
         internshipService.updateInternship(internshipDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/{internshipId}/complete/{teamMemberId}")
+    @DeleteMapping("/{internshipId}/complete/{teamMemberId}")
     public ResponseEntity<Void> earlyCompletionInternship(@RequestParam @Positive long internshipId, @RequestParam @Positive long teamMemberId) {
         internshipService.completeInternship(internshipId, teamMemberId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -48,13 +42,13 @@ public class InternshipController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/{internshipId/change/{status}")
+    @PutMapping("/{internshipId}/change/{status}")
     public ResponseEntity<Void> changeInternshipStatus(@RequestParam @Positive long internshipId, @RequestParam InternshipStatus status) {
         internshipService.changeInternshipStatus(internshipId, status);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/filter/{internshipFilterDto}")
+    @GetMapping("/filter")
     public ResponseEntity<List<InternshipDto>> getFilteredInternships(@RequestBody InternshipFilterDto internshipFilterDto) {
         return ResponseEntity.ok(internshipService.getFilteredInternships(internshipFilterDto));
     }

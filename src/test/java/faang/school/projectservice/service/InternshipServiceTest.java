@@ -165,7 +165,7 @@ class InternshipServiceTest {
     void getAllInternships() {
         List<Internship> internships = List.of(internship);
         when(internshipRepository.findAll()).thenReturn(internships);
-        when(internshipMapper.toDtos(internships)).thenReturn(List.of(internshipDto));
+        when(internshipMapper.toInternshipDtos(internships)).thenReturn(List.of(internshipDto));
 
         assertEquals(1, internshipService.getAllInternships().size());
         assertEquals(internshipDto, internshipService.getAllInternships().get(0));
