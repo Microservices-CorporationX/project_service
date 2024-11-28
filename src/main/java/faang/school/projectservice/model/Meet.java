@@ -51,4 +51,23 @@ public class Meet {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public void deleteParticipant(long participantId) {
+        userIds.remove(participantId);
+    }
+
+    @Override
+    public String toString() {
+        return "Meet{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", creatorId=" + creatorId +
+                ", project=" + project.getId() +
+                ", userIds=" + userIds +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

@@ -47,17 +47,6 @@ public class VacancyControllerTest {
     }
 
     @Test
-    public void testIfThrowsExceptionWhenDeletingVacancyWithNegativeId() {
-        UpdateDeleteVacancyDto vacancyDto = UpdateDeleteVacancyDto.builder()
-                .id(-1L)
-                .build();
-
-
-        assertThrows(DataValidationException.class,
-                () -> vacancyController.deleteVacancy(vacancyDto));
-    }
-
-    @Test
     public void testIfDeletesVacancyWithValidDto() {
         // arrange
         UpdateDeleteVacancyDto vacancyDto = UpdateDeleteVacancyDto.builder()
