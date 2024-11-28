@@ -1,19 +1,31 @@
 package faang.school.projectservice.dto.teammember;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public record TeamMemberDto(
-        @NotNull(groups = {After.class})
-        Long id,
-        @NotNull(groups = {Before.class})
-        Long userId,
+public class TeamMemberDto{
         @NotNull
-        String username,
+        Long id;
         @NotNull
-        String role
-) {
-        public interface Before {}
-        public interface After {}
+        private Long team;
+        @NotNull
+        Long userId;
+        @NotNull
+        String username;
+//        @NotNull
+//        String role;
+        @NotNull
+        private List<String> roles;
+        private String description;
+        @NotNull
+        private Integer accessLevel;
 }

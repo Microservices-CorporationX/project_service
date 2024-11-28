@@ -31,4 +31,10 @@ public interface TeamMemberJpaRepository extends JpaRepository<TeamMember, Long>
             "JOIN t.teamMembers tm " +
             "WHERE p.id = :projectId AND tm.userId IN :userIds")
     long countUsersInProjectTeams(long projectId, List<Long> userIds);
+
+    @Query(
+            "SELECT tm FROM TeamMember tm JOIN tm.team t " +
+                    "WHERE t.project.id = :projectId"
+    )
+    List<TeamMember> findAllByProjectId(long projectId);
 }

@@ -393,7 +393,7 @@ class VacancyServiceTest {
                         .id(expectedSupervisor.getId())
                         .userId(expectedSupervisor.getUserId())
                         .username("John")
-                        .role(TeamRole.OWNER.toString())
+                        .roles(List.of(TeamRole.OWNER.toString()))
                         .build())
                 .numberOfCandidates(5)
                 .build();
@@ -406,8 +406,9 @@ class VacancyServiceTest {
                 .name("UpdatedVacancy")
                 .description("Updated")
                 .status(status)
-                .supervisor(new TeamMemberDto(1L, 1L, "Max", role.toString()))
+                .supervisor(new TeamMemberDto(1L, 1L, 1L,"Max", List.of(role.toString()),"Test" ,1))
                 .numberOfCandidates(5)
                 .build();
     }
 }
+
