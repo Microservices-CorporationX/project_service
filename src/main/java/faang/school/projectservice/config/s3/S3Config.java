@@ -22,6 +22,9 @@ public class S3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
 
+    @Value("${services.s3.bucketName}")
+    private String bucket;
+
     @Bean
     public AmazonS3 s3client() {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -30,10 +33,16 @@ public class S3Config {
         AwsClientBuilder.EndpointConfiguration endpointConfig
                 = new AwsClientBuilder.EndpointConfiguration(endpoint, null);
 
-        return AmazonS3ClientBuilder.standard()
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
                 .withCredentials(provider)
                 .withEndpointConfiguration(endpointConfig)
                 .enablePathStyleAccess()
                 .build();
+
+        if (!s3Client.doesBucketExistV2(bucket)) {
+            s3Client.createBucket(bucket);
+        }
+
+        return s3Client;
     }
 }

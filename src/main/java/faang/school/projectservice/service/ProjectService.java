@@ -23,6 +23,7 @@ public class ProjectService {
         log.info("Trying to add cover to project: {}", projectId);
         long maxAllowedSize = 5 * 1024 * 1024;
         fileValidator.validateFileSize(file, maxAllowedSize);
+        fileValidator.validateFileIsImage(file);
 
         boolean requiresResizing = true;
         int maxWidth = 1080;
@@ -33,6 +34,11 @@ public class ProjectService {
         String coverImageId = s3Service.uploadFile(file, folder, resizeOptions);
 
         Project project = findProjectById(projectId);
+        String oldCoverImageId = project.getCoverImageId();
+        if (oldCoverImageId != null) {
+            s3Service.deleteFile(oldCoverImageId);
+        }
+
         project.setCoverImageId(coverImageId);
     }
 

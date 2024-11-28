@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import faang.school.projectservice.exceptions.ImageProcessingException;
 import faang.school.projectservice.utils.image.ImageUtils;
@@ -44,6 +45,12 @@ public class S3Service {
             throw new ImageProcessingException("An error occurred when converting MultipartFile to InputStream");
         }
         return key;
+    }
+
+
+    public void deleteFile(String key) {
+        DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, key);
+        s3Client.deleteObject(deleteObjectRequest);
     }
 
     private BufferedImage resizeImage(MultipartFile file, ResizeOptions resizeOptions) {
