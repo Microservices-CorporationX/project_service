@@ -51,7 +51,6 @@ public class ResourceController {
             @PathVariable
             @Positive(message = "File id must be a positive integer") Long resourceId,
             @RequestParam(name = "userId")
-            @NotNull(message = "User id must be a positive integer")
             @Positive(message = "User id must be a positive integer") Long userId
     ) {
         log.info("Request to delete of file id: {} in the project id: {} received", resourceId, projectId);
@@ -61,6 +60,23 @@ public class ResourceController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @PutMapping("/{projectId}/{resourceId}")
+    @Operation(summary = "Update project file in storage")
+    public ResponseEntity<Map<String, Object>> updateResource(
+            @PathVariable
+            @Positive(message = "Project id must be a positive integer") Long projectId,
+            @PathVariable
+            @Positive(message = "File id must be a positive integer") Long resourceId,
+            @RequestParam(name = "userId")
+            @Positive(message = "User id must be a positive integer") Long userId,
+            @RequestParam(name = "file")
+            @NotNull(message = "You should add a file") MultipartFile file
+    ) {
+        log.info("Request to update file id {} in the project id: {} received", resourceId, projectId);
+        ResourceResponseDto resourceResponseDto = resourceService.updateResource(projectId, resourceId, userId, file);
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", resourceResponseDto);
+        response.put("message", String.format("File id: %d updated successfully", resourceResponseDto.getId()));
+        return ResponseEntity.ok(response);
+    }
 }

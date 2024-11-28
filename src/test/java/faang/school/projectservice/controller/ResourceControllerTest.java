@@ -33,6 +33,7 @@ class ResourceControllerTest {
     private static final String BASE_URL = "/resources";
     private static final String UPLOAD_SINGLE_RESOURCE_URL = "/{projectId}";
     private static final String DELETE_URL = "/{projectId}/{resourceId}";
+    private static final String UPDATE_URL = "/{projectId}/{resourceId}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +63,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload success")
-    void uploadFile_ValidFileAndParams_Success() throws Exception {
+    void uploadResource_ValidFileAndParams_Success() throws Exception {
         when(resourceService.uploadResource(projectId, userId, file)).thenReturn(resourceResponseDto);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
@@ -77,7 +78,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload fail: negative project id")
-    void uploadFile_NegativeProjectId_FailBadRequest() throws Exception {
+    void uploadResource_NegativeProjectId_FailBadRequest() throws Exception {
         projectId = -1L;
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
@@ -90,7 +91,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload fail: null project id")
-    void uploadFile_NullProjectId_FailNotFound() throws Exception {
+    void uploadResource_NullProjectId_FailNotFound() throws Exception {
         projectId = null;
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
@@ -102,7 +103,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload fail: user id not provided")
-    void uploadFile_UserIdNotProvided_FailBadRequest() throws Exception {
+    void uploadResource_UserIdNotProvided_FailBadRequest() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
@@ -114,7 +115,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload fail: negative user id")
-    void uploadFile_NegativeUserId_FailBadRequest() throws Exception {
+    void uploadResource_NegativeUserId_FailBadRequest() throws Exception {
         userId = -1L;
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
@@ -127,7 +128,7 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("File upload fail: file not provided")
-    void uploadFile_FileNotProvided_FailBadRequest() throws Exception {
+    void uploadResource_FileNotProvided_FailBadRequest() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .param("userId", String.valueOf(userId))
@@ -204,6 +205,106 @@ class ResourceControllerTest {
                 .andExpect(jsonPath("$.['deleteResource.userId']").value("User id must be a positive integer"))
                 .andExpect(content().string(containsString("User id must be a positive integer")));
     }
+
+    @Test
+    @DisplayName("File update success")
+    void updateResource_ValidFileAndParams_Success() throws Exception {
+        resourceId = 6L;
+        when(resourceService.updateResource(projectId, resourceId, userId, file)).thenReturn(resourceResponseDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .file(file)
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data.id").value(6L))
+                .andExpect(jsonPath("$.message").value(String.format("File id: %d updated successfully", resourceId)));
+    }
+
+    @Test
+    @DisplayName("File update fail: negative projectId")
+    void updateResource_NegativeProjectId_Fail() throws Exception {
+        projectId = -1L;
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .file(file)
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['updateResource.projectId']").value("Project id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("File update fail: negative resourceId")
+    void updateResource_NegativeResourceId_Fail() throws Exception {
+        resourceId = -1L;
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .file(file)
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['updateResource.resourceId']").value("File id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("File update fail: negative userId")
+    void updateResource_NegativeUserId_Fail() throws Exception {
+        userId = -1L;
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .file(file)
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.['updateResource.userId']").value("User id must be a positive integer"));
+    }
+
+    @Test
+    @DisplayName("File update fail: missed userId")
+    void updateResource_MissedUserId_Fail() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.userId").value("Parameter cannot be null"));
+    }
+
+    @Test
+    @DisplayName("File update fail: file not provided")
+    void updateResource_FiledNotProvided_Fail() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.file").value("Value not provided"));
+    }
+
 
     private ResourceResponseDto mockResourceResponseDto() {
         return ResourceResponseDto.builder()
