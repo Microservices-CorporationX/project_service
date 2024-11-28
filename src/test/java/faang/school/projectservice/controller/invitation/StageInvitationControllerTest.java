@@ -47,7 +47,7 @@ class StageInvitationControllerTest {
 
     @Test
     @DisplayName("Тест успешного отправления приглашения")
-    void positiveTestSendInvitation() throws Exception {
+    void testSendInvitation_SuccessfulCase() throws Exception {
         StageInvitationDTO inputDTO = StageInvitationDTO.builder()
             .stageId(2L)
             .authorId(3L)
@@ -77,7 +77,7 @@ class StageInvitationControllerTest {
     @ParameterizedTest
     @MethodSource("invalidSendInvitationDTO")
     @DisplayName("Тест с некорректными данными: обязательные поля отсутствуют")
-    void negativeSendInvitation(StageInvitationDTO inputDTO) throws Exception {
+    void testSendInvitation_MissingRequiredFields_ShouldReturnBadRequest(StageInvitationDTO inputDTO) throws Exception {
         mockMvc.perform(post(URL_SEND_INVITATION)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(inputDTO)))
@@ -94,7 +94,7 @@ class StageInvitationControllerTest {
 
     @Test
     @DisplayName("Тест успешного принятия приглашения")
-    void positiveTestAcceptInvitation() throws Exception {
+    void testAcceptInvitation_SuccessfulAcceptance() throws Exception {
         Long invitationId = 1L;
         StageInvitationDTO expectedDTO = StageInvitationDTO.builder()
             .id(invitationId)
@@ -109,8 +109,20 @@ class StageInvitationControllerTest {
     }
 
     @Test
+    @DisplayName("Тест отклонения без причины")
+    void testRejectInvitation_MissingReason_ShouldReturnBadRequest() throws Exception {
+        Long invitationId = 1L;
+        RejectionReasonDTO emptyReasonDTO = new RejectionReasonDTO();
+
+        mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(emptyReasonDTO)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("Тест успешного отклонения приглашения")
-    void positiveTestRejectInvitation() throws Exception {
+    void testRejectInvitation_SuccessfulRejection() throws Exception {
         Long invitationId = 1L;
         RejectionReasonDTO reasonDTO = new RejectionReasonDTO("Занят на других проектах");
 
@@ -130,20 +142,8 @@ class StageInvitationControllerTest {
     }
 
     @Test
-    @DisplayName("Тест отклонения без причины")
-    void negativeTestRejectInvitationMissingReason() throws Exception {
-        Long invitationId = 1L;
-        RejectionReasonDTO emptyReasonDTO = new RejectionReasonDTO();
-
-        mockMvc.perform(patch(URL_REJECT_INVITATION, invitationId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(emptyReasonDTO)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     @DisplayName("Тест ошибки при некорректном JSON для фильтрации приглашений")
-    void negativeTestGetFilteredInvitationsWithInvalidJson() throws Exception {
+    void testGetFilteredInvitations_InvalidJson_ShouldReturnBadRequest() throws Exception {
         String invalidJson = "{invalid}";
 
         mockMvc.perform(post(URL_GET_FILTERED_INVITATIONS)
