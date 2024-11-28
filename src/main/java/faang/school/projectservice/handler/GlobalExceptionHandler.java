@@ -7,6 +7,7 @@ import faang.school.projectservice.exception.ProjectStatusValidationException;
 import faang.school.projectservice.exception.TeamMemberValidationException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.Subproject.*;
+import faang.school.projectservice.exception.project.ImageValidationFailException;
 import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
@@ -103,5 +104,12 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleStorageSizeExceededException(StorageSizeExceededException exception) {
         log.error("Storage Size Exceeded Error: {}", exception);
         return new ErrorResponse("Storage Size Exceeded Error", exception.getMessage());
+    }
+
+    @ExceptionHandler(ImageValidationFailException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleImageValidationFailException(ImageValidationFailException exception) {
+        log.error("Image Validation Fail Error: {}", exception);
+        return new ErrorResponse("Image Validation Fail Error", exception.getMessage());
     }
 }

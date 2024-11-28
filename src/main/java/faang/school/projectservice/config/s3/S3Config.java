@@ -17,15 +17,13 @@ public class S3Config {
     @Value("${services.s3.secretKey}")
     private String secretKey;
 
-    @Value("${services.s3.bucketName}")
-    private String bucketName;
-
     @Value("${services.s3.region}")
     private String region;
 
-
     @Bean
     public AmazonS3 s3Client() {
+        System.out.println("ACCESS KEY: " + accessKey);
+        System.out.println("SECRET KEY: " + secretKey);
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
