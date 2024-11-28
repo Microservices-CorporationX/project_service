@@ -146,7 +146,6 @@ public class ProjectService {
 
     @Transactional
     public ProjectUpdateResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
-        projectValidator.validateProjectExistsById(updateSubProjectDto.getId());
         Project subProject = getProjectById(updateSubProjectDto.getId());
         changeStatus(subProject, updateSubProjectDto);
         changeVisibility(subProject, updateSubProjectDto);

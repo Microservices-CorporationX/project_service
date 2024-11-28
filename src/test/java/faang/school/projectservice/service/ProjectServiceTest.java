@@ -451,7 +451,6 @@ class ProjectServiceTest {
 
         verify(projectRepository, times(1)).getProjectById(updateSubProjectDto.getId());
         verify(projectRepository, times(1)).save(subProject);
-        verify(projectValidator, times(1)).validateProjectExistsById(updateSubProjectDto.getId());
         verify(projectValidator, times(1)).validateHasChildrenProjectsClosed(subProject.getParentProject());
 
         assertEquals(subProject.getName(), responseDto.getName());
