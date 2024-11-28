@@ -48,6 +48,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Project {
+
             private String id;
             private String key;
             private String name;
@@ -59,6 +60,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class AvatarUrls {
+
             @JsonProperty("48x48")
             private String avatar48Pixels;
 
@@ -70,6 +72,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Watches {
+
             private String self;
             private int watchCount;
             private boolean isWatching;
@@ -79,6 +82,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class IssueLink {
+
             private String id;
             private String self;
             private IssueLinkType type;
@@ -89,6 +93,7 @@ public class JiraIssueDto {
             @Setter
             @NoArgsConstructor
             public static class IssueLinkType {
+
                 private String id;
                 private String name;
                 private String self;
@@ -101,6 +106,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Issue {
+
             private String id;
             private String key;
             private String self;
@@ -110,6 +116,7 @@ public class JiraIssueDto {
             @Setter
             @NoArgsConstructor
             public static class IssueFields {
+
                 private String summary;
                 private Status status;
                 private Priority priority;
@@ -121,6 +128,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Status {
+
             private String id;
             private String self;
             private String name;
@@ -131,6 +139,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Priority {
+
             private String id;
             private String self;
             private String name;
@@ -140,6 +149,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class IssueType {
+
             private String id;
             private String self;
             private String description;
@@ -151,6 +161,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class User {
+
             private String self;
             private String accountId;
             private String emailAddress;
@@ -165,6 +176,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Votes {
+
             private String self;
             private int votes;
         }
@@ -173,6 +185,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Comment {
+
             private List<CommentInfo> comments;
             private String self;
             private int total;
@@ -182,6 +195,7 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class CommentInfo {
+
             private String id;
             private String self;
             private User author;
@@ -198,12 +212,14 @@ public class JiraIssueDto {
         @Setter
         @NoArgsConstructor
         public static class Worklog {
+
             List<WorklogInfo> worklogs;
 
             @Getter
             @Setter
             @NoArgsConstructor
             public static class WorklogInfo {
+
                 private String self;
                 private User author;
                 private User updateAuthor;

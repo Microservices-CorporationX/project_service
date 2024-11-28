@@ -17,6 +17,7 @@ public class JiraIssueAvailableTransitionsDto {
     @Setter
     @NoArgsConstructor
     public static class TransitionInfo {
+
         private String id;
         private String name;
     }

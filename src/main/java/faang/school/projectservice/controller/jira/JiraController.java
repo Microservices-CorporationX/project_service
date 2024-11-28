@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -75,7 +76,7 @@ public class JiraController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/{jiraDomain}/issues/{issueKey}/transitions")
+    @PatchMapping("/{jiraDomain}/issues/{issueKey}/transitions")
     public ResponseEntity<Void> changeIssueStatus(
             @RequestHeader("x-user-id")
             @Min(value = 1, message = "Requester user ID must be greater than 0!")
@@ -136,7 +137,7 @@ public class JiraController {
     }
 
     @PostMapping("/{jiraDomain}/issues/filter")
-    public ResponseEntity<List<JiraIssueDto>> filterIssues(
+    public ResponseEntity<List<JiraIssueDto>> getIssuesByFilters(
             @RequestHeader("x-user-id")
             @Min(value = 1, message = "Requester user ID must be greater than 0!")
             @Parameter(description = "ID of user who sent the request") long requesterUserId,

@@ -23,6 +23,7 @@ public class JiraIssueCreateDto extends JiraIssueBaseDto {
         @Setter
         @NoArgsConstructor
         public static class Project {
+
             @NotBlank(message = "Project key cannot be blank")
             private String key;
         }

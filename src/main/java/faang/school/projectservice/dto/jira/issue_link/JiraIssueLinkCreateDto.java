@@ -24,6 +24,7 @@ public class JiraIssueLinkCreateDto {
     @Setter
     @NoArgsConstructor
     public static class Type {
+
         @NotBlank(message = "Type name must be set")
         private String name;
     }
@@ -32,6 +33,7 @@ public class JiraIssueLinkCreateDto {
     @Setter
     @NoArgsConstructor
     public static class InwardIssue {
+
         @NotBlank(message = "Inward issue key must be set")
         private String key;
     }
@@ -40,6 +42,7 @@ public class JiraIssueLinkCreateDto {
     @Setter
     @NoArgsConstructor
     public static class OutwardIssue {
+
         @NotBlank(message = "Outward issue key must be set")
         private String key;
     }

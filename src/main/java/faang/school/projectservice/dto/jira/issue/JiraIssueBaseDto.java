@@ -42,6 +42,7 @@ public class JiraIssueBaseDto {
         @Setter
         @NoArgsConstructor
         public static class IssueType {
+
             @NotBlank(message = "Issue type ID cannot be blank")
             private String name;
         }
@@ -50,6 +51,7 @@ public class JiraIssueBaseDto {
         @Setter
         @NoArgsConstructor
         public static class Assignee {
+
             @NotBlank(message = "Assignee ID cannot be blank")
             private String id;
         }
@@ -58,6 +60,7 @@ public class JiraIssueBaseDto {
         @Setter
         @NoArgsConstructor
         public static class Parent {
+
             @NotBlank(message = "Parent key cannot be blank")
             private String key;
         }
