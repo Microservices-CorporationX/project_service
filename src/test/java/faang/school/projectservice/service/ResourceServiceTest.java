@@ -81,7 +81,6 @@ class ResourceServiceTest {
 
         when(projectService.getProjectById(projectId)).thenReturn(project);
         when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
-        when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
         when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
 
         ResourceResponseDto result = resourceService.uploadResource(projectId, userId, file);
@@ -104,7 +103,6 @@ class ResourceServiceTest {
         assertEquals(resource.getCreatedBy().getUserId(), result.getCreatedById());
         assertEquals(resource.getUpdatedAt(), result.getUpdatedAt());
         assertEquals(resource.getUpdatedBy().getUserId(), result.getUpdatedById());
-
     }
 
     @Test
@@ -226,6 +224,42 @@ class ResourceServiceTest {
         verify(resourceRepository, never()).save(resource);
     }
 
+    @Test
+    @DisplayName("Update file with all valid parameters: success")
+    void updateResource_ValidParameters_Success() {
+        Long resourceId = 1L;
+        project.setStorageSize(BigInteger.valueOf(100L));
+
+        when(teamMemberService.getTeamMemberByUserId(userId)).thenReturn(teamMember);
+        when(resourceRepository.getReferenceById(resourceId)).thenReturn(resource);
+        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(resourceRepository.save(any(Resource.class))).thenReturn(resource);
+
+        ResourceResponseDto result = resourceService.updateResource(projectId, resourceId, userId, file);
+
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(resourceValidator, times(1)).validateResourceExistsById(resource.getId());
+        verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(teamMember.getUserId());
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+        verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, times(1)).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
+        verify(storageService, times(1)).deleteResource(anyString());
+        verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
+        verify(storageService, times(1)).uploadResourceAsync(any(MultipartFile.class), anyString());
+        verify(projectService, times(1)).increaseOccupiedStorageSizeAfterFileUpload(any(Project.class), any(MultipartFile.class));
+        verify(resourceRepository, times(1)).save(resource);
+
+        assertNotNull(result);
+        assertEquals(resource.getId(), result.getId());
+        assertEquals(resource.getName(), result.getName());
+        assertEquals(resource.getKey(), result.getKey());
+        assertEquals(resource.getSize(), result.getSize());
+        assertEquals(resource.getType(), result.getType());
+        assertEquals(resource.getCreatedAt(), result.getCreatedAt());
+        assertEquals(resource.getCreatedBy().getUserId(), result.getCreatedById());
+        assertEquals(resource.getUpdatedAt(), result.getUpdatedAt());
+        assertEquals(resource.getUpdatedBy().getUserId(), result.getUpdatedById());
+    }
 
 
     private Project createMockProject() {

@@ -83,6 +83,42 @@ public class ResourceService {
         log.info("File id: {} was deleted successfully from project id: {}", resourceId, projectId);
     }
 
+    @Transactional
+    public ResourceResponseDto updateResource(Long projectId, Long resourceId, Long userId, MultipartFile file) {
+        projectValidator.validateProjectExistsById(projectId);
+        resourceValidator.validateResourceExistsById(resourceId);
+        teamMemberValidator.validateTeamMemberExistsById(userId);
+        resourceValidator.validateResourceNotEmpty(file);
+
+        TeamMember teamMember = teamMemberService.getTeamMemberByUserId(userId);
+        Resource resource = resourceRepository.getReferenceById(resourceId);
+        Project project = projectService.getProjectById(projectId);
+
+        projectValidator.validateUserInProjectTeam(userId, project);
+        resourceValidator.validateTeamMemberHasPermissionsToModifyResource(teamMember, resource);
+
+        String key = resource.getKey();
+
+        storageService.deleteResource(key);
+
+        project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
+        resourceValidator.validateEnoughSpaceInStorage(project, file);
+
+        String folderName = String.format("%d_%s", projectId, project.getName());
+        String newKey = String.format("%s/%s_%d", folderName, file.getOriginalFilename(), System.currentTimeMillis());
+
+        storageService.uploadResourceAsync(file, newKey);
+
+        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
+
+        createResourceAfterUpdate(resource, newKey, teamMember, file);
+
+        resourceRepository.save(resource);
+
+        log.info("File id: {} in project id: {}was updated successfully", resourceId, projectId);
+        return resourceMapper.toDto(resource);
+    }
+
     private Resource createNewUploadResource(MultipartFile file, String key, Long userId, Project project) {
         List<TeamRole> allowedRoles = new ArrayList<>(teamMemberService.getTeamMemberByUserId(userId).getRoles());
 
@@ -99,5 +135,13 @@ public class ResourceService {
                 .updatedBy(teamMemberService.getTeamMemberByUserId(userId))
                 .project(project)
                 .build();
+    }
+
+    private void createResourceAfterUpdate(Resource resource, String key, TeamMember teamMember, MultipartFile file) {
+        resource.setName(file.getName());
+        resource.setKey(key);
+        resource.setSize(BigInteger.valueOf(file.getSize()));
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setUpdatedBy(teamMember);
     }
 }
