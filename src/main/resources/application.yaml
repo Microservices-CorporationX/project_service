@@ -50,12 +50,21 @@ services:
     secretKey: password
     bucketName: projectbucket
     region: us-east-1
+  jira:
+    protocol: https
+    host: atlassian.net
+    api-path: /rest/api/2
+    endpoints:
+      issue: /issue
+      issue-link: /issueLink
+      search: /search
   payment-service:
     host: http://localhost
     port: 9080
   user-service:
     host: http://localhost
     port: 8080
+    path: /api/v1
 
 project-files:
   max-project-file-size: 2147483648
