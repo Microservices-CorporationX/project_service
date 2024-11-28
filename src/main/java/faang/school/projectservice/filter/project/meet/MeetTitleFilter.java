@@ -16,6 +16,7 @@ public class MeetTitleFilter implements Filter<MeetFilterDto, Stream<Meet>> {
 
     @Override
     public Stream<Meet> apply(MeetFilterDto meetFilterDto, Stream<Meet> meetStream) {
-        return meetStream.filter(meet -> meet.getTitle().contains(meetFilterDto.getTitle()));
+        return meetStream
+                .filter(meet -> meet.getTitle().toLowerCase().contains(meetFilterDto.getTitle().toLowerCase()));
     }
 }

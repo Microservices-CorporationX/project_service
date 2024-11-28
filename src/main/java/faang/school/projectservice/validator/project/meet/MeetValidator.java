@@ -19,9 +19,9 @@ public class MeetValidator {
     public void validate(MeetDto meetDto, long userId, ProjectService projectService) {
         validation(meetDto.getProjectId(), userId, projectService);
 
-//        if (meetDto.getStartDateTime().isBefore(LocalDateTime.now())) {
-//            throw new IllegalStateException("start date time must be before now date");
-//        }
+        if (meetDto.getStartDateTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("start date time must be before now date");
+        }
     }
 
     public void validate(long projectId, long userId, ProjectService projectService) {
@@ -32,12 +32,12 @@ public class MeetValidator {
         try {
             userServiceClient.getUser(userId);
         } catch(FeignException e) {
-            throw new IllegalStateException(String.format("user with %d not found", userId), e);
+            throw new IllegalStateException(String.format("user with id %d not found", userId), e);
         }
 
-        if (projectService.hasUserInProject(projectId, userId)) {
+        if (!projectService.hasUserInProject(projectId, userId)) {
             throw new IllegalStateException(
-                    String.format("user with %d not found in project with id %d", userId, projectId));
+                    String.format("user with id %d not found in project with id %d", userId, projectId));
         }
     }
 }

@@ -1,17 +1,14 @@
 package faang.school.projectservice.dto.project.meet;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import faang.school.projectservice.deserialization.UnixTimestampToLocalDateTimeDeserializer;
 import faang.school.projectservice.model.MeetStatus;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
-import jdk.jfr.Timestamp;
 import lombok.Data;
-import org.hibernate.annotations.TimeZoneColumn;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,11 +21,14 @@ public class MeetDto {
     @Size(max = 128, message = "Title must not exceed 128 characters")
     private String title;
 
+    @NotNull(message = "Title must not be null")
+    @NotBlank(message = "Title must not be blank")
+    @Size(max = 4096, message = "Description must not exceed 4096 characters")
     private String description;
 
-//    @NotNull(message = "Start time must not be null")
+    @NotNull(message = "Start time must not be null")
+    @JsonDeserialize(using = UnixTimestampToLocalDateTimeDeserializer.class)
     private LocalDateTime startDateTime;
-    private Instant instant;
 
     private MeetStatus status;
     private Long creatorId;
