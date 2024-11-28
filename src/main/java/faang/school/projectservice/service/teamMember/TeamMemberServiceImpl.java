@@ -1,8 +1,12 @@
 package faang.school.projectservice.service.teamMember;
 
+import faang.school.projectservice.dto.internship.RoleDto;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.TeamMemberService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +23,14 @@ public class TeamMemberServiceImpl implements TeamMemberService {
     @Override
     public TeamMember save(TeamMember teamMember) {
         return teamMemberRepository.save(teamMember);
+    }
+
+    @Override
+    public void addNewRole(Long teamMemberId, RoleDto role) {
+        TeamMember teamMember = teamMemberRepository.findById(teamMemberId);
+        List<TeamRole> memberRoles = new ArrayList<>(teamMember.getRoles());
+        memberRoles.add(role.toTeamRole());
+        teamMember.setRoles(memberRoles);
+        teamMemberRepository.save(teamMember);
     }
 }

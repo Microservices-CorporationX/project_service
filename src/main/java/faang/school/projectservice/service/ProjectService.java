@@ -1,12 +1,18 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.TaskDto;
 import faang.school.projectservice.model.Team;
+import java.util.List;
 
 public interface ProjectService {
-    Project getProjectById(Long projectId);
+    ProjectDto getProjectById(Long projectId);
 
     void saveNewTeam(Team team, Long projectId);
 
-    void saveProject(Project project);
+    List<Long> getAllTeamMembersIds(Long projectId);
+
+    List<TaskDto> getProjectTasks(Long projectId);
+
+    void deleteTeamMember(Long projectId, Long teamMemberId);
 }

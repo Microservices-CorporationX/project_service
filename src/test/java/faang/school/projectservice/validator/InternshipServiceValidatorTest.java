@@ -10,8 +10,6 @@ import faang.school.projectservice.dto.internship.RoleDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -39,21 +37,8 @@ class InternshipServiceValidatorTest {
     private static final Long PROJECT_ID = 111L;
     private final TeamMember mentor = TeamMember.builder().id(1L).userId(21L).roles(List.of(TeamRole.DEVELOPER))
             .build();
-    private final TeamMember firstIntern = TeamMember.builder().id(2L).userId(23L)
-            .roles(List.of(TeamRole.INTERN)).build();
-    private final TeamMember secondIntern = TeamMember.builder().id(3L).userId(24L)
-            .roles(List.of(TeamRole.INTERN)).build();
-    private final TeamMember thirdIntern = TeamMember.builder().id(4L).userId(25L)
-            .roles(List.of(TeamRole.INTERN)).build();
-    private final TeamMember fourthIntern = TeamMember.builder().id(5L).userId(26L)
-            .roles(List.of(TeamRole.INTERN)).build();
-    private final List<TeamMember> internsList = List.of(firstIntern, secondIntern, thirdIntern, fourthIntern);
     private final List<TeamMember> mentorList = List.of(mentor);
-    private final Team projectTeam = Team.builder().id(55L).teamMembers(List.of(mentor)).build();
-    private final Team internshipTeam = Team.builder().id(55L).teamMembers(internsList).build();
-    private final List<Team> teams = List.of(projectTeam, internshipTeam);
 
-    private final Project project = Project.builder().teams(teams).build();
 
     @Mock
     private ProjectService projectService;
@@ -78,7 +63,7 @@ class InternshipServiceValidatorTest {
     public void testValidateMentor() {
         InternshipDto internshipDto = new InternshipDto(INTERNSHIP_DTO_ID, INTERNSHIP_DTO_NAME, 235L, PROJECT_ID,
                 InternshipStatusDto.COMPLETED, RoleDto.DEVELOPER, INTERN_IDS, START_DATE, LATEST_END_DATE);
-        when(projectService.getProjectById(internshipDto.ownedProjectId())).thenReturn(project);
+        when(projectService.getAllTeamMembersIds(internshipDto.ownedProjectId())).thenReturn(List.of(1L, 2L));
 
         assertThrows(DataValidationException.class, () -> validator.validateMentor(internshipDto));
     }
