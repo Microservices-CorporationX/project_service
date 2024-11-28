@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Tag(name = "Projects methods")
@@ -109,11 +111,12 @@ public class ProjectController {
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
     })
     @PostMapping("/{projectId}/resources")
-    public ResponseEntity<String> uploadFile(@PathVariable long projectId,
-                                             @RequestHeader("x-team-member-id") long teamMemberId,
-                                             @RequestBody @NotNull MultipartFile file) {
+    @Async("filesExecutor")
+    public CompletableFuture<ResponseEntity<String>> uploadFile(@PathVariable long projectId,
+                                                                @RequestHeader("x-team-member-id") long teamMemberId,
+                                                                @RequestBody @NotNull MultipartFile file) {
         projectFilesService.uploadFile(projectId, teamMemberId, file);
-        return ResponseEntity.ok("File uploaded successfully");
+        return CompletableFuture.completedFuture(ResponseEntity.ok("File uploaded successfully"));
     }
 
     @Operation(summary = "Download a file of the project",
@@ -124,13 +127,14 @@ public class ProjectController {
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
     })
     @GetMapping("/resources/{resourceId}")
-    public ResponseEntity<StreamingResponseBody> downloadFile(@PathVariable long resourceId) {
+    @Async("filesExecutor")
+    public CompletableFuture<ResponseEntity<StreamingResponseBody>> downloadFile(@PathVariable long resourceId) {
         InputStream fileStream = projectFilesService.downloadFile(resourceId);
         StreamingResponseBody responseBody = fileStreamingService.getStreamingResponseBody(fileStream);
 
-        return ResponseEntity.ok()
+        return CompletableFuture.completedFuture(ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(responseBody);
+                .body(responseBody));
     }
 
     @Operation(summary = "Delete a file from the project",
@@ -143,7 +147,7 @@ public class ProjectController {
     public ResponseEntity<String> deleteFile(@PathVariable long resourceId,
                                              @RequestHeader("x-team-member-id") long teamMemberId) {
         projectFilesService.deleteFile(resourceId, teamMemberId);
-        return ResponseEntity.ok("File deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Download all project files",
@@ -154,15 +158,16 @@ public class ProjectController {
             @ApiResponse(responseCode = "500", description = "Internal server error occurred during processing")
     })
     @GetMapping("/{projectId}/resources")
-    public ResponseEntity<StreamingResponseBody> downloadAllFiles(@PathVariable long projectId) {
+    @Async("filesExecutor")
+    public CompletableFuture<ResponseEntity<StreamingResponseBody>> downloadAllFiles(@PathVariable long projectId) {
         Map<String, InputStream> files = projectFilesService.downloadAllFiles(projectId);
         StreamingResponseBody responseBody = fileStreamingService.
                 getStreamingResponseBodyInZip(files);
 
-        return ResponseEntity.ok()
+        return CompletableFuture.completedFuture(ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=project_" +
                         projectId + "_resources.zip")
-                .body(responseBody);
+                .body(responseBody));
     }
 }

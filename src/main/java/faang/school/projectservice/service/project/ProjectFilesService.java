@@ -1,8 +1,6 @@
 package faang.school.projectservice.service.project;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
@@ -11,6 +9,7 @@ import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.amazons3.S3Service;
+import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.resource.ResourceValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ import java.util.Map;
 public class ProjectFilesService {
 
     private final S3Service s3Service;
-    private final ResourceRepository resourceRepository;
+    private final ResourceService resourceService;
     private final ResourceValidator resourceValidator;
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
@@ -66,13 +65,13 @@ public class ProjectFilesService {
                 .build();
 
         projectService.updateProject(projectMapper.toDto(project));
-        resourceRepository.save(resource);
+        resourceService.save(resource);
         log.info("Saving new Resource with key: {}, with status: {}",
                 resource.getKey(), resource.getStatus());
     }
 
     public InputStream downloadFile(long resourceId) {
-        Resource resource = getResource(resourceId);
+        Resource resource = resourceService.getResource(resourceId);
         String key = resource.getKey();
 
         return s3Service.downloadFile(key);
@@ -93,7 +92,7 @@ public class ProjectFilesService {
     }
 
     public void deleteFile(long resourceId, long teamMemberId) {
-        Resource resource = getResource(resourceId);
+        Resource resource = resourceService.getResource(resourceId);
         TeamMember teamMember = teamMemberService.findById(teamMemberId);
         Project project = projectService.getProjectById(resource.getProject().getId());
 
@@ -111,13 +110,8 @@ public class ProjectFilesService {
         resource.setUpdatedBy(teamMember);
 
         projectService.updateProject(projectMapper.toDto(project));
-        resourceRepository.save(resource);
+        resourceService.save(resource);
         log.info("Saving Resource with id: {} , with status: {} ",
                 resource.getId(), resource.getStatus());
-    }
-
-    private Resource getResource(long resourceId) {
-        return resourceRepository.findById(resourceId).orElseThrow(
-                () -> new EntityNotFoundException("Resource", resourceId));
     }
 }
