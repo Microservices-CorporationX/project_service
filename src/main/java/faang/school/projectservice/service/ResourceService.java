@@ -3,20 +3,20 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
+import faang.school.projectservice.model.*;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.ResourceValidator;
 import faang.school.projectservice.validator.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,7 @@ public class ResourceService {
     private final StorageService storageService;
     private final ProjectService projectService;
 
+    @Transactional
     public ResourceResponseDto uploadResource(Long projectId, Long userId, MultipartFile file) {
         projectValidator.validateProjectExistsById(projectId);
         teamMemberValidator.validateTeamMemberExistsById(userId);
@@ -43,20 +44,25 @@ public class ResourceService {
         String folderName = String.format("%d_%s", projectId, project.getName());
         String key = String.format("%s/%s_%d", folderName, file.getOriginalFilename(), System.currentTimeMillis());
 
+        Resource resource = createNewUploadResource(file, key, userId, project);
+
         storageService.uploadResourceAsync(file, key);
 
-        Resource resource = createNewUploadResource(file, key, userId, project);
+        projectService.updateStorageSizeAfterFileUpload(project, file);
+
         resource = resourceRepository.save(resource);
 
         return resourceMapper.toDto(resource);
     }
 
     private Resource createNewUploadResource(MultipartFile file, String key, Long userId, Project project) {
+        List<TeamRole> allowedRoles = new ArrayList<>(teamMemberService.getTeamMemberByUserId(userId).getRoles());
+
         return Resource.builder()
                 .name(file.getName())
                 .key(key)
                 .size(BigInteger.valueOf(file.getSize()))
-                .allowedRoles(teamMemberService.getTeamMemberByUserId(userId).getRoles())
+                .allowedRoles(allowedRoles)
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .status(ResourceStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())

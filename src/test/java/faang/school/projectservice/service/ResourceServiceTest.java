@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -84,6 +85,14 @@ class ResourceServiceTest {
 
         ResourceResponseDto result = resourceService.uploadResource(projectId, userId, file);
 
+        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
+        verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(userId);
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+        verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
+        verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
+        verify(storageService, times(1)).uploadResourceAsync(any(MultipartFile.class), anyString());
+        verify(projectService, times(1)).updateStorageSizeAfterFileUpload(project, file);
+
         assertNotNull(result);
         assertEquals(resource.getId(), result.getId());
         assertEquals(resource.getName(), result.getName());
@@ -95,11 +104,6 @@ class ResourceServiceTest {
         assertEquals(resource.getUpdatedAt(), result.getUpdatedAt());
         assertEquals(resource.getUpdatedBy().getUserId(), result.getUpdatedById());
 
-        verify(projectValidator, times(1)).validateProjectExistsById(projectId);
-        verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(userId);
-        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
-        verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
     }
 
     @Test
@@ -116,6 +120,8 @@ class ResourceServiceTest {
         verify(resourceValidator, never()).validateResourceNotEmpty(file);
         verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, never()).validateEnoughSpaceInStorage(project, file);
+        verify(storageService, never()).uploadResourceAsync(any(MultipartFile.class), anyString());
+        verify(projectService, never()).updateStorageSizeAfterFileUpload(project, file);
     }
 
     @Test

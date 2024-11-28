@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.exception.InsufficientStorageException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.projectfilter.ProjectStatusFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -11,33 +11,23 @@ import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.Collections;
+import java.math.BigInteger;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
@@ -47,6 +37,9 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectValidator projectValidator;
+
+    @Mock
+    private ResourceValidator resourceValidator;
 
     @Spy
     private ProjectMapperImpl projectMapper;
@@ -198,7 +191,7 @@ class ProjectServiceTest {
         ProjectStatusFilter statusFilter = new ProjectStatusFilter();
         filters = List.of(statusFilter);
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(projectRepository, projectValidator,
+        projectService = new ProjectService(projectRepository, projectValidator, resourceValidator,
                 projectMapper, updateProjectMapper, filters);
         when(projectRepository.findAll()).thenReturn(notFilteredProjects);
 
@@ -214,7 +207,7 @@ class ProjectServiceTest {
         allProjects.get(2).setVisibility(ProjectVisibility.PRIVATE);
         List<ProjectDto> availableProjectDtos = getProjectDtosList();
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(projectRepository, projectValidator,
+        projectService = new ProjectService(projectRepository, projectValidator, resourceValidator,
                 projectMapper, updateProjectMapper, filters);
 
         when(projectRepository.findAll()).thenReturn(allProjects);
@@ -247,7 +240,7 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testFindAllByIdWhenProjectsExist() {
+    void testFindAllByIdWhenProjectsExist() {
         List<Long> ids = List.of(1L, 2L, 3L);
         Project project1 = new Project();
         project1.setId(1L);
@@ -266,52 +259,12 @@ class ProjectServiceTest {
     }
 
     @Test
-    public void testFindAllByIdWhenNoProjectsFound() {
+    void testFindAllByIdWhenNoProjectsFound() {
         List<Long> ids = List.of(1L, 2L, 3L);
         when(projectRepository.findAllByIds(ids)).thenReturn(List.of());
 
         List<ProjectDto> result = projectService.findAllById(ids);
         assertEquals(0, result.size());
-    }
-
-    private List<Project> getProjectsList() {
-        return List.of(
-                Project.builder()
-                        .ownerId(1L)
-                        .visibility(ProjectVisibility.PRIVATE)
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .build(),
-                Project.builder()
-                        .ownerId(2L)
-                        .visibility(ProjectVisibility.PUBLIC)
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .build(),
-                Project.builder()
-                        .ownerId(2L)
-                        .visibility(ProjectVisibility.PUBLIC)
-                        .status(ProjectStatus.COMPLETED)
-                        .build(),
-                Project.builder()
-                        .ownerId(2L)
-                        .visibility(ProjectVisibility.PRIVATE)
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .build()
-        );
-    }
-
-    private List<ProjectDto> getProjectDtosList() {
-        return List.of(
-                ProjectDto.builder()
-                        .ownerId(1L)
-                        .visibility(ProjectVisibility.PRIVATE)
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .build(),
-                ProjectDto.builder()
-                        .ownerId(2L)
-                        .visibility(ProjectVisibility.PUBLIC)
-                        .status(ProjectStatus.IN_PROGRESS)
-                        .build()
-        );
     }
 
     @Test
@@ -372,5 +325,72 @@ class ProjectServiceTest {
         assertTrue(result.isEmpty());
 
         verify(projectRepository).findAllByIds(ids);
+    }
+
+    @Test
+    @DisplayName("Update storage size after file upload with valid input: success")
+    void UpdateStorageSizeAfterFileUpload_ValidInput_Success() {
+        MockMultipartFile file = new MockMultipartFile("file", "content".getBytes());
+
+        project.setStorageSize(BigInteger.valueOf(10L));
+
+        projectService.updateStorageSizeAfterFileUpload(project, file);
+
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+
+        assertEquals(BigInteger.valueOf(17L), project.getStorageSize());
+    }
+
+    @Test
+    @DisplayName("Update storage size with empty file: fail")
+    void UpdateStorageSizeAfterFileUpload_EmptyFile_Fail() {
+        MockMultipartFile file = new MockMultipartFile("file", new byte[0]);
+        doThrow(new InsufficientStorageException("Not enough space to store files"))
+                .when(resourceValidator).validateResourceNotEmpty(file);
+
+        RuntimeException ex = assertThrows(InsufficientStorageException.class, () -> projectService.updateStorageSizeAfterFileUpload(project, file));
+        assertEquals("Not enough space to store files", ex.getMessage());
+
+        verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
+    }
+
+    private List<Project> getProjectsList() {
+        return List.of(
+                Project.builder()
+                        .ownerId(1L)
+                        .visibility(ProjectVisibility.PRIVATE)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build(),
+                Project.builder()
+                        .ownerId(2L)
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build(),
+                Project.builder()
+                        .ownerId(2L)
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .status(ProjectStatus.COMPLETED)
+                        .build(),
+                Project.builder()
+                        .ownerId(2L)
+                        .visibility(ProjectVisibility.PRIVATE)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build()
+        );
+    }
+
+    private List<ProjectDto> getProjectDtosList() {
+        return List.of(
+                ProjectDto.builder()
+                        .ownerId(1L)
+                        .visibility(ProjectVisibility.PRIVATE)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build(),
+                ProjectDto.builder()
+                        .ownerId(2L)
+                        .visibility(ProjectVisibility.PUBLIC)
+                        .status(ProjectStatus.IN_PROGRESS)
+                        .build()
+        );
     }
 }

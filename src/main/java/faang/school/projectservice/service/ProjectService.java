@@ -10,12 +10,15 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.validator.ProjectValidator;
+import faang.school.projectservice.validator.ResourceValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
+    private final ResourceValidator resourceValidator;
     private final ProjectMapper projectMapper;
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
@@ -41,7 +45,6 @@ public class ProjectService {
 
         return projectMapper.toDto(savedProject);
     }
-
 
     @Transactional
     public UpdateProjectDto updateProject(UpdateProjectDto dto) {
@@ -117,11 +120,20 @@ public class ProjectService {
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
+    public void updateStorageSizeAfterFileUpload(Project project, MultipartFile file) {
+        resourceValidator.validateResourceNotEmpty(file);
+
+        BigInteger currentStorageSize = project.getStorageSize();
+        BigInteger updatedStorageSize = currentStorageSize.add(BigInteger.valueOf(file.getSize()));
+
+        project.setStorageSize(updatedStorageSize);
+        projectRepository.save(project);
+    }
+
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
-
 }
 

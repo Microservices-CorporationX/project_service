@@ -36,11 +36,11 @@ public class ResourceController {
             @RequestParam(name = "file")
             @NotNull(message = "You should add a file") MultipartFile file
             ) {
+        log.info("Request to upload of {} file in the project id: {} received", file.getName(), projectId);
         Map<String, Object> response = new HashMap<>();
         ResourceResponseDto resourceResponseDto = resourceService.uploadResource(projectId, userId, file);
         response.put("data", resourceResponseDto);
         response.put("message", String.format("File %s uploaded successfully", file.getName()));
-        log.info("Request to upload of {} file in the project id: {} received", file.getName(), projectId);
         return ResponseEntity.ok(response);
     }
 }
