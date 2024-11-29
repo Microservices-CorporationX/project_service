@@ -25,6 +25,20 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 523144599976-otpi6d9avis6olm8j2bmplok654vkeru.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - openid
+              - profile
+              - email
+              - https://www.googleapis.com/auth/calendar
+#            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+
 server:
   port: 8082
 
