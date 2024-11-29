@@ -138,11 +138,11 @@ class CampaignServiceTest {
             when(campaignRepository.save(any(Campaign.class))).thenReturn(campaign);
             when(campaignMapper.toDto(campaign)).thenReturn(campaignDto);
 
-            CampaignDto result = campaignService.publishingCampaign(campaignPublishingDto);
+            CampaignDto result = campaignService.publishCampaign(campaignPublishingDto);
 
             assertNotNull(result);
             verify(userContext).getUserId();
-            verify(teamMemberValidator).validateUserHasStatusOwnerOrManagerInTeam(ID, ID);
+            verify(teamMemberValidator).validateUserRoleForPublishing(ID, ID);
             verify(campaignRepository).save(any(Campaign.class));
             verify(projectService).getProjectById(ID);
         }

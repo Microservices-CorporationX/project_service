@@ -49,7 +49,7 @@ class TeamMemberValidatorTest {
             when(teamMemberService.findByUserIdAndProjectId(ID, ID)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class,
-                    () -> teamMemberValidator.validateUserHasStatusOwnerOrManagerInTeam(ID, ID));
+                    () -> teamMemberValidator.validateUserRoleForPublishing(ID, ID));
         }
 
         @Test
@@ -59,7 +59,7 @@ class TeamMemberValidatorTest {
             when(teamMemberService.findByUserIdAndProjectId(ID, ID)).thenReturn(Optional.of(teamMember));
 
             assertThrows(DataValidationException.class,
-                    () -> teamMemberValidator.validateUserHasStatusOwnerOrManagerInTeam(ID, ID));
+                    () -> teamMemberValidator.validateUserRoleForPublishing(ID, ID));
         }
     }
 
@@ -72,7 +72,7 @@ class TeamMemberValidatorTest {
             teamMember.setRoles(List.of(TeamRole.OWNER));
             when(teamMemberService.findByUserIdAndProjectId(ID, ID)).thenReturn(Optional.of(teamMember));
 
-            assertDoesNotThrow(() -> teamMemberValidator.validateUserHasStatusOwnerOrManagerInTeam(ID, ID));
+            assertDoesNotThrow(() -> teamMemberValidator.validateUserRoleForPublishing(ID, ID));
         }
 
         @Test
@@ -81,7 +81,7 @@ class TeamMemberValidatorTest {
             teamMember.setRoles(List.of(TeamRole.MANAGER));
             when(teamMemberService.findByUserIdAndProjectId(ID, ID)).thenReturn(Optional.of(teamMember));
 
-            assertDoesNotThrow(() -> teamMemberValidator.validateUserHasStatusOwnerOrManagerInTeam(ID, ID));
+            assertDoesNotThrow(() -> teamMemberValidator.validateUserRoleForPublishing(ID, ID));
         }
     }
 }

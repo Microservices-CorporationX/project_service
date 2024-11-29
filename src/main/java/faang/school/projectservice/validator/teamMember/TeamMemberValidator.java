@@ -8,20 +8,28 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class TeamMemberValidator {
 
+    public static final Set<TeamRole> ALLOWED_ROLES = Set.of(TeamRole.OWNER, TeamRole.MANAGER);
     private final TeamMemberService teamMemberService;
 
-    public void validateUserHasStatusOwnerOrManagerInTeam(Long userId, Long projectId) {
+    public void validateUserRoleForPublishing(Long userId, Long projectId) {
         TeamMember teamMember = teamMemberService.findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id - " + userId +
                         " is not a team member of project with id - " + projectId));
 
-        if (!teamMember.getRoles().contains(TeamRole.OWNER) && !teamMember.getRoles().contains(TeamRole.MANAGER)) {
+        if (!hasRequiredRoles(teamMember.getRoles())) {
             throw new DataValidationException("Only team member with the role of MANAGER or OWNER " +
                     "can create fundraising activities for project!");
         }
+    }
+
+    private boolean hasRequiredRoles(List<TeamRole> roles) {
+        return roles.stream().anyMatch(ALLOWED_ROLES::contains);
     }
 }
