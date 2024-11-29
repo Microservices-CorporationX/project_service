@@ -27,6 +27,7 @@ services:
     secretKey: password
     bucketName: projectbucket
     region: us-east-1
+    isMocked: false
   jira:
     protocol: https
     host: atlassian.net
