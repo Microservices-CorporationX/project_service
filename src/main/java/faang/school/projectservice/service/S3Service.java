@@ -3,17 +3,12 @@ package faang.school.projectservice.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import faang.school.projectservice.exceptions.ImageProcessingException;
-import faang.school.projectservice.utils.image.ImageUtils;
-import faang.school.projectservice.utils.image.ResizeOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.InputStream;
 
 @Service
@@ -21,43 +16,20 @@ import java.io.InputStream;
 @Slf4j
 public class S3Service {
     private final AmazonS3 s3Client;
-    private final ImageUtils imageUtils;
 
     @Value("${services.s3.bucketName}")
     private String bucket;
 
-    public String uploadFile(MultipartFile file, String folder, ResizeOptions resizeOptions) {
+    public String uploadFile(MultipartFile file, InputStream inputStream, String folder) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(file.getContentType());
         String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-
-        if (resizeOptions.requiresResizing()) {
-            log.debug("Trying to resize image");
-            BufferedImage image = resizeImage(file, resizeOptions);
-            InputStream inputStream = imageUtils.getBufferedImageInputStream(file, image);
-            s3Client.putObject(bucket, key, inputStream, objectMetadata);
-            return key;
-        }
-
-        try {
-            s3Client.putObject(bucket, key, file.getInputStream(), objectMetadata);
-        } catch (IOException ex) {
-            throw new ImageProcessingException("An error occurred when converting MultipartFile to InputStream");
-        }
+        s3Client.putObject(bucket, key, inputStream, objectMetadata);
         return key;
     }
-
 
     public void deleteFile(String key) {
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, key);
         s3Client.deleteObject(deleteObjectRequest);
-    }
-
-    private BufferedImage resizeImage(MultipartFile file, ResizeOptions resizeOptions) {
-        return imageUtils.getResizedBufferedImage(
-                file,
-                resizeOptions.maxWidth(),
-                resizeOptions.maxHeight()
-        );
     }
 }

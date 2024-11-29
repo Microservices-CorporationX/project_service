@@ -1,6 +1,7 @@
 package faang.school.projectservice.utils.image;
 
 import faang.school.projectservice.exceptions.ImageProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,14 +14,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Component
+@Slf4j
 public class ImageUtils {
 
     public BufferedImage getResizedBufferedImage(MultipartFile file, int maxWidth, int maxHeight) {
+        log.debug("Trying to get resized BufferedImage from MultiPartFile");
         BufferedImage originalImage = getBufferedOriginalImage(file);
         return resize(originalImage, maxWidth, maxHeight);
     }
 
     public InputStream getBufferedImageInputStream(MultipartFile originalImage, BufferedImage resizedImage) {
+        log.debug("Trying to get BufferedImage InputStream");
+
         String fileName = originalImage.getOriginalFilename();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
@@ -75,4 +80,6 @@ public class ImageUtils {
         }
         return originalImage;
     }
+
+
 }
