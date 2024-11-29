@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AmazonS3Config {
+public class AmazonS3Configuration {
 
     @Value("${services.s3.endpoint}")
     private String endpointUrl;

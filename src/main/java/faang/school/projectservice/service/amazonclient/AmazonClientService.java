@@ -35,11 +35,10 @@ import java.util.Map;
 public class AmazonClientService {
 
     private final AmazonS3 s3client;
+    private final ImageService imageService;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
-
-    private final ImageService imageService;
 
     public String updateProjectCover(MultipartFile multipartFile) {
         String fileName = new Date().getTime() + "-" +
