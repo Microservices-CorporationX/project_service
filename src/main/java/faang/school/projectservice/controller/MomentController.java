@@ -57,8 +57,8 @@ public class MomentController {
         return ResponseEntity.ok(updateMoment);
     }
 
-    @GetMapping("/filters")
     @FiltersMomentDoc
+    @GetMapping("/filters")
     public ResponseEntity<List<MomentDto>> getMomentsWithFilter(@Valid @RequestParam MomentFilterDto filterDto) {
         List<MomentDto> momentDtos = momentService.getMoments(filterDto);
         if (momentDtos.isEmpty()) {
