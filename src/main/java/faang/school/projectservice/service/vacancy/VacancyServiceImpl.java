@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
-import faang.school.projectservice.dto.client.vacancy.VacancyFilterDto;
+import faang.school.projectservice.dto.VacancyDto;
+import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.mapper.vacancy.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
@@ -21,11 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor

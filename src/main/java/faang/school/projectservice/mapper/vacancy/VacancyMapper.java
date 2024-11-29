@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.vacancy;
 
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import org.mapstruct.Mapper;

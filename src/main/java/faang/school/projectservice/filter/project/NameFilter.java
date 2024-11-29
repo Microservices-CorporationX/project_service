@@ -1,10 +1,11 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 public class NameFilter implements ProjectFilter {
@@ -14,7 +15,7 @@ public class NameFilter implements ProjectFilter {
     }
 
     @Override
-    public void apply(List<Project> projectStream, ProjectFilterDto projectFilterDto) {
-        projectStream.removeIf(project -> !project.getName().contains(projectFilterDto.getName()));
+    public Stream<Project> apply(ProjectFilterDto projectFilterDto, Stream<Project> projectStream) {
+        return projectStream.filter(project -> project.getName().contains(projectFilterDto.getName()));
     }
 }

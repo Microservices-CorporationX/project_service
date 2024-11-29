@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.vacancy;
 
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

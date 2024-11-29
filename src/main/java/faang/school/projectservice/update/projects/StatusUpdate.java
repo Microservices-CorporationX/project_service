@@ -1,8 +1,7 @@
 package faang.school.projectservice.update.projects;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.update.ProjectUpdate;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package faang.school.projectservice.update;
 
-import faang.school.projectservice.dto.client.ProjectDto;
+import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.model.Project;
 
 

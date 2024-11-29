@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.vacancy;
 
-import faang.school.projectservice.dto.client.vacancy.VacancyDto;
+import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.team.TeamService;

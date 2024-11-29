@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.vacancy;
+package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;

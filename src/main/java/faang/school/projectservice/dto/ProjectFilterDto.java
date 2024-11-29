@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client;
+package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectStatus;
 import lombok.Data;
@@ -6,6 +6,5 @@ import lombok.Data;
 @Data
 public class ProjectFilterDto {
     private String name;
-    private ProjectStatus projectStatus;
-
+    private ProjectStatus status;
 }

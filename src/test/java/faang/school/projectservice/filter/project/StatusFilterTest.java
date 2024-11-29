@@ -1,50 +1,60 @@
 package faang.school.projectservice.filter.project;
 
-import faang.school.projectservice.dto.client.ProjectFilterDto;
+import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+@ExtendWith(MockitoExtension.class)
+public class StatusFilterTest {
+    StatusFilter statusFilter;
 
-class StatusFilterTest {
-    private StatusFilter statusFilter = new StatusFilter();
-    private ProjectFilterDto projectFilterDto = new ProjectFilterDto();
+    ProjectFilterDto projectFilterDto;
 
-    @Test
-    void testIsApplicableFalse() {
-        assertFalse(statusFilter.isApplicable(projectFilterDto));
+    @BeforeEach
+    public void setUp() {
+        statusFilter = new StatusFilter();
+        projectFilterDto = new ProjectFilterDto();
     }
 
     @Test
-    void testIsApplicableTrue() {
-        projectFilterDto.setProjectStatus(ProjectStatus.CANCELLED);
-        assertTrue(statusFilter.isApplicable(projectFilterDto));
+    public void testIsApplicableFailed() {
+        projectFilterDto.setStatus(null);
+        boolean result = statusFilter.isApplicable(projectFilterDto);
+
+        assertFalse(result);
     }
 
     @Test
-    void testApply() {
+    public void testIsApplicableSuccessful() {
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
+        boolean result = statusFilter.isApplicable(projectFilterDto);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testApplySuccessful() {
         Project firstProject = new Project();
-        firstProject.setStatus(ProjectStatus.CANCELLED);
         Project secondProject = new Project();
-        secondProject.setStatus(ProjectStatus.IN_PROGRESS);
+        firstProject.setStatus(ProjectStatus.CREATED);
+        secondProject.setStatus(ProjectStatus.COMPLETED);
+        projectFilterDto.setStatus(ProjectStatus.CREATED);
+        Stream<Project> projects = Stream.of(firstProject, secondProject);
 
-        projectFilterDto.setProjectStatus(ProjectStatus.CANCELLED);
+        List<Project> result = statusFilter.apply(projectFilterDto, projects).toList();
 
-        List<Project> projects = new ArrayList<>();
-        projects.add(firstProject);
-        projects.add(secondProject);
-
-        statusFilter.apply(projects, projectFilterDto);
-
-
-        assertEquals(projects.get(0), firstProject);
-        assertEquals(projects.size(), 1);
-
+        assertEquals(1, result.size());
+        assertEquals(ProjectStatus.CREATED, result.get(0).getStatus());
     }
-
 }
