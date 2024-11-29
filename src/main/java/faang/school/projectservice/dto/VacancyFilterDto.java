@@ -11,10 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VacancyFilterDto {
 
-    @NotNull(message = "Name must not be null")
     private String name;
 
-    @NotNull(message = "ProjectId must not be null")
     @Min(value = 0, message = "ProjectId must be non-negative")
     private Long projectId;
 }

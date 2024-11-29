@@ -26,7 +26,7 @@ public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{Id}/createSubProject")
-    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+    public ProjectDto createSubProject(@PathVariable("Id") Long projectId,
                                        @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
     }
@@ -37,7 +37,7 @@ public class SubProjectController {
     }
 
     @PostMapping("/{Id}/getSubProject")
-    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+    public List<ProjectDto> getSubProjects(@PathVariable("Id") Long projectId,
                                            @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }

@@ -11,12 +11,10 @@ import lombok.Data;
 @Data
 public class CreateSubProjectDto {
 
-    @NotNull(message = "Name must not be null")
     @NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must be less than 128 characters")
     private String name;
 
-    @NotNull(message = "Description must not be null")
     @NotBlank(message = "Description must not be blank")
     @Size(max = 4096, message = "Description must be less than 4096 characters")
     private String description;

@@ -42,7 +42,7 @@ public class VacancyController {
     }
 
     @DeleteMapping("/{vacancyId}")
-    public void deleteVacancy(@NotNull @Min(0) @PathVariable Long vacancyId) {
+    public void deleteVacancy(@PathVariable Long vacancyId) {
         validator.validateVacancyId(vacancyId);
         vacancyService.deleteVacancy(vacancyId);
     }
@@ -53,7 +53,7 @@ public class VacancyController {
     }
 
     @GetMapping("/{vacancyId}")
-    public VacancyDto getVacancy(@NotNull @Min(0) @PathVariable Long vacancyId) {
+    public VacancyDto getVacancy(@PathVariable Long vacancyId) {
         validator.validateVacancyId(vacancyId);
         return vacancyService.getVacancy(vacancyId);
     }
