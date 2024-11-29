@@ -125,7 +125,6 @@ public class GlobalExceptionHandler {
         responseBody.put("errors", errors);
         return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
     }
-}
 
     @ExceptionHandler(PermissionDeniedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
