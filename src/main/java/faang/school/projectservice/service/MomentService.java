@@ -11,6 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.validation.ValidationException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
     private final ProjectRepository projectRepository;
+
 
     public MomentDto create(MomentDto momentDto) {
         if (isExists(momentDto)) {
@@ -63,6 +65,7 @@ public class MomentService {
             Moment foundMoment = receivedMoment.get();
             return momentMapper.toDto(foundMoment);
         }
+
         throw new ValidationException("There is no moment with given Id");
     }
 
