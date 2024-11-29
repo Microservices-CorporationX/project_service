@@ -13,10 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-@Slf4j
 @Tag(name = "Projects methods")
 @RestController
 @RequestMapping("/projects")
@@ -179,4 +178,22 @@ public class ProjectController {
         Resource resource = resourceService.getResource(resourceId);
         return URLConnection.guessContentTypeFromName(resource.getName());
     }
+}
+
+@PutMapping("/{projectId}/cover")
+public ProjectDto updateProjectCover(@PathVariable Long projectId, @NotBlank MultipartFile file) {
+    return projectService.updateProjectCover(projectId, file);
+}
+
+@GetMapping("/{projectId}/cover")
+public ResponseEntity getProjectCover(@PathVariable Long projectId) {
+    byte[] coverData = projectService.getProjectCover(projectId);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.IMAGE_JPEG);
+
+    return ResponseEntity.ok()
+            .headers(headers)
+            .body(coverData);
+}
 }

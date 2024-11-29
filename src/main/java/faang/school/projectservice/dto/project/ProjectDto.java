@@ -39,6 +39,9 @@ public class ProjectDto {
     @Size(max = 4096)
     private String description;
 
+
+    private String coverImageId;
+  
     @NotNull
     private ProjectStatus status;
 

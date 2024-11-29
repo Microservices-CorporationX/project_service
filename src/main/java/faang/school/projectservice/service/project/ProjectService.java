@@ -9,10 +9,12 @@ import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -29,6 +31,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<Filter<Project,ProjectFilterDto>> projectFilters;
     private final ProjectJpaRepository projectRepository;
+    private final AmazonClientService amazonClient;
 
     @Transactional(readOnly = true)
     public ProjectDto findById(long projectId) {
@@ -87,6 +90,31 @@ public class ProjectService {
     public Project getProjectById(long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException(PROJECT, projectId));
+    }
+
+    public ProjectDto updateProjectCover(Long projectId, MultipartFile file) {
+
+        Project project = getProjectById(projectId);
+
+        String filePath = amazonClient.updateProjectCover(file);
+
+        project.setCoverImageId(filePath);
+        log.info("Updated cover with project ID: {}", projectId);
+        return projectMapper.toDto(projectRepository.save(project));
+    }
+
+    public byte[] getProjectCover(Long projectId) {
+
+        Project project = getProjectById(projectId);
+
+        if (project.getCoverImageId() == null || project.getCoverImageId().isBlank()) {
+            log.warn("Project cover not found: {}", projectId);
+            throw new EntityNotFoundException("Project cover", projectId);
+        }
+
+        log.info("Get cover with project ID: {}", projectId);
+
+        return amazonClient.getProjectCover(project.getCoverImageId());
     }
 
     private boolean isProjectVisibleForUser(Project project, Long userId) {
