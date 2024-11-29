@@ -21,8 +21,6 @@ public class TeamMemberDto{
         Long userId;
         @NotNull
         String username;
-//        @NotNull
-//        String role;
         @NotNull
         private List<String> roles;
         private String description;

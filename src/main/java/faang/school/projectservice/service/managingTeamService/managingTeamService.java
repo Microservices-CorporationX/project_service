@@ -120,6 +120,9 @@ public class managingTeamService {
     }
 
     public List<TeamMemberDto> getTeamMemberWithFilter(Long projectId, TeamMemberFilterDto filters) {
+        if (teamMemberFilters == null) {
+           throw new IllegalStateException("Team member filters are not initialized");
+        }
         Project project = projectRepository.getProjectById(projectId);
         Stream<TeamMember> teamMembers = project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream());
 
