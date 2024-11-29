@@ -42,7 +42,6 @@ public class ProjectService {
         return projectMapper.toDto(savedProject);
     }
 
-
     @Transactional
     public UpdateProjectDto updateProject(UpdateProjectDto dto) {
         Project project = projectRepository.getProjectById(dto.getId());
@@ -117,11 +116,14 @@ public class ProjectService {
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
+    public Project saveProject(Project project) {
+        return projectRepository.save(project);
+    }
+
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
-
 }
 

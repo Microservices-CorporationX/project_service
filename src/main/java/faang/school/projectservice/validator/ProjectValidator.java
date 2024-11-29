@@ -3,6 +3,7 @@ package faang.school.projectservice.validator;
 import faang.school.projectservice.dto.internship.InternshipCreatedDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.ProjectNotAccessibleException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -72,5 +73,17 @@ public class ProjectValidator {
             log.error("Mentor with id #{} is not present in project team", mentorId.getId());
             throw new IllegalArgumentException("Mentor is not present in project team");
         }
+    }
+
+    public void validateUserIsProjectOwner(long userId, long projectId) {
+        if (projectRepository.getProjectById(projectId).getOwnerId() != userId) {
+            log.info("User #{} does not have access to the project #{}.", userId, projectId);
+            throw new ProjectNotAccessibleException(
+                    String.format("User #%d does not have access to the project #%d.", userId, projectId));
+        }
+    }
+
+    public boolean hasProjectCoverImage(Project project) {
+        return project.getCoverImageId() != null;
     }
 }
