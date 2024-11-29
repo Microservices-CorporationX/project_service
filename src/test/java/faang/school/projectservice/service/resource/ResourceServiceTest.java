@@ -10,7 +10,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.s3.AwsS3Service;
+import faang.school.projectservice.service.storage.ResourceStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ class ResourceServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private AwsS3Service awsS3Service;
+    private ResourceStorageService awsS3Service;
     @Mock
     private ResourceDtoMapperImpl resourceDtoMapper;
 

@@ -1,8 +1,8 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.service.storage;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import faang.school.projectservice.config.s3.AwsS3Client;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
@@ -21,10 +21,10 @@ import java.time.format.DateTimeFormatter;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AwsS3Service {
+public class ResourceStorageService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    private final AwsS3Client awsS3Client;
+    private final AmazonS3 amazonS3;
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
@@ -36,7 +36,7 @@ public class AwsS3Service {
                 file.getOriginalFilename());
 
         try{
-            awsS3Client.s3Config().putObject(bucketName, key, file.getInputStream(), metadata);
+            amazonS3.putObject(bucketName, key, file.getInputStream(), metadata);
         } catch (Exception e) {
             log.error("Error uploading file", e);
             throw new IllegalStateException("Error uploading file", e);
@@ -47,7 +47,7 @@ public class AwsS3Service {
 
     public InputStream downloadResource(String key){
         try{
-            S3Object resource = awsS3Client.s3Config().getObject(bucketName, key);
+            S3Object resource = amazonS3.getObject(bucketName, key);
             return resource.getObjectContent();
         } catch (Exception e){
             log.error("Resource downloading error", e);
@@ -59,7 +59,7 @@ public class AwsS3Service {
         ObjectMetadata metadata = createMetadata(file.getSize(), file.getContentType());
 
         try {
-            awsS3Client.s3Config().putObject(bucketName, key, file.getInputStream(), metadata);
+            amazonS3.putObject(bucketName, key, file.getInputStream(), metadata);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -69,7 +69,7 @@ public class AwsS3Service {
 
     public void deleteResource(String key){
         try{
-            awsS3Client.s3Config().deleteObject(bucketName, key);
+            amazonS3.deleteObject(bucketName, key);
             log.info("Resource with key: {} was successfully deleted from bucket: {}", key, bucketName);
         } catch (Exception e){
             log.error("Resource deleting error", e);

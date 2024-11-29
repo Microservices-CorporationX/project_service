@@ -8,7 +8,7 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.resource.ResourceDtoMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.s3.AwsS3Service;
+import faang.school.projectservice.service.storage.ResourceStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
-    private final AwsS3Service awsS3Service;
+    private final ResourceStorageService awsS3Service;
     private final ResourceDtoMapper resourceDtoMapper;
 
     @Transactional

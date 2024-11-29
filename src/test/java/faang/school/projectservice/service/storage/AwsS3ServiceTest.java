@@ -1,10 +1,10 @@
-package faang.school.projectservice.service.s3;
+package faang.school.projectservice.service.storage;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import faang.school.projectservice.config.s3.AwsS3Client;
+import faang.school.projectservice.config.s3.AwsS3Config;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import org.junit.jupiter.api.Test;
@@ -34,9 +34,9 @@ import static org.mockito.Mockito.anyString;
 @ActiveProfiles("test")
 class AwsS3ServiceTest {
     @MockBean
-    private AwsS3Client awsS3Client;
+    private AwsS3Config awsS3Client;
     @Autowired
-    private AwsS3Service awsS3Service;
+    private ResourceStorageService awsS3Service;
 
     @Value("${services.s3.bucketName}")
     private String bucketName;
