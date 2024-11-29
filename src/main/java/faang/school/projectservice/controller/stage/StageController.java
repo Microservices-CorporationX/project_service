@@ -23,7 +23,7 @@ public class StageController {
     }
 
     @GetMapping("/filters")
-    public List<StageDto> getAllStagesByFilters(@RequestBody StageFilterDto stageFilterDto) {
+    public List<StageDto> getAllStagesByFilters(@Valid @RequestBody StageFilterDto stageFilterDto) {
         return stageService.getAllStagesByFilters(stageFilterDto);
     }
 
@@ -45,11 +45,5 @@ public class StageController {
     @GetMapping("/{stageId}")
     public StageDto getStageById(@PathVariable Long stageId) {
         return stageService.getStageById(stageId);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    //@ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
-    public void handleValidationExceptions(MethodArgumentNotValidException ex) {
-        throw new IllegalArgumentException("Validation failed", ex);
     }
 }

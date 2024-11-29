@@ -4,6 +4,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TeamMember;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,11 +20,9 @@ import java.util.List;
 @NoArgsConstructor
 public class StageDto {
 
-    @NotNull(message = "stageId не может быть null")
-    @Min(value = 1, message = "stageId должен быть больше 0")
     private Long stageId;
 
-    @NotNull(message = "Название этапа не может быть null")
+    @NotBlank(message = "Название этапа не может быть пустым")
     private String stageName;
 
     @NotNull(message = "Проект не может быть null")
