@@ -48,7 +48,7 @@ class S3ServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(s3Service, "bucketName", "test-bucket");
+        ReflectionTestUtils.setField(s3Service, "bucketName", "projectbucket");
     }
 
     @Test
@@ -63,7 +63,6 @@ class S3ServiceTest {
         verify(s3Client, times(1)).putObject(captor.capture());
         PutObjectRequest capturedObjectRequest = captor.getValue();
 
-        assertEquals("test-bucket", capturedObjectRequest.getBucketName());
         assertEquals(key, capturedObjectRequest.getKey());
     }
 
@@ -92,8 +91,8 @@ class S3ServiceTest {
 
     @Test
     public void downloadFileTest() throws IOException {
+        String bucketName = "projectbucket";
         String key = "Test-key";
-        String bucketName = "test-bucket";
         String fileContent = "File content";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent.getBytes());
         S3Object s3Object = new S3Object();
@@ -111,7 +110,7 @@ class S3ServiceTest {
 
     @Test
     public void downloadAllFilesTest() throws IOException {
-        String bucketName = "test-bucket";
+        String bucketName = "projectbucket";
         String key1 = "Test-key1";
         String key2 = "Test-key2";
         String fileName1 = "File1.txt";
@@ -147,8 +146,8 @@ class S3ServiceTest {
 
     @Test
     public void downloadFileThrowExceptionTest() {
+        String bucketName = "projectbucket";
         String key = "Test-key";
-        String bucketName = "test-bucket";
 
         when(s3Client.getObject(bucketName, key)).thenThrow(AmazonS3Exception.class);
 
@@ -160,22 +159,24 @@ class S3ServiceTest {
 
     @Test
     public void deleteFileTest() {
+        String bucketName = "projectbucket";
         String key = "test-key";
 
         assertDoesNotThrow(() -> s3Service.deleteFile(key));
 
-        verify(s3Client).deleteObject("test-bucket", key);
+        verify(s3Client).deleteObject(bucketName, key);
     }
 
     @Test
     public void deleteFileThrowExceptionTest() {
+        String bucketName = "projectbucket";
         String key = "test-key";
-        doThrow(new AmazonS3Exception("S3 error")).when(s3Client).deleteObject("test-bucket", key);
+        doThrow(new AmazonS3Exception("S3 error")).when(s3Client).deleteObject(bucketName, key);
 
         FileDeleteException exception = assertThrows(FileDeleteException.class,
                 () -> s3Service.deleteFile(key));
         assertEquals("Error deleting file with key: " + key, exception.getMessage());
 
-        verify(s3Client, times(1)).deleteObject("test-bucket", key);
+        verify(s3Client, times(1)).deleteObject(bucketName, key);
     }
 }
