@@ -1,13 +1,14 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.meet.MeetDto;
+import faang.school.projectservice.exception.MeetingAlreadyCancelledException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
+import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.validator.MeetingValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,7 +29,6 @@ public class MeetingService {
     private final MeetMapper meetMapper;
     private final ProjectService projectService;
     private final ProjectValidator projectValidator;
-    private final MeetingValidator meetingValidator;
     private final TeamMemberService teamMemberService;
     private final List<Filter<Meet, MeetDto>> meetFilters;
 
@@ -45,15 +47,14 @@ public class MeetingService {
 
         projectValidator.validateProjectExistsById(updateMeetDto.getProjectId());
 
-        meetingValidator.validateMeetingUpdate(updateMeetDto, meetId, meeting);
+        validateMeetingUpdate(updateMeetDto, meetId, meeting);
 
         return meetMapper.toDto(meeting);
     }
 
     @Transactional
-    public void deleteMeeting(MeetDto deleteDto, Long projectId, long meetId ) {
-        projectValidator.validateProjectExistsById(projectId);
-        validateMeetCreator(deleteDto);
+    public void deleteMeeting(Long meetId, MeetDto deleteDto) {
+        validateMeetCreator(meetId, deleteDto.getCreatorId());
 
         meetRepository.deleteById(meetId);
         log.info("Meeting #{} successfully deleted by User #{}", meetId, deleteDto.getCreatorId());
@@ -71,8 +72,8 @@ public class MeetingService {
         return filterMeet.map(meetMapper::toDto).toList();
     }
 
-    public List<MeetDto> getAllMeetings(Long projectId) {
-        return meetRepository.findById(projectId).stream().map(meetMapper::toDto).toList();
+    public List<MeetDto> getAllMeetings() {
+        return meetRepository.findAll().stream().map(meetMapper::toDto).toList();
     }
 
 
@@ -89,11 +90,25 @@ public class MeetingService {
         return meet;
     }
 
-    private void validateMeetCreator(MeetDto deleteDto) {
-        Meet meetCreatorId = meetRepository.findById(deleteDto.getCreatorId()).orElseThrow(EntityNotFoundException::new);
+    private void validateMeetCreator(Long meetId, Long creatorId) {
+        Meet meet = meetRepository.findById(meetId).orElseThrow(EntityNotFoundException::new);
 
-        if (!deleteDto.getCreatorId().equals(meetCreatorId.getCreatorId())) {
+        if (!creatorId.equals(meet.getCreatorId())) {
             throw new UnauthorizedAccessException("User is not allowed to delete this meeting");
+        }
+    }
+
+    private void validateMeetingUpdate(MeetDto updateMeetDto, long meetId, Meet meeting) {
+        if (meeting.getStatus().equals(MeetStatus.CANCELLED) && updateMeetDto.getMeetStatus().equals(MeetStatus.CANCELLED)) {
+            throw new MeetingAlreadyCancelledException("Meeting is already cancelled");
+        } else {
+            log.info("Meeting with ID {} is updated", meetId);
+            meeting.setStatus(updateMeetDto.getMeetStatus());
+            meeting.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        }
+
+        if (!(meeting.getCreatorId() == updateMeetDto.getCreatorId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to meet with ID " + meetId);
         }
     }
 }

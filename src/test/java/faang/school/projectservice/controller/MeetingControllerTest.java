@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,10 +37,10 @@ public class MeetingControllerTest {
     private static final String BASE_URL = "/api/v1/meetings";
     private static final String CREATE_URL = "/meeting";
     private static final String UPDATE_URL = "/{meetId}";
-    private static final String DELETE_URL = "/{projectId}/{meetId}";
-    private static final String GET_ALL_URL = "/projects/{projectId}";
+    private static final String DELETE_URL = "/meetings/{meetId}";
+    private static final String GET_ALL_URL = "/meetings";
     private static final String FILTER_URL = "/filters";
-    private static final String GET_BY_ID_URL = "/meeting/{meetId}";
+    private static final String GET_BY_ID_URL = "/meetings/{meetId}";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -82,7 +84,7 @@ public class MeetingControllerTest {
     void testUpdateMeeting() throws Exception {
         when(meetingService.updateMeeting(any(MeetDto.class), anyLong())).thenReturn(meetDto);
 
-        mockMvc.perform(post(BASE_URL + UPDATE_URL, meetDto.getId())
+        mockMvc.perform(put(BASE_URL + UPDATE_URL, meetDto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(meetDto)))
                 .andExpect(status().isOk())
@@ -95,14 +97,14 @@ public class MeetingControllerTest {
 
     @Test
     void testDeleteMeeting() throws Exception {
-        doNothing().when(meetingService).deleteMeeting(any(MeetDto.class), anyLong(), anyLong());
+        doNothing().when(meetingService).deleteMeeting(anyLong(), eq(meetDto));
 
-        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L, 1L)
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(meetDto)))
                 .andExpect(status().isNoContent());
 
-        verify(meetingService, times(1)).deleteMeeting(any(MeetDto.class), anyLong(), anyLong());
+        verify(meetingService, times(1)).deleteMeeting(1L, meetDto);
     }
 
     @Test
@@ -124,7 +126,7 @@ public class MeetingControllerTest {
 
     @Test
     void testGetAllMeetings() throws Exception {
-        when(meetingService.getAllMeetings(anyLong())).thenReturn(List.of(meetDto));
+        when(meetingService.getAllMeetings()).thenReturn(List.of(meetDto));
 
         mockMvc.perform(get(BASE_URL + GET_ALL_URL, 100))
                 .andExpect(status().isOk())
@@ -132,7 +134,7 @@ public class MeetingControllerTest {
                 .andExpect(jsonPath("$[0].title").value(meetDto.getTitle()))
                 .andExpect(jsonPath("$[0].creatorId").value(meetDto.getCreatorId()));
 
-        verify(meetingService, times(1)).getAllMeetings(anyLong());
+        verify(meetingService, times(1)).getAllMeetings();
     }
 
     @Test

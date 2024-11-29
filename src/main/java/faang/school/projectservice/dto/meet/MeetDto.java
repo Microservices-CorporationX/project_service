@@ -20,7 +20,7 @@ import java.util.List;
 public class MeetDto {
     @Positive(message = "ID must be a positive number")
     @NotNull(message = "ID is required")
-    private long id;
+    private Long id;
 
     @NotBlank(message = "Title is required")
     @Size(min = 3, max = 100, message = "Title should be between 3 and 100 characters")
