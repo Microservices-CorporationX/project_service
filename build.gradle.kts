@@ -64,6 +64,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2:2.3.232")
     testImplementation("io.projectreactor:reactor-test")
+
+    implementation("com.vaadin.external.google:android-json:0.0.20131108.vaadin1") {
+        exclude(group = "org.json", module = "json")
+    }
 }
 
 tasks.withType<Test> {
