@@ -8,7 +8,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.service.amazons3.S3Service;
+import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.resource.ResourceValidator;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 class ProjectFilesServiceTest {
 
     @Mock
-    private S3Service s3Service;
+    private AmazonClientService amazonClientService;
 
     @Mock
     private ResourceService resourceService;
@@ -107,7 +107,7 @@ class ProjectFilesServiceTest {
         doNothing().when(resourceValidator).validateStorageSizeNotExceeded(maxStorageSize,
                 currentStorageSize.add(BigInteger.valueOf(file.getSize())));
         when(teamMemberService.findById(teamMemberId)).thenReturn(teamMember);
-        when(s3Service.uploadFile(file, folder)).thenReturn(key);
+        when(amazonClientService.uploadFile(file, folder)).thenReturn(key);
 
         projectFilesService.uploadFile(projectId, teamMemberId, file);
 
@@ -118,7 +118,7 @@ class ProjectFilesServiceTest {
         verify(resourceValidator, times(1)).validateStorageSizeNotExceeded(
                 maxStorageSize, currentStorageSize.add(BigInteger.valueOf(file.getSize())));
         verify(teamMemberService, times(1)).findById(teamMemberId);
-        verify(s3Service, times(1)).uploadFile(file, folder);
+        verify(amazonClientService, times(1)).uploadFile(file, folder);
         verify(projectService, times(1)).
                 updateProject(projectMapper.toDto(savingProject));
         verify(resourceService, times(1)).save(updatedResource);
@@ -137,12 +137,12 @@ class ProjectFilesServiceTest {
         S3ObjectInputStream s3ObjectInputStream = new S3ObjectInputStream(mockInputStream, null);
 
         when(resourceService.getResource(resourceId)).thenReturn(resource);
-        when(s3Service.downloadFile(key)).thenReturn(s3ObjectInputStream);
+        when(amazonClientService.downloadFile(key)).thenReturn(s3ObjectInputStream);
 
         InputStream result = projectFilesService.downloadFile(resourceId);
 
         verify(resourceService, times(1)).getResource(resourceId);
-        verify(s3Service, times(1)).downloadFile(key);
+        verify(amazonClientService, times(1)).downloadFile(key);
 
         String resultContent = new String(result.readAllBytes());
         assertNotNull(result);
@@ -201,7 +201,7 @@ class ProjectFilesServiceTest {
         namesWithS3ObjectInputStreams.put(name3, s3ObjectInputStream3);
 
         when(projectService.getProjectById(projectId)).thenReturn(project);
-        when(s3Service.downloadAllFiles(filesNamesWithKeys)).thenReturn(namesWithS3ObjectInputStreams);
+        when(amazonClientService.downloadAllFiles(filesNamesWithKeys)).thenReturn(namesWithS3ObjectInputStreams);
 
         Map<String, InputStream> result = projectFilesService.downloadAllFiles(projectId);
 
@@ -209,7 +209,7 @@ class ProjectFilesServiceTest {
         String resultContent3 = new String(result.get(name3).readAllBytes());
 
         verify(projectService, times(1)).getProjectById(projectId);
-        verify(s3Service, times(1)).downloadAllFiles(filesNamesWithKeys);
+        verify(amazonClientService, times(1)).downloadAllFiles(filesNamesWithKeys);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -261,7 +261,7 @@ class ProjectFilesServiceTest {
 
         projectFilesService.deleteFile(resourceId, teamMemberId);
 
-        verify(s3Service, times(1)).deleteFile(key);
+        verify(amazonClientService, times(1)).deleteFile(key);
         verify(projectService, times(1)).updateProject(projectMapper.toDto(updatedProject));
         verify(resourceService, times(1)).save(updatedResource);
     }
