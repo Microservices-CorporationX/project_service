@@ -16,8 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService momentService;
-    private final ProjectMapperProjectDto projectMapper;
-
 
     public MomentDto create(MomentDto momentDto) {
         validateMoment(momentDto);
@@ -42,21 +40,13 @@ public class MomentController {
 
 
     private void validateMoment(MomentDto momentDto) {
-
         if (momentDto.getName().isBlank()) {
             throw new ValidationException("The moment doesn't have name");
         }
         if (momentDto.getProjects().isEmpty()) {
             throw new ValidationException("The moment doesn't have related project");
         }
-        if (momentDto.getProjects().stream().anyMatch(project -> project.getStatus()
-                .equals(ProjectStatus.COMPLETED))) {
-            throw new ValidationException("The project was completed");
-        }
-        if (momentDto.getProjects().stream().anyMatch(project -> project.getStatus()
-                .equals(ProjectStatus.CANCELLED))) {
-            throw new ValidationException("The project was cancelled");
-        }
+
     }
 
 }

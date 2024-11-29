@@ -6,7 +6,10 @@ import faang.school.projectservice.dto.moment.filters.MomentFilter;
 
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,11 +25,13 @@ public class MomentService {
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
+    private final ProjectRepository projectRepository;
 
     public MomentDto create(MomentDto momentDto) {
         if (isExists(momentDto)) {
             throw new ValidationException("This moment already exists");
         }
+        validateMoment(momentDto);
         Moment moment = momentMapper.toEntity(momentDto);
         Moment savedMoment = momentRepository.save(moment);
         return (momentMapper.toDto(savedMoment));
@@ -66,5 +71,18 @@ public class MomentService {
         List<MomentDto> presentMomentDtoList = momentMapper.toDtoList(presentMomentsList);
         return presentMomentDtoList.contains(momentDto);
 
+    }
+
+    private void validateMoment(MomentDto momentDto) {
+        List<Long> relatedProjectIds = momentDto.getProjects().stream().map(project -> project.getId()).toList();
+        List<Project> relatedProjects = projectRepository.findAllByIds(relatedProjectIds);
+        if (relatedProjects.stream().anyMatch(project -> project.getStatus()
+                .equals(ProjectStatus.COMPLETED))) {
+            throw new ValidationException("The project was completed");
+        }
+        if (relatedProjects.stream().anyMatch(project -> project.getStatus()
+                .equals(ProjectStatus.CANCELLED))) {
+            throw new ValidationException("The project was cancelled");
+        }
     }
 }

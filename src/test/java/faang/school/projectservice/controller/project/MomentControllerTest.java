@@ -5,9 +5,7 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
-
 import faang.school.projectservice.mapper.ProjectMapperProjectDtoImpl;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.ValidationException;
@@ -88,18 +86,6 @@ public class MomentControllerTest {
         assertThrows(ValidationException.class, () -> momentController.create(momentDto));
     }
 
-    @Test
-    public void testCreateWithProjectCompletedProjectStatus() {
-        firstProjectDto.setStatus(ProjectStatus.COMPLETED);
-        assertThrows(ValidationException.class, () -> momentController.create(momentDto));
-    }
-
-    @Test
-    public void testCreateWithProjectCancelledProjectStatus() {
-        firstProjectDto.setStatus(ProjectStatus.CANCELLED);
-        secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
-        assertThrows(ValidationException.class, () -> momentController.create(momentDto));
-    }
 
     @Test
     public void testCreate() {

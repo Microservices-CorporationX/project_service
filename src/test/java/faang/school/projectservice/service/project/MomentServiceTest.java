@@ -7,10 +7,12 @@ import faang.school.projectservice.dto.moment.filters.MomentStartDateFromFilter;
 import faang.school.projectservice.dto.moment.filters.PartnerProjectFilter;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
+import faang.school.projectservice.mapper.ProjectMapperProjectDtoImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +34,13 @@ import static org.mockito.Mockito.*;
 public class MomentServiceTest {
     @Mock
     private MomentRepository momentRepository;
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Spy
     private MomentMapperImpl momentMapper;
+    @Spy
+    ProjectMapperProjectDtoImpl projectMapper;
     @InjectMocks
     MomentService momentService;
 
@@ -63,11 +69,15 @@ public class MomentServiceTest {
     ProjectDto firstProjectDto;
     ProjectDto secondProjectDto;
     List<MomentDto> momentDtoList;
+    List<Project> partnerProjectList = new ArrayList<>();
 
     Moment moment = new Moment();
     List<Moment> momentList;
+    List<Long> projectIdList = new ArrayList<>();
 
     long id = 1;
+    long firstProjectId = 3;
+    long secondProjectId = 4;
 
 
     @BeforeEach
@@ -76,6 +86,10 @@ public class MomentServiceTest {
         momentDto.setCreatedAt(LocalDateTime.of(2023, 7, 15, 10, 30));
         firstProjectDto = new ProjectDto();
         secondProjectDto = new ProjectDto();
+        firstProjectDto.setId(firstProjectId);
+        secondProjectDto.setId(secondProjectId);
+        projectIdList.add(firstProjectId);
+        projectIdList.add(secondProjectId);
         firstProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         List<ProjectDto> partnerProjectDtoList = new ArrayList<>();
@@ -104,7 +118,7 @@ public class MomentServiceTest {
         secondProject = new Project();
         firstProject.setStatus(ProjectStatus.IN_PROGRESS);
         secondProject.setStatus(ProjectStatus.IN_PROGRESS);
-        List<Project> partnerProjectList = new ArrayList<>();
+
         partnerProjectList.add(firstProject);
         partnerProjectList.add(secondProject);
         moment.setProjects(partnerProjectList);
@@ -130,6 +144,23 @@ public class MomentServiceTest {
     public void testCreateWithExistingMoment() {
         List<Moment> mappedMomentList = momentMapper.toEntityList(momentDtoList);
         when(momentRepository.findAll()).thenReturn(mappedMomentList);
+
+        assertThrows(ValidationException.class, () -> momentService.create(momentDto));
+    }
+
+    @Test
+    public void testCreateWithProjectCompletedProjectStatus() {
+        when(projectRepository.findAllByIds(projectIdList)).thenReturn(partnerProjectList);
+        partnerProjectList.get(0).setStatus(ProjectStatus.COMPLETED);
+
+        assertThrows(ValidationException.class, () -> momentService.create(momentDto));
+    }
+
+    @Test
+    public void testCreateWithProjectCancelledProjectStatus() {
+        when(projectRepository.findAllByIds(projectIdList)).thenReturn(partnerProjectList);
+        partnerProjectList.get(0).setStatus(ProjectStatus.CANCELLED);
+        partnerProjectList.get(1).setStatus(ProjectStatus.IN_PROGRESS);
 
         assertThrows(ValidationException.class, () -> momentService.create(momentDto));
     }
