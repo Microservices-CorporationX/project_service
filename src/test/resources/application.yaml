@@ -35,6 +35,7 @@ services:
     endpoints:
       issue: /issue
       issue-link: /issueLink
+      search: /search
 
   payment-service:
     host: http://localhost
