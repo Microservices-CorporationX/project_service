@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class UserDto {
 
-
-    @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
     @NotBlank(message = "Username must not be blank")

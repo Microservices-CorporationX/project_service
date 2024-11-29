@@ -21,24 +21,23 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/Projects")
-@Validated
 public class SubProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{Id}/createSubProject")
     public ProjectDto createSubProject(@PathVariable("Id") Long projectId,
-                                       @RequestBody CreateSubProjectDto createSubProjectDto) {
+                                       @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
     }
 
     @PatchMapping("/{Id}/updateSubProject")
-    public ProjectDto updateSubProject(@RequestBody ProjectDto subProjectDto) {
+    public ProjectDto updateSubProject(@Valid @RequestBody ProjectDto subProjectDto) {
         return projectService.updateSubProject(subProjectDto);
     }
 
     @PostMapping("/{Id}/getSubProject")
     public List<ProjectDto> getSubProjects(@PathVariable("Id") Long projectId,
-                                           @RequestBody ProjectFilterDto projectFilterDto) {
+                                           @Valid @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }
 }

@@ -14,13 +14,13 @@ import java.util.List;
 @Data
 public class ProjectDto {
 
-    @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
     @NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;
 
+    @NotBlank(message = "Description must not be blank")
     @Size(max = 4096, message = "Description must not exceed 4096 characters")
     private String description;
 

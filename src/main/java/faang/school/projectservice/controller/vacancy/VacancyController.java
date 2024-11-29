@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyControllerValidator;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/project/vacancy")
 @RequiredArgsConstructor
-@Validated
 public class VacancyController {
 
     private final VacancyControllerValidator validator;
@@ -30,13 +30,13 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping
-    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
 
     @PutMapping
-    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
@@ -48,7 +48,7 @@ public class VacancyController {
     }
 
     @PostMapping("/filtered")
-    public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto vacancyFilterDto) {
+    public List<VacancyDto> getVacancies(@Valid @RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getVacancies(vacancyFilterDto);
     }
 

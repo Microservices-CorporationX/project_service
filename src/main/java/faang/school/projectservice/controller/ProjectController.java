@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/project")
-@Validated
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -34,17 +33,17 @@ public class ProjectController {
     }
 
     @PostMapping("/with-filters")
-    public List<ProjectDto> getAllProjectsByFilters(@RequestBody ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getAllProjectsByFilters(@Valid @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getAllProjects(projectFilterDto);
     }
 
     @PostMapping
-    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
+    public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
 
     @PutMapping
-    public ProjectDto updateProject(@RequestBody ProjectDto projectDto) {
+    public ProjectDto updateProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
     }
 

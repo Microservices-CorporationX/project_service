@@ -17,7 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 public class VacancyDto {
 
-    @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
     @NotBlank(message = "Name must not be blank")
