@@ -174,26 +174,25 @@ public class ProjectController {
                 .body(responseBody));
     }
 
+    @PutMapping("/{projectId}/cover")
+    public ProjectDto updateProjectCover(@PathVariable Long projectId, @NotBlank MultipartFile file) {
+        return projectService.updateProjectCover(projectId, file);
+    }
+
+    @GetMapping("/{projectId}/cover")
+    public ResponseEntity getProjectCover(@PathVariable Long projectId) {
+        byte[] coverData = projectService.getProjectCover(projectId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(coverData);
+    }
+
     private String getMimeType(Long resourceId) {
         Resource resource = resourceService.getResource(resourceId);
         return URLConnection.guessContentTypeFromName(resource.getName());
     }
-}
-
-@PutMapping("/{projectId}/cover")
-public ProjectDto updateProjectCover(@PathVariable Long projectId, @NotBlank MultipartFile file) {
-    return projectService.updateProjectCover(projectId, file);
-}
-
-@GetMapping("/{projectId}/cover")
-public ResponseEntity getProjectCover(@PathVariable Long projectId) {
-    byte[] coverData = projectService.getProjectCover(projectId);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.IMAGE_JPEG);
-
-    return ResponseEntity.ok()
-            .headers(headers)
-            .body(coverData);
-}
 }
