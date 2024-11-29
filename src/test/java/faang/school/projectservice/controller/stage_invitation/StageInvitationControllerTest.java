@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -64,7 +65,7 @@ class StageInvitationControllerTest {
 
         when(stageInvitationService.sendStageInvitation(requestDto)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/v1/stage-invitation")
+        mockMvc.perform(post("/stage-invitation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -84,7 +85,7 @@ class StageInvitationControllerTest {
 
         String requestJson = objectMapper.writeValueAsString(stageInvitation);
 
-        mockMvc.perform(put("/api/v1/stage-invitation/accept")
+        mockMvc.perform(put("/stage-invitation/accept")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
@@ -106,7 +107,7 @@ class StageInvitationControllerTest {
 
         String requestJson = objectMapper.writeValueAsString(rejectStageInvitationDto);
 
-        mockMvc.perform(put("/api/v1/stage-invitation/reject")
+        mockMvc.perform(put("/stage-invitation/reject")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
@@ -130,11 +131,8 @@ class StageInvitationControllerTest {
         when(stageInvitationService.filters(any(StageInvitationFiltersDto.class)))
                 .thenReturn(List.of(firstResponseDto, secondResponseDto));
 
-        String requestJson = objectMapper.writeValueAsString(filters);
-
-        mockMvc.perform(post("/api/v1/stage-invitation/filters")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+        mockMvc.perform(get("/stage-invitation/filters")
+                        .param("status", "PENDING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].status").value("PENDING"))

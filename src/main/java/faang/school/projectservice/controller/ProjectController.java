@@ -1,9 +1,15 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.docs.project.AllProjectsDoc;
+import faang.school.projectservice.docs.project.CreateProjectDoc;
+import faang.school.projectservice.docs.project.FiltersProjectDoc;
+import faang.school.projectservice.docs.project.ProjectsDoc;
+import faang.school.projectservice.docs.project.UpdateProjectDoc;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
 import faang.school.projectservice.service.ProjectService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -26,12 +32,14 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
+@RequestMapping("/projects")
+@Tag(name = "Project", description = "The project operations")
 public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
+    @CreateProjectDoc
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
         log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
 
@@ -39,12 +47,14 @@ public class ProjectController {
     }
 
     @PutMapping
+    @UpdateProjectDoc
     public ResponseEntity<UpdateProjectDto> updateProject(@Valid @RequestBody UpdateProjectDto dto) {
         log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.ok(projectService.updateProject(dto));
     }
 
+    @FiltersProjectDoc
     @GetMapping("/filtered/{currentUserId}")
     public ResponseEntity<List<ProjectDto>> getProjectsByFilter(
             @Valid @RequestBody ProjectFilterDto filterDto,
@@ -57,6 +67,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
 
+    @AllProjectsDoc
     @GetMapping("/all-projects")
     public ResponseEntity<List<ProjectDto>> getAllProjects(
             @NotNull(message = "CurrentUserId is required.")
@@ -68,6 +79,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getAllProjectsForUser(currentUserId));
     }
 
+    @ProjectsDoc
     @GetMapping("/project/{projectId}")
     public ResponseEntity<ProjectDto> getProjectById(
             @NotNull(message = "CurrentUserId is required.")
