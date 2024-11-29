@@ -24,6 +24,9 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     public MomentDto create(MomentDto momentDto) {
+        if (isExists(momentDto)) {
+            throw new ValidationException("This moment already exists");
+        }
         Moment moment = momentMapper.toEntity(momentDto);
         Moment savedMoment = momentRepository.save(moment);
         return (momentMapper.toDto(savedMoment));
@@ -56,5 +59,12 @@ public class MomentService {
             return momentMapper.toDto(foundMoment);
         }
         throw new ValidationException("There is no moment with given Id");
+    }
+
+    private boolean isExists(MomentDto momentDto) {
+        List<Moment> presentMomentsList = momentRepository.findAll();
+        List<MomentDto> presentMomentDtoList = momentMapper.toDtoList(presentMomentsList);
+        return presentMomentDtoList.contains(momentDto);
+
     }
 }

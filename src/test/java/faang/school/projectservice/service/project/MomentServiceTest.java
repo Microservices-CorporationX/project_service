@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.filters.MomentFilter;
 import faang.school.projectservice.dto.moment.filters.MomentStartDateFromFilter;
 import faang.school.projectservice.dto.moment.filters.PartnerProjectFilter;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
@@ -58,6 +59,9 @@ public class MomentServiceTest {
     MomentDto momentDto = new MomentDto();
     Project firstProject;
     Project secondProject;
+
+    ProjectDto firstProjectDto;
+    ProjectDto secondProjectDto;
     List<MomentDto> momentDtoList;
 
     Moment moment = new Moment();
@@ -70,14 +74,14 @@ public class MomentServiceTest {
     public void setupMomentDto() {
         momentDto.setName("Notification feature");
         momentDto.setCreatedAt(LocalDateTime.of(2023, 7, 15, 10, 30));
-        firstProject = new Project();
-        secondProject = new Project();
-        firstProject.setStatus(ProjectStatus.IN_PROGRESS);
-        secondProject.setStatus(ProjectStatus.IN_PROGRESS);
-        List<Project> partnerProjectList = new ArrayList<>();
-        partnerProjectList.add(firstProject);
-        partnerProjectList.add(secondProject);
-        momentDto.setProjects(partnerProjectList);
+        firstProjectDto = new ProjectDto();
+        secondProjectDto = new ProjectDto();
+        firstProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        List<ProjectDto> partnerProjectDtoList = new ArrayList<>();
+        partnerProjectDtoList.add(firstProjectDto);
+        partnerProjectDtoList.add(secondProjectDto);
+        momentDto.setProjects(partnerProjectDtoList);
     }
 
     @BeforeEach
@@ -89,12 +93,13 @@ public class MomentServiceTest {
         secondMomentDto.setName("Kabana feature");
         momentDtoList.add(firstMomentDto);
         momentDtoList.add(secondMomentDto);
+        momentDtoList.add(momentDto);
     }
 
     @BeforeEach
     public void setupMoment() {
-        momentDto.setName("Notification feature");
-        momentDto.setCreatedAt(LocalDateTime.of(2023, 7, 15, 10, 30));
+        moment.setName("Notification feature");
+        moment.setCreatedAt(LocalDateTime.of(2023, 7, 15, 10, 30));
         firstProject = new Project();
         secondProject = new Project();
         firstProject.setStatus(ProjectStatus.IN_PROGRESS);
@@ -102,7 +107,7 @@ public class MomentServiceTest {
         List<Project> partnerProjectList = new ArrayList<>();
         partnerProjectList.add(firstProject);
         partnerProjectList.add(secondProject);
-        momentDto.setProjects(partnerProjectList);
+        moment.setProjects(partnerProjectList);
     }
 
     @BeforeEach
@@ -119,6 +124,14 @@ public class MomentServiceTest {
         PartnerProjectFilter filterPartnerProjectMock = Mockito.mock(PartnerProjectFilter.class);
         MomentStartDateFromFilter filterStartDateFromMock = Mockito.mock(MomentStartDateFromFilter.class);
         momentFilterListMock = List.of(filterPartnerProjectMock, filterStartDateFromMock);
+    }
+
+    @Test
+    public void testCreateWithExistingMoment() {
+        List<Moment> mappedMomentList = momentMapper.toEntityList(momentDtoList);
+        when(momentRepository.findAll()).thenReturn(mappedMomentList);
+
+        assertThrows(ValidationException.class, () -> momentService.create(momentDto));
     }
 
     @Test
@@ -157,7 +170,6 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentByIdWithPresentId() {
-
         when(momentRepository.findById(id)).thenReturn(Optional.of(moment));
 
         MomentDto receivedMomentDto = momentService.getMomentById(id);

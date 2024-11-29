@@ -3,7 +3,10 @@ package faang.school.projectservice.controller.project;
 import faang.school.projectservice.controller.moment.MomentController;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
+
+import faang.school.projectservice.mapper.ProjectMapperProjectDtoImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.MomentService;
@@ -30,6 +33,8 @@ public class MomentControllerTest {
     MomentController momentController;
     @Spy
     MomentMapperImpl momentMapper;
+    @Spy
+    ProjectMapperProjectDtoImpl projectMapper;
 
     @Captor
     ArgumentCaptor<MomentDto> momentDtoCaptor;
@@ -42,21 +47,21 @@ public class MomentControllerTest {
 
     List<MomentDto> momentDtoList;
 
-    Project firstProject;
-    Project secondProject;
+    ProjectDto firstProjectDto;
+    ProjectDto secondProjectDto;
 
     MomentFilterDto momentFilterDto;
+    List<ProjectDto> partnerProjectList = new ArrayList<>();
 
     @BeforeEach
     public void setupMomentDto() {
         momentDto = new MomentDto();
         momentDto.setName("Notification feature");
         momentDto.setCreatedAt(LocalDateTime.of(2023, 7, 15, 10, 30));
-        firstProject = new Project();
-        secondProject = new Project();
-        List<Project> partnerProjectList = new ArrayList<>();
-        partnerProjectList.add(firstProject);
-        partnerProjectList.add(secondProject);
+        firstProjectDto = new ProjectDto();
+        secondProjectDto = new ProjectDto();
+        partnerProjectList.add(firstProjectDto);
+        partnerProjectList.add(secondProjectDto);
         momentDto.setProjects(partnerProjectList);
     }
 
@@ -85,21 +90,21 @@ public class MomentControllerTest {
 
     @Test
     public void testCreateWithProjectCompletedProjectStatus() {
-        firstProject.setStatus(ProjectStatus.COMPLETED);
+        firstProjectDto.setStatus(ProjectStatus.COMPLETED);
         assertThrows(ValidationException.class, () -> momentController.create(momentDto));
     }
 
     @Test
     public void testCreateWithProjectCancelledProjectStatus() {
-        firstProject.setStatus(ProjectStatus.CANCELLED);
-        secondProject.setStatus(ProjectStatus.IN_PROGRESS);
+        firstProjectDto.setStatus(ProjectStatus.CANCELLED);
+        secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         assertThrows(ValidationException.class, () -> momentController.create(momentDto));
     }
 
     @Test
     public void testCreate() {
-        firstProject.setStatus(ProjectStatus.IN_PROGRESS);
-        secondProject.setStatus(ProjectStatus.IN_PROGRESS);
+        firstProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
+        secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         when(momentService.create(momentDto)).thenReturn(momentDto);
 
         MomentDto receivedMomentDto = momentController.create(momentDto);

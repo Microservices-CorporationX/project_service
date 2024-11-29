@@ -3,6 +3,7 @@ package faang.school.projectservice.controller.moment;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 
+import faang.school.projectservice.mapper.ProjectMapperProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.ValidationException;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MomentController {
     private final MomentService momentService;
+    private final ProjectMapperProjectDto projectMapper;
 
 
     public MomentDto create(MomentDto momentDto) {
@@ -40,6 +42,7 @@ public class MomentController {
 
 
     private void validateMoment(MomentDto momentDto) {
+
         if (momentDto.getName().isBlank()) {
             throw new ValidationException("The moment doesn't have name");
         }
