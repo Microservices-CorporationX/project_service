@@ -13,8 +13,11 @@ import faang.school.projectservice.service.task.filter.TaskFilter;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,16 +57,21 @@ public class TaskService {
         Task existingTask = taskRepository.findById(taskId)
             .orElseThrow(() -> new IllegalArgumentException("Задача с таким ID не найдена"));
 
-        if (taskDTO.getName() != null) existingTask.setName(taskDTO.getName());
-        if (taskDTO.getDescription() != null) existingTask.setDescription(taskDTO.getDescription());
-        if (taskDTO.getStatus() != null) existingTask.setStatus(taskDTO.getStatus());
-        if (taskDTO.getPerformerUserId() != null) existingTask.setPerformerUserId(taskDTO.getPerformerUserId());
-        if (taskDTO.getReporterUserId() != null) existingTask.setReporterUserId(taskDTO.getReporterUserId());
+        BeanUtils.copyProperties(taskDTO, existingTask, getNullPropertyNames(taskDTO));
+
 
         Task updatedTask = taskRepository.save(existingTask);
         log.info("Задача с ID: {} успешно обновлена", updatedTask.getId());
 
         return taskMapper.toDTO(updatedTask);
+    }
+
+    private String[] getNullPropertyNames(TaskDTO taskDTO) {
+        final var wrapper = new BeanWrapperImpl(taskDTO);
+        return Arrays.stream(wrapper.getPropertyDescriptors())
+            .filter(pd -> wrapper.getPropertyValue(pd.getName()) == null)
+            .map(pd -> pd.getName())
+            .toArray(String[]::new);
     }
 
     public List<TaskDTO> getFilteredTasks(TaskFilterDTO taskFilterDTO) {
