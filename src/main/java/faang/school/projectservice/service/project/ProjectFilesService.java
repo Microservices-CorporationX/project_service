@@ -8,7 +8,7 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.service.amazons3.S3Service;
+import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import faang.school.projectservice.service.resource.ResourceService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.resource.ResourceValidator;
@@ -28,7 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProjectFilesService {
 
-    private final S3Service s3Service;
+    private final AmazonClientService amazonClient;
     private final ResourceService resourceService;
     private final ResourceValidator resourceValidator;
     private final ProjectService projectService;
@@ -48,7 +48,7 @@ public class ProjectFilesService {
 
         String folder = projectId + project.getName();
 
-        String key = s3Service.uploadFile(file, folder);
+        String key = amazonClient.uploadFile(file, folder);
 
         TeamMember fileCreator = teamMemberService.findById(teamMemberId);
         ArrayList<TeamRole> allowedRoles = new ArrayList<>(fileCreator.getRoles());
@@ -76,7 +76,7 @@ public class ProjectFilesService {
         Resource resource = resourceService.getResource(resourceId);
         String key = resource.getKey();
 
-        return s3Service.downloadFile(key);
+        return amazonClient.downloadFile(key);
     }
 
     public Map<String, InputStream> downloadAllFiles(long projectId) {
@@ -86,7 +86,7 @@ public class ProjectFilesService {
                 .filter(resource -> resource.getStatus().equals(ResourceStatus.ACTIVE))
                 .forEach(resource -> filesNamesWithKeys.put(resource.getId() + resource.getName(), resource.getKey()));
 
-        Map<String, S3ObjectInputStream> s3ObjectInputStreams = s3Service.downloadAllFiles(filesNamesWithKeys);
+        Map<String, S3ObjectInputStream> s3ObjectInputStreams = amazonClient.downloadAllFiles(filesNamesWithKeys);
 
         Map<String, InputStream> files = new HashMap<>();
         s3ObjectInputStreams.forEach((key, value) -> files.put(key, value.getDelegateStream()));
@@ -101,7 +101,7 @@ public class ProjectFilesService {
         resourceValidator.validateAllowedToDeleteFile(resource, teamMember);
 
         String key = resource.getKey();
-        s3Service.deleteFile(key);
+        amazonClient.deleteFile(key);
 
         BigInteger renewStorageSize = project.getStorageSize().subtract(resource.getSize());
         project.setStorageSize(renewStorageSize);
