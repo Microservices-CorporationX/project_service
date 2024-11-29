@@ -48,7 +48,7 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
         log.info("Задача успешно создана с ID: {}", savedTask.getId());
-        return taskMapper.toDTO(savedTask);
+        return taskMapper.toDto(savedTask);
     }
 
     public TaskDTO updateTask(Long taskId, TaskDTO taskDTO) {
@@ -63,7 +63,7 @@ public class TaskService {
         Task updatedTask = taskRepository.save(existingTask);
         log.info("Задача с ID: {} успешно обновлена", updatedTask.getId());
 
-        return taskMapper.toDTO(updatedTask);
+        return taskMapper.toDto(updatedTask);
     }
 
     private String[] getNullPropertyNames(TaskDTO taskDTO) {
@@ -91,7 +91,7 @@ public class TaskService {
         return taskFilters.stream()
             .filter(filter -> filter.isApplicable(taskFilterDTO))
             .flatMap(filter -> filter.apply(tasks.stream(), taskFilterDTO))
-            .map(taskMapper::toDTO)
+            .map(taskMapper::toDto)
             .collect(Collectors.toList());
     }
 
@@ -101,7 +101,7 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
             .orElseThrow(() -> new IllegalArgumentException("Задача с таким ID не найдена"));
 
-        return taskMapper.toDTO(task);
+        return taskMapper.toDto(task);
     }
 
     public List<TaskDTO> getAllTasksByProjectId(Long projectId) {
@@ -112,7 +112,7 @@ public class TaskService {
             return Collections.emptyList();
         }
         return tasks.stream()
-            .map(taskMapper::toDTO)
+            .map(taskMapper::toDto)
             .collect(Collectors.toList());
     }
 }
