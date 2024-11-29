@@ -120,7 +120,7 @@ public class ProjectService {
     }
 
     public ProjectDto updateProject(ProjectDto projectDto) {
-        //projectValidator.validate(projectDto, this::existsByOwnerUserIdAndName, userContext.getUserId());
+        projectValidator.validate(projectDto, this::existsByOwnerUserIdAndName, userContext.getUserId());
         Project project = projectRepository.getProjectById(projectDto.getId());
         log.info("GET project");
         projectMapper.update(projectDto, project);
