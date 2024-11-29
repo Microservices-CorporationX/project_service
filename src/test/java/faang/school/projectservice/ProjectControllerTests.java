@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(ProjectController.class)
 public class ProjectControllerTests {
@@ -43,34 +45,15 @@ public class ProjectControllerTests {
     private ObjectMapper objectMapper;
 
     private ProjectDto projectDto;
+    @MockBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @BeforeEach
     void setUp() {
         projectDto = createTestProjectDto();
     }
 
-    private ProjectDto createTestProjectDto() {
-        ProjectDto dto = new ProjectDto();
-        dto.setId(1L);
-        dto.setName("Test Project");
-        dto.setDescription("A sample project description");
-        dto.setOwnerId(100L);
-        dto.setStatus(ProjectStatus.CREATED);
-        dto.setVisibility(ProjectVisibility.PUBLIC);
-        dto.setCreatedAt(LocalDateTime.now());
-        return dto;
-    }
 
-    private ResultActions performPostRequest(String url, ProjectDto projectDto) throws Exception {
-        return mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(projectDto)));
-    }
-
-    private ResultActions performGetRequest(String url) throws Exception {
-        return mockMvc.perform(get(url)
-                .contentType(MediaType.APPLICATION_JSON));
-    }
 
     @Test
     void createProject_Success() throws Exception {
@@ -150,5 +133,26 @@ public class ProjectControllerTests {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Project not found"));
     }
+    private ProjectDto createTestProjectDto() {
+        ProjectDto dto = new ProjectDto();
+        dto.setId(1L);
+        dto.setName("Test Project");
+        dto.setDescription("A sample project description");
+        dto.setOwnerId(100L);
+        dto.setStatus(ProjectStatus.CREATED);
+        dto.setVisibility(ProjectVisibility.PUBLIC);
+        dto.setCreatedAt(LocalDateTime.now());
+        return dto;
+    }
 
+    private ResultActions performPostRequest(String url, ProjectDto projectDto) throws Exception {
+        return mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(projectDto)));
+    }
+
+    private ResultActions performGetRequest(String url) throws Exception {
+        return mockMvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON));
+    }
 }

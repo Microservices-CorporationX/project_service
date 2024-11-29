@@ -16,7 +16,9 @@ import java.util.List;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 public class ProjectController {
+
     private final ProjectService projectService;
+
     @PostMapping
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         log.info("Received request to create project with name: {} for owner ID: {}", projectDto.getName(), projectDto.getOwnerId());
