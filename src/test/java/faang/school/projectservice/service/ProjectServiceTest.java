@@ -15,7 +15,6 @@ import faang.school.projectservice.mapper.project.UpdateProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -30,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +64,6 @@ class ProjectServiceTest {
     @Mock
     List<Filter<Project, ProjectFilterDto>> filters;
 
-    @Mock
-    MomentRepository momentRepository;
-
     @InjectMocks
     private ProjectService projectService;
 
@@ -87,6 +84,7 @@ class ProjectServiceTest {
     private UpdateSubProjectDto updateSubProjectDto;
     private List<StatusUpdater> statusUpdates;
     private ProjectFilterDto projectFilterDto;
+    private ApplicationEventPublisher eventPublisher;
 
     @BeforeEach
     void setUp() {
@@ -214,8 +212,8 @@ class ProjectServiceTest {
         ProjectStatusFilter statusFilter = new ProjectStatusFilter();
         filters = List.of(statusFilter);
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(projectRepository, projectValidator,
-                projectMapper, updateProjectMapper, filters, statusUpdates, momentRepository);
+        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator,
+                projectMapper, updateProjectMapper, filters, statusUpdates);
         when(projectRepository.findAll()).thenReturn(notFilteredProjects);
 
         List<ProjectDto> result = projectService.getProjectsByFilter(filterDto, ownerId);
@@ -230,8 +228,8 @@ class ProjectServiceTest {
         allProjects.get(2).setVisibility(ProjectVisibility.PRIVATE);
         List<ProjectDto> availableProjectDtos = getProjectDtosList();
         projectValidator = new ProjectValidator(projectRepository);
-        projectService = new ProjectService(projectRepository, projectValidator,
-                projectMapper, updateProjectMapper, filters, statusUpdates, momentRepository);
+        projectService = new ProjectService(eventPublisher, projectRepository, projectValidator,
+                projectMapper, updateProjectMapper, filters, statusUpdates);
 
         when(projectRepository.findAll()).thenReturn(allProjects);
 

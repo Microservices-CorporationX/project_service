@@ -4,10 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateResponseDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
-import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.event.project.SubProjectClosedEvent;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
@@ -21,13 +18,13 @@ import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.statusupdator.StatusUpdater;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -35,13 +32,13 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    private final ApplicationEventPublisher eventPublisher;
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
     private final List<StatusUpdater> statusUpdates;
-    private final MomentRepository momentRepository;
 
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
@@ -151,10 +148,8 @@ public class ProjectService {
         changeVisibility(subProject, updateSubProjectDto);
         Project parentProject = subProject.getParentProject();
 
-        if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
-            createMomentAllSubProjectsCompleted(parentProject);
-            log.info("Moment #All subprojects completed! successfully created for project #{}", parentProject.getId());
-        }
+        publishSubProjectsClosedEventIfNeeded(parentProject);
+
         subProject.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         return projectMapper.toUpdateResponseDto(projectRepository.save(subProject));
     }
@@ -192,22 +187,6 @@ public class ProjectService {
         }
     }
 
-    private void createMomentAllSubProjectsCompleted(Project project) {
-        Moment moment = Moment.builder()
-                .name("All subprojects completed!")
-                .date(LocalDateTime.now(ZoneId.of("UTC")))
-                .userIds(project.getTeams().stream()
-                        .map(Team::getTeamMembers)
-                        .flatMap(List::stream)
-                        .map(TeamMember::getUserId)
-                        .toList())
-                .projects(new ArrayList<>(List.of(project)))
-                .build();
-        project.getMoments().add(moment);
-        momentRepository.save(moment);
-        projectRepository.save(project);
-    }
-
     private void initializeSubProject(Project project, Project parentProject) {
         project.setParentProject(parentProject);
         project.setStatus(ProjectStatus.CREATED);
@@ -220,5 +199,11 @@ public class ProjectService {
                 .toList();
     }
 
+    private void publishSubProjectsClosedEventIfNeeded(Project parentProject) {
+        if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
+            eventPublisher.publishEvent(new SubProjectClosedEvent(this, parentProject.getId()));
+            log.info("Published SubProjectClosedEvent for project #{}", parentProject.getId());
+        }
+    }
 }
 
