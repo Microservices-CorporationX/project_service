@@ -247,14 +247,12 @@ public class StageServiceTest {
 
         Long stageId = 1L;
         TeamRole roleManager = TeamRole.MANAGER;
-        long requiredMembers = 1L;
         Stage stage = mock(Stage.class);
         Project project = mock(Project.class);
         Team team = mock(Team.class);
         TeamMember teamMember = mock(TeamMember.class);
         StageRoles stageRole = mock(StageRoles.class);
 
-        // Настройка Stage
         List<StageRoles> stageRoles = List.of(stageRole);
         List<TeamMember> executors = new ArrayList<>();
         List<Team> teams = List.of(team);
@@ -272,7 +270,7 @@ public class StageServiceTest {
         when(team.getTeamMembers()).thenReturn(List.of(teamMember));
 
         // Настройка TeamMember
-        when(teamMember.getRoles()).thenReturn(Set.of(roleManager));
+        when(teamMember.getRoles()).thenReturn(List.of(roleManager));
 
         // Настройка репозитория
         when(stageRepository.getById(stageId)).thenReturn(stage);
