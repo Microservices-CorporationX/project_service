@@ -35,6 +35,11 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+google:
+  credentials:
+    path: credentials/your-credentials.json
+  redirect-uri: http://localhost:8082/oauth2/callback
+
 services:
   s3:
     endpoint: http://localhost:9000
