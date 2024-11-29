@@ -30,7 +30,7 @@ public class CampaignController {
 
     @PostMapping
     public CampaignDto publishingCampaign(@RequestBody @Valid CampaignPublishingDto campaignPublishingDto) {
-        return campaignService.publishingCampaign(campaignPublishingDto);
+        return campaignService.publishCampaign(campaignPublishingDto);
     }
 
     @PutMapping("/{campaignId}")

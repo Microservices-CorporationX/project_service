@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -36,11 +35,11 @@ public class CampaignService {
     private final UserContext userContext;
 
     @Transactional
-    public CampaignDto publishingCampaign(CampaignPublishingDto campaignPublishingDto) {
+    public CampaignDto publishCampaign(CampaignPublishingDto campaignPublishingDto) {
         log.info("start publishingCampaign with dto: {}", campaignPublishingDto);
 
         Long userId = userContext.getUserId();
-        teamMemberValidator.validateUserHasStatusOwnerOrManagerInTeam(userId, campaignPublishingDto.getProjectId());
+        teamMemberValidator.validateUserRoleForPublishing(userId, campaignPublishingDto.getProjectId());
 
         Campaign campaign = campaignRepository.save(createCampaign(userId, campaignPublishingDto));
         log.info("finish publishingCampaign with campaign: {}", campaign);
@@ -99,7 +98,7 @@ public class CampaignService {
                         (v1, v2) -> v1)
                 .map(campaignMapper::toDto)
                 .sorted(Comparator.comparing(CampaignDto::getCreatedAt).reversed())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Campaign createCampaign(Long userId, CampaignPublishingDto campaignPublishingDto) {
