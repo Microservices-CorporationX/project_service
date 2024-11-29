@@ -17,7 +17,6 @@ public class ProjectDto {
     @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
-    @NotNull(message = "Name must not be null")
     @NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;

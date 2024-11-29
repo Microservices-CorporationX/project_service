@@ -17,16 +17,13 @@ import java.util.List;
 @NoArgsConstructor
 public class VacancyDto {
 
-    @NotNull(message = "Id must not be null")
     @Min(value = 0, message = "Id must be non-negative")
     private Long id;
 
-    @NotNull(message = "Name must not be null")
     @NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;
 
-    @NotNull(message = "Description must not be null")
     @Size(max = 4096, message = "Description must not exceed 4096 characters")
     @NotBlank(message = "Description must not be blank")
     private String description;
