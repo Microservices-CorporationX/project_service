@@ -12,7 +12,6 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -34,7 +33,7 @@ public class StorageService {
             s3Client.putObject(putObjectRequest, requestBody);
             log.info("File '{}' uploaded successfully", file.getOriginalFilename());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

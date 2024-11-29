@@ -149,7 +149,7 @@ class ResourceHandlerTest {
     }
 
     @Test
-    void testConvertImageToMultipartFile_ValidImage() throws IOException {
+    void testConvertImageToMultipartFile_ValidImage() {
         MultipartFile convertedFile = resourceHandler.convertImageToMultipartFile(validImageFile, bufferedImage);
 
         assertThat(convertedFile).isNotNull();

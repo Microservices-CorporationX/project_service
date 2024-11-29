@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.handler.ResourceHandler;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -30,14 +29,14 @@ public class ResourceService {
         resourceValidator.validateResourceNotEmpty(file);
         resourceValidator.validateProjectCoverSize(file);
 
-        BufferedImage cover = resourceHandler.getImageFromMultipartFile(file);
-        if (!resourceValidator.isCorrectProjectCoverScale(cover)) {
-            cover = resourceHandler.resizeImage(cover,
+        BufferedImage coverImage = resourceHandler.getImageFromMultipartFile(file);
+        if (!resourceValidator.isCorrectProjectCoverScale(coverImage)) {
+            coverImage = resourceHandler.resizeImage(coverImage,
                     ResourceValidator.MAX_COVER_WIDTH_PX,
                     ResourceValidator.MAX_COVER_HEIGHT_PX);
         }
 
-        MultipartFile coverFile = resourceHandler.convertImageToMultipartFile(file, cover);
+        MultipartFile coverFile = resourceHandler.convertImageToMultipartFile(file, coverImage);
 
         Project project = projectService.getProjectById(projectId);
 
@@ -64,7 +63,7 @@ public class ResourceService {
         Project project = projectService.getProjectById(projectId);
 
         if (!projectValidator.hasProjectCoverImage(project)) {
-            throw new DataValidationException(String.format("Project #%d has no cover image to delete.", projectId));
+            throw new IllegalStateException(String.format("Project #%d has no cover image to delete.", projectId));
         }
 
         String key = project.getCoverImageId();
@@ -72,6 +71,7 @@ public class ResourceService {
         projectService.saveProject(project);
 
         storageService.deleteResource(key);
+        log.info("Project #{} cover successfully deleted.", projectId);
     }
 
     public byte[] downloadProjectCover(long userId, long projectId) {

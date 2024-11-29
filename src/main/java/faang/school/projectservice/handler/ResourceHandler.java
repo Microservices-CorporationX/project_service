@@ -85,7 +85,7 @@ public class ResourceHandler {
         } catch (MimeTypeException e) {
             throw new IllegalStateException(
                     String.format("An error occurred while getting file '%s' extension.",
-                    file.getOriginalFilename()), e);
+                            file.getOriginalFilename()), e);
         }
     }
 }
