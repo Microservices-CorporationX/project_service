@@ -12,6 +12,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +44,9 @@ public class ProjectServiceTest {
     @Mock
     private ProjectJpaRepository projectRepository;
 
+    @Mock
+    private AmazonClientService amazonClient;
+
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
@@ -54,7 +60,7 @@ public class ProjectServiceTest {
         projectFilters.add(new ProjectNameFilter());
         projectFilters.add(new ProjectStatusFilter());
 
-        projectService = new ProjectService(projectMapper, projectFilters, projectRepository);
+        projectService = new ProjectService(projectMapper, projectFilters, projectRepository, amazonClient);
     }
 
     @Test
@@ -318,5 +324,71 @@ public class ProjectServiceTest {
                 EntityNotFoundException.class, () -> projectService.getProjectById(projectId));
         assertEquals("Entity %s with ID %s not found".formatted(PROJECT, projectId), exception.getMessage());
         verify(projectRepository, times(1)).findById(projectId);
+    }
+
+    @Test
+    void getCoverByNotExistProjectTest() {
+        long projectId = 1L;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectCover(projectId));
+    }
+
+    @Test
+    void getCoverByNotExistCoverProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectCover(projectId));
+    }
+
+    @Test
+    void getCoverByProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        project.setCoverImageId("1.png");
+        byte[] image = new byte[10];
+        image[0] = 1;
+        image[1] = 0;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(amazonClient.getProjectCover(project.getCoverImageId())).thenReturn(image);
+
+        byte[] result = projectService.getProjectCover(projectId);
+
+        assertEquals(image[0], result[0]);
+        assertEquals(image[1], result[1]);
+    }
+
+    @Test
+    void updateCoverByNotExistProjectTest() {
+        long projectId = 1L;
+        byte[] content = new byte[10];
+        content[0] = 1;
+        content[1] = 0;
+        MultipartFile file = new MockMultipartFile("1.png", content);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.updateProjectCover(projectId, file));
+    }
+
+    @Test
+    void updateCoverByProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        byte[] content = new byte[10];
+        content[0] = 1;
+        content[1] = 0;
+        MultipartFile file = new MockMultipartFile("1.png", content);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(amazonClient.updateProjectCover(file)).thenReturn("1.png");
+        when(projectRepository.save(project)).thenReturn(project);
+
+        ProjectDto result = projectService.updateProjectCover(projectId, file);
+
+        assertEquals("1.png", result.getCoverImageId());
     }
 }

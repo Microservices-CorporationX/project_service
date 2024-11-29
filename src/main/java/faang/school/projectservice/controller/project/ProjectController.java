@@ -9,8 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -83,5 +88,22 @@ public class ProjectController {
     @PutMapping
     public ProjectDto updateProject(@RequestBody @Valid ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
+    }
+
+    @PutMapping("/{projectId}/cover")
+    public ProjectDto updateProjectCover(@PathVariable Long projectId, @NotBlank MultipartFile file) {
+        return projectService.updateProjectCover(projectId, file);
+    }
+
+    @GetMapping("/{projectId}/cover")
+    public ResponseEntity getProjectCover(@PathVariable Long projectId) {
+        byte[] coverData = projectService.getProjectCover(projectId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(coverData);
     }
 }
