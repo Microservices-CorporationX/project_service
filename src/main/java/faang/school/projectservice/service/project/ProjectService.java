@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
@@ -147,6 +147,9 @@ public class ProjectService {
 
     public Project getProjectEntityById(Long id) {
         return projectRepository.getProjectById(id);
+    }
+    public void saveProject(Project project){
+        projectRepository.save(project);
     }
 
     private boolean checkCancelledStatus(ProjectDto subProjectDto) {

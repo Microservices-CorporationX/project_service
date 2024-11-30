@@ -3,7 +3,7 @@ package faang.school.projectservice.controller.sub_project;
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
