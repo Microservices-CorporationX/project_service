@@ -2,6 +2,7 @@ package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.stage.Stage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,4 +34,5 @@ public class ProjectDto {
     private String coverImageId;
     private List<Long> teamsIds;
     private List<Long> childrenIds;
+    private List<Stage> stages;
 }
