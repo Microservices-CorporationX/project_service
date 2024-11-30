@@ -38,7 +38,7 @@ public class VacancyService {
         vacancyValidator.validateVacancyManagerRole(dto.getCreatedById());
         Vacancy vacancy = mapToNewEntity(dto);
         vacancyRepository.save(vacancy);
-        log.info("New vacancy with id #{} successfully saved", vacancy.getId());
+        log.info("New vacancy with id {} successfully saved", vacancy.getId());
         return vacancyMapper.toDto(vacancy);
     }
 

@@ -1,6 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.handler.ResourceHandler;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -20,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,23 +68,20 @@ class ResourceServiceTest {
     void testUploadProjectCover_Success() {
         doNothing().when(resourceValidator).validateResourceNotEmpty(mockFile);
         doNothing().when(resourceValidator).validateProjectCoverSize(mockFile);
-        when(resourceHandler.getImageFromMultipartFile(mockFile)).thenReturn(bufferedImage);
-        when(resourceValidator.isCorrectProjectCoverScale(bufferedImage)).thenReturn(true);
-        when(resourceHandler.convertImageToMultipartFile(mockFile, bufferedImage)).thenReturn(mockFile);
-        when(projectValidator.hasProjectCoverImage(mockProject)).thenReturn(false);
 
-        String result = resourceService.uploadProjectCover(mockFile, userId, projectId);
+        when(resourceHandler.handleImage(mockFile)).thenReturn(mockFile);
+        when(projectValidator.hasCoverImage(mockProject)).thenReturn(false);
 
-        verify(resourceHandler, times(1)).getImageFromMultipartFile(mockFile);
-        verify(resourceHandler, never()).resizeImage(bufferedImage, maxCoverWidth, maxCoverHeight);
+        resourceService.uploadProjectCover(mockFile, userId, projectId);
+
+        verify(resourceHandler, times(1)).handleImage(mockFile);
         verify(storageService, times(1)).uploadResource(any(MultipartFile.class), anyString());
         verify(projectService, times(1)).saveProject(mockProject);
-        assertThat(result).isNotNull();
     }
 
     @Test
     void testDeleteProjectCover_Success() {
-        when(projectValidator.hasProjectCoverImage(mockProject)).thenReturn(true);
+        when(projectValidator.hasCoverImage(mockProject)).thenReturn(true);
         when(mockProject.getCoverImageId()).thenReturn(coverImageKey);
 
         resourceService.deleteProjectCover(userId, projectId);
@@ -99,11 +94,11 @@ class ResourceServiceTest {
 
     @Test
     void testDeleteProjectCover_NoCoverImage() {
-        when(projectValidator.hasProjectCoverImage(mockProject)).thenReturn(false);
+        when(projectValidator.hasCoverImage(mockProject)).thenReturn(false);
 
         assertThatThrownBy(() -> resourceService.deleteProjectCover(userId, projectId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining(String.format("Project #%d has no cover image to delete.", projectId));
+                .hasMessageContaining(String.format("Project %d has no cover image to delete.", projectId));
     }
 
     @Test

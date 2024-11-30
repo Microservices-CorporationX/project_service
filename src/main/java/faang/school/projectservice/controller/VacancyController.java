@@ -65,7 +65,7 @@ public class VacancyController {
     @Operation(summary = "Get vacancy by its id")
     @GetMapping("/{vacancyId})")
     public ResponseEntity<VacancyResponseDto> getVacancy(@PathVariable @Positive long vacancyId) {
-        log.info("Request to get vacancy #{} received", vacancyId);
+        log.info("Request to get vacancy {} received", vacancyId);
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getVacancyDtoById(vacancyId));
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class InternshipController {
 
     @PostMapping("/internship")
     public InternshipCreatedDto createInternship(@Valid @RequestBody InternshipCreatedDto internship) {
-        log.info("Creating internship '{}' by UserId #{}.", internship.getName(), internship.getCreatedBy());
+        log.info("Creating internship '{}' by UserId {}.", internship.getName(), internship.getCreatedBy());
         return internshipService.createInternship(internship);
     }
 

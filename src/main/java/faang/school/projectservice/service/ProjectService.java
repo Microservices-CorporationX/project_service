@@ -37,7 +37,7 @@ public class ProjectService {
         project.setStatus(ProjectStatus.CREATED);
         Project savedProject = projectRepository.save(project);
 
-        log.info("Project #{} successfully created.", savedProject.getId());
+        log.info("Project {} successfully created.", savedProject.getId());
 
         return projectMapper.toDto(savedProject);
     }
@@ -59,7 +59,7 @@ public class ProjectService {
         project.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
         Project updatedProject = projectRepository.save(project);
 
-        log.info("Project #{} successfully updated. Current data: description: '{}'; status: '{}'; visibility: '{}'",
+        log.info("Project {} successfully updated. Current data: description: '{}'; status: '{}'; visibility: '{}'",
                 updatedProject.getId(), updatedProject.getDescription(),
                 updatedProject.getStatus(), updatedProject.getVisibility());
 
@@ -87,7 +87,7 @@ public class ProjectService {
                 .map(projectMapper::toDto)
                 .toList();
 
-        log.info("Founded all projects, available for User #{}", currentUserId);
+        log.info("Founded all projects, available for User {}", currentUserId);
 
         return result;
     }
@@ -96,8 +96,8 @@ public class ProjectService {
         Project project = projectRepository.getProjectById(projectId);
 
         if (!projectValidator.canUserAccessProject(project, currentUserId)) {
-            log.error("Project #{} not found by User #{}", projectId, currentUserId);
-            throw new EntityNotFoundException(String.format("Project #%d not found by User #%d",
+            log.error("Project {} not found by User {}", projectId, currentUserId);
+            throw new EntityNotFoundException(String.format("Project %d not found by User %d",
                     projectId, currentUserId));
         }
 

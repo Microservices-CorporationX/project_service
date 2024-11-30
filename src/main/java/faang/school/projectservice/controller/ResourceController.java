@@ -40,13 +40,13 @@ public class ResourceController {
             @RequestParam(name = "file")
             @NotNull(message = "You should add a file") MultipartFile file
     ) {
-        log.info("Request to upload cover for project #{} by User #{}.", projectId, userId);
-        String fileName = resourceService.uploadProjectCover(file, userId, projectId);
+        log.info("Request to upload cover for project {} by User {}.", projectId, userId);
+        resourceService.uploadProjectCover(file, userId, projectId);
 
         return ResponseEntity.ok(
-                String.format("Project #%d cover '%s' successfully uploaded by User #%d",
+                String.format("Project %d cover '%s' successfully uploaded by User %d",
                         projectId,
-                        fileName,
+                        file.getOriginalFilename(),
                         userId));
     }
 
@@ -58,11 +58,11 @@ public class ResourceController {
             @RequestParam(name = "userId")
             @Positive(message = "User id must be a positive integer") Long userId
     ) {
-        log.info("Request to delete project #{}  cover by User #{}.", projectId, userId);
+        log.info("Request to delete project {}  cover by User {}.", projectId, userId);
         resourceService.deleteProjectCover(userId, projectId);
 
         return ResponseEntity.ok(
-                String.format("Project #%d cover successfully deleted by User #%d",
+                String.format("Project %d cover successfully deleted by User %d",
                         projectId,
                         userId));
     }
@@ -75,7 +75,7 @@ public class ResourceController {
             @RequestParam(name = "userId")
             @Positive(message = "User id must be a positive integer") Long userId
     ) {
-        log.info("Request to download project #{} cover image by User #{}.", projectId, userId);
+        log.info("Request to download project {} cover image by User {}.", projectId, userId);
         byte[] coverImage = resourceService.downloadProjectCover(userId, projectId);
 
         HttpHeaders headers = new HttpHeaders();

@@ -28,12 +28,12 @@ public class ProjectValidator {
         String name = dto.getName();
 
         if (projectRepository.existsByOwnerUserIdAndName(ownerId, name)) {
-            log.error("Project '{}' with ownerId #{} already exists.", name, ownerId);
-            throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
+            log.error("Project '{}' with ownerId {} already exists.", name, ownerId);
+            throw new NotUniqueProjectException(String.format("Project '%s' with ownerId %d already exists.",
                     name, ownerId));
         }
 
-        log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
+        log.info("Project '{}' with ownerId {} unique and can be created.", name, ownerId);
     }
 
     public boolean canUserAccessProject(Project project, Long currentUserId) {
@@ -41,12 +41,12 @@ public class ProjectValidator {
     }
 
     public void validateProjectExistsById(Long projectId) {
-        log.info("Validating project existence by id #{}", projectId);
+        log.info("Validating project existence by id {}", projectId);
         if (!projectRepository.existsById(projectId)) {
-            log.error("Project with id #{} doesn't exist", projectId);
+            log.error("Project with id {} doesn't exist", projectId);
             throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
-        log.info("Project with id #{} exists", projectId);
+        log.info("Project with id {} exists", projectId);
     }
 
     public boolean isOpenProject(Long projectId) {
@@ -70,20 +70,20 @@ public class ProjectValidator {
         TeamMember mentorId = internShipCreatedDto.getMentorId();
 
         if (!isMentorPresent(teamMembersId, mentorId.getId())) {
-            log.error("Mentor with id #{} is not present in project team", mentorId.getId());
+            log.error("Mentor with id {} is not present in project team", mentorId.getId());
             throw new IllegalArgumentException("Mentor is not present in project team");
         }
     }
 
     public void validateUserIsProjectOwner(long userId, long projectId) {
         if (projectRepository.getProjectById(projectId).getOwnerId() != userId) {
-            log.info("User #{} does not have access to the project #{}.", userId, projectId);
+            log.info("User {} does not have access to the project {}.", userId, projectId);
             throw new ProjectNotAccessibleException(
-                    String.format("User #%d does not have access to the project #%d.", userId, projectId));
+                    String.format("User %d does not have access to the project %d.", userId, projectId));
         }
     }
 
-    public boolean hasProjectCoverImage(Project project) {
+    public boolean hasCoverImage(Project project) {
         return project.getCoverImageId() != null;
     }
 }

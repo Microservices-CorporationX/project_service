@@ -33,7 +33,8 @@ public class StorageService {
             s3Client.putObject(putObjectRequest, requestBody);
             log.info("File '{}' uploaded successfully", file.getOriginalFilename());
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(
+                    String.format("An error occurred while uploading file '%s'.", file.getOriginalFilename()), e);
         }
     }
 

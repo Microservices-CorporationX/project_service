@@ -73,7 +73,9 @@ class StorageServiceTest {
 
         assertThatThrownBy(() -> storageService.uploadResource(mockFile, key))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Test IOException");
+                .hasMessageContaining(
+                        String.format("An error occurred while uploading file '%s'.", mockFile.getOriginalFilename())
+                );
     }
 
     @Test

@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.image.BufferedImage;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -23,24 +21,16 @@ public class ResourceService {
     private final ProjectService projectService;
 
     @Transactional
-    public String uploadProjectCover(MultipartFile file, long userId, long projectId) {
+    public void uploadProjectCover(MultipartFile file, long userId, long projectId) {
         projectValidator.validateProjectExistsById(projectId);
         projectValidator.validateUserIsProjectOwner(userId, projectId);
         resourceValidator.validateResourceNotEmpty(file);
         resourceValidator.validateProjectCoverSize(file);
 
-        BufferedImage coverImage = resourceHandler.getImageFromMultipartFile(file);
-        if (!resourceValidator.isCorrectProjectCoverScale(coverImage)) {
-            coverImage = resourceHandler.resizeImage(coverImage,
-                    ResourceValidator.MAX_COVER_WIDTH_PX,
-                    ResourceValidator.MAX_COVER_HEIGHT_PX);
-        }
-
-        MultipartFile coverFile = resourceHandler.convertImageToMultipartFile(file, coverImage);
-
+        MultipartFile coverFile = resourceHandler.handleImage(file);
         Project project = projectService.getProjectById(projectId);
 
-        if (projectValidator.hasProjectCoverImage(project)) {
+        if (projectValidator.hasCoverImage(project)) {
             deleteProjectCover(userId, projectId);
         }
 
@@ -51,8 +41,7 @@ public class ResourceService {
         project.setCoverImageId(key);
         projectService.saveProject(project);
 
-        log.info("Project #{} cover successfully uploaded.", projectId);
-        return key;
+        log.info("Project {} cover successfully uploaded.", projectId);
     }
 
     @Transactional
@@ -62,16 +51,16 @@ public class ResourceService {
 
         Project project = projectService.getProjectById(projectId);
 
-        if (!projectValidator.hasProjectCoverImage(project)) {
-            throw new IllegalStateException(String.format("Project #%d has no cover image to delete.", projectId));
+        if (!projectValidator.hasCoverImage(project)) {
+            throw new IllegalStateException(String.format("Project %d has no cover image to delete.", projectId));
         }
 
         String key = project.getCoverImageId();
+        storageService.deleteResource(key);
         project.setCoverImageId(null);
         projectService.saveProject(project);
 
-        storageService.deleteResource(key);
-        log.info("Project #{} cover successfully deleted.", projectId);
+        log.info("Project {} cover successfully deleted.", projectId);
     }
 
     public byte[] downloadProjectCover(long userId, long projectId) {
@@ -81,7 +70,7 @@ public class ResourceService {
         Project project = projectService.getProjectById(projectId);
         byte[] coverAsBytes = storageService.downloadResource(project.getCoverImageId());
 
-        log.info("Project #{} cover successfully downloaded.", projectId);
+        log.info("Project {} cover successfully downloaded.", projectId);
         return coverAsBytes;
     }
 }

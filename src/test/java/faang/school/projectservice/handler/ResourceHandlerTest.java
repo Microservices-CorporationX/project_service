@@ -20,6 +20,10 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,30 +34,37 @@ class ResourceHandlerTest {
     @InjectMocks
     private ResourceHandler resourceHandler;
 
-    private MockMultipartFile validImageFile;
+    private MockMultipartFile validSquareImageFile;
+    private MockMultipartFile validNonSquareImageFile;
     private MockMultipartFile invalidImageFile;
-    private BufferedImage bufferedImage;
-    private int maxImageWidth;
-    private int maxImageHeight;
+    private BufferedImage squareImage;
+    private BufferedImage nonSquareImage;
+    private int maxCoverWidth;
+    private int maxCoverHeight;
 
     @BeforeEach
     void setUp() throws IOException {
-        maxImageWidth = ResourceValidator.MAX_COVER_WIDTH_PX;
-        maxImageHeight = ResourceValidator.MAX_COVER_HEIGHT_PX;
+        maxCoverWidth = ResourceValidator.MAX_COVER_WIDTH_PX;
+        maxCoverHeight = ResourceValidator.MAX_COVER_HEIGHT_PX;
 
-        bufferedImage = new BufferedImage(maxImageWidth, maxImageWidth, BufferedImage.TYPE_INT_RGB);
+        squareImage = new BufferedImage(maxCoverWidth, maxCoverWidth, BufferedImage.TYPE_INT_RGB);
+        nonSquareImage = new BufferedImage(maxCoverWidth, maxCoverHeight, BufferedImage.TYPE_INT_RGB);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "jpg", baos);
-        baos.flush();
-        byte[] imageBytes = baos.toByteArray();
-        baos.close();
+        byte[] squareImageBytes = convertImageToByteArray(squareImage, "jpg");
+        byte[] nonSquareImageBytes = convertImageToByteArray(nonSquareImage, "jpg");
 
-        validImageFile = new MockMultipartFile(
+        validSquareImageFile = new MockMultipartFile(
                 "file",
-                "validImage.jpg",
+                "validSquareImage.jpg",
                 "image/jpeg",
-                new ByteArrayInputStream(imageBytes)
+                new ByteArrayInputStream(squareImageBytes)
+        );
+
+        validNonSquareImageFile = new MockMultipartFile(
+                "file",
+                "validNonSquareImage.jpg",
+                "image/jpeg",
+                new ByteArrayInputStream(nonSquareImageBytes)
         );
 
         invalidImageFile = new MockMultipartFile(
@@ -66,10 +77,10 @@ class ResourceHandlerTest {
 
     @Test
     void testGetImageFromMultipartFile_ValidImage() {
-        BufferedImage image = resourceHandler.getImageFromMultipartFile(validImageFile);
+        BufferedImage image = resourceHandler.getImageFromMultipartFile(validSquareImageFile);
 
-        assertThat(image.getWidth()).isEqualTo(bufferedImage.getWidth());
-        assertThat(image.getHeight()).isEqualTo(bufferedImage.getHeight());
+        assertThat(image.getWidth()).isEqualTo(squareImage.getWidth());
+        assertThat(image.getHeight()).isEqualTo(squareImage.getHeight());
     }
 
     @Test
@@ -84,77 +95,112 @@ class ResourceHandlerTest {
 
     @Test
     void testResizeImage_SquareImageWithinLimits() {
-        when(resourceValidator.isSquareImage(bufferedImage)).thenReturn(true);
+        when(resourceValidator.isSquareImage(squareImage)).thenReturn(true);
 
-        BufferedImage resizedImage = resourceHandler.resizeImage(bufferedImage, maxImageWidth, maxImageWidth);
+        BufferedImage resizedImage = resourceHandler.resizeImage(squareImage, maxCoverWidth, maxCoverWidth);
 
-        assertThat(resizedImage.getWidth()).isEqualTo(maxImageWidth);
-        assertThat(resizedImage.getHeight()).isEqualTo(maxImageWidth);
+        assertThat(resizedImage.getWidth()).isEqualTo(maxCoverWidth);
+        assertThat(resizedImage.getHeight()).isEqualTo(maxCoverWidth);
     }
 
     @Test
     void testResizeImage_NonSquareImageWithinLimits() {
         BufferedImage nonSquareImage = new BufferedImage(
-                maxImageWidth,
-                maxImageHeight,
+                maxCoverWidth,
+                maxCoverHeight,
                 BufferedImage.TYPE_INT_RGB);
         when(resourceValidator.isSquareImage(nonSquareImage)).thenReturn(false);
 
-        BufferedImage resizedImage = resourceHandler.resizeImage(nonSquareImage, maxImageWidth, maxImageHeight);
+        BufferedImage resizedImage = resourceHandler.resizeImage(nonSquareImage, maxCoverWidth, maxCoverHeight);
 
-        assertThat(resizedImage.getWidth()).isEqualTo(maxImageWidth);
-        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxImageHeight);
+        assertThat(resizedImage.getWidth()).isEqualTo(maxCoverWidth);
+        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxCoverHeight);
     }
 
     @Test
     void testResizeImage_SquareImageExceedsLimits() {
         BufferedImage invalidSquareImage = new BufferedImage(
-                maxImageWidth + 1,
-                maxImageWidth + 1,
+                maxCoverWidth + 1,
+                maxCoverWidth + 1,
                 BufferedImage.TYPE_INT_RGB);
         when(resourceValidator.isSquareImage(invalidSquareImage)).thenReturn(true);
 
-        BufferedImage resizedImage = resourceHandler.resizeImage(invalidSquareImage, maxImageWidth, maxImageWidth);
+        BufferedImage resizedImage = resourceHandler.resizeImage(invalidSquareImage, maxCoverWidth, maxCoverWidth);
 
-        assertThat(resizedImage.getWidth()).isEqualTo(maxImageWidth);
-        assertThat(resizedImage.getHeight()).isEqualTo(maxImageWidth);
+        assertThat(resizedImage.getWidth()).isEqualTo(maxCoverWidth);
+        assertThat(resizedImage.getHeight()).isEqualTo(maxCoverWidth);
     }
 
     @Test
     void testResizeImage_NonSquareImageExceedsLimits() {
         BufferedImage invalidNonSquareImage = new BufferedImage(
-                maxImageWidth + 1,
-                maxImageHeight + 1,
+                maxCoverWidth + 1,
+                maxCoverHeight + 1,
                 BufferedImage.TYPE_INT_RGB);
         when(resourceValidator.isSquareImage(invalidNonSquareImage)).thenReturn(false);
 
-        BufferedImage resizedImage = resourceHandler.resizeImage(invalidNonSquareImage, maxImageWidth, maxImageHeight);
+        BufferedImage resizedImage = resourceHandler.resizeImage(invalidNonSquareImage, maxCoverWidth, maxCoverHeight);
 
-        assertThat(resizedImage.getWidth()).isEqualTo(maxImageWidth);
-        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxImageHeight);
+        assertThat(resizedImage.getWidth()).isEqualTo(maxCoverWidth);
+        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxCoverHeight);
     }
 
     @Test
     void testResizeImage_NonSquareVerticalImageExceedsLimits() {
         BufferedImage invalidNonSquareImage = new BufferedImage(
-                maxImageHeight + 1,
-                maxImageWidth + 1,
+                maxCoverHeight + 1,
+                maxCoverWidth + 1,
                 BufferedImage.TYPE_INT_RGB);
         when(resourceValidator.isSquareImage(invalidNonSquareImage)).thenReturn(false);
 
-        BufferedImage resizedImage = resourceHandler.resizeImage(invalidNonSquareImage, maxImageWidth, maxImageHeight);
+        BufferedImage resizedImage = resourceHandler.resizeImage(invalidNonSquareImage, maxCoverWidth, maxCoverHeight);
 
-        assertThat(resizedImage.getWidth()).isLessThanOrEqualTo(maxImageWidth);
-        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxImageHeight);
+        assertThat(resizedImage.getWidth()).isLessThanOrEqualTo(maxCoverWidth);
+        assertThat(resizedImage.getHeight()).isLessThanOrEqualTo(maxCoverHeight);
     }
 
     @Test
     void testConvertImageToMultipartFile_ValidImage() {
-        MultipartFile convertedFile = resourceHandler.convertImageToMultipartFile(validImageFile, bufferedImage);
+        MultipartFile convertedFile = resourceHandler.convertImageToMultipartFile(validSquareImageFile, squareImage);
 
         assertThat(convertedFile).isNotNull();
-        assertEquals(validImageFile.getName(), convertedFile.getName());
-        assertEquals(validImageFile.getOriginalFilename(), convertedFile.getOriginalFilename());
-        assertEquals(validImageFile.getContentType(), convertedFile.getContentType());
+        assertEquals(validSquareImageFile.getName(), convertedFile.getName());
+        assertEquals(validSquareImageFile.getOriginalFilename(), convertedFile.getOriginalFilename());
+        assertEquals(validSquareImageFile.getContentType(), convertedFile.getContentType());
+    }
+
+    @Test
+    void testHandleImage_SuccessWithoutResize() throws IOException {
+        when(resourceValidator.isCorrectProjectCoverScale(any())).thenReturn(true);
+
+        MultipartFile result = resourceHandler.handleImage(validNonSquareImageFile);
+
+        verify(resourceValidator, times(1)).isCorrectProjectCoverScale(any());
+        verify(resourceValidator, never()).isSquareImage(any());
+        assertThat(result.getOriginalFilename()).isEqualTo(validNonSquareImageFile.getOriginalFilename());
+        assertThat(result.getContentType()).isEqualTo(validNonSquareImageFile.getContentType());
+        assertThat(result.getBytes()).isEqualTo(validNonSquareImageFile.getBytes());
+    }
+
+    @Test
+    void testHandleImage_SuccessWithResize() throws IOException {
+        when(resourceValidator.isCorrectProjectCoverScale(any())).thenReturn(false);
+
+        MultipartFile result = resourceHandler.handleImage(validNonSquareImageFile);
+
+        verify(resourceValidator, times(1)).isCorrectProjectCoverScale(any());
+        verify(resourceValidator, times(1)).isSquareImage(any());
+        assertThat(result.getOriginalFilename()).isEqualTo(validNonSquareImageFile.getOriginalFilename());
+        assertThat(result.getContentType()).isEqualTo(validNonSquareImageFile.getContentType());
+        assertThat(result.getBytes()).isEqualTo(validNonSquareImageFile.getBytes());
+    }
+
+    private byte[] convertImageToByteArray(BufferedImage image, String format) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, format, baos);
+        baos.flush();
+        byte[] imageBytes = baos.toByteArray();
+        baos.close();
+        return imageBytes;
     }
 }

@@ -33,14 +33,14 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
-        log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+        log.info("Creating project '{}' by UserId {}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(dto));
     }
 
     @PutMapping
     public ResponseEntity<UpdateProjectDto> updateProject(@Valid @RequestBody UpdateProjectDto dto) {
-        log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+        log.info("Updating project '{}' by UserId {}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.ok(projectService.updateProject(dto));
     }
@@ -52,7 +52,7 @@ public class ProjectController {
             @Positive(message = "CurrentUserId must be greater than 0.")
             @PathVariable
             Long currentUserId) {
-        log.info("Getting filtered projects by User #{}.", currentUserId);
+        log.info("Getting filtered projects by User {}.", currentUserId);
 
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
@@ -63,7 +63,7 @@ public class ProjectController {
             @Positive(message = "CurrentUserId must be greater than 0.")
             @RequestParam
             Long currentUserId) {
-        log.info("Getting all projects by User #{}.", currentUserId);
+        log.info("Getting all projects by User {}.", currentUserId);
 
         return ResponseEntity.ok(projectService.getAllProjectsForUser(currentUserId));
     }
@@ -78,7 +78,7 @@ public class ProjectController {
             @Positive(message = "CurrentUserId must be greater than 0.")
             @PathVariable
             Long projectId) {
-        log.info("Getting project id #{} by User #{}.", projectId, currentUserId);
+        log.info("Getting project id {} by User {}.", projectId, currentUserId);
 
         return ResponseEntity.ok(projectService.getAccessibleProjectById(currentUserId, projectId));
     }

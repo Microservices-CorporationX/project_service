@@ -76,6 +76,19 @@ public class ResourceHandler {
         );
     }
 
+    public MultipartFile handleImage(MultipartFile file) {
+        BufferedImage coverImage = getImageFromMultipartFile(file);
+        if (!resourceValidator.isCorrectProjectCoverScale(coverImage)) {
+            coverImage = resizeImage(coverImage,
+                    ResourceValidator.MAX_COVER_WIDTH_PX,
+                    ResourceValidator.MAX_COVER_HEIGHT_PX);
+        }
+        MultipartFile coverFile = convertImageToMultipartFile(file, coverImage);
+        log.info("Image '{}' successfully handled.", coverFile.getOriginalFilename());
+
+        return coverFile;
+    }
+
     private String getResourceExtension(MultipartFile file) {
         MimeTypes mimeTypes = MimeTypes.getDefaultMimeTypes();
 

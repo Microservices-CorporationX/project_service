@@ -13,6 +13,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,14 +65,12 @@ class ResourceControllerTest {
 
     @Test
     void testUploadProjectCoverImage() throws Exception {
-        when(resourceService.uploadProjectCover(mockFile, userId, projectId)).thenReturn(originalFileName);
-
         mockMvc.perform(multipart(URL, projectId)
                         .file(mockFile)
                         .param("userId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(
-                        String.format("Project #%d cover '%s' successfully uploaded by User #%d",
+                        String.format("Project %d cover '%s' successfully uploaded by User %d",
                                 projectId, originalFileName, userId)));
 
         verify(resourceService, times(1)).uploadProjectCover(mockFile, userId, projectId);
@@ -83,7 +82,7 @@ class ResourceControllerTest {
                         .param("userId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(
-                        String.format("Project #%d cover successfully deleted by User #%d", projectId, userId)));
+                        String.format("Project %d cover successfully deleted by User %d", projectId, userId)));
 
         verify(resourceService, times(1)).deleteProjectCover(userId, projectId);
     }
