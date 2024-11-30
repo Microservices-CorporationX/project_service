@@ -33,9 +33,12 @@ public class ResourceController {
     @PostMapping("/{projectId}")
     @Operation(summary = "Add project cover image.")
     public ResponseEntity<String> uploadProjectCoverImage(
-            @PathVariable @Positive(message = "Project id must be a positive integer") Long projectId,
-            @RequestParam(name = "userId") @Positive(message = "User id must be a positive integer") Long userId,
-            @RequestParam(name = "file") @NotNull(message = "You should add a file") MultipartFile file
+            @PathVariable
+            @Positive(message = "Project id must be a positive integer") Long projectId,
+            @RequestParam(name = "userId")
+            @Positive(message = "User id must be a positive integer") Long userId,
+            @RequestParam(name = "file")
+            @NotNull(message = "You should add a file") MultipartFile file
     ) {
         log.info("Request to upload cover for project #{} by User #{}.", projectId, userId);
         String fileName = resourceService.uploadProjectCover(file, userId, projectId);
@@ -52,7 +55,6 @@ public class ResourceController {
     public ResponseEntity<String> deleteProjectCoverImage(
             @PathVariable
             @Positive(message = "Project id must be a positive integer") Long projectId,
-            @PathVariable
             @RequestParam(name = "userId")
             @Positive(message = "User id must be a positive integer") Long userId
     ) {
