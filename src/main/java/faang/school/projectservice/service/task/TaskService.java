@@ -2,6 +2,7 @@ package faang.school.projectservice.service.task;
 
 import faang.school.projectservice.dto.task.TaskDTO;
 import faang.school.projectservice.dto.task.TaskFilterDTO;
+import faang.school.projectservice.exception.task.AccessDeniedException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.task.TaskMapper;
 import faang.school.projectservice.model.Project;
@@ -10,7 +11,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.task.filter.TaskFilter;
-import org.springframework.security.access.AccessDeniedException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
