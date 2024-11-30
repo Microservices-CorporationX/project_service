@@ -70,7 +70,6 @@ public class TaskService {
 
     public List<TaskDTO> getFilteredTasks(TaskFilterDTO taskFilterDTO, Long projectId) {
         log.info("Запрос на фильтрацию задач с фильтром: {}", taskFilterDTO);
-
         if (taskFilterDTO == null) {
             log.warn("Фильтр не был передан");
             throw new ValidationException("Фильтр не может быть null");
