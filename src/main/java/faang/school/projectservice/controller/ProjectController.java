@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.ProjectFilterDto;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,7 @@ public class ProjectController {
     }
 
     @PostMapping("/with-filters")
-    public List<ProjectDto> getAllProjectsByFilters(@RequestBody ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getAllProjectsByFilters(@Valid @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getAllProjects(projectFilterDto);
     }
 
