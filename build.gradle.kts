@@ -24,6 +24,11 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
+     * Spring Security
+     */
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    /**
      * Database
      */
     implementation("org.liquibase:liquibase-core")
