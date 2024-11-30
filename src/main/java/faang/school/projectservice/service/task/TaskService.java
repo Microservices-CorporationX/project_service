@@ -101,7 +101,7 @@ public class TaskService {
         return taskMapper.toDto(task);
     }
 
-    private void validateUserAccessToProject(Long projectId, Long currentUserId) {
+    void validateUserAccessToProject(Long projectId, Long currentUserId) {
         if (!teamMemberRepository.isUserInAnyTeamOfProject(projectId, currentUserId)) {
             throw new AccessDeniedException("У вас нет доступа к проекту с ID: " + projectId);
         }
