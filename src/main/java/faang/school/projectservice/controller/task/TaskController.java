@@ -6,7 +6,6 @@ import faang.school.projectservice.service.task.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,34 +18,27 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TaskDTO createTask(@Valid @RequestBody TaskDTO taskDTO) {
+    @PostMapping("/project/{projectId}")
+    public TaskDTO createTask(@PathVariable Long projectId,@Valid @RequestBody TaskDTO taskDTO) {
         log.info("Получен запрос на создание задачи: {}", taskDTO);
-        return taskService.createTask(taskDTO);
+        return taskService.createTask(taskDTO, projectId);
     }
 
-    @PatchMapping("/{taskId}")
-    public TaskDTO updateTask(@PathVariable Long taskId, @Valid @RequestBody TaskDTO taskDTO) {
+    @PatchMapping("/project/{projectId}/tasks/{taskId}")
+    public TaskDTO updateTask(@PathVariable Long projectId, @PathVariable Long taskId, @Valid @RequestBody TaskDTO taskDTO) {
         log.info("Получен запрос на обновление задачи с ID: {}", taskId);
-        return taskService.updateTask(taskId, taskDTO);
+        return taskService.updateTask(taskId, taskDTO, projectId);
     }
 
-    @GetMapping("/{taskId}")
-    public TaskDTO getTaskById(@PathVariable Long taskId) {
+    @GetMapping("/project/{projectId}/tasks/{taskId}")
+    public TaskDTO getTaskById(@PathVariable Long projectId, @PathVariable Long taskId) {
         log.info("Получен запрос на получение задачи с ID: {}", taskId);
-        return taskService.getTaskById(taskId);
+        return taskService.getTaskById(taskId, projectId);
     }
 
-    @PostMapping("/filter")
-    public List<TaskDTO> getFilteredTasks(@Valid @RequestBody TaskFilterDTO taskFilterDTO) {
+    @PostMapping("/project/{projectId}/filter")
+    public List<TaskDTO> getFilteredTasks(@PathVariable Long projectId,@Valid @RequestBody TaskFilterDTO taskFilterDTO) {
         log.info("Получен запрос на фильтрацию задач с фильтром: {}", taskFilterDTO);
-        return taskService.getFilteredTasks(taskFilterDTO);
-    }
-
-    @GetMapping("/project/{projectId}")
-    public List<TaskDTO> getAllTasksByProjectId(@PathVariable Long projectId) {
-        log.info("Получен запрос на получение всех задач для проекта с ID: {}", projectId);
-        return taskService.getAllTasksByProjectId(projectId);
+        return taskService.getFilteredTasks(taskFilterDTO, projectId);
     }
 }
