@@ -26,6 +26,9 @@ public class MomentDto {
     @Size(min = 3, max = 16, message = "Username length should be min 3, max 16")
     private String name;
 
+    @NotEmpty(message = "At least one user must be specified")
+    private List<Long> userIds;
+
     @NotEmpty(message = "At least one project must be specified")
     private List<@NotNull(message = "The project ID cannot be null") Long> projectsIds;
 
