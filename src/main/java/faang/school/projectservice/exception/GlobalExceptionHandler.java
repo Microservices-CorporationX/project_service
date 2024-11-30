@@ -28,6 +28,18 @@ public class GlobalExceptionHandler {
         return buildResponse(e);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleIllegalStateException(IllegalStateException e) {
+        return buildResponse(e);
+    }
+
+    @ExceptionHandler(StorageExceededException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleStorageExceededException(StorageExceededException e) {
+        return buildResponse(e);
+    }
+
     @ExceptionHandler(ServiceCallException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorResponse handleServiceCallException(ServiceCallException e) {
@@ -68,14 +80,15 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({ZippingFileError.class, StreamingFileError.class,
+            FileDownloadException.class, FileUploadException.class, Exception.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleException(Exception e) {
+    public ErrorResponse handleZipFileStreamingFileFileDownloadFileUploadExceptions(Exception e) {
         return buildResponse(e);
     }
 
     private ErrorResponse buildResponse(Exception e) {
-        log.error(e.getClass().getName(), e);
+        log.error(e.getClass().getSimpleName(), e);
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .error(e.getClass().getName())

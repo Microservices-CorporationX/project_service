@@ -4,7 +4,7 @@ spring:
       path: /api/v1
   servlet:
     multipart:
-      max-file-size: 5MB
+      max-file-size: 10GB
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -47,7 +47,7 @@ services:
     endpoint: http://127.0.0.1:9000
     accessKey: user
     secretKey: password
-    bucketName: projectbucket
+    bucketName: corpbucket
     region: us-east-1
     isMocked: false
   jira:
@@ -66,3 +66,6 @@ services:
     host: http://localhost
     port: 8080
     path: /api/v1
+
+project-files:
+  max-project-file-size: 2147483648

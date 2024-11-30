@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,6 +57,7 @@ public class ProjectService {
         validateProjectExistsForUser(userId, projectDto.getName());
         Project project = projectMapper.toEntityCreate(projectDto);
         project.setOwnerId(userId);
+        project.setStorageSize(BigInteger.ZERO);
         Project savedProject = projectRepository.save(project);
         log.info("Project created with ID: {}", savedProject.getId());
         return projectMapper.toDto(savedProject);

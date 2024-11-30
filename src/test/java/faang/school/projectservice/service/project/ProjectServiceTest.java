@@ -24,12 +24,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -202,6 +204,7 @@ public class ProjectServiceTest {
                 .id(1L)
                 .name("Project1")
                 .ownerId(1L)
+                .storageSize(BigInteger.ZERO)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .description("Description1")
@@ -215,6 +218,7 @@ public class ProjectServiceTest {
         verify(projectRepository).save(project);
         assertEquals(projectDto.getId(), result.getId());
         assertEquals(projectDto.getName(), result.getName());
+        assertNotNull(result.getStorageSize());
     }
 
     @Test
