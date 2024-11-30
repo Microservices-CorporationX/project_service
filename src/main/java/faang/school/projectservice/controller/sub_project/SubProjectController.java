@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +41,7 @@ public class SubProjectController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)})
-    public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId,
+    public ProjectDto createSubProject(@PathVariable("Id") Long projectId,
                                        @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
     }
@@ -76,8 +74,8 @@ public class SubProjectController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)})
-    public List<ProjectDto> getSubProjects(@NotNull @Min(0) @PathVariable("Id") Long projectId,
-                                           @RequestBody ProjectFilterDto projectFilterDto) {
+    public List<ProjectDto> getSubProjects(@PathVariable("Id") Long projectId,
+                                           @Valid @RequestBody ProjectFilterDto projectFilterDto) {
         return projectService.getSubProjects(projectId, projectFilterDto);
     }
 }

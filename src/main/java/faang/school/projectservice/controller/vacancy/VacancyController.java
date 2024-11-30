@@ -1,10 +1,10 @@
 package faang.school.projectservice.controller.vacancy;
 
-import faang.school.projectservice.dto.ProjectDto;
 import faang.school.projectservice.dto.VacancyDto;
 import faang.school.projectservice.dto.VacancyFilterDto;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.validator.vacancy.VacancyControllerValidator;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,7 +46,7 @@ public class VacancyController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)})
-    public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
+    public VacancyDto createVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
     }
@@ -63,7 +63,7 @@ public class VacancyController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)})
-    public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
+    public VacancyDto updateVacancy(@Valid @RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
     }
@@ -95,7 +95,7 @@ public class VacancyController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
                     content = @Content)})
-    public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto vacancyFilterDto) {
+    public List<VacancyDto> getVacancies(@Valid @RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getVacancies(vacancyFilterDto);
     }
 
