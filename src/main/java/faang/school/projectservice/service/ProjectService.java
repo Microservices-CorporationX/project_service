@@ -2,33 +2,41 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+
+
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
+
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    private final ApplicationEventPublisher eventPublisher;
     private final ProjectRepository projectRepository;
     private final ProjectValidator projectValidator;
     private final ProjectMapper projectMapper;
     private final UpdateProjectMapper updateProjectMapper;
     private final List<Filter<Project, ProjectFilterDto>> projectFilters;
+    private final List<StatusUpdater> statusUpdates;
 
     public ProjectDto createProject(ProjectDto dto) {
         projectValidator.validateUniqueProject(dto);
@@ -120,10 +128,84 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    @Transactional
+    public ProjectCreateResponseDto createSubProject(Long parentId, CreateProjectDto createProjectDto) {
+        Project parentProject = projectRepository.getProjectById(parentId);
+        projectValidator.validateCreateSubprojectBasedOnVisibility(parentProject, createProjectDto);
+        projectValidator.validateUniqueProject(createProjectDto);
+
+        Project subProject = projectMapper.toEntity(createProjectDto);
+        initializeSubProject(subProject, parentProject);
+
+        projectRepository.save(parentProject);
+        Project savedProject = projectRepository.save(subProject);
+        log.info("Subproject #{} created successfully for parent project #{}.", savedProject.getId(), parentId);
+        return projectMapper.toCreateResponseDto(savedProject);
+    }
+
+    @Transactional
+    public ProjectUpdateResponseDto updateSubProject(UpdateSubProjectDto updateSubProjectDto) {
+        Project subProject = getProjectById(updateSubProjectDto.getId());
+        changeStatus(subProject, updateSubProjectDto);
+        changeVisibility(subProject, updateSubProjectDto);
+        Project parentProject = subProject.getParentProject();
+
+        publishSubProjectsClosedEventIfNeeded(parentProject);
+
+        subProject.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        return projectMapper.toUpdateResponseDto(projectRepository.save(subProject));
+    }
+
+    public List<ProjectDto> filterSubProjects(Long parentId, ProjectFilterDto filters) {
+
+        Project project = projectRepository.getProjectById(parentId);
+        projectValidator.validateProjectPublic(project);
+
+        Stream<Project> childrenProjectsStream = project
+                .getChildren()
+                .stream()
+                .filter(projectValidator::isPublicProject);
+
+        return projectFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .reduce(childrenProjectsStream, (streamProject, filter) -> filter.apply(streamProject, filters),
+                        (s1, s2) -> s1)
+                .map(projectMapper::toDto)
+                .toList();
+    }
+
+    private void changeStatus(Project project, UpdateSubProjectDto updateSubProjectDto) {
+        projectValidator.validateSameProjectStatus(project, updateSubProjectDto);
+        projectValidator.validateProjectStatusCompletedOrCancelled(project);
+
+        statusUpdates.stream()
+                .filter(update -> update.isApplicable(updateSubProjectDto))
+                .forEach(update -> update.changeStatus(project));
+    }
+
+    private void changeVisibility(Project project, UpdateSubProjectDto updateSubProjectDto) {
+        if (updateSubProjectDto.getVisibility() != null) {
+            project.setVisibility(updateSubProjectDto.getVisibility());
+        }
+    }
+
+    private void initializeSubProject(Project project, Project parentProject) {
+        project.setParentProject(parentProject);
+        project.setStatus(ProjectStatus.CREATED);
+        parentProject.getChildren().add(project);
+    }
+
     private List<Project> getAllAccessibleProjects(Long currentUserId) {
         return projectRepository.findAll().stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
+    }
+
+    private void publishSubProjectsClosedEventIfNeeded(Project parentProject) {
+        if (projectValidator.validateHasChildrenProjectsClosed(parentProject)) {
+            eventPublisher.publishEvent(new SubProjectClosedEvent(this, parentProject.getId()));
+            log.info("Published SubProjectClosedEvent for project #{}", parentProject.getId());
+        }
     }
 }
 
