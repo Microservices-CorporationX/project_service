@@ -53,16 +53,22 @@ public class MeetingService {
     }
 
     @Transactional
-    public void deleteMeeting(Long meetId, MeetDto deleteDto) {
-        validateMeetCreator(meetId, deleteDto.getCreatorId());
+    public void deleteMeeting(long meetId, long creatorId) {
+        validateMeetCreator(meetId, creatorId);
 
         meetRepository.deleteById(meetId);
-        log.info("Meeting #{} successfully deleted by User #{}", meetId, deleteDto.getCreatorId());
+        log.info("Meeting #{} successfully deleted by User #{}", meetId, creatorId);
     }
 
 
     @Transactional
     public List<MeetDto> filterMeetings(MeetDto filters) {
+        if (filters == null || meetFilters.stream().noneMatch(filter -> filter.isApplicable(filters))) {
+            return meetRepository.findAll().stream()
+                    .map(meetMapper::toDto)
+                    .toList();
+        }
+
         Stream<Meet> meet = meetRepository.findAll().stream();
 
         Stream<Meet> filterMeet = meetFilters.stream()
@@ -90,10 +96,10 @@ public class MeetingService {
         return meet;
     }
 
-    private void validateMeetCreator(Long meetId, Long creatorId) {
+    private void validateMeetCreator(long meetId, long creatorId) {
         Meet meet = meetRepository.findById(meetId).orElseThrow(EntityNotFoundException::new);
 
-        if (!creatorId.equals(meet.getCreatorId())) {
+        if (!(creatorId == meet.getCreatorId())) {
             throw new UnauthorizedAccessException("User is not allowed to delete this meeting");
         }
     }

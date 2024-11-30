@@ -49,13 +49,13 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.updateMeeting(updateMeetDto, meetId));
     }
 
-    @DeleteMapping("/meetings/{meetId}")
+    @DeleteMapping("/meetings/{meetId}/{creatorId}")
     @Operation(summary = "Delete a meeting by its ID by owning user")
     public ResponseEntity<Void> deleteMeeting(
-            @PathVariable @Positive(message = "Meeting ID must be a positive number") Long meetId,
-            @RequestBody MeetDto deleteDto) {
+            @PathVariable @Positive(message = "Meeting ID must be a positive number") long meetId,
+            @PathVariable @Positive(message = "Creator ID must be a positive number") long creatorId) {
         log.info("Deleting meeting with id {}", meetId);
-        meetingService.deleteMeeting(meetId, deleteDto);
+        meetingService.deleteMeeting(meetId, creatorId);
         return ResponseEntity.noContent().build();
     }
 

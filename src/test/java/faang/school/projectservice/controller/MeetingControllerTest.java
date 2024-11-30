@@ -37,7 +37,7 @@ public class MeetingControllerTest {
     private static final String BASE_URL = "/api/v1/meetings";
     private static final String CREATE_URL = "/meeting";
     private static final String UPDATE_URL = "/{meetId}";
-    private static final String DELETE_URL = "/meetings/{meetId}";
+    private static final String DELETE_URL = "/meetings/{meetId}/{creatorId}";
     private static final String GET_ALL_URL = "/meetings";
     private static final String FILTER_URL = "/filters";
     private static final String GET_BY_ID_URL = "/meetings/{meetId}";
@@ -97,14 +97,13 @@ public class MeetingControllerTest {
 
     @Test
     void testDeleteMeeting() throws Exception {
-        doNothing().when(meetingService).deleteMeeting(anyLong(), eq(meetDto));
+        doNothing().when(meetingService).deleteMeeting(anyLong(), anyLong());
 
-        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(meetDto)))
+        mockMvc.perform(delete(BASE_URL + DELETE_URL, 1L, meetDto.getCreatorId())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(meetingService, times(1)).deleteMeeting(1L, meetDto);
+        verify(meetingService, times(1)).deleteMeeting(eq(1L), eq(meetDto.getCreatorId()));
     }
 
     @Test

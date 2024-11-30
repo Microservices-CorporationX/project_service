@@ -4,6 +4,8 @@ import faang.school.projectservice.dto.meet.MeetDto;
 import faang.school.projectservice.exception.MeetingAlreadyCancelledException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.meet.MeetDateFilter;
+import faang.school.projectservice.filter.meet.MeetNameFilter;
 import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
@@ -26,9 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,11 +131,14 @@ public class MeetingServiceTest {
 
     @Test
     void testDeleteMeeting() {
+        long creatorId = 1L;
+        long meetingId = 1L;
+
         meet.setCreatorId(meetDto.getCreatorId());
 
         when(meetRepository.findById(meetDto.getId())).thenReturn(Optional.of(meet));
 
-        meetingService.deleteMeeting(meetDto.getId(), meetDto);
+        meetingService.deleteMeeting(meetingId, creatorId);
 
         verify(meetRepository, times(1)).deleteById(meetDto.getId());
     }
@@ -141,7 +149,7 @@ public class MeetingServiceTest {
 
         when(meetRepository.findById(meetDto.getId())).thenReturn(Optional.of(meet));
 
-        assertThrows(UnauthorizedAccessException.class, () -> meetingService.deleteMeeting(meetDto.getId(), meetDto));
+        assertThrows(UnauthorizedAccessException.class, () -> meetingService.deleteMeeting(meetDto.getId(), anyLong()));
     }
 
     @Test
@@ -158,6 +166,36 @@ public class MeetingServiceTest {
         assertFalse(filteredMeetings.isEmpty());
         assertEquals(1, filteredMeetings.size());
         verify(meetRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testFilterMeetingsWithoutApplicableFilters() {
+        Meet meet = new Meet();
+        MeetDto meetDto = new MeetDto();
+
+        when(meetRepository.findAll()).thenReturn(List.of(meet));
+        when(meetMapper.toDto(meet)).thenReturn(meetDto);
+
+
+        Filter<Meet, MeetDto> filter1 = mock(Filter.class);
+        Filter<Meet, MeetDto> filter2 = mock(Filter.class);
+
+        when(filter1.isApplicable(meetDto)).thenReturn(false);
+        when(filter2.isApplicable(meetDto)).thenReturn(false);
+
+        when(meetFilters.stream()).thenReturn(Stream.of(filter1, filter2));
+
+        List<MeetDto> result = meetingService.filterMeetings(meetDto);
+
+        assertNotNull(result, "Result should not be null");
+        assertFalse(result.isEmpty(), "Result should not be empty");
+        assertEquals(1, result.size(), "Must be one result");
+        assertEquals(meetDto, result.get(0), "Result must contains meetDto");
+
+        verify(meetRepository, times(1)).findAll();
+        verify(filter1, times(1)).isApplicable(meetDto);
+        verify(filter2, times(1)).isApplicable(meetDto);
+        verifyNoMoreInteractions(filter1, filter2);
     }
 
     @Test
