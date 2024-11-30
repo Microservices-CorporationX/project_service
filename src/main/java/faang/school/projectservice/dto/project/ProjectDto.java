@@ -6,10 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ProjectDto {
 
@@ -28,6 +32,7 @@ public class ProjectDto {
     @Positive(message = "OwnerId must be greater than 0.")
     private Long ownerId;
 
+    @NotNull(message = "Visibility is required.")
     private ProjectVisibility visibility;
     private ProjectStatus status;
 }
