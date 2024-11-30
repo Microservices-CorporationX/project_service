@@ -55,8 +55,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Projects not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects(new ProjectFilterDto());
     }
@@ -87,8 +86,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "400", description = "Project already exists",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public ProjectDto createProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.createProject(projectDto);
     }
@@ -104,8 +102,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public ProjectDto updateProject(@Valid @RequestBody ProjectDto projectDto) {
         return projectService.updateProject(projectDto);
     }

@@ -28,6 +28,7 @@ import java.util.List;
 @RequestMapping("/Projects")
 @Tag(name = "Контроллер для управления подпроектами")
 public class SubProjectController {
+
     private final ProjectService projectService;
 
     @PostMapping("/{Id}/createSubProject")
@@ -41,8 +42,7 @@ public class SubProjectController {
             @ApiResponse(responseCode = "400", description = "SubProject already exists",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public ProjectDto createSubProject(@NotNull @Min(0) @PathVariable("Id") Long projectId,
                                        @Valid @RequestBody CreateSubProjectDto createSubProjectDto) {
         return projectService.createSubProject(projectId, createSubProjectDto);
@@ -59,8 +59,7 @@ public class SubProjectController {
             @ApiResponse(responseCode = "404", description = "SubProject not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public ProjectDto updateSubProject(@Valid @RequestBody ProjectDto subProjectDto) {
         return projectService.updateSubProject(subProjectDto);
     }

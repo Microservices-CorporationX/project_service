@@ -45,8 +45,7 @@ public class VacancyController {
             @ApiResponse(responseCode = "400", description = "Vacancy already exists",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public VacancyDto createVacancy(@RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.createVacancy(vacancyDto);
@@ -63,8 +62,7 @@ public class VacancyController {
             @ApiResponse(responseCode = "404", description = "Vacancy not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public VacancyDto updateVacancy(@RequestBody VacancyDto vacancyDto) {
         validator.validateVacancyDto(vacancyDto);
         return vacancyService.updateVacancy(vacancyDto);
@@ -96,8 +94,7 @@ public class VacancyController {
             @ApiResponse(responseCode = "404", description = "Vacancy not found",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Server error",
-                    content = @Content)
-    })
+                    content = @Content)})
     public List<VacancyDto> getVacancies(@RequestBody VacancyFilterDto vacancyFilterDto) {
         return vacancyService.getVacancies(vacancyFilterDto);
     }
