@@ -329,12 +329,12 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("Increase storage size after file upload with valid input: success")
-    void increaseOccupiedStorageSizeAfterFileUpload_ValidInput_Success() {
+    void increaseOccupiedStorageSize_ValidInput_Success() {
         MockMultipartFile file = new MockMultipartFile("file", "content".getBytes());
 
         project.setStorageSize(BigInteger.valueOf(10L));
 
-        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
+        projectService.increaseOccupiedStorageSize(project, file);
 
         verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
 
@@ -349,7 +349,7 @@ class ProjectServiceTest {
                 .when(resourceValidator).validateResourceNotEmpty(file);
 
         RuntimeException ex = assertThrows(InsufficientStorageException.class, () ->
-                projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file));
+                projectService.increaseOccupiedStorageSize(project, file));
         assertEquals("Not enough space to store files", ex.getMessage());
 
         verify(resourceValidator, times(1)).validateResourceNotEmpty(file);
@@ -357,12 +357,12 @@ class ProjectServiceTest {
 
     @Test
     @DisplayName("Decrease storage size after file deleted with valid input: success")
-    void decreaseOccupiedStorageSizeAfterFileDelete_ValidInput_Success() {
+    void decreaseOccupiedStorageSize_ValidInput_Success() {
         BigInteger fileSize = BigInteger.valueOf(5L);
 
         project.setStorageSize(BigInteger.valueOf(10L));
 
-        projectService.decreaseOccupiedStorageSizeAfterFileDelete(project, fileSize);
+        projectService.decreaseOccupiedStorageSize(project, fileSize);
 
         assertEquals(BigInteger.valueOf(5L), project.getStorageSize());
     }

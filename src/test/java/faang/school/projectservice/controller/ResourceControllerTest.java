@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigInteger;
@@ -24,8 +23,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @WebMvcTest
 @ContextConfiguration(classes = {ResourceController.class})
@@ -68,13 +71,13 @@ class ResourceControllerTest {
     void uploadResource_ValidFileAndParams_Success() throws Exception {
         when(resourceService.uploadResource(projectId, userId, file)).thenReturn(resourceResponseDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.data.id").value(6L))
+                .andExpect(jsonPath("$.data.id").value( resourceResponseDto.getId()))
                 .andExpect(jsonPath("$.message").value(String.format("File %s uploaded successfully", resourceResponseDto.getName())));
     }
 
@@ -83,7 +86,7 @@ class ResourceControllerTest {
     void uploadResource_NegativeProjectId_FailBadRequest() throws Exception {
         projectId = -1L;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -96,7 +99,7 @@ class ResourceControllerTest {
     void uploadResource_NullProjectId_FailNotFound() throws Exception {
         projectId = null;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -107,7 +110,7 @@ class ResourceControllerTest {
     @DisplayName("File upload fail: user id not provided")
     void uploadResource_UserIdNotProvided_FailBadRequest() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
@@ -120,7 +123,7 @@ class ResourceControllerTest {
     void uploadResource_NegativeUserId_FailBadRequest() throws Exception {
         userId = -1L;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -132,7 +135,7 @@ class ResourceControllerTest {
     @DisplayName("File upload fail: file not provided")
     void uploadResource_FileNotProvided_FailBadRequest() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
+        mockMvc.perform(multipart(BASE_URL + UPLOAD_SINGLE_RESOURCE_URL, projectId)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
@@ -214,7 +217,7 @@ class ResourceControllerTest {
         resourceId = 6L;
         when(resourceService.updateResource(projectId, resourceId, userId, file)).thenReturn(resourceResponseDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -224,7 +227,7 @@ class ResourceControllerTest {
                         }))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.data.id").value(6L))
+                .andExpect(jsonPath("$.data.id").value(resourceId))
                 .andExpect(jsonPath("$.message").value(String.format("File id: %d updated successfully", resourceId)));
     }
 
@@ -233,7 +236,7 @@ class ResourceControllerTest {
     void updateResource_NegativeProjectId_Fail() throws Exception {
         projectId = -1L;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -250,7 +253,7 @@ class ResourceControllerTest {
     void updateResource_NegativeResourceId_Fail() throws Exception {
         resourceId = -1L;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -267,7 +270,7 @@ class ResourceControllerTest {
     void updateResource_NegativeUserId_Fail() throws Exception {
         userId = -1L;
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .file(file)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -282,7 +285,7 @@ class ResourceControllerTest {
     @Test
     @DisplayName("File update fail: missed userId")
     void updateResource_MissedUserId_Fail() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .file(file)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(request -> {
@@ -296,7 +299,7 @@ class ResourceControllerTest {
     @Test
     @DisplayName("File update fail: file not provided")
     void updateResource_FiledNotProvided_Fail() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
+        mockMvc.perform(multipart(BASE_URL + UPDATE_URL, projectId, resourceId)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(request -> {

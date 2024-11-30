@@ -13,12 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,16 +39,19 @@ public class ResourceService {
 
         Project project = projectService.getProjectById(projectId);
         projectValidator.validateUserInProjectTeam(userId, project);
-        resourceValidator.validateEnoughSpaceInStorage(project, file);
+        validateEnoughSpaceInStorageAndIncreaseStorageSize(project, file);
 
         String folderName = String.format("%d_%s", projectId, project.getName());
-        String key = String.format("%s/%s_%d", folderName, file.getOriginalFilename(), System.currentTimeMillis());
+        String key = String.format("%s/%d_%s", folderName, System.currentTimeMillis(), file.getOriginalFilename());
 
         Resource resource = createNewUploadResource(file, key, userId, project);
 
-        storageService.uploadResourceAsync(file, key);
-
-        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
+        try {
+            storageService.uploadResourceAsync(file, key);
+        } catch (Exception e) {
+            projectService.decreaseOccupiedStorageSize(project, BigInteger.valueOf(file.getSize()));
+            log.error("Failed to upload resource, rolled back storage size change", e);
+        }
 
         resource = resourceRepository.save(resource);
 
@@ -59,9 +60,7 @@ public class ResourceService {
 
     @Transactional
     public void deleteResource(Long projectId, Long resourceId, Long userId) {
-        projectValidator.validateProjectExistsById(projectId);
-        resourceValidator.validateResourceExistsById(resourceId);
-        teamMemberValidator.validateTeamMemberExistsById(userId);
+        checkProjectResourceTeamMemberExistById(projectId, resourceId, userId);
 
         TeamMember teamMember = teamMemberService.getTeamMemberByUserId(userId);
         Resource resource = resourceRepository.getReferenceById(resourceId);
@@ -74,7 +73,7 @@ public class ResourceService {
 
         storageService.deleteResource(key);
 
-        projectService.decreaseOccupiedStorageSizeAfterFileDelete(project, resource.getSize());
+        projectService.decreaseOccupiedStorageSize(project, resource.getSize());
 
         resource.setStatus(ResourceStatus.DELETED);
         resource.setKey(null);
@@ -87,9 +86,7 @@ public class ResourceService {
 
     @Transactional
     public ResourceResponseDto updateResource(Long projectId, Long resourceId, Long userId, MultipartFile file) {
-        projectValidator.validateProjectExistsById(projectId);
-        resourceValidator.validateResourceExistsById(resourceId);
-        teamMemberValidator.validateTeamMemberExistsById(userId);
+        checkProjectResourceTeamMemberExistById(projectId, resourceId, userId);
         resourceValidator.validateResourceNotEmpty(file);
 
         TeamMember teamMember = teamMemberService.getTeamMemberByUserId(userId);
@@ -104,33 +101,42 @@ public class ResourceService {
         storageService.deleteResource(key);
 
         project.setStorageSize(project.getStorageSize().subtract(resource.getSize()));
-        resourceValidator.validateEnoughSpaceInStorage(project, file);
+        validateEnoughSpaceInStorageAndIncreaseStorageSize(project, file);
 
         String folderName = String.format("%d_%s", projectId, project.getName());
         String newKey = String.format("%s/%s_%d", folderName, file.getOriginalFilename(), System.currentTimeMillis());
 
         storageService.uploadResourceAsync(file, newKey);
 
-        projectService.increaseOccupiedStorageSizeAfterFileUpload(project, file);
 
         createResourceAfterUpdate(resource, newKey, teamMember, file);
 
         resourceRepository.save(resource);
 
-        log.info("File id: {} in project id: {}was updated successfully", resourceId, projectId);
+        log.info("File id: {} in project id: {} was updated successfully", resourceId, projectId);
         return resourceMapper.toDto(resource);
     }
 
     public byte[] downloadResource(Long projectId, Long resourceId, Long userId) {
-        projectValidator.validateProjectExistsById(projectId);
-        resourceValidator.validateResourceExistsById(resourceId);
-        teamMemberValidator.validateTeamMemberExistsById(userId);
+        checkProjectResourceTeamMemberExistById(projectId, resourceId, userId);
 
         Resource resource = resourceRepository.getReferenceById(resourceId);
         Project project = projectService.getProjectById(projectId);
         projectValidator.validateUserInProjectTeam(userId, project);
 
-        return storageService.downloadResource(resource.getKey());
+        return storageService.downloadResourceAsync(resource.getKey());
+    }
+
+    private synchronized void validateEnoughSpaceInStorageAndIncreaseStorageSize(Project project, MultipartFile file) {
+            resourceValidator.validateEnoughSpaceInStorage(project, file);
+            projectService.increaseOccupiedStorageSize(project, file);
+    }
+
+    private void checkProjectResourceTeamMemberExistById(Long projectId, Long resourceId, Long userId) {
+        projectValidator.validateProjectExistsById(projectId);
+        resourceValidator.validateResourceExistsById(resourceId);
+        teamMemberValidator.validateTeamMemberExistsById(userId);
+
     }
 
     private Resource createNewUploadResource(MultipartFile file, String key, Long userId, Project project) {

@@ -178,7 +178,7 @@ class StorageServiceTest {
 
     @Test
     @DisplayName("Download multiple files concurrently: success")
-    void downloadResourceAsync_Success() {
+    void downloadResourceAsyncAsync_Success() {
         byte[] contentFile = "content".getBytes();
         ResponseBytes<GetObjectResponse> mockResponse = ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), contentFile);
 
@@ -188,7 +188,7 @@ class StorageServiceTest {
 
         CompletableFuture<?>[] tasks = new CompletableFuture<?>[numFiles];
         for (int i = 0; i < numFiles; i++) {
-            tasks[i] = CompletableFuture.runAsync(() -> storageService.downloadResource(key), cachedThreadPool);
+            tasks[i] = CompletableFuture.runAsync(() -> storageService.downloadResourceAsync(key), cachedThreadPool);
         }
 
         CompletableFuture.allOf(tasks).join();
@@ -198,11 +198,11 @@ class StorageServiceTest {
 
     @Test
     @DisplayName("Download multiple files concurrently: fail")
-    void downloadResourceAsync_Fail() {
+    void downloadResourceAsyncAsync_Fail() {
         when(s3AsyncClient.getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class)))
                 .thenReturn(CompletableFuture.failedFuture(new CompletionException("Test exception", null)));
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> storageService.downloadResource(key));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> storageService.downloadResourceAsync(key));
 
         verify(s3AsyncClient, times(1)).getObject(any(GetObjectRequest.class), any(AsyncResponseTransformer.class));
 

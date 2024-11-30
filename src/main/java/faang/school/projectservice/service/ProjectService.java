@@ -120,7 +120,7 @@ public class ProjectService {
         return projectRepository.findAllByIds(ids).stream().map(projectMapper::toDto).toList();
     }
 
-    public void increaseOccupiedStorageSizeAfterFileUpload(Project project, MultipartFile file) {
+    public void increaseOccupiedStorageSize(Project project, MultipartFile file) {
         resourceValidator.validateResourceNotEmpty(file);
 
         BigInteger currentStorageSize = project.getStorageSize();
@@ -130,7 +130,7 @@ public class ProjectService {
         projectRepository.save(project);
     }
 
-    public void decreaseOccupiedStorageSizeAfterFileDelete(Project project, BigInteger fileSize) {
+    public void decreaseOccupiedStorageSize(Project project, BigInteger fileSize) {
 
         BigInteger currentStorageSize = project.getStorageSize();
         BigInteger updatedStorageSize = currentStorageSize.subtract(fileSize);

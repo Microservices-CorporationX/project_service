@@ -14,7 +14,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +53,7 @@ public class StorageService {
         }
     }
 
-    public byte[] downloadResource(String key) {
+    public byte[] downloadResourceAsync(String key) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(minioConfigProperties.getBucketName())
                 .key(key)

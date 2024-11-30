@@ -38,6 +38,7 @@ class ProjectValidatorTest {
     private Long ownerId;
     private String projectName;
     private Long projectId = 1L;
+    private Long userId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -146,7 +147,7 @@ class ProjectValidatorTest {
         Team team = Team.builder().teamMembers(List.of(teamMember)).build();
         project.setTeams(List.of(team));
 
-        assertDoesNotThrow(() -> projectValidator.validateUserInProjectTeam(1L, project));
+        assertDoesNotThrow(() -> projectValidator.validateUserInProjectTeam(userId, project));
     }
 
     @Test
@@ -157,7 +158,7 @@ class ProjectValidatorTest {
         project.setId(5L);
         project.setTeams(List.of(team));
 
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(1L, project));
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(userId, project));
         assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
     }
 
@@ -167,7 +168,7 @@ class ProjectValidatorTest {
         project.setId(5L);
         project.setTeams(List.of());
 
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(1L, project));
+        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateUserInProjectTeam(userId, project));
         assertEquals(String.format("User id: 1 doesn't work on project id: %d", project.getId()), ex.getMessage());
     }
 }

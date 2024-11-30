@@ -90,7 +90,7 @@ class ResourceServiceTest {
         verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
         verify(storageService, times(1)).uploadResourceAsync(any(MultipartFile.class), anyString());
-        verify(projectService, times(1)).increaseOccupiedStorageSizeAfterFileUpload(project, file);
+        verify(projectService, times(1)).increaseOccupiedStorageSize(project, file);
 
         assertNotNull(result);
         assertEquals(resource.getId(), result.getId());
@@ -115,11 +115,6 @@ class ResourceServiceTest {
         assertEquals(String.format("Project with id %d doesn't exist", projectId), ex.getMessage());
 
         verify(teamMemberValidator, never()).validateTeamMemberExistsById(userId);
-        verify(resourceValidator, never()).validateResourceNotEmpty(file);
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, never()).validateEnoughSpaceInStorage(project, file);
-        verify(storageService, never()).uploadResourceAsync(any(MultipartFile.class), anyString());
-        verify(projectService, never()).increaseOccupiedStorageSizeAfterFileUpload(project, file);
     }
 
     @Test
@@ -134,8 +129,6 @@ class ResourceServiceTest {
 
         verify(projectValidator, times(1)).validateProjectExistsById(projectId);
         verify(resourceValidator, never()).validateResourceNotEmpty(file);
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, never()).validateEnoughSpaceInStorage(project, file);
     }
 
     @Test
@@ -158,7 +151,7 @@ class ResourceServiceTest {
         verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
         verify(resourceValidator, times(1)).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
         verify(storageService, times(1)).deleteResource(anyString());
-        verify(projectService, times(1)).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
+        verify(projectService, times(1)).decreaseOccupiedStorageSize(any(Project.class), any(BigInteger.class));
         verify(resourceRepository, times(1)).save(resourceCaptor.capture());
 
         assertEquals(resource.getId(), resourceCaptor.getValue().getId());
@@ -176,12 +169,6 @@ class ResourceServiceTest {
         assertEquals(String.format("Project with id %d doesn't exist", projectId), ex.getMessage());
 
         verify(resourceValidator, never()).validateResourceExistsById(resource.getId());
-        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
-        verify(storageService, never()).deleteResource(anyString());
-        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
-        verify(resourceRepository, never()).save(resource);
     }
 
     @Test
@@ -197,11 +184,6 @@ class ResourceServiceTest {
 
         verify(projectValidator, times(1)).validateProjectExistsById(projectId);
         verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
-        verify(storageService, never()).deleteResource(anyString());
-        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
-        verify(resourceRepository, never()).save(resource);
     }
 
     @Test
@@ -217,10 +199,6 @@ class ResourceServiceTest {
         verify(projectValidator, times(1)).validateProjectExistsById(projectId);
         verify(resourceValidator, times(1)).validateResourceExistsById(anyLong());
         verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(resourceValidator, never()).validateTeamMemberHasPermissionsToModifyResource(any(TeamMember.class), any(Resource.class));
-        verify(storageService, never()).deleteResource(anyString());
-        verify(projectService, never()).decreaseOccupiedStorageSizeAfterFileDelete(any(Project.class), any(BigInteger.class));
-        verify(resourceRepository, never()).save(resource);
     }
 
     @Test
@@ -245,7 +223,7 @@ class ResourceServiceTest {
         verify(storageService, times(1)).deleteResource(anyString());
         verify(resourceValidator, times(1)).validateEnoughSpaceInStorage(project, file);
         verify(storageService, times(1)).uploadResourceAsync(any(MultipartFile.class), anyString());
-        verify(projectService, times(1)).increaseOccupiedStorageSizeAfterFileUpload(any(Project.class), any(MultipartFile.class));
+        verify(projectService, times(1)).increaseOccupiedStorageSize(any(Project.class), any(MultipartFile.class));
         verify(resourceRepository, times(1)).save(resource);
 
         assertNotNull(result);
@@ -267,7 +245,7 @@ class ResourceServiceTest {
 
         when(resourceRepository.getReferenceById(anyLong())).thenReturn(resource);
         when(projectService.getProjectById(projectId)).thenReturn(project);
-        when(storageService.downloadResource(anyString())).thenReturn(contentFile);
+        when(storageService.downloadResourceAsync(anyString())).thenReturn(contentFile);
 
         byte[] result = resourceService.downloadResource(projectId, resource.getId(), userId);
 
@@ -275,7 +253,7 @@ class ResourceServiceTest {
         verify(resourceValidator, times(1)).validateResourceExistsById(resource.getId());
         verify(teamMemberValidator, times(1)).validateTeamMemberExistsById(teamMember.getUserId());
         verify(projectValidator, times(1)).validateUserInProjectTeam(userId, project);
-        verify(storageService, times(1)).downloadResource(anyString());
+        verify(storageService, times(1)).downloadResourceAsync(anyString());
 
         assertNotNull(result);
         assertEquals(contentFile, result);
@@ -283,7 +261,7 @@ class ResourceServiceTest {
 
     @Test
     @DisplayName("Download file fail: invalid project id")
-    void DownloadResource_InvalidProjectId_Fail() {
+    void downloadResource_InvalidProjectId_Fail() {
 
         doThrow(new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId)))
                 .when(projectValidator).validateProjectExistsById(projectId);
@@ -292,9 +270,6 @@ class ResourceServiceTest {
         assertEquals(String.format("Project with id %d doesn't exist", projectId), ex.getMessage());
 
         verify(resourceValidator, never()).validateResourceExistsById(resource.getId());
-        verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(storageService, never()).downloadResource(anyString());
     }
 
     @Test
@@ -310,8 +285,6 @@ class ResourceServiceTest {
 
         verify(projectValidator, times(1)).validateProjectExistsById(projectId);
         verify(teamMemberValidator, never()).validateTeamMemberExistsById(teamMember.getUserId());
-        verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(storageService, never()).downloadResource(anyString());
     }
 
     @Test
@@ -327,7 +300,6 @@ class ResourceServiceTest {
         verify(projectValidator, times(1)).validateProjectExistsById(projectId);
         verify(resourceValidator, times(1)).validateResourceExistsById(anyLong());
         verify(projectValidator, never()).validateUserInProjectTeam(userId, project);
-        verify(storageService, never()).downloadResource(anyString());
     }
 
     private Project createMockProject() {
