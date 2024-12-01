@@ -1,10 +1,13 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.project;
 
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.project.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +49,10 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull Long id) {
         return projectService.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("{projectId}/filterChildren")
+    public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody ProjectFilterDto filterDto, @PathVariable@Positive @NotNull Long projectId){
+        return ResponseEntity.ok(projectService.getProjectsByFilters(projectId, filterDto));
     }
 }
