@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProj
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.exception.Subproject.*;
-import faang.school.projectservice.mapper.subprojectMapper.ProjectMapper;
+import faang.school.projectservice.mapper.subprojectMapper.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class SubProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
+    private final SubProjectMapper projectMapper;
     private final List<SubprojectFilter> subprojectFilters;
 
 

@@ -10,7 +10,7 @@ import org.mapstruct.Named;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface ProjectMapper {
+public interface SubProjectMapper {
     @Mapping(target = "children", source = "children", qualifiedByName = "childrenMap")
     ProjectDto toDto(Project project);
     @Mapping(target = "createdAt", ignore = true)
