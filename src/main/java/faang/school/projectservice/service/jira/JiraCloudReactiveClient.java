@@ -58,8 +58,8 @@ public class JiraCloudReactiveClient {
                 .bodyToMono(IssueResponse.class);
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<IssueResponse> updateIssue(String issueKey, JiraUpdateIssueRequest updateRequest) {
         log.info("Starting to Update issue {}", issueKey);
 
@@ -79,8 +79,8 @@ public class JiraCloudReactiveClient {
                 .bodyToMono(IssueResponse.class);
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<Void> transitionIssue(String issueKey, IssueStatus newIssueStatus) {
         log.info("Starting to transition issue with key {} to {}", issueKey, newIssueStatus);
 
@@ -104,8 +104,8 @@ public class JiraCloudReactiveClient {
                 .bodyToMono(Void.class);
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<List<TransitionNestedResponse>> getAvailableTransitions(String issueKey) {
         log.info("Starting to retrieve available transitions for issue {}", issueKey);
 
@@ -126,8 +126,8 @@ public class JiraCloudReactiveClient {
                 .map(TransitionsResponse::transitions);
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<List<IssueResponse>> searchIssuesByFilter(JiraSearchRequest request) {
         log.info("Starting to search issues by filter {}", request);
 
@@ -148,8 +148,8 @@ public class JiraCloudReactiveClient {
                 .map(JiraSearchResponse::getIssues);
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<IssueResponse> getIssueByKey(String issueKey) {
         log.info("Starting to retrieve issue by key {}", issueKey);
 
@@ -164,8 +164,8 @@ public class JiraCloudReactiveClient {
                 .flatMap(issues -> Mono.justOrEmpty(issues.stream().findFirst()));
     }
 
-    @CircuitBreaker(name = "jira-api")
-    @Retry(name = "jira-api-retry")
+    @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
+    @Retry(name = RETRY_CONFIG_NAME)
     public Mono<List<IssueResponse>> getIssuesByProject(String projectKey) {
         log.info("Starting to retrieve issues by project key {}", projectKey);
 
