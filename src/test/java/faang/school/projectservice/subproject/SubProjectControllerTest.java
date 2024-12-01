@@ -3,7 +3,7 @@ package faang.school.projectservice.subproject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.controller.SubprojectController;
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
-import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
+import faang.school.projectservice.dto.subprojectDto.subprojectDto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -44,14 +44,14 @@ public class SubProjectControllerTest {
     @Test
     void SubProjectController_createSubProject() throws Exception {
         CreateSubProjectDto createSubProjectDto = createValidSubProjectDto();
-        ProjectDto expectedProjectDto = createExpectedProjectDto();
+        SubProjectDto expectedSubProjectDto = createExpectedProjectDto();
 
-        when(subProjectService.createSubProject(1L, createSubProjectDto)).thenReturn(expectedProjectDto);
+        when(subProjectService.createSubProject(1L, createSubProjectDto)).thenReturn(expectedSubProjectDto);
 
         mockMvc.perform(post(POST)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(createSubProjectDto)))
-                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedProjectDto)))
+                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedSubProjectDto)))
                 .andExpect(status().isOk());
     }
 
@@ -68,14 +68,14 @@ public class SubProjectControllerTest {
     @Test
     void SubProjectController_updateSubProject() throws Exception {
         CreateSubProjectDto updateSubProjectDto = createValidSubProjectDto();
-        ProjectDto expectedProjectDto = createExpectedProjectDto();
+        SubProjectDto expectedSubProjectDto = createExpectedProjectDto();
 
-        when(subProjectService.updateSubProject(2L, updateSubProjectDto)).thenReturn(expectedProjectDto);
+        when(subProjectService.updateSubProject(2L, updateSubProjectDto)).thenReturn(expectedSubProjectDto);
 
         mockMvc.perform(put(PUT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(updateSubProjectDto)))
-                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedProjectDto)))
+                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(expectedSubProjectDto)))
                 .andExpect(status().isOk());
     }
 
@@ -91,19 +91,19 @@ public class SubProjectControllerTest {
 
     @Test
     void SubProjectController_getSubProject() throws Exception {
-        ProjectDto expectedProjectDto = createExpectedProjectDto();
+        SubProjectDto expectedSubProjectDto = createExpectedProjectDto();
 
         SubprojectFilterDto filterDto = SubprojectFilterDto.builder()
                 .name("Subproject 1")
                 .status(ProjectStatus.CREATED)
                 .build();
 
-        when(subProjectService.getSubProject(1L, filterDto)).thenReturn(List.of(expectedProjectDto));
+        when(subProjectService.getSubProject(1L, filterDto)).thenReturn(List.of(expectedSubProjectDto));
 
         mockMvc.perform(get(GET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(OBJECT_MAPPER.writeValueAsString(filterDto)))
-                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(List.of(expectedProjectDto))))
+                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(List.of(expectedSubProjectDto))))
                 .andExpect(status().isOk());
     }
 
@@ -148,8 +148,8 @@ public class SubProjectControllerTest {
                 .build();
     }
 
-    private ProjectDto createExpectedProjectDto() {
-        return ProjectDto.builder()
+    private SubProjectDto createExpectedProjectDto() {
+        return SubProjectDto.builder()
                 .id(1L)
                 .name("Subproject 1")
                 .description("Description of Subproject")
