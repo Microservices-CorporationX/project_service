@@ -21,7 +21,7 @@ public class ResourceService {
     private final ProjectService projectService;
 
     @Transactional
-    public void uploadProjectCover(MultipartFile file, long userId, long projectId) {
+    public void uploadProjectCover(MultipartFile file, Long userId, Long projectId) {
         projectValidator.validateProjectExistsById(projectId);
         projectValidator.validateUserIsProjectOwner(userId, projectId);
         resourceValidator.validateResourceNotEmpty(file);
@@ -45,7 +45,7 @@ public class ResourceService {
     }
 
     @Transactional
-    public void deleteProjectCover(long userId, long projectId) {
+    public void deleteProjectCover(Long userId, Long projectId) {
         projectValidator.validateProjectExistsById(projectId);
         projectValidator.validateUserIsProjectOwner(userId, projectId);
 
@@ -63,7 +63,7 @@ public class ResourceService {
         log.info("Project {} cover successfully deleted.", projectId);
     }
 
-    public byte[] downloadProjectCover(long userId, long projectId) {
+    public byte[] downloadProjectCover(Long userId, Long projectId) {
         projectValidator.validateProjectExistsById(projectId);
         projectValidator.validateUserIsProjectOwner(userId, projectId);
 
