@@ -21,9 +21,9 @@ public interface ProjectMapper {
     @Mapping(target = "status", expression = "java(mapProjectStatus())")
     Project toEntity(CreateSubProjectDto createSubProjectDto);
 
-    ProjectDto toDto(Project project);
+    ProjectDto toProjectDto(Project project);
 
-    List<ProjectDto> toDto(List<Project> projects);
+    List<ProjectDto> toProjectDto(List<Project> projects);
 
     ResponseProjectDto toResponseDto(Project project);
 

@@ -56,7 +56,7 @@ public class ProjectService {
 
         log.info("Successfully created a sub project: {} for project: {}",
                 createDto, parentProjectId);
-        return projectMapper.toDto(subProject);
+        return projectMapper.toProjectDto(subProject);
     }
 
     @Transactional
@@ -80,7 +80,7 @@ public class ProjectService {
         }
 
         log.info("Successfully updated a sub project: {}", projectId);
-        return projectMapper.toDto(subProject);
+        return projectMapper.toProjectDto(subProject);
     }
 
     @Transactional
@@ -104,7 +104,7 @@ public class ProjectService {
 
         log.info("Successfully got sub projects for project: {} with the following filters: {}",
                 parentProjectId, filterDto);
-        return projectMapper.toDto(subProjects);
+        return projectMapper.toProjectDto(subProjects);
     }
 
     public ResponseProjectDto getProject(long projectId) {

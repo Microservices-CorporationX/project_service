@@ -110,7 +110,7 @@ public class ProjectServiceTest {
         projectService.createSubProject(projectId, createSubProjectDto);
 
         // assert
-        verify(projectMapper).toDto(project);
+        verify(projectMapper).toProjectDto(project);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class ProjectServiceTest {
         projectService.updateSubProject(projectId, updateDto);
 
         // assert
-        verify(projectMapper).toDto(project);
+        verify(projectMapper).toProjectDto(project);
     }
 
     @Test
@@ -242,7 +242,7 @@ public class ProjectServiceTest {
         projectService.getFilteredSubProjects(projectId, filterDto);
 
         // assert
-        verify(projectMapper).toDto(Mockito.anyList());
+        verify(projectMapper).toProjectDto(Mockito.anyList());
     }
 
     @Test
