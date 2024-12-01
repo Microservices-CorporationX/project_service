@@ -21,9 +21,9 @@ public class ProjectDto {
     @NotNull(message = "Project name must not be null")
     @NotBlank(message = "Project name must not be blank")
     private String name;
+    private List<@NotNull Long> childrenIds;
     @NotNull(message = "Project description must not be null")
     @NotBlank(message = "Project description must not be blank")
-    private List<@NotNull Long> childrenIds;
     private String description;
     private Long ownerId;
     private LocalDateTime createdAt;
