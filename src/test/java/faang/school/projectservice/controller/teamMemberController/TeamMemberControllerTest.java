@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ManagingTeamController.class)
 @ContextConfiguration(classes = {ManagingTeamService.class, ManagingTeamController.class})
-public class teamMemberControllerTest {
+public class TeamMemberControllerTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -35,7 +35,7 @@ public class teamMemberControllerTest {
     private ManagingTeamService managingTeamService;
 
     @Test
-    public void testAddTeamMemberPositive() throws Exception {
+    void testAddTeamMemberPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.addTeamMember(1L, teamMemberDto, 1L)).thenReturn(teamMemberDto);
@@ -49,7 +49,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testAddTeamMemberNegative() throws Exception {
+    void testAddTeamMemberNegative() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         when(managingTeamService.addTeamMember(1L, teamMemberDto, 1L)).thenReturn(null);
@@ -62,7 +62,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testAddTeamMemberNegativeNotFound() throws Exception {
+    void testAddTeamMemberNegativeNotFound() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.addTeamMember(1L, teamMemberDto, 1L)).thenReturn(teamMemberDto);
@@ -75,7 +75,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testPutTeamMemberPositive() throws Exception {
+    void testPutTeamMemberPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.updateTeamMember(1L, teamMemberDto, 1L, 1L)).thenReturn(teamMemberDto);
@@ -90,7 +90,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testPutTeamMemberNegative() throws Exception {
+    void testPutTeamMemberNegative() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         when(managingTeamService.updateTeamMember(1L, teamMemberDto, 1L, 1L)).thenReturn(teamMemberDto);
@@ -104,7 +104,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testPutTeamMemberNegativeIsNotFound() throws Exception {
+    void testPutTeamMemberNegativeIsNotFound() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         when(managingTeamService.updateTeamMember(1L, teamMemberDto, 1L, 1L)).thenReturn(teamMemberDto);
@@ -118,7 +118,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testDeleteTeamMemberPositive() throws Exception {
+    void testDeleteTeamMemberPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.deleteTeamMember(1L, 1L, 1L)).thenReturn(teamMemberDto);
@@ -131,7 +131,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testDeleteTeamMemberNegative() throws Exception {
+    void testDeleteTeamMemberNegative() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
         teamMemberDto.setId(2L);
         teamMemberDto.setTeam(2L);
@@ -151,7 +151,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testDeleteTeamMemberNegativeNotFound() throws Exception {
+    void testDeleteTeamMemberNegativeNotFound() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.deleteTeamMember(1L, 1L, 1L)).thenReturn(teamMemberDto);
@@ -163,7 +163,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMembersWithFilterPositive() throws Exception {
+    void testGetTeamMembersWithFilterPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         TeamMemberFilterDto teamMemberFilterDto = new TeamMemberFilterDto();
@@ -180,7 +180,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMembersWithFilterNegative() throws Exception {
+    void testGetTeamMembersWithFilterNegative() throws Exception {
         TeamMemberFilterDto teamMemberFilterDto = new TeamMemberFilterDto();
 
         when(managingTeamService.getTeamMemberWithFilter(1L, teamMemberFilterDto))
@@ -192,7 +192,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMembersWithFilterPositiveNotFound() throws Exception {
+    void testGetTeamMembersWithFilterPositiveNotFound() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         TeamMemberFilterDto teamMemberFilterDto = new TeamMemberFilterDto();
@@ -209,7 +209,7 @@ public class teamMemberControllerTest {
 
 
     @Test
-    public void testGetAllTeamMembersAllPositive() throws Exception {
+    void testGetAllTeamMembersAllPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.getAllMembers(1L)).thenReturn(List.of(teamMemberDto));
@@ -221,7 +221,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetAllTeamMembersAllNegative() throws Exception {
+    void testGetAllTeamMembersAllNegative() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         when(managingTeamService.getAllMembers(1L)).thenReturn(null);
@@ -234,7 +234,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetAllTeamMembersAllNegativeNotFound() throws Exception {
+    void testGetAllTeamMembersAllNegativeNotFound() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         when(managingTeamService.getAllMembers(1L)).thenReturn(null);
@@ -247,7 +247,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMemberPositive() throws Exception {
+    void testGetTeamMemberPositive() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         when(managingTeamService.getTeamMember(1L, 1L)).thenReturn(teamMemberDto);
@@ -260,7 +260,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMemberNegative() throws Exception {
+    void testGetTeamMemberNegative() throws Exception {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
 
@@ -274,7 +274,7 @@ public class teamMemberControllerTest {
     }
 
     @Test
-    public void testGetTeamMemberNegativeNotFound() throws Exception {
+    void testGetTeamMemberNegativeNotFound() throws Exception {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
 
