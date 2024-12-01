@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
@@ -26,7 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
-
     private final ProjectMapper projectMapper;
     private final ProjectMomentMapper projectMomentMapper;
 
@@ -107,7 +107,12 @@ public class ProjectService {
         return projectMapper.toDto(subProjects);
     }
 
-    private Project getProjectById(long projectId) {
+    public ResponseProjectDto getProject(long projectId) {
+        Project project = getProjectById(projectId);
+        return projectMapper.toResponseDto(project);
+    }
+
+    public Project getProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 

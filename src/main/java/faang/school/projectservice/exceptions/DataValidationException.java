@@ -1,4 +1,4 @@
-package faang.school.projectservice.exception;
+package faang.school.projectservice.exceptions;
 
 public class DataValidationException extends RuntimeException {
 
@@ -10,11 +10,11 @@ public class DataValidationException extends RuntimeException {
         super(message);
     }
 
-    public DataValidationException(Throwable cause) {
-        super(cause);
-    }
-
     public DataValidationException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public DataValidationException(Throwable cause) {
+        super(cause);
     }
 }

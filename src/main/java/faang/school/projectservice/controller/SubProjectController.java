@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +24,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/projects/")
+@RequestMapping("/api/v1/projects")
 public class SubProjectController {
     private final ProjectService projectService;
 
@@ -39,7 +40,7 @@ public class SubProjectController {
         return projectService.updateSubProject(projectId, updateDto);
     }
 
-    @PostMapping("/{parentProjectId}/subprojects")
+    @GetMapping("/{parentProjectId}/subprojects")
     public List<ProjectDto> getFilteredSubProjects(@Positive @PathVariable Long parentProjectId,
                                                    @RequestBody SubProjectFilterDto filterDto) {
         return projectService.getFilteredSubProjects(parentProjectId, filterDto);
