@@ -18,4 +18,5 @@ public class TaskFilterDTO {
     private Long performerId;
     private String status;
     private String keyword;
+    private Long userId;
 }

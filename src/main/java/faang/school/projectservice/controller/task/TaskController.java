@@ -18,25 +18,25 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @PostMapping("/project/{projectId}")
+    @PostMapping("/projects/{projectId}")
     public TaskDTO createTask(@PathVariable Long projectId,@Valid @RequestBody TaskDTO taskDTO) {
         log.info("Получен запрос на создание задачи: {}", taskDTO);
         return taskService.createTask(taskDTO, projectId);
     }
 
-    @PatchMapping("/project/{projectId}/tasks/{taskId}")
+    @PatchMapping("/projects/{projectId}/tasks/{taskId}")
     public TaskDTO updateTask(@PathVariable Long projectId, @PathVariable Long taskId, @Valid @RequestBody TaskDTO taskDTO) {
         log.info("Получен запрос на обновление задачи с ID: {}", taskId);
         return taskService.updateTask(taskId, taskDTO, projectId);
     }
 
-    @GetMapping("/project/{projectId}/tasks/{taskId}")
+    @GetMapping("/projects/{projectId}/tasks/{taskId}")
     public TaskDTO getTaskById(@PathVariable Long projectId, @PathVariable Long taskId) {
         log.info("Получен запрос на получение задачи с ID: {}", taskId);
         return taskService.getTaskById(taskId, projectId);
     }
 
-    @PostMapping("/project/{projectId}/filter")
+    @PostMapping("/projects/{projectId}/filter")
     public List<TaskDTO> getFilteredTasks(@PathVariable Long projectId,@Valid @RequestBody TaskFilterDTO taskFilterDTO) {
         log.info("Получен запрос на фильтрацию задач с фильтром: {}", taskFilterDTO);
         return taskService.getFilteredTasks(taskFilterDTO, projectId);

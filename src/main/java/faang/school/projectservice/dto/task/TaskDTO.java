@@ -19,6 +19,8 @@ public class TaskDTO {
     private Long parentTaskId;
     private Long projectId;
     private Long stageId;
+    private Long userId;
+
 
     @Positive(message = "Идентификатор исполнителя не может быть отрицательным")
     @NotNull(message = "Идентификатор исполнителя не может быть null")

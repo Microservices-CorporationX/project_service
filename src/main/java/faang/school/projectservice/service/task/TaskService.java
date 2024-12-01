@@ -11,6 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.task.filter.TaskFilter;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,8 @@ public class TaskService {
     public TaskDTO createTask(TaskDTO taskDTO,  Long projectId) {
         log.info("Создание задачи: {}", taskDTO.getName());
 
-        validateUserAccessToProject(taskDTO.getProjectId(), projectId);
+        Long userId = taskDTO.getUserId();
+        validateUserAccessToProject(taskDTO.getProjectId(), projectId, userId);
 
         Project project = projectRepository.getProjectById(taskDTO.getProjectId());
         TeamMember reporter = teamMemberRepository.findById(taskDTO.getReporterUserId());
@@ -55,10 +57,11 @@ public class TaskService {
     public TaskDTO updateTask(Long taskId, TaskDTO taskDTO, Long projectId) {
         log.info("Обновление задачи с ID: {}", taskId);
 
+        Long userId = taskDTO.getUserId();
         Task existingTask = taskRepository.findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Задача с таким ID не найдена"));
+            .orElseThrow(() -> new EntityNotFoundException("Задача с таким ID не найдена"));
 
-        validateUserAccessToProject(existingTask.getProject().getId(), projectId);
+        validateUserAccessToProject(existingTask.getProject().getId(), projectId, userId);
 
         taskMapper.updateTaskFromDto(taskDTO, existingTask);
 
@@ -75,7 +78,8 @@ public class TaskService {
             throw new ValidationException("Фильтр не может быть null");
         }
 
-        validateUserAccessToProject(taskFilterDTO.getProjectId(), projectId);
+        Long userId = taskFilterDTO.getUserId();
+        validateUserAccessToProject(taskFilterDTO.getProjectId(), projectId, userId);
 
         List<Task> tasks = taskRepository.findAllByProjectId(taskFilterDTO.getProjectId());
         if (tasks == null || tasks.isEmpty()) {
@@ -90,20 +94,24 @@ public class TaskService {
             .collect(Collectors.toList());
     }
 
-    public TaskDTO getTaskById(Long taskId, Long projectId) {
+    public TaskDTO getTaskById(Long taskId, Long userId) {
         log.info("Получение задачи с ID: {}", taskId);
 
         Task task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new IllegalArgumentException("Задача с таким ID не найдена"));
+            .orElseThrow(() -> new EntityNotFoundException("Задача с таким ID не найдена"));
 
-        validateUserAccessToProject(task.getProject().getId(), projectId);
+        validateUserAccessToProject(task.getProject().getId(), task.getProject().getId(), userId);
 
         return taskMapper.toDto(task);
     }
 
-    void validateUserAccessToProject(Long projectId, Long currentUserId) {
-        if (!teamMemberRepository.isUserInAnyTeamOfProject(projectId, currentUserId)) {
-            throw new AccessDeniedException("У вас нет доступа к проекту с ID: " + projectId);
+    public void validateUserAccessToProject(Long taskProjectId, Long projectId, Long userId) {
+        if (!taskProjectId.equals(projectId) || !userHasAccessToProject(userId, projectId)) {
+            throw new AccessDeniedException("У пользователя нет доступа к этому проекту");
         }
+    }
+
+    public boolean userHasAccessToProject(Long userId, Long projectId) {
+        return projectRepository.existsByIdAndUserId(projectId, userId);
     }
 }

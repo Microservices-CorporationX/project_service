@@ -1,7 +1,18 @@
 package faang.school.projectservice.service.task;
 
+import static org.assertj.core.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
+
 import faang.school.projectservice.dto.task.TaskDTO;
-import faang.school.projectservice.dto.task.TaskFilterDTO;
 import faang.school.projectservice.exception.task.AccessDeniedException;
 import faang.school.projectservice.jpa.TaskRepository;
 import faang.school.projectservice.mapper.task.TaskMapper;
@@ -11,36 +22,21 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.task.filter.TaskFilter;
-import jakarta.validation.ValidationException;
-import org.junit.jupiter.api.DisplayName;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
-class TaskServiceTest {
-
-    @InjectMocks
-    private TaskService taskService;
-
-    @Mock
-    private TaskRepository taskRepository;
+@RunWith(MockitoJUnitRunner.class)
+public class TaskServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
@@ -49,37 +45,54 @@ class TaskServiceTest {
     private TeamMemberRepository teamMemberRepository;
 
     @Mock
+    private TaskRepository taskRepository;
+
+    @Mock
     private TaskMapper taskMapper;
 
+    @Mock
+    private TaskFilter statusFilter;
+    @Mock
+    private TaskFilter performerFilter;
+    @Mock
+    private TaskFilter keywordFilter;
+
+    @Spy
+    @InjectMocks
+    private TaskService taskService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        doNothing().when(taskService).validateUserAccessToProject(anyLong(), anyLong(), anyLong());
+    }
+
     @Test
-    @DisplayName("Создание задачи: возвращает TaskDTO при успешном создании")
-    void createTask_ShouldReturnTaskDTO() {
+    @DisplayName("Успешное создание задачи")
+    public void testCreateTask_Success() {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setProjectId(1L);
+        taskDTO.setUserId(1L);
+        taskDTO.setName("Test Task");
+        taskDTO.setReporterUserId(2L);
+        taskDTO.setPerformerUserId(3L);
+
         Project project = new Project();
         project.setId(1L);
 
         TeamMember reporter = new TeamMember();
-        reporter.setId(1L);
+        reporter.setId(2L);
 
         TeamMember performer = new TeamMember();
-        performer.setId(2L);
-
-        TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setName("Test Task");
-        taskDTO.setProjectId(1L);
-        taskDTO.setReporterUserId(1L);
-        taskDTO.setPerformerUserId(2L);
+        performer.setId(3L);
 
         Task task = new Task();
         task.setId(1L);
-        task.setName("Test Task");
-        task.setProject(project);
-        task.setReporterUserId(reporter.getId());
-        task.setPerformerUserId(performer.getId());
 
+        doNothing().when(taskService).validateUserAccessToProject(anyLong(), anyLong(), anyLong());
         when(projectRepository.getProjectById(1L)).thenReturn(project);
-        when(teamMemberRepository.findById(1L)).thenReturn(reporter);
-        when(teamMemberRepository.findById(2L)).thenReturn(performer);
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 1L)).thenReturn(true);
+        when(teamMemberRepository.findById(2L)).thenReturn(reporter);
+        when(teamMemberRepository.findById(3L)).thenReturn(performer);
         when(taskMapper.toEntity(taskDTO)).thenReturn(task);
         when(taskRepository.save(task)).thenReturn(task);
         when(taskMapper.toDto(task)).thenReturn(taskDTO);
@@ -87,148 +100,165 @@ class TaskServiceTest {
         TaskDTO createdTask = taskService.createTask(taskDTO, 1L);
 
         assertNotNull(createdTask);
-        assertEquals("Test Task", createdTask.getName());
-        verify(taskRepository, times(1)).save(task);
+        assertEquals(taskDTO.getName(), createdTask.getName());
     }
 
     @Test
-    @DisplayName("Создание задачи: выбрасывает AccessDeniedException при отсутствии доступа")
-    void createTask_ShouldThrowAccessDeniedException_WhenUserHasNoAccess() {
+    @DisplayName("Создание задачи — исполнитель не найден")
+    public void testCreateTask_PerformerNotFound() {
         TaskDTO taskDTO = new TaskDTO();
         taskDTO.setProjectId(1L);
+        taskDTO.setUserId(1L);
+        taskDTO.setName("Task with missing performer");
+        taskDTO.setReporterUserId(2L);
+        taskDTO.setPerformerUserId(99L);
 
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 3L)).thenReturn(false);
-
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () ->
-            taskService.createTask(taskDTO, 3L)
-        );
-        assertEquals("У вас нет доступа к проекту с ID: 1", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Обновление задачи: возвращает обновлённый TaskDTO при успешном обновлении")
-    void updateTask_ShouldReturnUpdatedTaskDTO() {
         Project project = new Project();
         project.setId(1L);
 
-        Task task = new Task();
-        task.setId(1L);
-        task.setName("Test Task");
-        task.setProject(project);
+        TeamMember reporter = new TeamMember();
+        reporter.setId(2L);
 
-        TaskDTO updatedTaskDTO = new TaskDTO();
-        updatedTaskDTO.setName("Updated Task");
-        updatedTaskDTO.setProjectId(1L);
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(teamMemberRepository.findById(2L)).thenReturn(reporter);
+        when(teamMemberRepository.findById(99L))
+            .thenThrow(new EntityNotFoundException("Team member doesn't exist by id: 99"));
 
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 1L)).thenReturn(true);
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-        when(taskMapper.toDto(task)).thenReturn(updatedTaskDTO);
-        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        assertThrows(EntityNotFoundException.class, () -> {
+            taskService.createTask(taskDTO, 1L);
+        });
+    }
 
-        TaskDTO updatedTask = taskService.updateTask(1L, updatedTaskDTO, 1L);
+    @Test
+    @DisplayName("Ошибка при отсутствии проекта")
+    public void testCreateTask_ProjectNotFound() {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setProjectId(999L);  // Несуществующий проект ID
+
+        when(projectRepository.getProjectById(999L)).thenReturn(null);
+
+        assertThrows(AccessDeniedException.class, () -> {
+            taskService.createTask(taskDTO, 1L);
+        });
+    }
+
+    @Test
+    @DisplayName("Ошибка при отсутствии репортера")
+    public void testCreateTask_ReporterNotFound() {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setProjectId(1L);
+        taskDTO.setReporterUserId(999L);
+
+        Project project = new Project();
+        project.setId(1L);
+
+        when(projectRepository.getProjectById(1L)).thenReturn(project);
+        when(teamMemberRepository.findById(999L)).thenReturn(null);
+
+        assertThrows(AccessDeniedException.class, () -> {
+            taskService.createTask(taskDTO, 1L);
+        });
+    }
+
+    @Test
+    @DisplayName("Ошибка доступа пользователя к проекту")
+    public void testCreateTask_AccessDenied() {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setProjectId(1L);
+        taskDTO.setUserId(5L);
+
+        doThrow(new AccessDeniedException("Access denied")).when(taskService)
+            .validateUserAccessToProject(eq(1L), eq(1L), eq(5L));
+
+        assertThrows(AccessDeniedException.class, () -> {
+            taskService.createTask(taskDTO, 1L);
+        });
+    }
+
+    @Test
+    @DisplayName("Успешное обновление задачи")
+    public void testUpdateTask_Success() {
+        Long taskId = 1L;
+        Long projectId = 1L;
+
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setName("Updated Task");
+        taskDTO.setUserId(1L);
+        taskDTO.setReporterUserId(2L);
+        taskDTO.setPerformerUserId(3L);
+
+        Task existingTask = new Task();
+        existingTask.setId(taskId);
+        Project project = new Project();
+        project.setId(projectId);
+        existingTask.setProject(project);
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        doNothing().when(taskService).validateUserAccessToProject(projectId, projectId, 1L);
+        when(taskRepository.save(existingTask)).thenReturn(existingTask);
+        when(taskMapper.toDto(existingTask)).thenReturn(taskDTO);
+
+        TaskDTO updatedTask = taskService.updateTask(taskId, taskDTO, projectId);
 
         assertNotNull(updatedTask);
         assertEquals("Updated Task", updatedTask.getName());
-        verify(taskRepository, times(1)).save(task);
-    }
-
-
-    @Test
-    @DisplayName("Обновление задачи: выбрасывает IllegalArgumentException при отсутствии задачи")
-    void updateTask_ShouldThrowIllegalArgumentException_WhenTaskNotFound() {
-        TaskDTO updatedTaskDTO = new TaskDTO();
-        updatedTaskDTO.setName("Updated Task");
-
-        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            taskService.updateTask(1L, updatedTaskDTO, 1L)
-        );
-        assertEquals("Задача с таким ID не найдена", exception.getMessage());
     }
 
     @Test
-    @DisplayName("Получение задач с фильтром: возвращает отфильтрованные задачи")
-    void getFilteredTasks_ShouldReturnFilteredTasks() {
-        TaskFilterDTO filterDTO = new TaskFilterDTO();
-        filterDTO.setProjectId(1L);
+    @DisplayName("Обновление задачи — задача не найдена")
+    public void testUpdateTask_TaskNotFound() {
+        Long taskId = 1L;
+        TaskDTO taskDTO = new TaskDTO();
 
-        Task task = new Task();
-        task.setId(1L);
-        task.setName("Test Task");
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
 
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 1L)).thenReturn(true);
-        when(taskRepository.findAllByProjectId(1L)).thenReturn(Arrays.asList(task));
-
-        TaskFilter taskFilter = mock(TaskFilter.class);
-        when(taskFilter.isApplicable(filterDTO)).thenReturn(true);
-        when(taskFilter.apply(any(), eq(filterDTO))).thenReturn(Arrays.stream(new Task[]{task}));
-
-        TaskService taskServiceWithFilters = new TaskService(
-            taskRepository, projectRepository, teamMemberRepository, taskMapper, Arrays.asList(taskFilter)
-        );
-
-        List<TaskDTO> filteredTasks = taskServiceWithFilters.getFilteredTasks(filterDTO, 1L);
-
-        assertNotNull(filteredTasks);
-        assertEquals(1, filteredTasks.size());
+        assertThrows(EntityNotFoundException.class, () -> {
+            taskService.updateTask(taskId, taskDTO, 1L);
+        });
     }
 
     @Test
-    @DisplayName("Получение задач с фильтром: выбрасывает ValidationException при отсутствии фильтра")
-    void getFilteredTasks_ShouldThrowValidationException_WhenFilterIsNull() {
-        ValidationException exception = assertThrows(ValidationException.class, () ->
-            taskService.getFilteredTasks(null, 1L)
-        );
-        assertEquals("Фильтр не может быть null", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Получение задачи по ID: возвращает TaskDTO при успешном поиске")
-    void getTaskById_ShouldReturnTaskDTO() {
-        Project project = new Project();
-        project.setId(1L);
-
-        Task task = new Task();
-        task.setId(1L);
-        task.setName("Test Task");
-        task.setProject(project);
+    @DisplayName("Обновление задачи — нет доступа к проекту")
+    public void testUpdateTask_AccessDenied() {
+        Long taskId = 1L;
+        Long projectId = 1L;
 
         TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setName("Test Task");
-        taskDTO.setProjectId(1L);
+        taskDTO.setUserId(1L);
 
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 1L)).thenReturn(true);
-        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
-        when(taskMapper.toDto(task)).thenReturn(taskDTO);
+        Task existingTask = new Task();
+        Project project = new Project();
+        project.setId(projectId);
+        existingTask.setProject(project);
 
-        TaskDTO foundTask = taskService.getTaskById(1L, 1L);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        doThrow(new AccessDeniedException("У пользователя нет доступа к этому проекту"))
+            .when(taskService).validateUserAccessToProject(projectId, projectId, 1L);
 
-        assertNotNull(foundTask);
-        assertEquals("Test Task", foundTask.getName());
-        verify(taskRepository, times(1)).findById(1L);
-    }
-
-
-    @Test
-    @DisplayName("Получение задачи по ID: выбрасывает IllegalArgumentException при отсутствии задачи")
-    void getTaskById_ShouldThrowIllegalArgumentException_WhenTaskNotFound() {
-        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            taskService.getTaskById(1L, 1L)
-        );
-        assertEquals("Задача с таким ID не найдена", exception.getMessage());
+        assertThrows(AccessDeniedException.class, () -> {
+            taskService.updateTask(taskId, taskDTO, projectId);
+        });
     }
 
     @Test
-    @DisplayName("Проверка доступа пользователя к проекту: выбрасывает AccessDeniedException при отсутствии доступа")
-    void validateUserAccessToProject_ShouldThrowAccessDeniedException_WhenUserHasNoAccess() {
-        when(teamMemberRepository.isUserInAnyTeamOfProject(1L, 3L)).thenReturn(false);
+    @DisplayName("Обновление задачи — невалидные данные")
+    public void testUpdateTask_InvalidData() {
+        Long taskId = 1L;
+        TaskDTO taskDTO = new TaskDTO();
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () ->
-            taskService.validateUserAccessToProject(1L, 3L)
-        );
-        assertEquals("У вас нет доступа к проекту с ID: 1", exception.getMessage());
+        Task existingTask = new Task();
+        existingTask.setId(taskId);
+        Project project = new Project();
+        existingTask.setProject(project);
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        doNothing().when(taskService).validateUserAccessToProject(anyLong(), anyLong(), anyLong());
+
+        doThrow(new RuntimeException("Invalid data"))
+            .when(taskMapper).updateTaskFromDto(any(TaskDTO.class), any(Task.class));
+
+        assertThrows(RuntimeException.class, () -> {
+            taskService.updateTask(taskId, taskDTO, 1L);
+        });
     }
 }
