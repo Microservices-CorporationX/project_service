@@ -1,15 +1,15 @@
 package faang.school.projectservice.model.calendar;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "google_calendar_token")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class GoogleCalendarToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

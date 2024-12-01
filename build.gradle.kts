@@ -45,6 +45,8 @@ dependencies {
 
 // https://mvnrepository.com/artifact/com.google.apis/google-api-services-calendar
     implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0") // Проверьте актуальную версию
+
 
     /**
      * Utils & Logging

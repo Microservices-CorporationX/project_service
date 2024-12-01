@@ -1,4 +1,4 @@
-package faang.school.projectservice.config.google;
+package faang.school.projectservice.config.calendar;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.json.gson.GsonFactory;

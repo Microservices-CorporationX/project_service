@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS google_calendar_token (
     CONSTRAINT fk_google_calendar_token_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-ALTER TABLE project ADD COLUMN IF NOT EXISTS calendar_id BIGSERIAL;
+ALTER TABLE project ADD COLUMN IF NOT EXISTS calendar_id VARCHAR(512);
