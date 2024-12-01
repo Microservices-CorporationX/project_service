@@ -15,12 +15,12 @@ public interface StageInvitationMapper {
 
     @Mapping(source = "author.id", target = "authorId")
     @Mapping(source = "invited.id", target = "invitedId")
-    @Mapping(source = "stage.id", target = "stageId")
+    @Mapping(source = "stage.stageId", target = "stageId")
     StageInvitationDto toDto(StageInvitation stageInvitation);
 
-    @Mapping(source = "authorId", target = "author.id", qualifiedByName = "toInvitedId")
-    @Mapping(source = "invitedId", target = "invited.id", qualifiedByName = "toIdToTeamMember")
-    @Mapping(source = "stageId", target = "stage.id", qualifiedByName = "toIdToTeamMember")
+    @Mapping(source = "authorId", target = "author", qualifiedByName = "toIdToTeamMember")
+    @Mapping(source = "invitedId", target = "invited", qualifiedByName = "toIdToTeamMember")
+    @Mapping(source = "stageId", target = "stage", qualifiedByName = "toIdToStage")
     StageInvitation toEntity(StageInvitationDto stageInvitationDto);
 
     @Named("toIdToStage")
@@ -28,28 +28,30 @@ public interface StageInvitationMapper {
         if (stageId == null) {
             return null;
         }
-        Stage stage = new Stage();
-        stage.setStageId(stageId);
-        return stage;
+
+        return Stage.builder()
+                .stageId(stageId)
+                .build();
     }
 
     @Named("toIdToTeamMember")
-    default TeamMember mapToTeamMemberId(Long authorId) {
-        if (authorId == null) {
+    default TeamMember mapToTeamMemberId(Long id) {
+        if (id == null) {
             return null;
         }
-        TeamMember teamMember = new TeamMember();
-        teamMember.setId(authorId);
-        return teamMember;
+
+        return TeamMember.builder()
+                .id(id)
+                .build();
     }
 
-    @Named("toInvitedId")
-    default TeamMember mapStageToInvitedId(Long invitedId) {
-        if (invitedId == null) {
-            return null;
-        }
-        TeamMember teamMember = new TeamMember();
-        teamMember.setId(invitedId);
-        return teamMember;
-    }
+//    @Named("toInvitedId")
+//    default TeamMember mapStageToInvitedId(Long invitedId) {
+//        if (invitedId == null) {
+//            return null;
+//        }
+//        TeamMember teamMember = new TeamMember();
+//        teamMember.setId(invitedId);
+//        return teamMember;
+//    }
 }

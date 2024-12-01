@@ -1,9 +1,9 @@
 package faang.school.projectservice.service.stage_invitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
+import faang.school.projectservice.filter.stage_invitation.StageInvitationFilter;
 import faang.school.projectservice.mapper.stage_invitation.StageInvitationMapper;
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
@@ -23,30 +23,22 @@ public class StageInvitationService {
     private final StageInvitationMapper invitationMapper;
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final List<StageInvitationFilter> stageInvitationFilters;
 
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitationEntity = invitationMapper.toEntity(stageInvitationDto);
-
-//        Stage stage = stageRepository.getById(stageInvitationDto.getStageId());
-//        TeamMember author = teamMemberRepository.findById(stageInvitationDto.getAuthorId());
-//        TeamMember invitation = teamMemberRepository.findById(stageInvitationDto.getInvitedId());
 
         stageInvitationEntity.setStage(stageRepository.getById(stageInvitationDto.getStageId()));
         stageInvitationEntity.setAuthor(teamMemberRepository.findById(stageInvitationDto.getAuthorId()));
         stageInvitationEntity.setInvited(teamMemberRepository.findById(stageInvitationDto.getInvitedId()));
         stageInvitationEntity.setStatus(StageInvitationStatus.PENDING);
 
-        //StageInvitation stageInvitation = new StageInvitation();
-//        stageInvitation.setStage(stage);
-//        stageInvitation.setAuthor(author);
-//        stageInvitation.setInvited(invitation);
-
         stageInvitationEntity = invitationRepository.save(stageInvitationEntity);
         return invitationMapper.toDto(stageInvitationEntity);
     }
 
-    public StageInvitationDto acceptInvitation(Long invintationId, Long invitedId) {
-        StageInvitation stageInvitation = invitationRepository.findById(invintationId);
+    public StageInvitationDto acceptInvitation(Long invitationId, Long invitedId) {
+        StageInvitation stageInvitation = invitationRepository.findById(invitationId);
 
         if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
             throw new IllegalStateException("Invitation is not in a PENDING state");
@@ -59,20 +51,10 @@ public class StageInvitationService {
         return invitationMapper.toDto(saveInvitation);
     }
 
-    public StageInvitationDto rejectInvitation(Long invintationId, Long invitedId, String rejectDescription) {
-        if (rejectDescription == null && rejectDescription.isEmpty()) {
-            throw new IllegalArgumentException("description не может быть равен null или быть пустым");
-        }
+    public StageInvitationDto rejectInvitation(Long invitationId, Long invitedId, String rejectDescription) {
+        StageInvitation stageInvitation = invitationRepository.findById(invitationId);
 
-        StageInvitation stageInvitation = invitationRepository.findById(invintationId);
-
-        if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
-            throw new IllegalStateException("Invitation is not in a PENDING state");
-        }
-
-        if (!stageInvitation.getInvited().getId().equals(invitedId)) {
-            throw new IllegalArgumentException("");
-        }
+        validation(stageInvitation, invitedId, rejectDescription);
 
         stageInvitation.setDescription(rejectDescription);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
@@ -83,8 +65,27 @@ public class StageInvitationService {
         return invitationMapper.toDto(saveInvitation);
     }
 
-    public void checkAllInvitation(Long invintationId) {
-        StageInvitation stageInvitation = invitationRepository.findById(invintationId);
+    public List<StageInvitationDto> checkAllInvitation(Long invitedId, StageInvitationFilterDto filters) {
+        List<StageInvitation> invitationList = invitationRepository.findAllByInvitedId(invitedId);
+
+        return stageInvitationFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .flatMap(filter -> filter.apply(invitationList.stream(), filters))
+                .map(invitationMapper::toDto)
+                .toList();
     }
 
+    private void validation(StageInvitation stageInvitation, Long invitedId, String rejectDescription) {
+        if (rejectDescription == null && rejectDescription.isEmpty()) {
+            throw new IllegalArgumentException("description не может быть равен null или быть пустым");
+        }
+
+        if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
+            throw new IllegalStateException("Invitation is not in a PENDING state");
+        }
+
+        if (!stageInvitation.getInvited().getId().equals(invitedId)) {
+            throw new IllegalArgumentException("");
+        }
+    }
 }
