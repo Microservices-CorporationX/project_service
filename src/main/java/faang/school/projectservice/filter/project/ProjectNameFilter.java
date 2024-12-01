@@ -10,7 +10,7 @@ public class ProjectNameFilter implements Filter<Project, ProjectFilterDto> {
 
     @Override
     public boolean isApplicable(ProjectFilterDto filter) {
-        return filter.getNameProjectPattern() != null;
+        return filter.getName() != null;
     }
 
     @Override
@@ -18,6 +18,6 @@ public class ProjectNameFilter implements Filter<Project, ProjectFilterDto> {
         return projectStream.filter(project -> project
                 .getName()
                 .toLowerCase()
-                .contains(filter.getNameProjectPattern().toLowerCase()));
+                .contains(filter.getName().toLowerCase()));
     }
 }
