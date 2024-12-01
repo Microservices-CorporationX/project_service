@@ -27,7 +27,8 @@ public class GoogleAuthController {
                 + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
                 + "&scope=" + URLEncoder.encode("https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events", StandardCharsets.UTF_8)
                 + "&response_type=code"
-                + "&access_type=offline";
+                + "&access_type=offline"
+                + "&approval_prompt=force";
 
         return "Перейдите по <a href='" + authUrl + "'>ссылке</a> для авторизации через Google.";
     }
