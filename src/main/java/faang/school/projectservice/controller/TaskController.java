@@ -62,12 +62,13 @@ public class TaskController {
     }
 
     @FiltersTaskDoc
-    @GetMapping("/filters")
+    @GetMapping("/filters/{projectId}")
     public ResponseEntity<List<ResponseTaskDto>> filterTasks(
             @NotNull(message = "ProjectId is required")
             @Positive(message = "ProjectId must be greater than 0.")
-            @RequestParam Long projectId,
+            @PathVariable Long projectId,
             @RequestParam(required = false) TaskStatus status,
+            @Positive(message = "PerformerUserId must be greater than 0.")
             @RequestParam(required = false) Long performerUserId,
             @RequestParam(required = false) String text
     ) {
@@ -81,12 +82,12 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
 
-    @GetMapping
+    @GetMapping("/{projectId}")
     @GetTasksDoc
     public ResponseEntity<List<ResponseTaskDto>> getTasks(
             @NotNull(message = "ProjectId is required")
             @Positive(message = "ProjectId must be greater than 0.")
-            @RequestParam Long projectId,
+            @PathVariable Long projectId,
             @Positive(message = "Limit must be greater than 0.")
             @RequestParam(required = false) Integer limit,
             @Positive(message = "Offset must be greater than 0.")
@@ -104,12 +105,11 @@ public class TaskController {
     }
 
     @GetTaskByIdDoc
-    @GetMapping("/{taskId}")
+    @GetMapping("/{projectId}/{taskId}")
     public ResponseEntity<ResponseTaskDto> getTasksById(
             @NotNull(message = "ProjectId is required")
             @Positive(message = "ProjectId must be greater than 0.")
-            @RequestParam Long projectId,
-            @NotNull(message = "TaskId is required")
+            @PathVariable Long projectId,
             @Positive(message = "TaskId must be greater than 0.")
             @PathVariable Long taskId
     ) {

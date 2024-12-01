@@ -46,6 +46,10 @@ class TaskControllerTest {
 
     private ObjectMapper objectMapper;
 
+    private Long projectId = 1L;
+    private Long taskId = 1L;
+    private Long userId = 1L;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(taskController).build();
@@ -105,9 +109,9 @@ class TaskControllerTest {
         List<ResponseTaskDto> taskDtos = List.of(ResponseTaskDto.builder().id(1L).build(), ResponseTaskDto.builder().id(2L).build());
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(taskService.filterTasks(filters, 1L, 1L)).thenReturn(taskDtos);
+        when(taskService.filterTasks(filters, userId, projectId)).thenReturn(taskDtos);
 
-        mockMvc.perform(get("/tasks/filters")
+        mockMvc.perform(get("/tasks/filters/1")
                         .param("projectId", "1")
                         .param("status", "TODO")
                         .param("performerUserId", "1")
@@ -122,12 +126,13 @@ class TaskControllerTest {
 
     @Test
     void getTasksSuccess() throws Exception {
-        List<ResponseTaskDto> taskDtos = List.of(ResponseTaskDto.builder().id(1L).build(), ResponseTaskDto.builder().id(2L).build());
+        List<ResponseTaskDto> taskDto = List.of(ResponseTaskDto.builder().id(1L).build(), ResponseTaskDto.builder().id(2L).build());
+
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(taskService.getTasks(1L, 1L, 10, 0)).thenReturn(taskDtos);
+        when(taskService.getTasks(userId, projectId, 10, 0)).thenReturn(taskDto);
 
-        mockMvc.perform(get("/tasks")
+        mockMvc.perform(get("/tasks/1")
                         .param("projectId", "1")
                         .param("limit", "10")
                         .param("offset", "0"))
@@ -142,9 +147,9 @@ class TaskControllerTest {
     @Test
     void getTasksNoContent() throws Exception {
         when(userContext.getUserId()).thenReturn(1L);
-        when(taskService.getTasks(1L, 1L, 10, 0)).thenReturn(List.of());
+        when(taskService.getTasks(userId, projectId, 10, 0)).thenReturn(List.of());
 
-        mockMvc.perform(get("/tasks")
+        mockMvc.perform(get("/tasks/1")
                         .param("projectId", "1")
                         .param("limit", "10")
                         .param("offset", "0"))
@@ -158,9 +163,9 @@ class TaskControllerTest {
         ResponseTaskDto taskDto = ResponseTaskDto.builder().id(1L).build();
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(taskService.getTaskById(1L, 1L, 1L)).thenReturn(taskDto);
+        when(taskService.getTaskById(userId, projectId, 1L)).thenReturn(taskDto);
 
-        mockMvc.perform(get("/tasks/1")
+        mockMvc.perform(get("/tasks/1/1")
                         .param("projectId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
@@ -171,13 +176,12 @@ class TaskControllerTest {
     @Test
     void getTasksByIdNotFound() throws Exception {
         when(userContext.getUserId()).thenReturn(1L);
-        when(taskService.getTaskById(1L, 1L, 1L)).thenReturn(null);
+        when(taskService.getTaskById(userId, projectId, 1L)).thenReturn(null);
 
-        mockMvc.perform(get("/tasks/1")
+        mockMvc.perform(get("/tasks/1/1")
                         .param("projectId", "1"))
                 .andExpect(status().isOk());
 
         verify(taskService, times(1)).getTaskById(1L, 1L, 1L);
     }
-
 }

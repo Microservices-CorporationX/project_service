@@ -38,7 +38,6 @@ public class TaskService {
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 10;
 
-    @Transactional
     public ResponseTaskDto create(CreateTaskDto createTaskDto) {
         taskValidator.validateString(createTaskDto.getName());
         taskValidator.validateString(createTaskDto.getDescription());
@@ -63,6 +62,7 @@ public class TaskService {
         return taskMapper.toDto(taskRepository.save(task));
     }
 
+    @Transactional
     public ResponseTaskDto update(UpdateTaskDto updateTaskDto) {
         taskValidator.validateTask(updateTaskDto.getId());
         taskValidator.validateString(updateTaskDto.getDescription());
@@ -82,8 +82,6 @@ public class TaskService {
 
         if (updateTaskDto.getParentTaskId() != null) {
             task.setParentTask(taskRepository.findById(updateTaskDto.getParentTaskId()).orElse(null));
-        } else {
-            task.setParentTask(null);
         }
 
         task.setUpdatedAt(LocalDateTime.now(ZoneId.of("UTC+3")));
@@ -118,8 +116,8 @@ public class TaskService {
         taskValidator.validateProject(projectId);
         taskValidator.validateTeamMember(userId, projectId);
 
-        limit = (limit != null && limit <= MAX_TASKS_PER_PAGE) ? limit : DEFAULT_LIMIT;
-        offset = (offset != null) ? offset : DEFAULT_OFFSET;
+        limit = getLimit(limit);
+        offset = getOffset(offset);
 
         Pageable pageable = PageRequest.of(offset, limit);
         Stream<Task> tasks = taskRepository.findTasksByProjectId(projectId, pageable).stream();
@@ -140,5 +138,13 @@ public class TaskService {
         log.info("Task by id {}.", taskId);
 
         return taskMapper.toDto(task);
+    }
+
+    private int getLimit(int limit) {
+        return (limit != 0 && limit <= MAX_TASKS_PER_PAGE) ? limit : DEFAULT_LIMIT;
+    }
+
+    private int getOffset(int offset) {
+        return (offset != 0) ? offset : DEFAULT_OFFSET;
     }
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.task;
 
 import faang.school.projectservice.model.TaskStatus;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -16,7 +17,7 @@ public class UpdateTaskDto {
     @NotNull(message = "Id must not be null")
     private Long id;
 
-    @NotNull(message = "Description must not be null")
+    @NotBlank(message = "Name must not be empty.")
     @Size(min = 10, max = 4096, message = "Description must be between 10 and 4096 characters.")
     private String description;
 

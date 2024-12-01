@@ -8,11 +8,14 @@ import faang.school.projectservice.docs.project.UpdateProjectDoc;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.UpdateProjectDto;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,7 +44,7 @@ public class ProjectController {
     @PostMapping
     @CreateProjectDoc
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
-        log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+        log.info("Creating project '{}' by UserId {}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(dto));
     }
@@ -49,20 +52,25 @@ public class ProjectController {
     @PutMapping
     @UpdateProjectDoc
     public ResponseEntity<UpdateProjectDto> updateProject(@Valid @RequestBody UpdateProjectDto dto) {
-        log.info("Updating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
+        log.info("Updating project '{}' by UserId {}.", dto.getName(), dto.getOwnerId());
 
         return ResponseEntity.ok(projectService.updateProject(dto));
     }
 
     @FiltersProjectDoc
-    @GetMapping("/filtered/{currentUserId}")
+    @GetMapping("/filters/{currentUserId}")
     public ResponseEntity<List<ProjectDto>> getProjectsByFilter(
-            @Valid @RequestBody ProjectFilterDto filterDto,
+            @NotBlank(message = "Project name must not be empty.")
+            @Size(min = 3, max = 128, message = "Name must be between 3 and 128 characters.")
+            String name,
+            ProjectStatus status,
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
             @PathVariable
             Long currentUserId) {
-        log.info("Getting filtered projects by User #{}.", currentUserId);
+        log.info("Getting filtered projects by User {}.", currentUserId);
+
+        ProjectFilterDto filterDto = new ProjectFilterDto(name, status);
 
         return ResponseEntity.ok(projectService.getProjectsByFilter(filterDto, currentUserId));
     }
@@ -74,7 +82,7 @@ public class ProjectController {
             @Positive(message = "CurrentUserId must be greater than 0.")
             @RequestParam
             Long currentUserId) {
-        log.info("Getting all projects by User #{}.", currentUserId);
+        log.info("Getting all projects by User {}.", currentUserId);
 
         return ResponseEntity.ok(projectService.getAllProjectsForUser(currentUserId));
     }
@@ -82,15 +90,13 @@ public class ProjectController {
     @ProjectsDoc
     @GetMapping("/project/{projectId}")
     public ResponseEntity<ProjectDto> getProjectById(
-            @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
             @RequestParam("currentUserId")
             Long currentUserId,
-            @NotNull(message = "CurrentUserId is required.")
-            @Positive(message = "CurrentUserId must be greater than 0.")
+            @Positive(message = "ProjectId must be greater than 0.")
             @PathVariable
             Long projectId) {
-        log.info("Getting project id #{} by User #{}.", projectId, currentUserId);
+        log.info("Getting project id #{} by User {}.", projectId, currentUserId);
 
         return ResponseEntity.ok(projectService.getAccessibleProjectById(currentUserId, projectId));
     }

@@ -65,7 +65,7 @@ class StageInvitationControllerTest {
 
         when(stageInvitationService.sendStageInvitation(requestDto)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/stage-invitation")
+        mockMvc.perform(post("/stage-invitations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -85,7 +85,7 @@ class StageInvitationControllerTest {
 
         String requestJson = objectMapper.writeValueAsString(stageInvitation);
 
-        mockMvc.perform(put("/stage-invitation/accept")
+        mockMvc.perform(put("/stage-invitations/accepts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
@@ -107,7 +107,7 @@ class StageInvitationControllerTest {
 
         String requestJson = objectMapper.writeValueAsString(rejectStageInvitationDto);
 
-        mockMvc.perform(put("/stage-invitation/reject")
+        mockMvc.perform(put("/stage-invitations/rejects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
@@ -131,7 +131,7 @@ class StageInvitationControllerTest {
         when(stageInvitationService.filters(any(StageInvitationFiltersDto.class)))
                 .thenReturn(List.of(firstResponseDto, secondResponseDto));
 
-        mockMvc.perform(get("/stage-invitation/filters")
+        mockMvc.perform(get("/stage-invitations/filters")
                         .param("status", "PENDING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))

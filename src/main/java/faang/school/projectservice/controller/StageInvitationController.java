@@ -30,7 +30,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/stage-invitation")
+@RequestMapping("/stage-invitations")
 @Tag(name = "Stage invitation", description = "Stage invitation controller")
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
@@ -43,7 +43,7 @@ public class StageInvitationController {
         return ResponseEntity.ok(stageInvitationService.sendStageInvitation(stageInvitationDto));
     }
 
-    @PutMapping("/accept")
+    @PutMapping("/accepts")
     @AcceptStageInvitationDoc
     public ResponseEntity<StageInvitationDto> acceptStageInvitation(@Valid @RequestBody AcceptStageInvitationDto stageInvitation) {
         log.info("Received request to accept stage invitation: {}", stageInvitation);
@@ -51,7 +51,7 @@ public class StageInvitationController {
         return ResponseEntity.ok(stageInvitationService.acceptStageInvitation(stageInvitation));
     }
 
-    @PutMapping("/reject")
+    @PutMapping("/rejects")
     @RejectStageInvitationDoc
     public ResponseEntity<StageInvitationDto> rejectStageInvitation(@Valid @RequestBody RejectStageInvitationDto rejectStageInvitationDto) {
         log.info("Received request to reject stage invitation: {}", rejectStageInvitationDto);

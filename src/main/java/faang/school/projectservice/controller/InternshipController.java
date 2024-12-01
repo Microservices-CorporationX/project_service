@@ -35,7 +35,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internship")
+@RequestMapping("/internships")
 @Tag(name = "Internship", description = "Internship operations")
 public class InternshipController {
     private final InternshipService internshipService;
@@ -43,7 +43,7 @@ public class InternshipController {
     @PostMapping
     @CreateInternshipDoc
     public InternshipCreatedDto createInternship(@Valid @RequestBody InternshipCreatedDto internship) {
-        log.info("Creating internship '{}' by UserId #{}.", internship.getName(), internship.getCreatedBy());
+        log.info("Creating internship '{}' by UserId {}.", internship.getName(), internship.getCreatedBy());
         return internshipService.createInternship(internship);
     }
 
@@ -54,7 +54,7 @@ public class InternshipController {
         return internshipService.updateInternship(internship);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/filters")
     @FilterInternshipDoc
     public List<InternshipFilterDto> getAllInternshipsByFilter(
             @NotNull(message = "Internship status can not be null")
@@ -82,7 +82,10 @@ public class InternshipController {
 
     @GetInternshipDoc
     @GetMapping("/{internshipId}")
-    public InternshipGetByIdDto getInternshipById(@PathVariable @Positive long internshipId) {
+    public InternshipGetByIdDto getInternshipById(
+            @PathVariable
+            @Positive(message = "InternshipId must be positive")
+            long internshipId) {
         log.info("Getting internship by Id {}", internshipId);
         return internshipService.getByIdInternship(internshipId);
     }

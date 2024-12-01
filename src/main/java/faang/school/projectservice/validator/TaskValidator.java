@@ -8,11 +8,13 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.StageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TaskValidator {
@@ -35,6 +37,7 @@ public class TaskValidator {
         try {
             TaskStatus.valueOf(String.valueOf(status));
         } catch (IllegalArgumentException e) {
+            log.error("Task status is not valid. Validation status: {}", Arrays.toString(TaskStatus.values()), e);
             throw new DataValidationException("Task status is not valid. Validation status: " + Arrays.toString(TaskStatus.values()));
         }
     }
@@ -77,17 +80,17 @@ public class TaskValidator {
 
     public void validateTeamMember(Long teamMemberId, Long projectId) {
         Project project = projectService.getProjectById(projectId);
-        AtomicBoolean isFounded = new AtomicBoolean(false);
+        AtomicBoolean isFound = new AtomicBoolean(false);
 
         project.getTeams().forEach(team -> {
             team.getTeamMembers().forEach(teamMember -> {
                 if (teamMember.getId().equals(teamMemberId)) {
-                    isFounded.set(true);
+                    isFound.set(true);
                 }
             });
         });
 
-        if (!isFounded.get()) {
+        if (!isFound.get()) {
             throw new DataValidationException("Team member with id " + teamMemberId + " does not exist in project with id " + projectId);
         }
     }

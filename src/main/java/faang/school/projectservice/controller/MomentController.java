@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,7 +45,7 @@ public class MomentController {
         MomentDto savedMoment = momentService.saveMoment(momentDto);
         log.info("Moment saved: {}", savedMoment);
 
-        return ResponseEntity.status(HttpStatus.SC_CREATED).body(savedMoment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMoment);
     }
 
     @PutMapping
@@ -85,7 +85,11 @@ public class MomentController {
 
     @GetMomentDoc
     @GetMapping("/{momentId}")
-    public ResponseEntity<MomentDto> getMoment(@PathVariable @NotNull @Positive long momentId) {
+    public ResponseEntity<MomentDto> getMoment(
+            @PathVariable
+            @NotNull(message = "Moment id can not be null")
+            @Positive(message = "Moment id must be positive")
+            long momentId) {
         MomentDto momentDto = momentService.getMoment(momentId);
         log.info("Moment found by id {}", momentId);
 
