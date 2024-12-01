@@ -51,7 +51,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testCreateProjectCancelled() {
+    void testCreateProjectCancelled() {
         Project firstProject = createProject(1L, "Project 1", ProjectStatus.CANCELLED);
         Project secondProject = createProject(2L, "Project 2", ProjectStatus.IN_PROGRESS);
         MomentDto momentDto = createMomentDto(1L, "Moment");
@@ -62,7 +62,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testCreateMomentSuccessfully() {
+    void testCreateMomentSuccessfully() {
         Project firstProject = createProject(1L, "Project 1", ProjectStatus.IN_PROGRESS);
         Project secondProject = createProject(2L, "Project 2", ProjectStatus.IN_PROGRESS);
         MomentDto momentDto = createMomentDto(1L, "Moment");
@@ -90,7 +90,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testUpdateMomentUserOrProjectIdExists() {
+    void testUpdateMomentUserOrProjectIdExists() {
         Project firstProject = createProject(1L, "Project1", ProjectStatus.IN_PROGRESS);
         Project secondProject = createProject(2L, "Project2", ProjectStatus.IN_PROGRESS);
         List<Long> userIds = new ArrayList<>(List.of(1L, 2L, 3L, 4L));
@@ -111,7 +111,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testUpdateMomentSuccessfully() {
+    void testUpdateMomentSuccessfully() {
         Project firstProject = createProject(1L, "Project1", ProjectStatus.IN_PROGRESS);
         Project secondProject = createProject(2L, "Project2", ProjectStatus.IN_PROGRESS);
         Project thirdProject = createProject(5L, "Project5", ProjectStatus.IN_PROGRESS);
@@ -137,7 +137,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentsWhenAllNull() {
+    void testGetMomentsWhenAllNull() {
         MomentFilterDto filter = createMomentFilterDto(1L, null, new ArrayList<>());
         List<Moment> moments = getMoments();
 
@@ -152,7 +152,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentsWhenSomeValuesNull() {
+    void testGetMomentsWhenSomeValuesNull() {
         MomentFilterDto filter = createMomentFilterDto(1L, LocalDateTime.now(), new ArrayList<>());
         List<Moment> moments = getMoments();
         when(momentRepository.findAll()).thenReturn(moments);
@@ -165,7 +165,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentsWithFiltersSuccessfully() {
+    void testGetMomentsWithFiltersSuccessfully() {
         List<Moment> moments = getMoments();
         Project firstProject = moments.get(0).getProjects().get(0);
         Project secondProject = moments.get(1).getProjects().get(1);
@@ -194,7 +194,7 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentsSuccessfully() {
+    void testGetMomentsSuccessfully() {
         List<Moment> moments = getMoments();
         when(momentRepository.findAll()).thenReturn(moments);
         List<MomentDto> result = momentService.getMoments();
@@ -203,14 +203,14 @@ public class MomentServiceTest {
     }
 
     @Test
-    public void testGetMomentByIdNotFound() {
+    void testGetMomentByIdNotFound() {
         Moment moment = createMoment(3L, "Moment1");
         when(momentRepository.findById(moment.getId())).thenReturn(Optional.empty());
         assertThrows(MomentNotFoundException.class, () -> momentService.getMomentById(moment.getId()));
     }
 
     @Test
-    public void testGetMomentByIdSuccess() {
+    void testGetMomentByIdSuccess() {
         Moment moment = createMoment(1L, "Moment1");
         MomentDto momentDto = createMomentDto(1L, "Moment1");
         when(momentRepository.findById(moment.getId())).thenReturn(Optional.of(moment));
@@ -224,14 +224,14 @@ public class MomentServiceTest {
         assertEquals(result.getName(), moment.getName());
     }
 
-    private MomentDto createMomentDto(long id, String name) {
+    MomentDto createMomentDto(long id, String name) {
         MomentDto momentDto = new MomentDto();
         momentDto.setId(id);
         momentDto.setName(name);
         return momentDto;
     }
 
-    private Project createProject(long id, String name, ProjectStatus status) {
+    Project createProject(long id, String name, ProjectStatus status) {
         Project project = new Project();
         project.setId(id);
         project.setName(name);
@@ -239,14 +239,14 @@ public class MomentServiceTest {
         return project;
     }
 
-    private Moment createMoment(long id, String name) {
+    Moment createMoment(long id, String name) {
         Moment moment = new Moment();
         moment.setId(id);
         moment.setName(name);
         return moment;
     }
 
-    private List<Moment> getMoments() {
+    List<Moment> getMoments() {
         Project firstProject = createProject(1L, "Project 1", ProjectStatus.IN_PROGRESS);
         Project secondProject = createProject(2L, "Project 2", ProjectStatus.IN_PROGRESS);
         Moment firstMoment = createMoment(1L, "Moment1");
@@ -258,7 +258,7 @@ public class MomentServiceTest {
         return new ArrayList<>(List.of(firstMoment, secondMoment));
     }
 
-    private MomentFilterDto createMomentFilterDto(long id, LocalDateTime date, List<Long> projectIds) {
+    MomentFilterDto createMomentFilterDto(long id, LocalDateTime date, List<Long> projectIds) {
         return new MomentFilterDto(id, date, projectIds);
     }
 }
