@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public class AssigneeCondition implements Condition {
 
     private static final String ASSIGNEE_FIELD_NAME = "assignee";
-    private static final String ASSIGNEE_FIELD_CONDITION = "assignee=%s";
+    private static final String ASSIGNEE_FIELD_CONDITION = "assignee='%s'";
 
     private final String assignee;
 

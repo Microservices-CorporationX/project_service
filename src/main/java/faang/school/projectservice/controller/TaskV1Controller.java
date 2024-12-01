@@ -11,6 +11,7 @@ import faang.school.projectservice.service.jira.JiraCloudReactiveClient;
 import faang.school.projectservice.service.jira.builders.JiraCreateIssueBuilder;
 import faang.school.projectservice.service.jira.builders.JiraSearchRequestBuilder;
 import faang.school.projectservice.service.jira.builders.JiraUpdateIssueBuilder;
+import faang.school.projectservice.service.jira.search.conditions.impl.AssigneeCondition;
 import faang.school.projectservice.service.jira.search.conditions.impl.ProjectCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class TaskV1Controller {
                 .setIssueType(IssueType.BUG)
                 .build();
 
-        return jiraCloudReactiveClient.updateIssue("TP-19", request);
+        return jiraCloudReactiveClient.updateIssue("TP-36", request);
     }
 
     @PutMapping("/transition/{issueId}")
@@ -63,7 +64,7 @@ public class TaskV1Controller {
         return jiraCloudReactiveClient.transitionIssue(issueId, IssueStatus.DONE);
     }
 
-    @GetMapping
+    @GetMapping("/transitions")
     public Mono<List<TransitionNestedResponse>> getAvailableTransitions() {
         return jiraCloudReactiveClient.getAvailableTransitions("TP-30");
     }
@@ -73,6 +74,7 @@ public class TaskV1Controller {
         JiraSearchRequest request = new JiraSearchRequestBuilder()
                 .withDefaultFields()
                 .addCondition(new ProjectCondition("TP"))
+                .addCondition(new AssigneeCondition("Николай Орленко"))
                 .build();
         return jiraCloudReactiveClient.searchIssuesByFilter(request);
     }
