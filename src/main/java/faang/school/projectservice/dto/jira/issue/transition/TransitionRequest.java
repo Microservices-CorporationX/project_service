@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.jira.transition;
+package faang.school.projectservice.dto.jira.issue.transition;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

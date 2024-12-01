@@ -1,4 +1,4 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.team;
 
 import java.util.List;
 

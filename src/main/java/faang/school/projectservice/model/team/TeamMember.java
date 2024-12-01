@@ -1,4 +1,4 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.team;
 
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;

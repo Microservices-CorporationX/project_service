@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.team.TeamRole;
 import faang.school.projectservice.service.TeamMemberService;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

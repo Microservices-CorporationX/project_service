@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.stage.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.filter.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapperImpl;
-import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.team.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;

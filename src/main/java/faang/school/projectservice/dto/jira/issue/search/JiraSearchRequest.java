@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.jira.search;
+package faang.school.projectservice.dto.jira.issue.search;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

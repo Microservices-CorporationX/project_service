@@ -39,7 +39,12 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("com.h2database:h2")
 
+    /**
+     * Reactor
+     */
     implementation("io.projectreactor:reactor-core")
+    testImplementation("io.projectreactor:reactor-test:3.5.10")
+
 
     /**
      * Resilience4j

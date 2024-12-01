@@ -1,4 +1,4 @@
-package faang.school.projectservice.model;
+package faang.school.projectservice.model.task;
 
 import faang.school.projectservice.model.project.Project;
 import faang.school.projectservice.model.stage.Stage;
@@ -72,8 +72,8 @@ public class Task {
     @JoinColumn(name = "stage_id")
     private Stage stage;
 
-    @Column(name = "jira_key")
-    private String jiraIssueKey;
+    @Column(name = "issue_key")
+    private String issueKey;
 
     @Column(name = "task_type")
     @Enumerated(EnumType.ORDINAL)

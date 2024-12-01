@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.jira.builders;
 
 import faang.school.projectservice.dto.jira.issue.enums.IssueFieldsName;
-import faang.school.projectservice.dto.jira.search.JiraSearchRequest;
+import faang.school.projectservice.dto.jira.issue.search.JiraSearchRequest;
 import faang.school.projectservice.service.jira.search.conditions.Condition;
 
 import java.util.ArrayList;

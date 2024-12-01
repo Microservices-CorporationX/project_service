@@ -1,17 +1,16 @@
 package faang.school.projectservice.dto.jira.webhook;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JiraUpdateIssuePayload {
 
     @JsonProperty("id")
-    @NotNull(message = "Timestamp cannot be null")
-    @Positive(message = "Id cannot be negative")
-    private Long id;
+    private String id;
 
     @JsonProperty("timestamp")
     @NotNull(message = "Timestamp cannot be null")

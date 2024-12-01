@@ -1,7 +1,7 @@
 package faang.school.projectservice.model.resource;
 
-import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.model.team.TeamMember;
+import faang.school.projectservice.model.team.TeamRole;
 import faang.school.projectservice.model.project.Project;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;

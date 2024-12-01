@@ -1,15 +1,15 @@
 package faang.school.projectservice.service.jira;
 
 import faang.school.projectservice.config.jira.JiraUriConfig;
-import faang.school.projectservice.dto.jira.JiraSearchResponse;
+import faang.school.projectservice.dto.jira.issue.search.JiraSearchResponse;
 import faang.school.projectservice.dto.jira.issue.IssueResponse;
 import faang.school.projectservice.dto.jira.issue.create.JiraCreateIssueRequest;
 import faang.school.projectservice.dto.jira.issue.enums.IssueStatus;
 import faang.school.projectservice.dto.jira.issue.update.JiraUpdateIssueRequest;
-import faang.school.projectservice.dto.jira.search.JiraSearchRequest;
-import faang.school.projectservice.dto.jira.transition.TransitionNestedResponse;
-import faang.school.projectservice.dto.jira.transition.TransitionRequest;
-import faang.school.projectservice.dto.jira.transition.TransitionsResponse;
+import faang.school.projectservice.dto.jira.issue.search.JiraSearchRequest;
+import faang.school.projectservice.dto.jira.issue.transition.TransitionNestedResponse;
+import faang.school.projectservice.dto.jira.issue.transition.TransitionRequest;
+import faang.school.projectservice.dto.jira.issue.transition.TransitionsResponse;
 import faang.school.projectservice.exceptions.jira.JiraBadRequestException;
 import faang.school.projectservice.exceptions.jira.JiraNotFoundException;
 import faang.school.projectservice.service.jira.builders.JiraSearchRequestBuilder;
@@ -37,14 +37,14 @@ public class JiraCloudReactiveClient {
     private static final String RETRY_CONFIG_NAME = "jira-api-retry";
 
     private final WebClient webClient;
-    private final JiraUriConfig jiraProperties;
+    private final JiraUriConfig uriConfig;
 
     @CircuitBreaker(name = CIRCUIT_BREAKER_NAME)
     @Retry(name = RETRY_CONFIG_NAME)
     public Mono<IssueResponse> createIssue(JiraCreateIssueRequest request) {
         log.info("Starting to Create issue {}", request);
         return webClient.post()
-                .uri(jiraProperties.getCreateIssueUri())
+                .uri(uriConfig.getCreateIssueUri())
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(status -> status == BAD_REQUEST, response ->
@@ -63,7 +63,7 @@ public class JiraCloudReactiveClient {
     public Mono<IssueResponse> updateIssue(String issueKey, JiraUpdateIssueRequest updateRequest) {
         log.info("Starting to Update issue {}", issueKey);
 
-        String updateUrl = String.format(jiraProperties.getUpdateIssueUri(), issueKey);
+        String updateUrl = String.format(uriConfig.getUpdateIssueUri(), issueKey);
         return webClient.put()
                 .uri(updateUrl)
                 .bodyValue(updateRequest)
@@ -84,7 +84,7 @@ public class JiraCloudReactiveClient {
     public Mono<Void> transitionIssue(String issueKey, IssueStatus newIssueStatus) {
         log.info("Starting to transition issue with key {} to {}", issueKey, newIssueStatus);
 
-        String url = String.format(jiraProperties.getTransitionIssueUri(), issueKey);
+        String url = String.format(uriConfig.getTransitionIssueUri(), issueKey);
         TransitionRequest request = TransitionRequest.builder()
                 .transition(new TransitionRequest.TransitionNested(newIssueStatus.getId()))
                 .build();
@@ -109,7 +109,7 @@ public class JiraCloudReactiveClient {
     public Mono<List<TransitionNestedResponse>> getAvailableTransitions(String issueKey) {
         log.info("Starting to retrieve available transitions for issue {}", issueKey);
 
-        String url = String.format(jiraProperties.getTransitionIssueUri(), issueKey);
+        String url = String.format(uriConfig.getTransitionIssueUri(), issueKey);
         return webClient
                 .get()
                 .uri(url)
@@ -133,7 +133,7 @@ public class JiraCloudReactiveClient {
 
         return webClient
                 .post()
-                .uri(jiraProperties.getSearchUri())
+                .uri(uriConfig.getSearchUri())
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(status -> status == BAD_REQUEST, response ->
