@@ -176,7 +176,6 @@ public class TeamMemberServiceTest {
         // Assert
         assertEquals(responseDto, result);
         verify(teamService).getTeamById(teamId);
-        //verify(teamMemberRepository).addTeamMemberToTeam(teamId, teamMember);
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
 
@@ -213,7 +212,6 @@ public class TeamMemberServiceTest {
 
         // Assert
         verify(teamService).getTeamById(teamId);
-        //verify(teamMemberRepository).removeTeamMemberFromTeam(teamId, teamMember);
         verify(teamMemberRepository).delete(teamMember);
     }
 
