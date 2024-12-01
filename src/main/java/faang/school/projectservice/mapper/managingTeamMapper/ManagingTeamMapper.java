@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface managingTeamMapper {
+public interface ManagingTeamMapper {
 
     @Mapping(source = "team.id", target = "team")
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapRolesToStrings")

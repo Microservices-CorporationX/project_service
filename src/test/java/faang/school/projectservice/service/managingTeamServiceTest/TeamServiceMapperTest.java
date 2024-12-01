@@ -1,6 +1,6 @@
-package faang.school.projectservice.managingTeamServiceTest;
+package faang.school.projectservice.service.managingTeamServiceTest;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
-import faang.school.projectservice.mapper.managingTeamMapper.managingTeamMapper;
+import faang.school.projectservice.mapper.managingTeamMapper.ManagingTeamMapper;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TeamServiceMapperTest {
 
-    private final managingTeamMapper mapper = Mappers.getMapper(managingTeamMapper.class);
+    private final ManagingTeamMapper mapper = Mappers.getMapper(ManagingTeamMapper.class);
 
     @Test
     void shouldMapTeamMemberToDtoCorrectly() {

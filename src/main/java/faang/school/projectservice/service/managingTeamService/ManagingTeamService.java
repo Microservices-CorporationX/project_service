@@ -3,38 +3,46 @@ package faang.school.projectservice.service.managingTeamService;
 import faang.school.projectservice.dto.managingTeamDto.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.managingTeamMapper.managingTeamMapper;
+import faang.school.projectservice.mapper.managingTeamMapper.ManagingTeamMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.managingFilter.managingTeamFilter;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
-public class managingTeamService {
+public class ManagingTeamService {
 
     private final ProjectRepository projectRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
-    private final managingTeamMapper teamMemberMapper;
+    private final ManagingTeamMapper teamMemberMapper;
     private final List<managingTeamFilter> teamMemberFilters;
 
 
-    public TeamMemberDto addTeamMember(Long projectId, TeamMemberDto TeamMemberDto, @PathVariable Long teamId) {
+    public TeamMemberDto addTeamMember(Long projectId, TeamMemberDto TeamMemberDto, Long teamMemberId) {
         Project project = projectRepository.getProjectById(projectId);
 
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
-            throw new IllegalStateException("Cannot add member to a cancelled or completed project");
+            throw new EntityNotFoundException("Cannot add member to a cancelled or completed project");
         }
 
         Team team = project.getTeams().stream()
-                .filter(t -> t.getId().equals(teamId))
+                .filter(t -> t.getId().equals(teamMemberId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Team with given ID not found in project"));
+
+       TeamMember teamMemberInProject = team.getTeamMembers().stream().filter(teamMember -> teamMember.getId().equals(teamMemberId)).findFirst().orElseThrow(() ->
+                new IllegalStateException("Team with given ID not found in project")
+        );
+
+       if (!teamMemberInProject.getRoles().contains(TeamRole.OWNER)) {
+           throw new IllegalStateException("Only the owner can add members");
+       }
 
         TeamMember existingMember = teamMemberJpaRepository.findByUserIdAndProjectId(TeamMemberDto.getUserId(), projectId);
 
@@ -49,18 +57,16 @@ public class managingTeamService {
         return teamMemberMapper.toDto(savedMember);
     }
 
-    public TeamMemberDto updateTeamMember(Long projectId, TeamMemberDto TeamMemberDto, @PathVariable Long teamMemberId, Long currentUserId) {
+    public TeamMemberDto updateTeamMember(Long projectId, TeamMemberDto TeamMemberDto, Long teamMemberId, Long currentUserId) {
         checkProjectStatusAndThrowException(projectId);
 
         TeamMember existingMember = teamMemberJpaRepository.findById(teamMemberId)
-                .orElseThrow(() -> new IllegalStateException("Team member with given ID not found in project"));
+                .orElseThrow(() -> new EntityNotFoundException("Team member with given ID not found in project"));
 
         if (!existingMember.getUserId().equals(currentUserId)) {
-            boolean isTeamLead = existingMember.getRoles().contains(TeamRole.OWNER);
-            if (!isTeamLead) {
-                throw new IllegalStateException("Only the team lead can update roles and access level");
-            }
+            validateUserIsOwner(currentUserId, projectId);
         }
+
 
         TeamMember teamMemberToUpdate = teamMemberMapper.toEntity(TeamMemberDto);
         teamMemberToUpdate.setId(teamMemberId);
@@ -80,23 +86,20 @@ public class managingTeamService {
         return teamMemberMapper.toDto(savedMember);
     }
 
-    public TeamMemberDto deleteTeamMember(Long projectId, @PathVariable Long teamMemberId, Long currentUserId) {
+    public TeamMemberDto deleteTeamMember(Long projectId, Long teamMemberId, Long currentUserId) {
         checkProjectStatusAndThrowException(projectId);
 
         TeamMember teamMember = teamMemberJpaRepository.findById(teamMemberId)
-                .orElseThrow(() -> new IllegalStateException("Team member with given ID not found in project"));
+                .orElseThrow(() -> new EntityNotFoundException("Team member with given ID not found in project"));
 
-        TeamMember currentUser = teamMemberJpaRepository.findByUserId(currentUserId).stream().findFirst().orElse(null);
-
-
-        boolean isTeamLeadOrOwner = currentUser.getRoles().contains(TeamRole.OWNER);
-        if (!isTeamLeadOrOwner) {
-            throw new IllegalStateException("Only the team lead or owner can delete members");
+        if (!teamMember.getUserId().equals(currentUserId)) {
+            validateUserIsOwner(currentUserId, projectId);
         }
 
         teamMemberJpaRepository.delete(teamMember);
         return teamMemberMapper.toDto(teamMember);
     }
+
 
     public List<TeamMemberDto> getAllMembers(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
@@ -115,7 +118,7 @@ public class managingTeamService {
     }
 
     public TeamMemberDto getTeamMember(Long projectId, Long teamMemberId) {
-        TeamMember teamMember = teamMemberJpaRepository.findById(teamMemberId).orElse(null);
+        TeamMember teamMember = teamMemberJpaRepository.findById(teamMemberId).orElseThrow(() -> new EntityNotFoundException("Team member with given ID not found in project"));
         return teamMemberMapper.toDto(teamMember);
     }
 
@@ -137,6 +140,17 @@ public class managingTeamService {
         Project project = projectRepository.getProjectById(projectId);
         if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
             throw new IllegalStateException("Cannot add member to a cancelled or completed project");
+        }
+    }
+
+    private void validateUserIsOwner(Long userId, Long projectId) {
+        TeamMember currentUser = teamMemberJpaRepository.findByUserId(userId).stream()
+                .filter(member -> member.getTeam().getId().equals(projectId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("User is not part of the project"));
+
+        if (!currentUser.getRoles().contains(TeamRole.OWNER)) {
+            throw new IllegalStateException("Only the owner can delete members");
         }
     }
 }

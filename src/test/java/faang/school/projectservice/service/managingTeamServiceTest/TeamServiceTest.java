@@ -1,13 +1,12 @@
-package faang.school.projectservice.managingTeamServiceTest;
+package faang.school.projectservice.service.managingTeamServiceTest;
 
 import faang.school.projectservice.dto.managingTeamDto.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.managingTeamMapper.managingTeamMapper;
+import faang.school.projectservice.mapper.managingTeamMapper.ManagingTeamMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filters.managingFilter.managingTeamFilter;
-import faang.school.projectservice.service.managingTeamService.managingTeamService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,10 +32,10 @@ public class TeamServiceTest {
     private TeamMemberJpaRepository teamMemberJpaRepository;
 
     @Mock
-    private managingTeamMapper teamMemberMapper;
+    private ManagingTeamMapper teamMemberMapper;
 
     @InjectMocks
-    private managingTeamService ManagingTeamService;
+    private faang.school.projectservice.service.managingTeamService.ManagingTeamService ManagingTeamService;
 
     @Test
     void addTeamMember_shouldAddMember_whenConditionsAreMet() {
@@ -82,7 +81,7 @@ public class TeamServiceTest {
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 ManagingTeamService.addTeamMember(projectId, teamMemberDto, teamId));
         assertEquals("Cannot add member to a cancelled or completed project", exception.getMessage());
     }
@@ -200,7 +199,7 @@ public class TeamServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamMemberJpaRepository.findById(teamMemberId)).thenReturn(java.util.Optional.empty());
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 ManagingTeamService.updateTeamMember(projectId, teamMemberDto, teamMemberId, currentUserId));
         assertEquals("Team member with given ID not found in project", exception.getMessage());
     }
@@ -292,7 +291,7 @@ public class TeamServiceTest {
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamMemberJpaRepository.findById(teamMemberId)).thenReturn(java.util.Optional.empty());
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 ManagingTeamService.deleteTeamMember(projectId, teamMemberId, currentUserId)
         );
 

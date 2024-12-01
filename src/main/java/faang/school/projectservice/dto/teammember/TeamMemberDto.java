@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class TeamMemberDto{
         @NotNull
-        Long id;
+        private Long id;
         @NotNull
         private Long team;
         @NotNull
