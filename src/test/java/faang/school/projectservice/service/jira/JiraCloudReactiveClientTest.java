@@ -34,8 +34,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class JiraCloudReactiveClientTest {
 
-    private static final String JIRA_NOT_FOUND_MESSAGE = "Jira not found error: %s";
-    private static final String JIRA_BAD_REQUEST_MESSAGE = "Jira bad request error: %s";
+    private static final String BODY_AS_STRING = "bodyAsString";
+    private static final String BAD_REQUEST_MESSAGE = String.format("Jira bad request error: %s", BODY_AS_STRING);
+    private static final String NOT_FOUND_MESSAGE = String.format("Jira not found error: %s", BODY_AS_STRING);
 
     @Mock
     private WebClient webClient;
@@ -61,27 +62,55 @@ public class JiraCloudReactiveClientTest {
     @InjectMocks
     private JiraCloudReactiveClient jiraClient;
 
-    @Test
-    void testCreateIssue_Success() {
-        JiraCreateIssueRequest request = new JiraCreateIssueBuilder()
+    private JiraCreateIssueRequest createIssueRequest;
+    private JiraUpdateIssueRequest updateIssueRequest;
+    private String issueKey;
+    private IssueResponse expectedResponse;
+    private IssueStatus newIssueStatus;
+    private TransitionRequest transitionRequest;
+    private JiraSearchRequest searchRequest;
+
+    @BeforeEach
+    void setUp() {
+        createIssueRequest = new JiraCreateIssueBuilder()
                 .setProjectKey("TEST")
                 .setSummary("Test Issue")
                 .setDescription("Test Description")
                 .build();
 
-        IssueResponse expectedResponse = new IssueResponse();
-        expectedResponse.setKey("TEST-1");
+        updateIssueRequest = new JiraUpdateIssueBuilder()
+                .setSummary("test")
+                .setDescription("test description")
+                .build();
 
+        issueKey = "TEST-1";
+
+        expectedResponse = new IssueResponse();
+        expectedResponse.setKey(issueKey);
+
+        newIssueStatus = IssueStatus.DONE;
+        transitionRequest = TransitionRequest.builder()
+                .transition(new TransitionRequest.TransitionNested(newIssueStatus.getId()))
+                .build();
+
+        searchRequest = new JiraSearchRequestBuilder()
+                .withDefaultFields()
+                .addCondition(new ProjectCondition("TP"))
+                .build();
+    }
+
+    @Test
+    void testCreateIssue_Success() {
         when(uriConfig.getCreateIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue");
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(uriConfig.getCreateIssueUri())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(createIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class)).thenReturn(Mono.just(expectedResponse));
 
-        Mono<IssueResponse> actualResponse = jiraClient.createIssue(request);
+        Mono<IssueResponse> actualResponse = jiraClient.createIssue(createIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectNext(expectedResponse)
@@ -90,76 +119,52 @@ public class JiraCloudReactiveClientTest {
 
     @Test
     void testCreateIssue_BadRequest() {
-        JiraCreateIssueRequest request = new JiraCreateIssueBuilder()
-                .setProjectKey("TEST")
-                .setSummary("Test Issue")
-                .setDescription("Test Description")
-                .build();
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_BAD_REQUEST_MESSAGE, bodyAsString);
-
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(uriConfig.getCreateIssueUri())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(createIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class))
-                .thenReturn(Mono.error(new JiraBadRequestException(bodyAsString)));
+                .thenReturn(Mono.error(new JiraBadRequestException(BODY_AS_STRING)));
 
-        Mono<IssueResponse> actualResponse = jiraClient.createIssue(request);
+        Mono<IssueResponse> actualResponse = jiraClient.createIssue(createIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectErrorMatches(throwable -> throwable instanceof JiraBadRequestException &&
-                        throwable.getMessage().equals(expectedErrorMessage))
+                        throwable.getMessage().equals(BAD_REQUEST_MESSAGE))
                 .verify();
     }
 
     @Test
     void testCreateIssue_NotFound() {
-        JiraCreateIssueRequest request = new JiraCreateIssueBuilder()
-                .setProjectKey("TEST")
-                .setSummary("Test Issue")
-                .setDescription("Test Description")
-                .build();
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_NOT_FOUND_MESSAGE, bodyAsString);
-
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(uriConfig.getCreateIssueUri())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(createIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class))
-                .thenReturn(Mono.error(new JiraNotFoundException(bodyAsString)));
+                .thenReturn(Mono.error(new JiraNotFoundException(BODY_AS_STRING)));
 
-        Mono<IssueResponse> actualResponse = jiraClient.createIssue(request);
+        Mono<IssueResponse> actualResponse = jiraClient.createIssue(createIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectErrorMatches(throwable -> throwable instanceof JiraNotFoundException &&
-                        throwable.getMessage().equals(expectedErrorMessage))
+                        throwable.getMessage().equals(NOT_FOUND_MESSAGE))
                 .verify();
     }
 
     @Test
     void testUpdateIssue_success() {
-        JiraUpdateIssueRequest request = new JiraUpdateIssueBuilder()
-                .setSummary("test")
-                .setDescription("test description")
-                .build();
-        String issueId = "TEST-1";
-        IssueResponse expectedResponse = new IssueResponse();
-        expectedResponse.setKey("TEST-1");
-
         when(uriConfig.getUpdateIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/%s");
         when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueId))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueKey))).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(updateIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class)).thenReturn(Mono.just(expectedResponse));
 
-        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueId, request);
+        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueKey, updateIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectNext(expectedResponse)
@@ -168,78 +173,52 @@ public class JiraCloudReactiveClientTest {
 
     @Test
     void testUpdateIssue_badRequest() {
-        JiraUpdateIssueRequest request = new JiraUpdateIssueBuilder()
-                .setSummary("test")
-                .setDescription("test description")
-                .build();
-        String issueId = "TEST-1";
-        IssueResponse expectedResponse = new IssueResponse();
-        expectedResponse.setKey("TEST-1");
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_BAD_REQUEST_MESSAGE, bodyAsString);
-
         when(uriConfig.getUpdateIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/%s");
         when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueId))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueKey))).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(updateIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class))
-                .thenReturn(Mono.error(new JiraBadRequestException(bodyAsString)));
+                .thenReturn(Mono.error(new JiraBadRequestException(BODY_AS_STRING)));
 
-        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueId, request);
+        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueKey, updateIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectErrorMatches(throwable -> throwable instanceof JiraBadRequestException &&
-                        throwable.getMessage().equals(expectedErrorMessage))
+                        throwable.getMessage().equals(BAD_REQUEST_MESSAGE))
                 .verify();
     }
 
     @Test
     void testUpdateIssue_NotFound() {
-        JiraUpdateIssueRequest request = new JiraUpdateIssueBuilder()
-                .setSummary("test")
-                .setDescription("test description")
-                .build();
-        String issueId = "TEST-1";
-        IssueResponse expectedResponse = new IssueResponse();
-        expectedResponse.setKey("TEST-1");
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_NOT_FOUND_MESSAGE, bodyAsString);
-
         when(uriConfig.getUpdateIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/%s");
         when(webClient.put()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueId))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodyUriSpec.uri(String.format(uriConfig.getUpdateIssueUri(), issueKey))).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(updateIssueRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(IssueResponse.class))
-                .thenReturn(Mono.error(new JiraNotFoundException(bodyAsString)));
+                .thenReturn(Mono.error(new JiraNotFoundException(BODY_AS_STRING)));
 
-        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueId, request);
+        Mono<IssueResponse> actualResponse = jiraClient.updateIssue(issueKey, updateIssueRequest);
 
         StepVerifier.create(actualResponse)
                 .expectErrorMatches(throwable -> throwable instanceof JiraNotFoundException &&
-                        throwable.getMessage().equals(expectedErrorMessage))
+                        throwable.getMessage().equals(NOT_FOUND_MESSAGE))
                 .verify();
     }
 
     @Test
     void testTransitionIssue_success() {
-        IssueStatus newIssueStatus = IssueStatus.DONE;
-        TransitionRequest request = TransitionRequest.builder()
-                .transition(new TransitionRequest.TransitionNested(newIssueStatus.getId()))
-                .build();
-        String issueKey = "TEST-1";
-
         when(uriConfig.getTransitionIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/{issueKey}/transitions");
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(String.format(uriConfig.getTransitionIssueUri(), issueKey)))
                 .thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(transitionRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.empty());
@@ -252,69 +231,51 @@ public class JiraCloudReactiveClientTest {
 
     @Test
     void testTransitionIssue_badRequest() {
-        IssueStatus newIssueStatus = IssueStatus.DONE;
-        TransitionRequest request = TransitionRequest.builder()
-                .transition(new TransitionRequest.TransitionNested(newIssueStatus.getId()))
-                .build();
-        String issueKey = "TEST-1";
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_BAD_REQUEST_MESSAGE, bodyAsString);
-
         when(uriConfig.getTransitionIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/{issueKey}/transitions");
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(String.format(uriConfig.getTransitionIssueUri(), issueKey)))
                 .thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(transitionRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new JiraBadRequestException(bodyAsString)));
+        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new JiraBadRequestException(BODY_AS_STRING)));
 
         Mono<Void> monoResponse = jiraClient.transitionIssue(issueKey, newIssueStatus);
 
         StepVerifier.create(monoResponse)
                 .verifyErrorMatches(throwable -> throwable instanceof JiraBadRequestException &&
-                        throwable.getMessage().equals(expectedErrorMessage));
+                        throwable.getMessage().equals(BAD_REQUEST_MESSAGE));
     }
 
     @Test
     void testTransitionIssue_notFound() {
-        IssueStatus newIssueStatus = IssueStatus.DONE;
-        TransitionRequest request = TransitionRequest.builder()
-                .transition(new TransitionRequest.TransitionNested(newIssueStatus.getId()))
-                .build();
-        String issueKey = "TEST-1";
-        String bodyAsString = "bodyAsString";
-        String expectedErrorMessage = String.format(JIRA_NOT_FOUND_MESSAGE, bodyAsString);
-
         when(uriConfig.getTransitionIssueUri())
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/issue/{issueKey}/transitions");
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(String.format(uriConfig.getTransitionIssueUri(), issueKey)))
                 .thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(transitionRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new JiraNotFoundException(bodyAsString)));
+        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new JiraNotFoundException(BODY_AS_STRING)));
 
         Mono<Void> monoResponse = jiraClient.transitionIssue(issueKey, newIssueStatus);
 
         StepVerifier.create(monoResponse)
                 .verifyErrorMatches(throwable -> throwable instanceof JiraNotFoundException &&
-                        throwable.getMessage().equals(expectedErrorMessage));
+                        throwable.getMessage().equals(NOT_FOUND_MESSAGE));
     }
 
     @Test
     void testGetAvailableTransitions_success() {
-        String issueKey = "TEST-1";
-
         TransitionNestedResponse responseNested1 = TransitionNestedResponse.builder()
                 .id("1")
                 .name("test1")
                 .build();
         TransitionNestedResponse responseNested2 = TransitionNestedResponse.builder()
-                .id("1")
-                .name("test1")
+                .id("2")
+                .name("test2")
                 .build();
         List<TransitionNestedResponse> expectedNestedTransitions = List.of(responseNested1, responseNested2);
         TransitionsResponse expectedTransitionResponse =
@@ -338,11 +299,6 @@ public class JiraCloudReactiveClientTest {
 
     @Test
     void testSearchIssuesByFilter() {
-        JiraSearchRequest request = new JiraSearchRequestBuilder()
-                .withDefaultFields()
-                .addCondition(new ProjectCondition("TP"))
-                .build();
-
         IssueResponse expectedResponse1 = new IssueResponse();
         expectedResponse1.setKey("TP-1");
         IssueResponse expectedResponse2 = new IssueResponse();
@@ -356,12 +312,12 @@ public class JiraCloudReactiveClientTest {
                 .thenReturn("https://foodwise.atlassian.net/rest/api/3/search");
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(uriConfig.getSearchUri())).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(request)).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(searchRequest)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(JiraSearchResponse.class)).thenReturn(Mono.just(expectedResponse));
 
-        Mono<List<IssueResponse>> actualIssuesResponses = jiraClient.searchIssuesByFilter(request);
+        Mono<List<IssueResponse>> actualIssuesResponses = jiraClient.searchIssuesByFilter(searchRequest);
 
         StepVerifier.create(actualIssuesResponses)
                 .expectNext(expectedIssues)
