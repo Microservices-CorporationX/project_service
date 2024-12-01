@@ -1,10 +1,7 @@
 package faang.school.projectservice.controller;
 
-import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import faang.school.projectservice.service.calendar.GoogleCalendarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +18,7 @@ public class GoogleAuthController {
     private final GoogleClientSecrets clientSecrets;
     @Value("${google.redirect-uri}")
     private String redirectUri;
+    private final GoogleCalendarService googleCalendarService;
 
     @GetMapping("/oauth2/google")
     public String initiateGoogleAuth() {
@@ -34,23 +32,8 @@ public class GoogleAuthController {
         return "Перейдите по <a href='" + authUrl + "'>ссылке</a> для авторизации через Google.";
     }
 
-    @GetMapping("/oauth2/google/callback")
-    public String googleCallback(@RequestParam("code") String code) {
-        try {
-            TokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                    new NetHttpTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    clientSecrets.getDetails().getTokenUri(),
-                    clientSecrets.getDetails().getClientId(),
-                    clientSecrets.getDetails().getClientSecret(),
-                    code,
-                    redirectUri
-            ).execute();
-
-            String accessToken = tokenResponse.getAccessToken();
-            return "Access Token: " + accessToken;
-        } catch (Exception e) {
-            return "Error exchanging code for token: " + e.getMessage();
-        }
+    @GetMapping("/oauth2/callback")
+    public void googleCallback(@RequestParam("code") String code) {
+        googleCalendarService.getAndSaveToken(code);
     }
 }

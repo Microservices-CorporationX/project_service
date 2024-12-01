@@ -91,4 +91,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    @Column(name = "calendar_id")
+    private String calendarId;
 }
