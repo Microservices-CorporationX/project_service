@@ -24,6 +24,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changeset/project_V015_resource_roles.sql
   - include:
-      file: db/changelog/changeset/project_V010_create_users.sql
-  - include:
       file: db/changelog/changeset/project_V016_meet.sql

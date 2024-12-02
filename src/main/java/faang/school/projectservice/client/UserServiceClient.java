@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
@@ -17,12 +18,15 @@ import java.util.List;
 )
 public interface UserServiceClient {
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/user/{userId}")
     UserDto getUser(@PathVariable long userId);
 
-    @PostMapping("/users")
+    @PostMapping("/users/filter")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
 
     @GetMapping("/users/{userId}/jira/{jiraDomain}")
     UserJiraDto getUserJiraInfo(@PathVariable long userId, @PathVariable String jiraDomain);
+
+    @PostMapping("/users")
+    UserDto saveUser(@RequestBody UserDto user);
 }
