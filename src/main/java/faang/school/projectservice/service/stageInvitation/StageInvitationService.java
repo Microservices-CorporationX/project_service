@@ -1,11 +1,11 @@
-package faang.school.projectservice.service.stageInvitation;
+package faang.school.projectservice.service.stageinvitation;
 
 import faang.school.projectservice.dto.stage_invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationFilterDto;
 import faang.school.projectservice.dto.stage_invitation.StageInvitationRejectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.stage_invitation_filter.StageInvitationFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.StageInvitationJpaRepository;
 import faang.school.projectservice.mapper.stageInvitation.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class StageInvitationService {
 
-    private final List<StageInvitationFilter> filters;
+    private final List<Filter<StageInvitation, StageInvitationFilterDto>> filters;
     private final StageInvitationMapper stageInvitationMapper;
     private final StageInvitationJpaRepository repository;
     private final StageInvitationValidator stageInvValidator;

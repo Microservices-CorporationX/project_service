@@ -1,6 +1,7 @@
 package faang.school.projectservice.filter.moment;
 
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Moment;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 import java.util.stream.Stream;
 
 @Component
-public class MomentDateFilter implements MomentFilter {
+public class MomentDateFilter implements Filter<Moment, MomentFilterDto> {
 
     @Override
     public boolean isApplicable(MomentFilterDto filters) {

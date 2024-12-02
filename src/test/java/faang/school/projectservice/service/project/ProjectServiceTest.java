@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
-import faang.school.projectservice.filter.project.ProjectFilter;
+import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.filter.project.ProjectNameFilter;
 import faang.school.projectservice.filter.project.ProjectStatusFilter;
 import faang.school.projectservice.jpa.ProjectJpaRepository;
@@ -12,6 +12,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +21,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -41,10 +46,13 @@ public class ProjectServiceTest {
     @Mock
     private ProjectJpaRepository projectRepository;
 
+    @Mock
+    private AmazonClientService amazonClient;
+
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
-    private final List<ProjectFilter> projectFilters = new ArrayList<>();
+    private final List<Filter<Project,ProjectFilterDto>> projectFilters = new ArrayList<>();
 
     @InjectMocks
     private ProjectService projectService;
@@ -54,7 +62,7 @@ public class ProjectServiceTest {
         projectFilters.add(new ProjectNameFilter());
         projectFilters.add(new ProjectStatusFilter());
 
-        projectService = new ProjectService(projectMapper, projectFilters, projectRepository);
+        projectService = new ProjectService(projectMapper, projectFilters, projectRepository, amazonClient);
     }
 
     @Test
@@ -196,6 +204,7 @@ public class ProjectServiceTest {
                 .id(1L)
                 .name("Project1")
                 .ownerId(1L)
+                .storageSize(BigInteger.ZERO)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
                 .description("Description1")
@@ -209,6 +218,7 @@ public class ProjectServiceTest {
         verify(projectRepository).save(project);
         assertEquals(projectDto.getId(), result.getId());
         assertEquals(projectDto.getName(), result.getName());
+        assertNotNull(result.getStorageSize());
     }
 
     @Test
@@ -318,5 +328,71 @@ public class ProjectServiceTest {
                 EntityNotFoundException.class, () -> projectService.getProjectById(projectId));
         assertEquals("Entity %s with ID %s not found".formatted(PROJECT, projectId), exception.getMessage());
         verify(projectRepository, times(1)).findById(projectId);
+    }
+
+    @Test
+    void getCoverByNotExistProjectTest() {
+        long projectId = 1L;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectCover(projectId));
+    }
+
+    @Test
+    void getCoverByNotExistCoverProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectCover(projectId));
+    }
+
+    @Test
+    void getCoverByProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        project.setCoverImageId("1.png");
+        byte[] image = new byte[10];
+        image[0] = 1;
+        image[1] = 0;
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(amazonClient.getProjectCover(project.getCoverImageId())).thenReturn(image);
+
+        byte[] result = projectService.getProjectCover(projectId);
+
+        assertEquals(image[0], result[0]);
+        assertEquals(image[1], result[1]);
+    }
+
+    @Test
+    void updateCoverByNotExistProjectTest() {
+        long projectId = 1L;
+        byte[] content = new byte[10];
+        content[0] = 1;
+        content[1] = 0;
+        MultipartFile file = new MockMultipartFile("1.png", content);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> projectService.updateProjectCover(projectId, file));
+    }
+
+    @Test
+    void updateCoverByProjectTest() {
+        long projectId = 1L;
+        Project project = new Project();
+        project.setId(projectId);
+        byte[] content = new byte[10];
+        content[0] = 1;
+        content[1] = 0;
+        MultipartFile file = new MockMultipartFile("1.png", content);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(amazonClient.updateProjectCover(file)).thenReturn("1.png");
+        when(projectRepository.save(project)).thenReturn(project);
+
+        ProjectDto result = projectService.updateProjectCover(projectId, file);
+
+        assertEquals("1.png", result.getCoverImageId());
     }
 }

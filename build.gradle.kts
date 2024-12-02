@@ -3,11 +3,11 @@ plugins {
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     jacoco
-    kotlin("jvm")
 }
 
 group = "faang.school"
 version = "1.0"
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -17,6 +17,7 @@ dependencies {
     /**
      * Spring boot starters
      */
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -62,7 +63,11 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2:2.3.232")
-    implementation(kotlin("stdlib-jdk8"))
+    testImplementation("io.projectreactor:reactor-test")
+
+    implementation("com.vaadin.external.google:android-json:0.0.20131108.vaadin1") {
+        exclude(group = "org.json", module = "json")
+    }
 }
 
 tasks.withType<Test> {
@@ -135,7 +140,4 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
-}
-kotlin {
-    jvmToolchain(17)
 }

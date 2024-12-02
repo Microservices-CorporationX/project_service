@@ -681,4 +681,21 @@ class TeamMemberServiceTest {
         assertDoesNotThrow(() -> teamMemberService.deleteAll(teamMembersToDelete));
         verify(teamMemberRepository, times(1)).deleteAll(teamMembersToDelete);
     }
+
+    @Test
+    public void teamMemberNotExistsTest() {
+        long id = 1L;
+
+        assertThrows(EntityNotFoundException.class,
+                () -> teamMemberService.getTeamMemberEntity(id));
+    }
+
+    @Test
+    public void teamMemberExistsTest() {
+        long id = 1L;
+        TeamMember teamMember = new TeamMember();
+        when(teamMemberRepository.findById(id)).thenReturn(Optional.of(teamMember));
+
+        assertDoesNotThrow(() -> teamMemberService.getTeamMemberEntity(id));
+    }
 }

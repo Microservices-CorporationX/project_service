@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.moment;
 
+import faang.school.projectservice.dto.filter.FilterDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MomentFilterDto {
+public class MomentFilterDto implements FilterDto {
     private LocalDateTime datePattern;
     private String projectsPattern;
 }
