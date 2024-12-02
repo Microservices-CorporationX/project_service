@@ -12,14 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,7 +86,7 @@ public class TeamMemberServiceTest {
 
 
     @Test
-    public void testRemoveTeamMemberRole(){
+    public void testRemoveTeamMemberRole() {
         TeamMember member = teamMembers.get(0);
         TeamRole role = TeamRole.INTERN;
 

@@ -6,6 +6,7 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,14 +25,23 @@ public class TeamMemberService {
     public void setTeamMembersRoleAndRemoveInternRole(List<Long> teamMemberIds, TeamRole teamRole) {
         List<TeamMember> teamMembers = teamMemberRepository.findAllByIds(teamMemberIds);
         teamMembers.forEach(intern -> {
-            intern.getRoles().add(teamRole);
-            intern.getRoles().remove(TeamRole.INTERN);
+            if (intern.getRoles() == null) {
+                intern.setRoles(new ArrayList<>());
+            }
+            List<TeamRole> mutableRoles = new ArrayList<>(intern.getRoles());
+            mutableRoles.add(teamRole);
+            mutableRoles.remove(TeamRole.INTERN);
+            intern.setRoles(mutableRoles);
         });
+
         teamMemberRepository.saveAll(teamMembers);
     }
 
     public void removeTeamRole(TeamMember teamMember, TeamRole teamRole) {
-        teamMember.getRoles().remove(teamRole);
+        List<TeamRole> mutableRoles = new ArrayList<>(teamMember.getRoles());
+        mutableRoles.remove(teamRole);
+        teamMember.setRoles(mutableRoles);
+
         teamMemberRepository.save(teamMember);
     }
 }

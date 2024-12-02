@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -87,9 +87,9 @@ class InternshipServiceTest {
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
         when(internshipRepository.save(internship)).thenReturn(internship);
 
-        Long result = internshipService.createInternship(internshipDto);
+        InternshipDto result = internshipService.createInternship(internshipDto);
 
-        assertEquals(1L, result);
+        assertEquals(1L, result.id());
         verify(internshipRepository, times(1)).save(internship);
     }
 
