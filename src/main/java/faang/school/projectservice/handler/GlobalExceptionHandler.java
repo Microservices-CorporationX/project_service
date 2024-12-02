@@ -7,6 +7,8 @@ import faang.school.projectservice.exception.ProjectStatusValidationException;
 import faang.school.projectservice.exception.TeamMemberValidationException;
 import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.exception.Subproject.*;
+import faang.school.projectservice.exception.PermissionDeniedException;
+import faang.school.projectservice.exception.StorageSizeException;
 import jakarta.persistence.EntityNotFoundException;
 import faang.school.projectservice.exception.vacancy.VacancyDuplicationException;
 import lombok.extern.slf4j.Slf4j;
@@ -122,5 +124,19 @@ public class GlobalExceptionHandler {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errors", errors);
         return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTeamMemberPermission(PermissionDeniedException e) {
+        log.error("Team  member does not have permission", e);
+        return new ErrorResponse("Team  member does not have permission", e.getMessage());
+    }
+
+    @ExceptionHandler(StorageSizeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleStorageSize(StorageSizeException e) {
+        log.error("Storage size exceeded", e);
+        return new ErrorResponse("Storage size exceeded", e.getMessage());
     }
 }

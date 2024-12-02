@@ -1,17 +1,15 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.dto.client.project.ProjectDto;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
-import lombok.Builder;
+import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.junit.jupiter.api.Nested;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
