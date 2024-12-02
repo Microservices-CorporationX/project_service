@@ -35,16 +35,9 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void testFindProjectById() {
-        // Arrange
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("Test Project");
     public void testGetProjectById() {
         when(projectRepository.getProjectById(1L)).thenReturn(project);
 
-        // Act
-        Project result = projectService.findProjectById(1L);
         assertEquals(project, projectService.getProjectById(1L));
     }
 
@@ -59,11 +52,8 @@ public class ProjectServiceTest {
     public void testIsProjectComplete_Completed() {
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
 
-        // Assert
-        assertEquals(project, result);
         assertTrue(projectService.isProjectComplete(project.getId()));
     }
-}
 
     @Test
     public void testIsProjectComplete_NotCompleted() {

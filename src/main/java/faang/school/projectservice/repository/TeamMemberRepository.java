@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -44,10 +42,6 @@ public class TeamMemberRepository {
 
     public List<TeamMember> findAllMembersByProjectId(Long projectId) {
         return jpaRepository.findAllMembersByProjectId(projectId);
-    }
-
-    public TeamMember save(TeamMember teamMember) {
-        return jpaRepository.save(teamMember);
     }
 
     public void delete(TeamMember teamMember) {

@@ -2,10 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -26,7 +26,6 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Service
 public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
@@ -45,14 +44,10 @@ public class TeamMemberService {
         Project project = team.getProject();
         ensureHasAccess(creatorId, List.of(TeamRole.OWNER, TeamRole.TEAMLEAD), TeamMemberActions.ADD_MEMBER, project.getId());
 
-    public TeamMember getTeamMemberById(long id) {
-        return teamMemberRepository.findById(id);
         TeamMember teamMember = createOrUpdateRolesTeamMember(teamMemberDto, team, project);
         return teamMemberMapper.toResponseDto(teamMember);
     }
 
-    public List<TeamMember> getAllTeamMembersByIds(List<Long> ids) {
-        return teamMemberRepository.findAllByIds(ids);
     @Transactional
     public ResponseTeamMemberDto updateTeamMember(UpdateTeamMemberDto teamMemberDto,
                                                   long teamId,
@@ -72,13 +67,6 @@ public class TeamMemberService {
         return teamMemberMapper.toResponseDto(memberToUpdate);
     }
 
-    public void setTeamMembersRoleAndRemoveInternRole(List<Long> teamMemberIds, TeamRole teamRole) {
-        List<TeamMember> teamMembers = teamMemberRepository.findAllByIds(teamMemberIds);
-        teamMembers.forEach(intern -> {
-            intern.getRoles().add(teamRole);
-            intern.getRoles().remove(TeamRole.INTERN);
-        });
-        teamMemberRepository.saveAll(teamMembers);
     @Transactional
     public void deleteTeamMember(long memberId, long teamId) {
         long deleterId = userContext.getUserId();
@@ -92,8 +80,6 @@ public class TeamMemberService {
         teamMemberRepository.delete(teamMember);
     }
 
-    public void removeTeamRole(TeamMember teamMember, TeamRole teamRole) {
-        teamMember.getRoles().remove(teamRole);
     public List<ResponseTeamMemberDto> getFilteredTeamMembers(String name, TeamRole role, long projectId) {
         List<TeamMember> teamMembers = teamMemberRepository.findAllMembersByProjectId(projectId);
         List<Long> userIds = getUserIdsFromTeams(teamMembers);
@@ -222,5 +208,32 @@ public class TeamMemberService {
     @Transactional
     public TeamMember getTeamMember(long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
+    }
+
+    public List<TeamMember> getAllTeamMembersByIds(List<Long> ids) {
+        return teamMemberRepository.findAllByIds(ids);
+    }
+
+    public void setTeamMembersRoleAndRemoveInternRole(List<Long> teamMemberIds, TeamRole teamRole) {
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByIds(teamMemberIds);
+        teamMembers.forEach(intern -> {
+            if (intern.getRoles() == null) {
+                intern.setRoles(new ArrayList<>());
+            }
+            List<TeamRole> mutableRoles = new ArrayList<>(intern.getRoles());
+            mutableRoles.add(teamRole);
+            mutableRoles.remove(TeamRole.INTERN);
+            intern.setRoles(mutableRoles);
+        });
+
+        teamMemberRepository.saveAll(teamMembers);
+    }
+
+    public void removeTeamRole(TeamMember teamMember, TeamRole teamRole) {
+        List<TeamRole> mutableRoles = new ArrayList<>(teamMember.getRoles());
+        mutableRoles.remove(teamRole);
+        teamMember.setRoles(mutableRoles);
+
+        teamMemberRepository.save(teamMember);
     }
 }

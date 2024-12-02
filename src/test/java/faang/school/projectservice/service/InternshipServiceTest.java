@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -86,11 +86,12 @@ class InternshipServiceTest {
     void createInternship() {
         when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
         when(internshipRepository.save(internship)).thenReturn(internship);
+        when(internshipMapper.toInternshipDto(internship)).thenReturn(internshipDto);
 
-        Long result = internshipService.createInternship(internshipDto);
+        InternshipDto result = internshipService.createInternship(internshipDto);
 
-        assertEquals(1L, result);
-        verify(internshipRepository, times(1)).save(internship);
+        assertEquals(internshipDto, result);
+        verify(internshipRepository,times(1)).save(internship);
     }
 
     @Test
@@ -145,7 +146,7 @@ class InternshipServiceTest {
     void completeInternship() {
         TeamMember teamMember = teamMembers.get(0);
         when(internshipRepository.findById(1L)).thenReturn(Optional.of(internship));
-        when(teamMemberService.getTeamMemberById(1L)).thenReturn(teamMember);
+        when(teamMemberService.getTeamMember(1L)).thenReturn(teamMember);
 
         internshipService.completeInternship(1L, 1L);
 

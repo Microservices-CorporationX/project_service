@@ -14,16 +14,16 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
 
-    public Project getProjectById(long id) {
-        return projectRepository.getProjectById(id);
-    public Project findProjectById(long projectId) {
+    public Project getProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 
-    public boolean isProjectComplete(long id) {
+    public boolean isProjectComplete(long id){
         return getProjectById(id).getStatus() == ProjectStatus.COMPLETED;
+    }
+
     public ResponseProjectDto getProject(long projectId) {
-        Project project = findProjectById(projectId);
+        Project project = getProjectById(projectId);
         return projectMapper.toResponseDto(project);
     }
 }

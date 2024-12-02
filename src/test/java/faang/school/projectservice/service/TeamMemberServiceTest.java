@@ -2,10 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
@@ -38,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TeamMemberServiceTest {
+
 
     @Mock
     private TeamMemberRepository teamMemberRepository;
@@ -63,7 +62,6 @@ public class TeamMemberServiceTest {
     @InjectMocks
     private TeamMemberService teamMemberService;
 
-    private List<TeamMember> teamMembers;
     private CreateTeamMemberDto createDto;
     private UpdateTeamMemberDto updateDto;
     private TeamMember teamMember;
@@ -80,10 +78,10 @@ public class TeamMemberServiceTest {
     private long updaterId;
     private long memberId;
     private long deleterId;
+    private List<TeamMember> teamMembers;
 
     @BeforeEach
     public void setUp() {
-        teamMembers = new ArrayList<>();
         createDto = CreateTeamMemberDto.builder()
                 .userId(2L)
                 .roles(List.of(TeamRole.OWNER))
@@ -123,18 +121,11 @@ public class TeamMemberServiceTest {
         deleterId = 1L;
         memberId = 2L;
 
-        TeamMember teamMember = new TeamMember();
-        teamMember.setId(1L);
-        teamMember.setRoles(List.of(TeamRole.INTERN));
-        teamMembers.add(teamMember);
         member1 = TeamMember.builder()
                 .id(1L)
                 .roles(List.of(TeamRole.DEVELOPER))
                 .build();
 
-        TeamMember teamMember2 = new TeamMember();
-        teamMember2.setId(2L);
-        teamMembers.add(teamMember2);
         member2 = TeamMember.builder()
                 .id(2L)
                 .roles(List.of(TeamRole.ANALYST))
@@ -147,6 +138,17 @@ public class TeamMemberServiceTest {
         team2 = new Team();
         team2.setId(2L);
         team2.setTeamMembers(List.of(member2));
+
+        teamMembers = new ArrayList<>();
+
+        TeamMember teamMember = new TeamMember();
+        teamMember.setId(1L);
+        teamMember.setRoles(List.of(TeamRole.INTERN));
+        teamMembers.add(teamMember);
+
+        TeamMember teamMember2 = new TeamMember();
+        teamMember2.setId(2L);
+        teamMembers.add(teamMember2);
     }
 
     @Test
@@ -175,8 +177,6 @@ public class TeamMemberServiceTest {
     }
 
     @Test
-    public void testGetTeamMemberById() {
-        when(teamMemberRepository.findById(1L)).thenReturn(teamMembers.get(0));
     public void testAddTeamMember() {
         // Arrange
         when(userContext.getUserId()).thenReturn(creatorId);
@@ -185,9 +185,8 @@ public class TeamMemberServiceTest {
         when(teamMemberMapper.toResponseDto(any(TeamMember.class))).thenReturn(responseDto);
         when(teamMemberRepository.findByUserIdAndProjectId(creatorId, project.getId()))
                 .thenReturn(Optional.ofNullable(teamMember));
-        when(teamMemberRepository.save(any(TeamMember.class))).thenReturn(teamMember);
+        //when(teamMemberRepository.save(any(TeamMember.class))).thenReturn(teamMember);
 
-        assertEquals(teamMembers.get(0), teamMemberService.getTeamMemberById(1L));
         // Act
         ResponseTeamMemberDto result = teamMemberService.addTeamMember(createDto, teamId);
 
@@ -199,8 +198,6 @@ public class TeamMemberServiceTest {
     }
 
     @Test
-    public void testGetTeamMemberByIdNotFound() {
-        when(teamMemberRepository.findById(1L)).thenReturn(null);
     public void testUpdateTeamMember() {
         // Arrange
         when(userContext.getUserId()).thenReturn(updaterId);
@@ -210,8 +207,6 @@ public class TeamMemberServiceTest {
                 .thenReturn(Optional.ofNullable(teamMember));
         when(teamMemberMapper.toResponseDto(teamMember)).thenReturn(responseDto);
 
-        assertNull(teamMemberService.getTeamMemberById(1L));
-    }
         // Act
         ResponseTeamMemberDto result = teamMemberService.updateTeamMember(updateDto, teamId, memberId);
 
@@ -221,9 +216,8 @@ public class TeamMemberServiceTest {
         verify(teamMemberRepository).findById(memberId);
         verify(teamMemberRepository).save(teamMember);
     }
+
     @Test
-    public void testGetAllTeamMembersByIds() {
-        when(teamMemberRepository.findAllByIds(List.of(1L, 2L))).thenReturn(teamMembers);
     public void testDeleteTeamMember() {
         // Arrange
         when(userContext.getUserId()).thenReturn(deleterId);
@@ -232,7 +226,6 @@ public class TeamMemberServiceTest {
                 .thenReturn(Optional.ofNullable(teamMember));
         when(teamMemberRepository.findById(memberId)).thenReturn(teamMember);
 
-        assertEquals(teamMembers, teamMemberService.getAllTeamMembersByIds(List.of(1L, 2L)));
         // Act
         teamMemberService.deleteTeamMember(memberId, teamId);
 
@@ -242,9 +235,6 @@ public class TeamMemberServiceTest {
     }
 
     @Test
-    void testSetTeamMembersRoleAndRemoveInternRole() {
-        List<Long> ids = Arrays.asList(1L, 2L);
-        when(teamMemberRepository.findAllByIds(ids)).thenReturn(teamMembers);
     public void testGetFilteredTeamMembers() {
         // Arrange
         String name = "John";
@@ -253,21 +243,14 @@ public class TeamMemberServiceTest {
 
         project.setTeams(List.of(team1, team2));
 
-        teamMemberService.setTeamMembersRoleAndRemoveInternRole(ids, TeamRole.MANAGER);
         UserDto user1 = new UserDto();
         user1.setId(1L);
         user1.setUsername("John Doe");
 
-        verify(teamMemberRepository, times(1)).findAllByIds(ids);
-        verify(teamMemberRepository, times(1)).saveAll(teamMembers);
         UserDto user2 = new UserDto();
         user2.setId(2L);
         user2.setUsername("Jane Doe");
 
-        TeamMember updatedMember1 = teamMembers.get(0);
-        assertTrue(updatedMember1.getRoles().contains(TeamRole.MANAGER));
-        assertFalse(updatedMember1.getRoles().contains(TeamRole.INTERN));
-    }
         when(userServiceClient.getUsersByIds(List.of(1L, 2L))).thenReturn(List.of(user1, user2));
         when(teamMemberMapper.toResponseDto(anyList())).thenReturn(List.of(responseDto));
         when(teamMemberRepository.findAllMembersByProjectId(projectId)).thenReturn(List.of(member1, member2));
@@ -284,9 +267,6 @@ public class TeamMemberServiceTest {
     }
 
     @Test
-    public void testRemoveTeamMemberRole(){
-        TeamMember member = teamMembers.get(0);
-        TeamRole role = TeamRole.INTERN;
     public void testGetTeamMembersByTeamId() {
         // Arrange
         team.setTeamMembers(List.of(member1, member2));
@@ -294,18 +274,14 @@ public class TeamMemberServiceTest {
         when(teamService.getTeamById(teamId)).thenReturn(team);
         when(teamMemberMapper.toResponseDto(List.of(member1, member2))).thenReturn(List.of(responseDto, responseDto));
 
-        teamMemberService.removeTeamRole(member, role);
         // Act
         List<ResponseTeamMemberDto> result = teamMemberService.getTeamMembersByTeamId(teamId);
 
-        assertFalse(member.getRoles().contains(role));
-        verify(teamMemberRepository, times(1)).save(member);
         // Assert
         assertEquals(2, result.size());
         verify(teamService).getTeamById(teamId);
         verify(teamMemberMapper).toResponseDto(List.of(member1, member2));
     }
-}
 
     @Test
     public void testGetTeamMemberValidId() {
@@ -320,4 +296,57 @@ public class TeamMemberServiceTest {
         // assert
         assertEquals(teamMember, returnedTeamMember);
     }
+
+    @Test
+    public void testGetTeamMemberById() {
+        when(teamMemberRepository.findById(1L)).thenReturn(teamMembers.get(0));
+
+        assertEquals(teamMembers.get(0), teamMemberService.getTeamMember(1L));
+    }
+
+    @Test
+    public void testGetTeamMemberByIdNotFound() {
+        when(teamMemberRepository.findById(1L)).thenReturn(null);
+
+        assertNull(teamMemberService.getTeamMember(1L));
+    }
+
+    @Test
+    public void testGetAllTeamMembersByIds() {
+        when(teamMemberRepository.findAllByIds(List.of(1L, 2L))).thenReturn(teamMembers);
+
+        assertEquals(teamMembers, teamMemberService.getAllTeamMembersByIds(List.of(1L, 2L)));
+    }
+
+    @Test
+    void testSetTeamMembersRoleAndRemoveInternRole() {
+        List<Long> ids = new ArrayList<>(List.of(1L, 2L));
+        when(teamMemberRepository.findAllByIds(ids)).thenReturn(teamMembers);
+
+        teamMemberService.setTeamMembersRoleAndRemoveInternRole(ids, TeamRole.MANAGER);
+
+        verify(teamMemberRepository, times(1)).findAllByIds(ids);
+        verify(teamMemberRepository, times(1)).saveAll(teamMembers);
+
+        TeamMember updatedMember1 = teamMembers.get(0);
+        assertTrue(updatedMember1.getRoles().contains(TeamRole.MANAGER));
+        assertFalse(updatedMember1.getRoles().contains(TeamRole.INTERN));
+
+        TeamMember updatedMember2 = teamMembers.get(1);
+        assertTrue(updatedMember2.getRoles().contains(TeamRole.MANAGER));
+    }
+
+
+
+    @Test
+    void testRemoveTeamMemberRole() {
+        TeamMember member = teamMembers.get(0);
+        TeamRole role = TeamRole.INTERN;
+
+        teamMemberService.removeTeamRole(member, role);
+
+        assertFalse(member.getRoles().contains(role));
+        verify(teamMemberRepository, times(1)).save(member);
+    }
+
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.InternshipDto;
-import faang.school.projectservice.dto.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.service.InternshipService;
 import jakarta.validation.Valid;
@@ -20,8 +20,8 @@ public class InternshipV1Controller {
     private final InternshipService internshipService;
 
     @PostMapping
-    public ResponseEntity<Long> createInternship(@Valid @RequestBody InternshipDto internshipDto) {
-        return ResponseEntity.ok(internshipService.createInternship(internshipDto));
+    public InternshipDto createInternship(@Valid @RequestBody InternshipDto internshipDto) {
+        return internshipService.createInternship(internshipDto);
     }
 
     @PutMapping("/update/{internshipId}")
@@ -49,18 +49,18 @@ public class InternshipV1Controller {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<InternshipDto>> getFilteredInternships(@RequestBody InternshipFilterDto internshipFilterDto) {
-        return ResponseEntity.ok(internshipService.getFilteredInternships(internshipFilterDto));
+    public List<InternshipDto> getFilteredInternships(@RequestBody InternshipFilterDto internshipFilterDto) {
+        return internshipService.getFilteredInternships(internshipFilterDto);
     }
 
     @GetMapping
-    public ResponseEntity<List<InternshipDto>> getAllInternships() {
-        return ResponseEntity.ok(internshipService.getAllInternships());
+    public List<InternshipDto> getAllInternships() {
+        return internshipService.getAllInternships();
     }
 
     @GetMapping("/{internshipId}")
-    public ResponseEntity<InternshipDto> getInternshipById(@RequestParam long internshipId) {
-        return ResponseEntity.ok(internshipService.getInternshipDtoById(internshipId));
+    public InternshipDto getInternshipById(@RequestParam long internshipId) {
+        return internshipService.getInternshipDtoById(internshipId);
     }
 
 }

@@ -1,7 +1,7 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.InternshipDto;
-import faang.school.projectservice.dto.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -25,14 +25,14 @@ public class InternshipService {
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
 
-    public Long createInternship(InternshipDto internshipDto) {
+    public InternshipDto createInternship(InternshipDto internshipDto) {
         validateInternship(internshipDto);
 
         Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setMentorId(teamMemberService.getTeamMemberById(internshipDto.mentorId()));
+        internship.setMentorId(teamMemberService.getTeamMember(internshipDto.mentorId()));
         internship.setInterns(teamMemberService.getAllTeamMembersByIds(internshipDto.internIds()));
 
-        return internshipRepository.save(internship).getId();
+        return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
 
     public void updateInternship(InternshipDto internshipDto) {
@@ -55,16 +55,16 @@ public class InternshipService {
     @Transactional
     public void completeInternship(long internshipId, long teamMemberId) {
         Internship internship = getInternshipById(internshipId);
-        TeamMember teamMember = teamMemberService.getTeamMemberById(teamMemberId);
+        TeamMember teamMember = teamMemberService.getTeamMember(teamMemberId);
 
         internship.getInterns().remove(teamMember);
-        teamMemberService.removeTeamRole(teamMemberService.getTeamMemberById(internshipId), TeamRole.INTERN);
+        teamMemberService.removeTeamRole(teamMemberService.getTeamMember(internshipId), TeamRole.INTERN);
         internshipRepository.save(internship);
     }
 
     public void dismissTeamMember(long internshipId, long teamMemberId) {
         Internship internship = getInternshipById(internshipId);
-        TeamMember teamMember = teamMemberService.getTeamMemberById(teamMemberId);
+        TeamMember teamMember = teamMemberService.getTeamMember(teamMemberId);
 
         internship.getInterns().remove(teamMember);
         internshipRepository.save(internship);
