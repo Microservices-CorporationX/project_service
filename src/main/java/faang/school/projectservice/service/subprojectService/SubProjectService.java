@@ -1,10 +1,10 @@
 package faang.school.projectservice.service.subprojectService;
 
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
-import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
+import faang.school.projectservice.dto.subprojectDto.subprojectDto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.exception.Subproject.*;
-import faang.school.projectservice.mapper.subprojectMapper.SubProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -24,11 +24,11 @@ import java.util.stream.Stream;
 public class SubProjectService {
 
     private final ProjectRepository projectRepository;
-    private final SubProjectMapper projectMapper;
+    private final SubProjectMapper subProjectMapper;
     private final List<SubprojectFilter> subprojectFilters;
 
 
-    public ProjectDto createSubProject(Long parentProjectId, CreateSubProjectDto createSubProjectDto) {
+    public SubProjectDto createSubProject(Long parentProjectId, CreateSubProjectDto createSubProjectDto) {
         Project parentProject = projectRepository.getProjectById(parentProjectId);
 
         if (parentProjectId.equals(createSubProjectDto.getId())) {
@@ -36,7 +36,7 @@ public class SubProjectService {
             throw new SubprojectBadRequestException("Such a subproject already exists");
         }
 
-        Project project = projectMapper.toEntity(createSubProjectDto);
+        Project project = subProjectMapper.toEntity(createSubProjectDto);
         project.setStatus(createSubProjectDto.getStatus());
 
         if (parentProject.getVisibility() == ProjectVisibility.PUBLIC && createSubProjectDto.getIsPrivate()) {
@@ -47,10 +47,10 @@ public class SubProjectService {
         project.setParentProject(parentProject);
 
         Project savedProject = projectRepository.save(project);
-        return projectMapper.toDto(savedProject);
+        return subProjectMapper.toDto(savedProject);
     }
 
-    public ProjectDto updateSubProject(Long subProjectId, CreateSubProjectDto updateSubProjectDto) {
+    public SubProjectDto updateSubProject(Long subProjectId, CreateSubProjectDto updateSubProjectDto) {
         Project subProject = projectRepository.getProjectById(subProjectId);
         if (subProject == null) {
             throw new EntityNotFoundException("Subproject with ID " + subProjectId + " not found");
@@ -93,12 +93,12 @@ public class SubProjectService {
 
         try {
             Project updatedSubProject = projectRepository.save(subProject);
-            return projectMapper.toDto(updatedSubProject);
+            return subProjectMapper.toDto(updatedSubProject);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update subproject", e);
         }
     }
-    public List<ProjectDto> getSubProject(Long parentProjectId, SubprojectFilterDto subprojectFilterDto) {
+    public List<SubProjectDto> getSubProject(Long parentProjectId, SubprojectFilterDto subprojectFilterDto) {
         if (parentProjectId == null || subprojectFilterDto == null) {
             throw new SubprojectBadRequestException("Parent project ID and filter cannot be null");
         }
@@ -113,7 +113,7 @@ public class SubProjectService {
         return subprojectFilters.stream()
                 .filter(filter -> filter.isApplicable(subprojectFilterDto))
                 .flatMap(filter -> filter.apply(filteredProjects, subprojectFilterDto))
-                .map(projectMapper::toDto)
+                .map(subProjectMapper::toDto)
                 .toList();
     }
 }

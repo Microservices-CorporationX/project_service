@@ -43,4 +43,8 @@ public class ProjectRepository {
     public Optional<Project> findById(Long projectId) {
         return projectJpaRepository.findById(projectId);
     }
+
+    public boolean existsByIdAndUserId(Long projectId, Long userId) {
+        return projectJpaRepository.existsByIdAndOwnerId(projectId, userId);
+    }
 }

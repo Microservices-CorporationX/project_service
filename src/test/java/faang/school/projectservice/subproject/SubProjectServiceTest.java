@@ -1,10 +1,10 @@
 package faang.school.projectservice.subproject;
 
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
-import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
+import faang.school.projectservice.dto.subprojectDto.subprojectDto.SubProjectDto;
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.exception.Subproject.SubprojectBadRequestException;
-import faang.school.projectservice.mapper.subprojectMapper.SubProjectMapper;
+import faang.school.projectservice.mapper.subproject.SubProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -34,7 +34,7 @@ public class SubProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private SubProjectMapper projectMapper;
+    private SubProjectMapper subProjectMapper;
 
     @Mock
     private SubProjectService subProjectService;
@@ -42,7 +42,7 @@ public class SubProjectServiceTest {
     private Project parentProject;
     private CreateSubProjectDto createSubProjectDto;
     private Project subProject;
-    private ProjectDto expectedProjectDto;
+    private SubProjectDto expectedSubProjectDto;
     private SubprojectFilterDto subprojectFilterDto;
 
     @BeforeEach
@@ -59,11 +59,11 @@ public class SubProjectServiceTest {
         createSubProjectDto.setDescription("Description of Subproject");
         createSubProjectDto.setStatus(ProjectStatus.CREATED);
 
-        expectedProjectDto = new ProjectDto();
-        expectedProjectDto.setId(2L);
-        expectedProjectDto.setName("Subproject 1");
-        expectedProjectDto.setDescription("Description of Subproject");
-        expectedProjectDto.setOwnerId(1L);
+        expectedSubProjectDto = new SubProjectDto();
+        expectedSubProjectDto.setId(2L);
+        expectedSubProjectDto.setName("Subproject 1");
+        expectedSubProjectDto.setDescription("Description of Subproject");
+        expectedSubProjectDto.setOwnerId(1L);
 
         subProject = Project.builder()
                 .id(2L)
@@ -79,21 +79,21 @@ public class SubProjectServiceTest {
 
         when(projectRepository.save(any(Project.class))).thenReturn(subProject);
 
-        when(projectMapper.toEntity(createSubProjectDto)).thenReturn(subProject);
-        when(projectMapper.toDto(subProject)).thenReturn(expectedProjectDto);
+        when(subProjectMapper.toEntity(createSubProjectDto)).thenReturn(subProject);
+        when(subProjectMapper.toDto(subProject)).thenReturn(expectedSubProjectDto);
 
-        ProjectDto createdSubProject = projectService.createSubProject(1L, createSubProjectDto);
+        SubProjectDto createdSubProject = projectService.createSubProject(1L, createSubProjectDto);
 
         verify(projectRepository).getProjectById(1L);
         verify(projectRepository).save(any(Project.class));
-        verify(projectMapper).toEntity(createSubProjectDto);
-        verify(projectMapper).toDto(subProject);
+        verify(subProjectMapper).toEntity(createSubProjectDto);
+        verify(subProjectMapper).toDto(subProject);
 
         assertNotNull(createdSubProject);
-        assertEquals(expectedProjectDto.getId(), createdSubProject.getId());
-        assertEquals(expectedProjectDto.getName(), createdSubProject.getName());
-        assertEquals(expectedProjectDto.getDescription(), createdSubProject.getDescription());
-        assertEquals(expectedProjectDto.getOwnerId(), createdSubProject.getOwnerId());
+        assertEquals(expectedSubProjectDto.getId(), createdSubProject.getId());
+        assertEquals(expectedSubProjectDto.getName(), createdSubProject.getName());
+        assertEquals(expectedSubProjectDto.getDescription(), createdSubProject.getDescription());
+        assertEquals(expectedSubProjectDto.getOwnerId(), createdSubProject.getOwnerId());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class SubProjectServiceTest {
     void testUpdateSubProject_Success() {
         parentProject.setStatus(ProjectStatus.IN_PROGRESS);
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
-        when(projectMapper.toDto(any(Project.class))).thenReturn(new ProjectDto());
+        when(subProjectMapper.toDto(any(Project.class))).thenReturn(new SubProjectDto());
 
         createSubProjectDto.setId(1L);
 
@@ -147,7 +147,7 @@ public class SubProjectServiceTest {
         updatedSubProject.setDescription(createSubProjectDto.getDescription());
         when(projectRepository.save(any(Project.class))).thenReturn(updatedSubProject);
 
-        ProjectDto result = projectService.updateSubProject(1L, createSubProjectDto);
+        SubProjectDto result = projectService.updateSubProject(1L, createSubProjectDto);
 
         assertNotNull(result);
         assertEquals(createSubProjectDto.getName(), updatedSubProject.getName());
@@ -159,7 +159,7 @@ public class SubProjectServiceTest {
     void testUpdateSubProject_ParentProjectPrivate() {
         parentProject.setVisibility(ProjectVisibility.PRIVATE);
         when(projectRepository.getProjectById(1L)).thenReturn(subProject);
-        when(projectMapper.toDto(any(Project.class))).thenReturn(new ProjectDto());
+        when(subProjectMapper.toDto(any(Project.class))).thenReturn(new SubProjectDto());
 
         createSubProjectDto.setId(1L);
 
@@ -189,8 +189,8 @@ public class SubProjectServiceTest {
     @Test
     void testGetSubProjectsByFilter() {
         SubprojectFilterDto.builder().name("Subproject 1").status(ProjectStatus.CREATED).build();
-        when(subProjectService.getSubProject(1L, subprojectFilterDto)).thenReturn(List.of(expectedProjectDto));
-        List<ProjectDto> subProjects = subProjectService.getSubProject(1L, subprojectFilterDto);
+        when(subProjectService.getSubProject(1L, subprojectFilterDto)).thenReturn(List.of(expectedSubProjectDto));
+        List<SubProjectDto> subProjects = subProjectService.getSubProject(1L, subprojectFilterDto);
         assertEquals("Subproject 1", subProjects.get(0).getName());
         assertNotNull(subProjects);
     }
@@ -199,7 +199,7 @@ public class SubProjectServiceTest {
     void testGetSubProjectsByFilter_negative() {
         SubprojectFilterDto.builder().name("Subproject 1").status(ProjectStatus.CREATED).build();
         when(subProjectService.getSubProject(2L, subprojectFilterDto)).thenReturn(List.of());
-        List<ProjectDto> subProjects = subProjectService.getSubProject(2L, subprojectFilterDto);
+        List<SubProjectDto> subProjects = subProjectService.getSubProject(2L, subprojectFilterDto);
         assertEquals(0, subProjects.size());
     }
 }

@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.client.project;
+package faang.school.projectservice.dto.subprojectDto.subprojectDto;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -9,24 +9,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ProjectDto {
+@NoArgsConstructor
+@Builder
+public class SubProjectDto {
     private Long id;
-    @NotNull(message = "Project name is required")
+    @NotNull
     private String name;
     private String description;
-    @Builder.Default
-    @NotNull(message = "Project status is required")
-    private ProjectStatus status = ProjectStatus.CREATED;
-    @Builder.Default
-    @NotNull(message = "Project visibility is required")
-    private ProjectVisibility visibility = ProjectVisibility.PUBLIC;
-    @NotNull(message = "Owner ID is required")
+    @NotNull
+    private ProjectStatus status;
+    @NotNull
+    private ProjectVisibility visibility;
+    @NotNull
     private Long ownerId;
+    private List<Long> children;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
