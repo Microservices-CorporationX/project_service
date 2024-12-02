@@ -84,4 +84,16 @@ public class Vacancy {
     @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
     @Column(name = "skill_id")
     private List<Long> requiredSkillIds;
+
+    public void addCandidate(Candidate candidate) {
+        candidates.add(candidate);
+    }
+
+    public boolean containsName(String name) {
+        return this.name.contains(name);
+    }
+
+    public boolean containsPosition(String description) {
+        return this.description.contains(description);
+    }
 }

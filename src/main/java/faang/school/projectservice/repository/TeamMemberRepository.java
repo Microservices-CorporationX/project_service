@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class TeamMemberRepository {
@@ -33,5 +36,25 @@ public class TeamMemberRepository {
 
     public void save(TeamMember teamMember) {
         jpaRepository.save(teamMember);
+    }
+
+    public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
+        return jpaRepository.findByUserIdAndProjectId(userId, projectId);
+    }
+
+    public List<TeamMember> findAllMembersByProjectId(Long projectId) {
+        return jpaRepository.findAllMembersByProjectId(projectId);
+    }
+
+    public TeamMember save(TeamMember teamMember) {
+        return jpaRepository.save(teamMember);
+    }
+
+    public void delete(TeamMember teamMember) {
+        jpaRepository.delete(teamMember);
+    }
+
+    public void updateTeamMembers(Long teamId, List<TeamMember> teamMembers) {
+        jpaRepository.updateTeamMembers(teamId, teamMembers);
     }
 }
