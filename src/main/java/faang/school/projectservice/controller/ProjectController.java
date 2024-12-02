@@ -62,8 +62,8 @@ public class ProjectController {
     public ResponseEntity<List<ProjectDto>> getProjectsByFilter(
             @NotBlank(message = "Project name must not be empty.")
             @Size(min = 3, max = 128, message = "Name must be between 3 and 128 characters.")
-            String name,
-            ProjectStatus status,
+            @RequestParam String name,
+            @RequestParam ProjectStatus status,
             @NotNull(message = "CurrentUserId is required.")
             @Positive(message = "CurrentUserId must be greater than 0.")
             @PathVariable
