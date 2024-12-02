@@ -1,7 +1,7 @@
 package faang.school.projectservice.controller.calendar;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import faang.school.projectservice.service.calendar.GoogleCalendarService;
+import faang.school.projectservice.service.calendar.GoogleCalendarApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ public class GoogleAuthController {
     private final GoogleClientSecrets clientSecrets;
     @Value("${google.redirect-uri}")
     private String redirectUri;
-    private final GoogleCalendarService googleCalendarService;
+    private final GoogleCalendarApiService googleAuthService;
 
     @GetMapping("/oauth2/google")
     public String initiateGoogleAuth() {
@@ -35,6 +35,6 @@ public class GoogleAuthController {
 
     @GetMapping("/oauth2/callback")
     public void googleCallback(@RequestParam("code") String code) {
-        googleCalendarService.getAndSaveToken(code);
+        googleAuthService.acquireToken(code);
     }
 }
