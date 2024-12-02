@@ -43,6 +43,14 @@ public class TeamMember {
         return roles.contains(TeamRole.OWNER) || roles.contains(TeamRole.MANAGER);
     }
 
+    public boolean hasRole(TeamRole role) {
+        return roles.contains(role);
+    }
+
+    public boolean isSameMember(Long teamMemberId) {
+        return this.id.equals(teamMemberId);
+    }
+
     public boolean isManager(){
         return roles.contains(TeamRole.MANAGER);
     }
