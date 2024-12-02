@@ -156,12 +156,14 @@ public class TeamMemberService {
     }
 
     private TeamMember findTeamMemberByUserAndProjectId(Long memberId, Long projectId) {
-        return teamMemberRepository.findByUserIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> {
-                    log.warn("Team member with user ID {} does not exist", memberId);
-                    return new EntityNotFoundException(
-                            String.format("Team member with user ID %d does not exist", memberId));
-                });
+        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(memberId, projectId);
+
+        if(teamMember == null){
+            log.error("Team member with user ID {} does not exist", memberId);
+            throw  new EntityNotFoundException(String.format("Team member with user ID %d does not exist", memberId));
+        }
+
+        return teamMember;
     }
 
     private void updateRolesIfPresent(UpdateTeamMemberDto teamMemberDto, TeamMember teamMember) {

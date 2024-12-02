@@ -1,11 +1,18 @@
 package faang.school.projectservice.exception;
 
-import jdk.jshell.Snippet;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 public class ErrorResponse {
+    private int status;
     private String message;
+    private LocalDateTime localDateTime;
+
+    public ErrorResponse(String message){
+        this.message = message;
+    }
 }

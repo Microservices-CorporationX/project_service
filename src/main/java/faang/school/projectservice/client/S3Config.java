@@ -26,7 +26,6 @@ public class S3Config {
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
-
     @Bean
     public AmazonS3 amazonS3() {
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
