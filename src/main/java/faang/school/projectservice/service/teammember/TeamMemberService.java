@@ -143,7 +143,6 @@ public class TeamMemberService {
         return teamMemberMapper.toDto(teamMember);
     }
 
-
     private TeamMemberDto updateMemberAsTeamLead(TeamMemberUpdateDto dto, Team team, TeamMember updateUser) {
         UserDto user = userServiceClient.getUser(dto.getUpdateUserId());
 
