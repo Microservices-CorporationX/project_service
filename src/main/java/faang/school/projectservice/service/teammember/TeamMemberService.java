@@ -47,10 +47,10 @@ public class TeamMemberService {
     private final UserContext userContext;
 
     @Transactional
-    public TeamMemberDto addMemberToTheTeam(TeamMemberDto teamMemberDto) {
+    public TeamMemberDto addMemberToTheTeam(Long projectId, TeamMemberDto teamMemberDto) {
         log.info("Adding team member to the team: {}", teamMemberDto.getTeam());
 
-        Project project = teamService.findById(teamMemberDto.getTeam()).getProject();
+        Project project = projectService.getProjectById(projectId);
         TeamMember currentUser = findSingleByUserId(userContext.getUserId());
 
         if (!hasPermissionToAddMember(project, currentUser)) {
@@ -76,8 +76,12 @@ public class TeamMemberService {
     }
 
     @Transactional
-    public TeamMemberDto updateMemberInTheTeam(TeamMemberUpdateDto teamMemberUpdateDto) {
-        Team team = teamService.findById(teamMemberUpdateDto.getTeamId());
+    public TeamMemberDto updateMemberInTheTeam(Long projectId, TeamMemberUpdateDto teamMemberUpdateDto) {
+        Team team = projectService.getProjectById(projectId).getTeams().stream()
+                .filter(t -> t.getId().equals(teamMemberUpdateDto.getTeamId()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Team", teamMemberUpdateDto.getTeamId()));
+
         TeamMember updateUser = findById(teamMemberUpdateDto.getUpdateUserId());
         TeamMember currentUser = findSingleByUserId(userContext.getUserId());
 
@@ -91,13 +95,13 @@ public class TeamMemberService {
     }
 
     @Transactional
-    public void deleteMemberFromTheTeam(Long id) {
-        log.info("Deleting team members from the project: {}", id);
+    public void deleteMemberFromTheTeam(Long projectId, Long userId) {
+        log.info("Deleting team members from the project: {}", userId);
 
         TeamMember currentUser = findSingleByUserId(userContext.getUserId());
-        TeamMember deletedMember = findById(id);
+        TeamMember deletedMember = findById(userId);
 
-        Project project = projectService.getProjectById(currentUser.getTeam().getProject().getId());
+        Project project = projectService.getProjectById(projectId);
 
         if (!project.getOwnerId().equals(currentUser.getId())) {
             throw new DataValidationException("You are not authorized to delete team members");
@@ -106,8 +110,9 @@ public class TeamMemberService {
         deleteById(deletedMember.getId());
     }
 
-    public List<TeamMemberDto> getAllMembersWithFilter(TeamMemberFilterDto teamMemberFilterDto) {
-        Stream<TeamMember> teamMemberStream = findAll().stream();
+    public List<TeamMemberDto> getAllMembersWithFilter(Long projectId, TeamMemberFilterDto teamMemberFilterDto) {
+        Stream<TeamMember> teamMemberStream = projectService.getProjectById(projectId).getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream());
 
         return teamMemberFilters.stream()
                 .filter(filter -> filter.isApplicable(teamMemberFilterDto))
@@ -125,10 +130,16 @@ public class TeamMemberService {
                 .toList();
     }
 
-    public TeamMemberDto getMemberById(Long id) {
-        log.debug("Retrieving team member by ID: {}", id);
-        TeamMember teamMember = findById(id);
-        log.info("Team member successfully retrieved, ID: {}", id);
+    public TeamMemberDto getMemberById(Long projectId, Long userId) {
+        log.debug("Retrieving team member by ID: {} for project: {}", userId, projectId);
+
+        TeamMember teamMember = projectService.getProjectById(projectId).getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .filter(member -> member.getUserId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(TEAM_MEMBER, userId));
+
+        log.info("Team member successfully retrieved, ID: {}", userId);
         return teamMemberMapper.toDto(teamMember);
     }
 
