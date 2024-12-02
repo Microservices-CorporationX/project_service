@@ -4,7 +4,7 @@ import faang.school.projectservice.model.TeamMember;
 
 import java.util.stream.Stream;
 
-public class managingFilter implements managingTeamFilter {
+public class ManagingFilter implements ManagingTeamFilter {
     @Override
     public boolean isApplicable(TeamMemberFilterDto filters) {
         return filters.getName() != null && !filters.getName().isEmpty();

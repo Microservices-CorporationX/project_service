@@ -6,7 +6,7 @@ import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.managingTeamMapper.ManagingTeamMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.filters.managingFilter.managingTeamFilter;
+import faang.school.projectservice.service.filters.managingFilter.ManagingTeamFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class ManagingTeamService {
     private final ProjectRepository projectRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
     private final ManagingTeamMapper teamMemberMapper;
-    private final List<managingTeamFilter> teamMemberFilters;
+    private final List<ManagingTeamFilter> teamMemberFilters;
 
 
     public TeamMemberDto addTeamMember(Long projectId, TeamMemberDto TeamMemberDto, Long teamMemberId) {

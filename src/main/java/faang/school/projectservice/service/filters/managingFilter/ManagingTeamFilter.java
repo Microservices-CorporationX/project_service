@@ -4,7 +4,7 @@ import faang.school.projectservice.model.TeamMember;
 
 import java.util.stream.Stream;
 
-public interface managingTeamFilter {
+public interface ManagingTeamFilter {
     boolean isApplicable(TeamMemberFilterDto filters);
     Stream<TeamMember> apply(Stream<TeamMember> teamMembers, TeamMemberFilterDto filters);
 }
