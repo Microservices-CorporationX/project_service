@@ -68,7 +68,6 @@ public class ManagingTeamService {
             validateUserIsOwner(currentUserId, projectId);
         }
 
-
         TeamMember teamMemberToUpdate = teamMemberMapper.toEntity(TeamMemberDto);
         teamMemberToUpdate.setId(teamMemberId);
         teamMemberToUpdate.setTeam(existingMember.getTeam());
@@ -107,9 +106,7 @@ public class ManagingTeamService {
     public List<TeamMemberDto> getAllMembers(Long projectId) {
         Project project = projectRepository.getProjectById(projectId);
 
-        if (project.getStatus().equals(ProjectStatus.CANCELLED) || project.getStatus().equals(ProjectStatus.COMPLETED)) {
-            throw new IllegalStateException("Cannot get members of a cancelled or completed project");
-        }
+        checkProjectStatus(project);
 
         List<TeamMember> teamMembers = teamMemberJpaRepository.findAllByProjectId(projectId);
 
