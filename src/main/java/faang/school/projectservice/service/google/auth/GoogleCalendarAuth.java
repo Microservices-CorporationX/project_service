@@ -8,7 +8,6 @@ import faang.school.projectservice.jpa.JpaDataStoreFactory;
 import faang.school.projectservice.repository.GoogleTokenRepository;
 import faang.school.projectservice.service.google.utils.GoogleCalendarUtils;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,6 @@ import static faang.school.projectservice.service.google.utils.GoogleCalendarUti
 @Component
 @Slf4j
 @AllArgsConstructor
-@Getter
 public class GoogleCalendarAuth {
     private GoogleProperties properties;
     private final GoogleTokenRepository googleTokenRepository;
