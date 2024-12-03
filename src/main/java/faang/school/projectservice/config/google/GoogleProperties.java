@@ -1,7 +1,5 @@
 package faang.school.projectservice.config.google;
 
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,8 +9,6 @@ import java.util.List;
 @Component
 @Getter
 public class GoogleProperties {
-    private final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
     @Value("${google-service.application-name}")
     private String applicationName;
 

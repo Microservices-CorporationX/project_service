@@ -6,18 +6,19 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.event.EventDto;
-import faang.school.projectservice.repository.GoogleTokenRepository;
 import faang.school.projectservice.jpa.JpaDataStoreFactory;
+import faang.school.projectservice.repository.GoogleTokenRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,18 +32,17 @@ import java.time.ZonedDateTime;
 @Slf4j
 @AllArgsConstructor
 @Getter
-@Configuration
 public class GoogleCalendarConfig {
-    private static final NetHttpTransport HTTP_TRANSPORT;
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private final GoogleProperties googleProperties;
     private final GoogleTokenRepository googleTokenRepository;
 
-    static {
+    private static NetHttpTransport createHttpTransport() {
         try {
-            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            return GoogleNetHttpTransport.newTrustedTransport();
         } catch (GeneralSecurityException | IOException e) {
-            log.error("Error creating authorized client service: ", e);
-            throw new RuntimeException();
+            log.error("Error creating HTTP transport", e);
+            throw new RuntimeException("Failed to create HTTP transport", e);
         }
     }
 
@@ -90,12 +90,12 @@ public class GoogleCalendarConfig {
             log.error("File not found at path {}", filePath);
             throw new FileNotFoundException("file not found: " + filePath);
         }
-        return GoogleClientSecrets.load(googleProperties.getJsonFactory(), new InputStreamReader(inputStream));
+        return GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inputStream));
     }
 
     private GoogleAuthorizationCodeFlow getCodeFlow(GoogleClientSecrets clientSecrets) throws IOException {
         return new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, googleProperties.getJsonFactory(), clientSecrets,
+                createHttpTransport(), JSON_FACTORY, clientSecrets,
                 googleProperties.getScopes())
                 .setDataStoreFactory(new JpaDataStoreFactory(googleTokenRepository))
                 .setAccessType(googleProperties.getAccessType())
@@ -110,7 +110,7 @@ public class GoogleCalendarConfig {
     }
 
     private Calendar getService(Credential credential) {
-        return new Calendar.Builder(HTTP_TRANSPORT, credential.getJsonFactory(), credential)
+        return new Calendar.Builder(createHttpTransport(), credential.getJsonFactory(), credential)
                 .build();
     }
 }
