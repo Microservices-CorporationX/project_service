@@ -1,12 +1,16 @@
 package faang.school.projectservice.update.tasks;
 
 import faang.school.projectservice.dto.TaskDto;
-import faang.school.projectservice.jpa.TaskJpaRepository;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.update.TaskUpdate;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class ParentTaskUpdate implements TaskUpdate {
-    private final TaskJpaRepository taskJpaRepository;
+    private final TaskRepository taskRepository;
 
     @Override
     public boolean isApplicable(TaskDto taskDto) {
@@ -15,6 +19,6 @@ public class ParentTaskUpdate implements TaskUpdate {
 
     @Override
     public void apply(Task task, TaskDto taskDto) {
-        task.setParentTask(taskJpaRepository.findById(taskDto.getParentTaskId()));
+        task.setParentTask(taskRepository.getById(taskDto.getParentTaskId()));
     }
 }
