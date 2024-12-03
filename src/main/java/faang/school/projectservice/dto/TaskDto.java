@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,4 +35,18 @@ public class TaskDto {
     private Long performerUserId;
 
     private Long reporterUserId;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @Min(value = 1, message = "Parent task ID must be a positive number")
+    private Long parentTaskId;
+
+    private List<@Min(value = 1, message = "Linked task IDs must be positive numbers") Long> linkedTaskIds;
+
+    @Min(value = 1, message = "Project ID must be a positive number")
+    private Long projectId;
+
+    @Min(value = 1, message = "Stage ID must be a positive number")
+    private Long stageId;
 }
