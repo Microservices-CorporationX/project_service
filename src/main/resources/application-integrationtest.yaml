@@ -1,6 +1,6 @@
 spring:
   liquibase:
-    enabled: false
+    change-log: classpath:testdb/changelog/db.changelog-master.yaml
 
 calculations_messages_processing:
   enabled: false

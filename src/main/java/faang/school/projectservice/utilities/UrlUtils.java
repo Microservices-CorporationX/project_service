@@ -1,5 +1,8 @@
 package faang.school.projectservice.utilities;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class UrlUtils {
         public static final String MAIN_URL = "/api/project-service";
         public static final String V1 = "/v1";
