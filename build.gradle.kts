@@ -34,20 +34,13 @@ dependencies {
      * Amazon S3
      */
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
-
     /**
      * Google Calendar
      */
     implementation("com.google.api-client:google-api-client:2.0.0")
-
-    // https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
-
-// https://mvnrepository.com/artifact/com.google.apis/google-api-services-calendar
     implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0") // Проверьте актуальную версию
-
-
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0")
     /**
      * Utils & Logging
      */
