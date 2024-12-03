@@ -36,7 +36,6 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleConstraintViolationException(ConstraintViolationException ex) {
         log.error(CONSTRAINT_VIOLATION, ex);
         return new ErrorResponse(ex.getMessage());
-
     }
 
     @ExceptionHandler(DataValidationException.class)
@@ -56,7 +55,7 @@ public class GlobalExceptionHandler {
                 .reduce((msg1, msg2) -> msg1 + "; " + msg2)
                 .orElse("Validation error");
 
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(errorMessage);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -91,6 +90,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGenericException(Exception ex) {
         log.error(UNEXPECTED_ERROR, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse("An unexpected error occurred");
     }
 }
+

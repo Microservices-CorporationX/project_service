@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.dto.project.ResponseProjectDto;
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.ProjectService;
@@ -36,10 +37,15 @@ public class ProjectV1Controller {
         return teamService.getFilteredTeamMembers(name, role, projectId);
     }
 
+    @GetMapping("/{projectId}")
+    public ResponseProjectDto getProject(@PathVariable @Positive Long projectId) {
+        return projectService.getProject(projectId);
+    }
+
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/{projectId}")
-    public void addCover(@PathVariable @Positive long projectId,
+    @PutMapping("/{projectId}/cover")
+    public ResponseProjectDto addCover(@PathVariable @Positive long projectId,
                          @RequestPart MultipartFile file) {
-        projectService.addCover(projectId, file);
+        return projectService.addCover(projectId, file);
     }
 }

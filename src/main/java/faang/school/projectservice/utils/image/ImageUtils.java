@@ -55,31 +55,22 @@ public class ImageUtils {
             int maxDimension = Math.max(maxWidth, maxHeight);
 
             if (height > maxDimension) {
-                Image resultingImage = originalImage.getScaledInstance(maxDimension, maxDimension, Image.SCALE_DEFAULT);
-                finalImage = new BufferedImage(maxDimension, maxDimension, BufferedImage.TYPE_INT_BGR);
-                finalImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-                return finalImage;
+                width = maxDimension;
+                height = maxDimension;
             }
         } else {
             if (height > maxHeight && width > maxWidth) {
-                Image resultingImage = originalImage.getScaledInstance(maxWidth, maxHeight, Image.SCALE_DEFAULT);
-                finalImage = new BufferedImage(maxWidth, maxHeight, BufferedImage.TYPE_INT_BGR);
-                finalImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-                return finalImage;
+                width = maxWidth;
+                height = maxHeight;
             } else if (width > maxWidth) {
-                Image resultingImage = originalImage.getScaledInstance(maxWidth, height, Image.SCALE_DEFAULT);
-                finalImage = new BufferedImage(maxWidth, height, BufferedImage.TYPE_INT_BGR);
-                finalImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-                return finalImage;
+                width = maxWidth;
             } else if (height > maxHeight) {
-                Image resultingImage = originalImage.getScaledInstance(width, maxHeight, Image.SCALE_DEFAULT);
-                finalImage = new BufferedImage(width, maxHeight, BufferedImage.TYPE_INT_BGR);
-                finalImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-                return finalImage;
+                height = maxHeight;
             }
         }
-        return originalImage;
+        Image resultingImage = originalImage.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+        finalImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+        finalImage.getGraphics().drawImage(resultingImage, 0, 0, null);
+        return finalImage;
     }
-
-
 }
