@@ -1,6 +1,7 @@
 package faang.school.projectservice.dto.moment;
 
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.project.ProjectDto;
+
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Data
 public class MomentFilterDto {
-    Project project;
+    ProjectDto project;
     LocalDateTime createdAt;
 
 }

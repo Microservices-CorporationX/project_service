@@ -4,10 +4,12 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.dto.moment.filters.MomentFilter;
 
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import jakarta.validation.ValidationException;
@@ -27,6 +29,7 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
     private final ProjectRepository projectRepository;
+    private final TeamMemberJpaRepository teamMemberJpaRepository;
 
 
     public MomentDto create(MomentDto momentDto) {
@@ -40,9 +43,8 @@ public class MomentService {
     }
 
     public MomentDto update(MomentDto momentDto) {
-
         Moment moment = momentMapper.toEntity(momentDto);
-        Moment updatedMoment = momentRepository.save(moment);
+        Moment updatedMoment = momentRepository.save(addAllUpdatesIfExists(moment));
         return (momentMapper.toDto(updatedMoment));
     }
 
@@ -87,5 +89,52 @@ public class MomentService {
                 .equals(ProjectStatus.CANCELLED))) {
             throw new ValidationException("The project was cancelled");
         }
+    }
+
+    private Moment addAllUpdatesIfExists(Moment updateMoment) {
+        Moment foundMomentFromDatabase = momentRepository.findById(updateMoment.getId())
+                .orElseThrow(() -> new ValidationException("Such moment was not found!"));
+
+        if (!updateMoment.getName().isBlank()) {
+            foundMomentFromDatabase.setName(updateMoment.getName());
+        }
+
+        if (!updateMoment.getDescription().isBlank()) {
+            foundMomentFromDatabase.setDescription(updateMoment.getDescription());
+        }
+
+        if (isProjectExists(updateMoment.getProjects())) {
+            updateMoment.getProjects().removeIf(foundMomentFromDatabase.getProjects()::contains);
+            if (!updateMoment.getProjects().isEmpty()) {
+                foundMomentFromDatabase.getProjects().addAll(updateMoment.getProjects());
+            }
+
+        }
+
+        if (isUserExists(updateMoment.getUserIds())) {
+            updateMoment.getUserIds().removeIf(foundMomentFromDatabase.getUserIds()::contains);
+            if (!updateMoment.getUserIds().isEmpty()) {
+                foundMomentFromDatabase.getUserIds().addAll(updateMoment.getUserIds());
+                List<TeamMember> tobeUpdatedUsers = teamMemberJpaRepository.findAllById(updateMoment.getUserIds());
+                List<Project> toBeAddedProjectList = tobeUpdatedUsers.stream()
+                        .map(user -> user.getTeam().getProject()).distinct().toList();
+                foundMomentFromDatabase.getProjects().addAll(toBeAddedProjectList);
+            }
+
+        }
+
+        return foundMomentFromDatabase;
+    }
+
+    private boolean isProjectExists(List<Project> project) {
+        List<Project> allExistingProjects = projectRepository.findAll();
+        return allExistingProjects.containsAll(project);
+    }
+
+    private boolean isUserExists(List<Long> userIds) {
+        List<TeamMember> allExistingUsers = teamMemberJpaRepository.findAll();
+        List<Long> allExistingUserIds = allExistingUsers.stream().map(user -> user.getUserId()).toList();
+        return allExistingUserIds.containsAll(userIds);
+
     }
 }

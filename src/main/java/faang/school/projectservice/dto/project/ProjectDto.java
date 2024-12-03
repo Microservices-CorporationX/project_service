@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class ProjectDto {
-long id;
-ProjectStatus status;
+    long id;
+    ProjectStatus status;
 }

@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 public class MomentDto {
+    private Long id;
     private String name;
     private String description;
     private List<ProjectDto> projects;

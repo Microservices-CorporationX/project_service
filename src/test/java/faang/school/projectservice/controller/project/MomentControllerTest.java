@@ -75,20 +75,20 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testCreateWithNoMomentName() {
+    public void createWithNoMomentNameFailTest() {
         momentDto.setName(" ");
         assertThrows(ValidationException.class, () -> momentController.create(momentDto));
     }
 
     @Test
-    public void testCreateWithNoProject() {
+    public void createWithNoProjectFailTest() {
         momentDto.setProjects(new ArrayList<>());
         assertThrows(ValidationException.class, () -> momentController.create(momentDto));
     }
 
 
     @Test
-    public void testCreate() {
+    public void createSuccessTest() {
         firstProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         secondProjectDto.setStatus(ProjectStatus.IN_PROGRESS);
         when(momentService.create(momentDto)).thenReturn(momentDto);
@@ -100,7 +100,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testUpdate() {
+    public void updateTest() {
         when(momentService.update(momentDto)).thenReturn(momentDto);
 
         MomentDto receivedMomentDto = momentController.update(momentDto);
@@ -110,7 +110,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetAllMoments() {
+    public void getAllMomentsTest() {
         when(momentService.getAllMoments()).thenReturn(momentDtoList);
 
         List<MomentDto> receivedMomentDtoList = momentController.getAllMoments();
@@ -120,7 +120,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetMomentById() {
+    public void getMomentByIdTest() {
         long id = 1;
         when(momentService.getMomentById(id)).thenReturn(momentDto);
 
@@ -132,7 +132,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testGetMomentsByFilter() {
+    public void getMomentsByFilterTest() {
         when(momentService.getMomentsByFilter(momentFilterDto)).thenReturn(momentDtoList);
 
         List<MomentDto> receivedMomentsDtoList = momentController.getMomentsByFilter(momentFilterDto);
