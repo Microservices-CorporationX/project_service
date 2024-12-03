@@ -23,7 +23,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+@RequestMapping(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
 public class VacancyController {
     private final VacationService vacationService;
     private final ValidationVacancies validationVacancies;
@@ -69,7 +69,7 @@ public class VacancyController {
         return vacancyDtoResult;
     }
 
-    @PostMapping(UrlUtils.ID)
+    @PostMapping(UrlUtils.VACANCY_ID)
     public VacancyDto getVacancyById(@NotNull @RequestBody VacancyDto vacancyDto) {
         validationVacancies.hasToBeNotNull(vacancyDto.id(), "id vacancy");
         VacancyDto vacancyDtoResult = vacationService.getVacancyById(vacancyDto.id());

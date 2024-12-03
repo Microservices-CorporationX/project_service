@@ -61,7 +61,7 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -84,7 +84,7 @@ class VacancyControllerTest {
         VacancyDto vacancyDtoInput = null;
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -102,7 +102,7 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        patch(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        patch(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -125,7 +125,7 @@ class VacancyControllerTest {
         VacancyDto vacancyDtoInput = null;
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        patch(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        patch(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -143,7 +143,7 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        delete(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        delete(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -167,7 +167,7 @@ class VacancyControllerTest {
         VacancyDto vacancyDtoInput = null;
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        delete(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1)
+                        delete(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -184,7 +184,7 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1 + UrlUtils.ID)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY + UrlUtils.VACANCY_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -207,7 +207,7 @@ class VacancyControllerTest {
         VacancyDto vacancyDtoInput = null;
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1 + UrlUtils.ID)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY + UrlUtils.VACANCY_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
@@ -224,12 +224,12 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoList);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1 + UrlUtils.VACANCY_FILTER)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY + UrlUtils.VACANCY_FILTER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(filterVacancyDto)))
                 .andDo(print())
-                .andExpect(jsonPath("$",hasSize(3)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$.[0].id").value(vacancyDtoList.get(0).id()))
                 .andExpect(jsonPath("$.[1].id").value(vacancyDtoList.get(1).id()))
                 .andExpect(jsonPath("$.[2].id").value(vacancyDtoList.get(2).id()))
@@ -246,7 +246,7 @@ class VacancyControllerTest {
                 thenReturn(vacancyDtoList);
 
         mockMvc.perform(MockMvcRequestBuilders.
-                        post(UrlUtils.MAIN_URL + UrlUtils.VACANCY + UrlUtils.V1 + UrlUtils.VACANCY_FILTER)
+                        post(UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.VACANCY + UrlUtils.VACANCY_FILTER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(filterVacancyDto)))
