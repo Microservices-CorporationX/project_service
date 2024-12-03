@@ -1,5 +1,6 @@
 package faang.school.projectservice.validation;
 
+import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
@@ -76,10 +77,11 @@ public class ValidationVacancies {
     }
 
     public void personHasNecessaryRole(Long idPersonBy, String nameParameter, Long projectId) {
-        if (idPersonBy != null){
-            TeamMember teamMember = teamMemberRepository.getJpaRepository().findByUserIdAndProjectId(idPersonBy, projectId);
+        if (idPersonBy != null) {
+            TeamMemberJpaRepository teamMemberJpaRepository = teamMemberRepository.getJpaRepository();
+            TeamMember teamMember = teamMemberJpaRepository.findByUserIdAndProjectId(idPersonBy, projectId);
             if (teamMember == null || teamMember.getRoles() == null || teamMember.getRoles().stream()
-                                                                        .noneMatch(LIST_RESPONSIBLE_ROLES::contains)) {
+                    .noneMatch(LIST_RESPONSIBLE_ROLES::contains)) {
                 log.error(String.format("Person: %s does not have a Role %s",
                         nameParameter,
                         LIST_RESPONSIBLE_ROLES));
@@ -103,19 +105,4 @@ public class ValidationVacancies {
                     necessaryNumberCandidates));
         }
     }
-    //--ToDo
-/*
-    private void hasToBePersonExist(Long idPersonBy, Long projectId, String nameParameterForMessage) {
-        if (idPersonBy == null ||
-                teamMemberRepository.getJpaRepository().findByUserIdAndProjectId(idPersonBy, projectId) == null) {
-            log.error(String.format("%s person does not exist. idCreatedBy: %s",
-                    nameParameterForMessage,
-                    idPersonBy));
-
-            throw new ValidationException(String.format("%s person does not exist. idCreatedBy: %s",
-                    nameParameterForMessage,
-                    idPersonBy));
-        }
-    }
- */
 }

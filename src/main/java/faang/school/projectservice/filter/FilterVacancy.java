@@ -5,8 +5,10 @@ import faang.school.projectservice.model.Vacancy;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
+
 @Component
-public interface VacancyFilter {
+public interface FilterVacancy {
     boolean isAvailable(FilterVacancyDto filterVacancyDto);
+
     Stream<Vacancy> apply(Stream<Vacancy> vacancyStream, FilterVacancyDto filterVacancyDto);
 }

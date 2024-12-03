@@ -38,4 +38,8 @@ public class ProjectRepository {
     public boolean existsById(Long id){
         return projectJpaRepository.existsById(id);
     }
+
+    public Project findById(Long projectId){
+        return projectJpaRepository.findById(projectId).orElse(new Project());
+    }
 }

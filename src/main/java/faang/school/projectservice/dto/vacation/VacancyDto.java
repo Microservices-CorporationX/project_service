@@ -1,5 +1,6 @@
 package faang.school.projectservice.dto.vacation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.Min;
@@ -18,7 +19,9 @@ public record VacancyDto(
     @Min(value = 1, message = "Value <projectId> has to be min 1")
     Long projectId,
     List<Long> candidates,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDateTime createdAt,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDateTime updatedAt,
     @Min(value = 1, message = "Value <createdBy> has to be min 1")
     Long createdBy,

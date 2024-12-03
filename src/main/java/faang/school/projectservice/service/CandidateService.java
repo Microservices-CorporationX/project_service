@@ -18,11 +18,11 @@ public class CandidateService {
         if (candidate == null) {
             log.info("Candidate with id {} did n't find", idCandidate);
         } else {
-            if (candidate.getCandidateStatus() == null || candidate.getCandidateStatus() != candidateStatusNotDelete) {
+            if (candidate.getCandidateStatus() != null
+                    && candidate.getCandidateStatus().name().equals(candidateStatusNotDelete.name())) {
                 candidateRepository.deleteById(idCandidate);
                 log.info("CandidateService. Candidate with id {} deleted", idCandidate);
             }
-
         }
     }
 }

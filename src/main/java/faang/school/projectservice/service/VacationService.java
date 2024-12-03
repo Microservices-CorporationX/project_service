@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.vacation.FilterVacancyDto;
 import faang.school.projectservice.dto.vacation.VacancyDto;
-import faang.school.projectservice.filter.VacancyFilter;
+import faang.school.projectservice.filter.FilterVacancy;
 import faang.school.projectservice.mapper.MapperVacation;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
@@ -24,8 +24,8 @@ public class VacationService {
     private final MapperVacation mapperVacation;
     private final ValidationVacancies validationVacancies;
     private final CandidateService candidateService;
-    private final List<VacancyFilter> filter;
-    private final List<CandidateStatus> CANDIDATE_STATUS_DELETE = List.of(CandidateStatus.WAITING_RESPONSE, CandidateStatus.REJECTED);
+    private final List<FilterVacancy> filter;
+    public final static List<CandidateStatus> CANDIDATE_STATUS_DELETE = List.of(CandidateStatus.WAITING_RESPONSE, CandidateStatus.REJECTED);
 
     public VacancyDto saveVacation(VacancyDto vacancyDto) {
         log.info("saveVacation, vacancyDto:{} ", vacancyDto);
@@ -42,7 +42,7 @@ public class VacationService {
 
         validationVacancies.isVacancyExist(vacancyDto.id());
         validationVacancies.isProjectExist(vacancyDto.projectId());
-        validationVacancies.personHasNecessaryRole(vacancyDto.createdBy(),"createdBy", vacancyDto.projectId());
+        validationVacancies.personHasNecessaryRole(vacancyDto.createdBy(), "createdBy", vacancyDto.projectId());
         validationVacancies.personHasNecessaryRole(vacancyDto.updatedBy(), "updatedBy", vacancyDto.projectId());
 
         Vacancy tempVacancy = vacancyExtraRepository.findById(vacancyDto.id());
@@ -68,7 +68,7 @@ public class VacationService {
         return tempVacancyDto;
     }
 
-    public List<VacancyDto> findAll(FilterVacancyDto filterVacancyDto) {
+    public List<VacancyDto> findByFilter(FilterVacancyDto filterVacancyDto) {
         log.info("findAll, filterVacancyDto:{} ", filterVacancyDto);
         return filter.stream()
                 .filter(filter -> filter.isAvailable(filterVacancyDto))

@@ -78,9 +78,9 @@ public class VacancyController {
         return vacancyDtoResult;
     }
 
-    @GetMapping(UrlUtils.VACANCY_FILTER)
+    @PostMapping(UrlUtils.VACANCY_FILTER)
     public List<VacancyDto> filter(@RequestBody FilterVacancyDto filterVacancyDto) {
-        List<VacancyDto> vacancyDtoList = vacationService.findAll(filterVacancyDto);
+        List<VacancyDto> vacancyDtoList = vacationService.findByFilter(filterVacancyDto);
 
         log.info("VacancyController.filter - 1) filter: {}; 2) send number items: {}",
                 filterVacancyDto.toString(),

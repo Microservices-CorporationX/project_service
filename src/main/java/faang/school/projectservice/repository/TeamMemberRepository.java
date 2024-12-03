@@ -5,10 +5,12 @@ import faang.school.projectservice.model.TeamMember;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @Getter
+@Setter
 @RequiredArgsConstructor
 public class TeamMemberRepository {
     private final TeamMemberJpaRepository jpaRepository;
