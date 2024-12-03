@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1/vacancies")
-@RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Vacancy API", description = "Endpoints for vacancy logic in project service")
+@RestController
+@RequestMapping("/vacancies")
+@RequiredArgsConstructor
+@Tag(name = "Vacancy", description = "Endpoints for vacancy logic in project service")
 public class VacancyController {
     private final VacancyService vacancyService;
 
@@ -31,6 +31,7 @@ public class VacancyController {
     @PostMapping
     public ResponseEntity<VacancyResponseDto> createVacancy(@Valid @RequestBody NewVacancyDto dto) {
         log.info("Received request from user id {} to create new vacancy: {}", dto.getCreatedById(), dto);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(vacancyService.create(dto));
     }
 
@@ -38,6 +39,7 @@ public class VacancyController {
     @PutMapping
     public ResponseEntity<VacancyResponseDto> updateVacancyStatus(@Valid @RequestBody VacancyUpdateDto dto) {
         log.info("Received request for update from user id {} for vacancy: {}", dto.getUpdatedById(), dto.getId());
+
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.updateVacancyStatus(dto));
     }
 
@@ -45,8 +47,11 @@ public class VacancyController {
     @DeleteMapping("/{vacancyId}")
     public ResponseEntity<Void> deleteVacancy(@PathVariable @Positive long vacancyId) {
         log.info("Received request to delete vacancy {}", vacancyId);
+
         vacancyService.deleteVacancy(vacancyId);
+
         log.info("Vacancy {} deleted successfully", vacancyId);
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -58,7 +63,9 @@ public class VacancyController {
             @RequestParam(required = false) @Schema(description = "Work schedule") WorkSchedule workSchedule
     ) {
         FilterVacancyDto filters = new FilterVacancyDto(title, salary, workSchedule);
+
         log.info("Filters request received: {}", filters);
+
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.filterVacancies(filters));
     }
 
@@ -66,6 +73,7 @@ public class VacancyController {
     @GetMapping("/{vacancyId})")
     public ResponseEntity<VacancyResponseDto> getVacancy(@PathVariable @Positive long vacancyId) {
         log.info("Request to get vacancy #{} received", vacancyId);
+
         return ResponseEntity.status(HttpStatus.OK).body(vacancyService.getVacancyDtoById(vacancyId));
     }
 }

@@ -26,7 +26,7 @@ class ProjectNameFilterTest {
     @DisplayName("Filter is applicable successfully")
     void testIsApplicable() {
         filter = ProjectFilterDto.builder()
-                .nameProjectPattern("test")
+                .name("test")
                 .build();
 
         boolean result = projectNameFilter.isApplicable(filter);
@@ -38,7 +38,7 @@ class ProjectNameFilterTest {
     @DisplayName("Filter is not applicable")
     void testIsNotApplicable() {
         filter = ProjectFilterDto.builder()
-                .nameProjectPattern(null)
+                .name(null)
                 .build();
 
         boolean result = projectNameFilter.isApplicable(filter);
@@ -50,7 +50,7 @@ class ProjectNameFilterTest {
     @DisplayName("Apply filter successfully")
     void testApply() {
         filter = ProjectFilterDto.builder()
-                .nameProjectPattern("test")
+                .name("test")
                 .build();
 
         Stream<Project> projects = Stream.of(
@@ -67,7 +67,7 @@ class ProjectNameFilterTest {
     @DisplayName("Apply filter with empty stream")
     void testApplyEmptyStream() {
         filter = ProjectFilterDto.builder()
-                .nameProjectPattern("test")
+                .name("test")
                 .build();
 
         Stream<Project> result = projectNameFilter.apply(Stream.empty(), filter);
