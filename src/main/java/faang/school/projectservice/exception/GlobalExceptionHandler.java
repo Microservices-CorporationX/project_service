@@ -1,5 +1,7 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.exception.dto.ErrorResponse;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -62,6 +64,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotUniqueProjectException.class)
     public ResponseEntity<String> notUniqueProjectException(NotUniqueProjectException ex) {
+        log.error("Not unique project exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
@@ -75,6 +78,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInternshipDurationException(InternshipDurationException ex) {
         log.error("Internship duration exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FeignException.NotFound.class)
+    public ResponseEntity<ErrorResponse> handleFeignNotFoundException(FeignException.NotFound ex) {
+        log.error("Feign exception: {}", ex.getMessage(), ex);
+        String errorMessage = extractMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(errorMessage, "External service returned a 404 error"));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
+        String errorMessage = extractMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(errorMessage, "Error message: " + ex.getMessage()));
+    }
+
+    private String extractMessage(String fullMessage) {
+        int lastBracketIndex = fullMessage.lastIndexOf("[");
+        if (lastBracketIndex != -1 && lastBracketIndex + 1 < fullMessage.length()) {
+            return fullMessage.substring(lastBracketIndex + 1, fullMessage.length() - 1);
+        }
+        return "Unknown error";
     }
 
     @ExceptionHandler(UnauthorizedAccessException.class)
