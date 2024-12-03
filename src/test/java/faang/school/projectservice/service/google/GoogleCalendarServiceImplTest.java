@@ -1,10 +1,10 @@
 package faang.school.projectservice.service.google;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.config.google.GoogleCalendarConfig;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.event.EventDto;
 import faang.school.projectservice.repository.GoogleTokenRepository;
+import faang.school.projectservice.service.google.auth.GoogleCalendarAuth;
 import faang.school.projectservice.validator.google.GoogleCalendarValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.Assert;
@@ -21,10 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,13 +34,14 @@ class GoogleCalendarServiceImplTest {
     @Mock
     private GoogleTokenRepository googleTokenRepository;
     @Mock
-    private GoogleCalendarConfig googleCalendarConfig;
-    @Mock
     private GoogleCalendarValidator googleCalendarValidator;
     @Mock
     private UserServiceClient userServiceClient;
     @InjectMocks
     private GoogleCalendarServiceImpl googleCalendarService;
+    @Mock
+    private GoogleCalendarAuth googleCalendarAuth;
+
 
     private EventDto eventDto;
     private UserDto userDto;
@@ -74,7 +72,6 @@ class GoogleCalendarServiceImplTest {
                 () -> googleCalendarService.createEvent(USER_ID, EVENT_ID));
     }
 
-
     @Test
     @DisplayName("Should return authorization link when user needs to authorize")
     void createEvent_WhenUserNeedsAuthorization_ReturnsAuthLink() throws IOException {
@@ -84,7 +81,7 @@ class GoogleCalendarServiceImplTest {
         when(userServiceClient.getUser(USER_ID)).thenReturn(userDto);
         when(userServiceClient.getEventById(EVENT_ID)).thenReturn(eventDto);
         when(googleTokenRepository.existsGoogleTokenByUserId(USER_ID)).thenReturn(false);
-        when(googleCalendarConfig.getAuthorizationUrl(USER_ID, EVENT_ID)).thenReturn(link);
+        when(googleCalendarAuth.getAuthorizationUrl(USER_ID, EVENT_ID)).thenReturn(link);
         String actual = googleCalendarService.createEvent(USER_ID, EVENT_ID);
         assertThat(actual).isEqualTo(expected);
     }
