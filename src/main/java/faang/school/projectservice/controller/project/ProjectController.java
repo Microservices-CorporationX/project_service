@@ -37,7 +37,7 @@ public class ProjectController {
     }
 
     @PostMapping("/filtered")
-    public List<ProjectDto> findWithFilters(@RequestBody @NonNull ProjectFilterDto filters) {
+    public List<ProjectDto> findWithFilters(@RequestBody @NonNull @Valid ProjectFilterDto filters) {
         return projectService.findWithFilters(filters);
     }
 
@@ -47,12 +47,12 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull Long id) {
+    public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull @Positive Long id) {
         return projectService.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("{projectId}/filterChildren")
-    public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody ProjectFilterDto filterDto, @PathVariable@Positive @NotNull Long projectId){
+    public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody @Valid ProjectFilterDto filterDto, @PathVariable @Positive @NotNull Long projectId){
         return ResponseEntity.ok(projectService.getProjectsByFilters(projectId, filterDto));
     }
 }
