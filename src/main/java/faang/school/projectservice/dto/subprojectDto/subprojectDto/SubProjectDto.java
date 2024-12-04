@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProjectDto {
+public class SubProjectDto {
     private Long id;
     @NotNull
     private String name;

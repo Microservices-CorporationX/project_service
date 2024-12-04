@@ -1,24 +1,15 @@
 package faang.school.projectservice.model;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -28,7 +19,9 @@ import java.util.List;
 @Table(name = "project_resource")
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,13 +52,13 @@ public class Resource {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private TeamMember createdBy;
+    @CreatedBy
+    @Column(name = "created_by")
+    private Long createdBy;
 
-    @ManyToOne
-    @JoinColumn(name = "updated_by")
-    private TeamMember updatedBy;
+    @LastModifiedBy
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)

@@ -13,6 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.mockito.Mockito.when;
 import java.math.BigInteger;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
@@ -34,7 +36,7 @@ public class ProjectBucketControllerTest {
 
         when(projectService.uploadImage(project.getId(), file)).thenReturn(null);
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(POST_URL)
+        mockMvc.perform(multipart(POST_URL)
                 .file(file)
                 .param("coverImage", file.getName()))
                 .andExpect(status().isBadRequest());
@@ -47,7 +49,7 @@ public class ProjectBucketControllerTest {
 
         when(projectService.uploadImage(project.getId(), file)).thenReturn(file.getOriginalFilename());
 
-        mockMvc.perform(MockMvcRequestBuilders.multipart(POST_URL)
+        mockMvc.perform(multipart(POST_URL)
                         .file("coverImage", file.getBytes()))
                 .andExpect(status().isOk());
     }

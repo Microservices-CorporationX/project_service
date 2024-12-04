@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
 
-    @Value("${services.s3.bucketName}")
+    @Value("${services.amazons3.bucketName}")
     private String bucketName;
 
     @Override

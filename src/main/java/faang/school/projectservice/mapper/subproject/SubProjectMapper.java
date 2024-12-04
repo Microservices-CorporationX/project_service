@@ -1,7 +1,7 @@
-package faang.school.projectservice.mapper.subprojectMapper;
+package faang.school.projectservice.mapper.subproject;
 
 import faang.school.projectservice.dto.subprojectDto.subprojectDto.CreateSubProjectDto;
-import faang.school.projectservice.dto.subprojectDto.subprojectDto.ProjectDto;
+import faang.school.projectservice.dto.subprojectDto.subprojectDto.SubProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,9 +10,9 @@ import org.mapstruct.Named;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface ProjectMapper {
+public interface SubProjectMapper {
     @Mapping(target = "children", source = "children", qualifiedByName = "childrenMap")
-    ProjectDto toDto(Project project);
+    SubProjectDto toDto(Project project);
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "children", source = "children", qualifiedByName = "mapChildrenToEntities")
