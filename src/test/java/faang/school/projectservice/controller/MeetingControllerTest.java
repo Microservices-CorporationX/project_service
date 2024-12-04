@@ -37,7 +37,7 @@ public class MeetingControllerTest {
     private static final String BASE_URL = "/api/v1/meetings";
     private static final String CREATE_URL = "/meeting";
     private static final String UPDATE_URL = "/{meetId}";
-    private static final String DELETE_URL = "/meetings/{meetId}/{creatorId}";
+    private static final String DELETE_URL = "/meetings/{meetId}/creators/{creatorId}";
     private static final String GET_ALL_URL = "/meetings";
     private static final String FILTER_URL = "/filters";
     private static final String GET_BY_ID_URL = "/meetings/{meetId}";

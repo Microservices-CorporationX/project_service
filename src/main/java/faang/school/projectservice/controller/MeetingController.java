@@ -49,7 +49,7 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.updateMeeting(updateMeetDto, meetId));
     }
 
-    @DeleteMapping("/meetings/{meetId}/{creatorId}")
+    @DeleteMapping("/meetings/{meetId}/creators/{creatorId}")
     @Operation(summary = "Delete a meeting by its ID by owning user")
     public ResponseEntity<Void> deleteMeeting(
             @PathVariable @Positive(message = "Meeting ID must be a positive number") long meetId,
