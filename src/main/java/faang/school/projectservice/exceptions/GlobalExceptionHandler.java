@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -23,6 +21,8 @@ public class GlobalExceptionHandler {
     private static final String ENTITY_NOT_FOUND = "EntityNotFoundException: ";
     private static final String CONSTRAINT_VIOLATION = "ConstraintViolationException: ";
     private static final String METHOD_ARGUMENT_NOT_VALID = "ConstraintViolationException: ";
+    private static final String FILE_SIZE_EXCEEDED = "FileSizeExceededException: ";
+    private static final String IMAGE_PROCESSING_EXCEPTION = "ImageProcessingException: ";
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -37,7 +37,6 @@ public class GlobalExceptionHandler {
         log.error(CONSTRAINT_VIOLATION, ex);
         return new ErrorResponse(ex.getMessage());
     }
-
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -70,6 +69,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
         log.error(ENTITY_NOT_FOUND, ex);
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(FileSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleFileSizeExceededException(FileSizeExceededException ex) {
+        log.error(FILE_SIZE_EXCEEDED, ex);
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleFileUploadException(ImageProcessingException ex) {
+        log.error(IMAGE_PROCESSING_EXCEPTION, ex);
         return new ErrorResponse(ex.getMessage());
     }
 

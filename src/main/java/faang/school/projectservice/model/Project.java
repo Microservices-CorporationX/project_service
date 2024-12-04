@@ -142,4 +142,8 @@ public class Project {
     public boolean isPrivate() {
         return visibility.equals(ProjectVisibility.PRIVATE);
     }
+
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
 }

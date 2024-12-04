@@ -1,10 +1,10 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.ResponseProjectDto;
-import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
-import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ResponseProjectDto;
+import faang.school.projectservice.dto.stage.StageDto;
+import faang.school.projectservice.dto.subproject.CreateSubProjectDto;
+import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.dto.subproject.UpdateSubProjectDto;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -13,12 +13,17 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.utils.image.ImageUtils;
+import faang.school.projectservice.validator.FileValidator;
 import faang.school.projectservice.validator.ProjectValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +34,15 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final ProjectMomentMapper projectMomentMapper;
-
     private final ProjectValidator projectValidator;
+    private final List<SubProjectFilter> filters;
 
     private final StageService stageService;
     private final MomentService momentService;
 
-    private final List<SubProjectFilter> filters;
+    private final FileValidator fileValidator;
+    private final S3Service s3Service;
+    private final ImageUtils imageUtils;
 
     @Transactional
     public ProjectDto createSubProject(long parentProjectId,
@@ -107,12 +114,43 @@ public class ProjectService {
         return projectMapper.toProjectDto(subProjects);
     }
 
+    @Transactional
+    public ResponseProjectDto addCover(long projectId, MultipartFile file) {
+        log.info("Trying to add cover to project: {}", projectId);
+
+        long maxAllowedSize = 5 * 1024 * 1024;
+        fileValidator.validateFileSize(file, maxAllowedSize);
+        fileValidator.validateFileIsImage(file);
+
+        int maxWidth = 1080;
+        int maxHeight = 566;
+        BufferedImage image = imageUtils.getResizedBufferedImage(file, maxWidth, maxHeight);
+        InputStream inputStream = imageUtils.getBufferedImageInputStream(file, image);
+
+        String folder = "projectCovers";
+        String coverImageId = s3Service.uploadFile(file, inputStream, folder);
+
+        Project project = findProjectById(projectId);
+        String oldCoverImageId = project.getCoverImageId();
+        if (oldCoverImageId != null) {
+            s3Service.deleteFile(oldCoverImageId);
+        }
+
+        project.setCoverImageId(coverImageId);
+
+        return projectMapper.toResponseDto(project);
+    }
+
     public ResponseProjectDto getProject(long projectId) {
         Project project = getProjectById(projectId);
         return projectMapper.toResponseDto(project);
     }
 
     public Project getProjectById(long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public Project findProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
     }
 
