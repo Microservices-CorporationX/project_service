@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@RestController
 @Slf4j
 @Validated
-@RestController
 @RequiredArgsConstructor
 @RequestMapping("/internships")
 @Tag(name = "Internship", description = "Internship operations")

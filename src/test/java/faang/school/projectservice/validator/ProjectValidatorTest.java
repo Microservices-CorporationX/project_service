@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.NotUniqueProjectException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -118,7 +119,7 @@ class ProjectValidatorTest {
         Long projectId = 1L;
         when(projectRepository.existsById(projectId)).thenReturn(false);
 
-        Exception ex = assertThrows(EntityNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
+        Exception ex = assertThrows(ProjectNotFoundException.class, () -> projectValidator.validateProjectExistsById(projectId));
         assertEquals("Project with id 1 doesn't exist", ex.getMessage());
 
         verify(projectRepository, times(1)).existsById(projectId);
