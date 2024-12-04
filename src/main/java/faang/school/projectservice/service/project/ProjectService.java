@@ -36,8 +36,11 @@ public class ProjectService {
     }
 
     @Transactional
-    public String uploadCoverImage(long projectId, MultipartFile file) {
+    public String uploadImage(long projectId, MultipartFile file) {
         Project project = projectRepository.getProjectById(projectId);
+        if (project == null) {
+            throw new IllegalArgumentException("Project not found");
+        }
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSize(newStorageSize, project.getMaxStorageSize());
 
@@ -59,20 +62,24 @@ public class ProjectService {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int targetWidth = IMAGE_DIMENSIONS.get(0);
         int targetHeight = IMAGE_DIMENSIONS.get(1);
         int secondTargetHeight = IMAGE_DIMENSIONS.get(0);
+        boolean resized = false;
 
-        if (width > targetWidth && height > targetHeight && width > height) {
-            resizeImage(file, targetWidth, targetHeight, byteArrayOutputStream);
+        if (width > targetWidth || height > targetHeight && width > height) {
+            resizeImage(file, targetWidth, targetHeight, outputStream);
+        } else if (width > targetWidth || height > secondTargetHeight && width == height) {
+            resizeImage(file, targetWidth, secondTargetHeight, outputStream);
         }
 
-        if (width > targetWidth && height > secondTargetHeight && width == height) {
-            resizeImage(file, targetWidth, secondTargetHeight, byteArrayOutputStream);
+        ByteArrayInputStream byteArrayInputStream;
+        if (resized) {
+            byteArrayInputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        } else {
+            byteArrayInputStream = new ByteArrayInputStream(file.getBytes());
         }
-
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
         return new MultipartImage(
                 file.getBytes(),

@@ -41,14 +41,14 @@ public class S3ServiceImpl implements S3Service {
             );
             s3Client.putObject(request);
         } catch(IllegalArgumentException e) {
-            log.error("Invalid file: File inputStream is null", e.getMessage());
+            log.error("Invalid file: File inputStream is null", e);
             throw new IllegalArgumentException("Invalid file: File inputStream is null");
         } catch (AmazonS3Exception ex) {
-            log.error("Amazon S3 exception", ex.getMessage());
+            log.error("Amazon S3 exception", ex);
             throw new AmazonS3Exception("Amazon S3 exception", ex);
         } catch (Exception ex) {
             log.error("A request to upload an image has failed", ex);
-            throw new StorageSizeExceededException("A request to upload an image has failed because storage size exceeded");
+            throw new StorageSizeExceededException("A request to upload an image has failed: " + ex.getMessage());
         }
         return key;
     }
