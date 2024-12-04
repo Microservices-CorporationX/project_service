@@ -32,7 +32,7 @@ public class VacancyService {
         ensureCuratorHasAccess(curatorId);
 
         Vacancy vacancy = vacancyMapper.toEntity(createVacancyDto);
-        Project vacancyProject = projectService.findProjectById(createVacancyDto.projectId());
+        Project vacancyProject = projectService.getProjectById(createVacancyDto.projectId());
         vacancy.setProject(vacancyProject);
         if (createVacancyDto.candidatesIds() != null) {
             List<Candidate> candidates = candidateService.findCandidates(createVacancyDto.candidatesIds());

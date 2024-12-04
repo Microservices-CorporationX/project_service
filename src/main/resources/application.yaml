@@ -25,6 +25,10 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
 server:
   port: 8091
 

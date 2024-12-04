@@ -62,7 +62,7 @@ public class VacancyServiceTest {
         // Arrange
         when(teamMemberService.curatorHasNoAccess(1L)).thenReturn(false);
         when(vacancyMapper.toEntity(createVacancyDto)).thenReturn(vacancy);
-        when(projectService.findProjectById(1L)).thenReturn(project);
+        when(projectService.getProjectById(1L)).thenReturn(project);
         when(vacancyMapper.toCreateDto(vacancy)).thenReturn(createVacancyDto);
 
         // Act
