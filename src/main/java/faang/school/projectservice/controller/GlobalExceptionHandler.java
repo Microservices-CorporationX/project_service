@@ -2,6 +2,8 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.exceptions.DataValidationException;
 import faang.school.projectservice.dto.ErrorResponse;
+import faang.school.projectservice.exceptions.FileSizeExceededException;
+import faang.school.projectservice.exceptions.ImageProcessingException;
 import faang.school.projectservice.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
 
 @RestControllerAdvice
 @Slf4j
@@ -31,21 +35,32 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.error(RESOURCE_NOT_FOUND, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                LocalDateTime.now());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConstraintViolationException(ConstraintViolationException ex) {
         log.error(CONSTRAINT_VIOLATION, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(DataValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataValidationException(DataValidationException ex) {
         log.error(DATA_VALIDATION_ERROR, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -58,42 +73,66 @@ public class GlobalExceptionHandler {
                 .reduce((msg1, msg2) -> msg1 + "; " + msg2)
                 .orElse("Validation error");
 
-        return new ErrorResponse(errorMessage);
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error(ILLEGAL_ARGUMENT, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler({EntityNotFoundException.class, JpaObjectRetrievalFailureException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
         log.error(ENTITY_NOT_FOUND, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(FileSizeExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleFileSizeExceededException(FileSizeExceededException ex) {
         log.error(FILE_SIZE_EXCEEDED, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(ImageProcessingException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleFileUploadException(ImageProcessingException ex) {
         log.error(IMAGE_PROCESSING_EXCEPTION, ex);
-        return new ErrorResponse(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGenericException(Exception ex) {
         log.error(UNEXPECTED_ERROR, ex);
-        return new ErrorResponse("An unexpected error occurred");
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
     }
 }
 
