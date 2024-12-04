@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
 
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
+                errorMessage,
                 LocalDateTime.now()
         );
     }
