@@ -29,6 +29,9 @@ public class Meet {
     @Column(name = "start_date_time", nullable = false)
     private LocalDateTime startDateTime;
 
+    @Column(name = "end_date_time", nullable = false)
+    private LocalDateTime endDateTime;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MeetStatus status;
@@ -54,4 +57,10 @@ public class Meet {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "google_calendar_event_link")
+    private String googleCalendarEventLink;
+
+    @Column(name = "google_event_id")
+    private String googleEventId;
 }

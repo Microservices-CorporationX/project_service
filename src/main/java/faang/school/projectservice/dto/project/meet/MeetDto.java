@@ -30,6 +30,10 @@ public class MeetDto {
     @JsonDeserialize(using = EpochSecondToLocalDateTimeDeserializer.class)
     private LocalDateTime startDateTime;
 
+    @NotNull(message = "End time must not be null")
+    @JsonDeserialize(using = EpochSecondToLocalDateTimeDeserializer.class)
+    private LocalDateTime endDateTime;
+
     private MeetStatus status;
     private Long creatorId;
 
@@ -40,6 +44,10 @@ public class MeetDto {
 
     @Null
     private LocalDateTime createdAt;
+
     @Null
     private LocalDateTime updatedAt;
+
+    private String googleCalendarEventLink;
+    private String googleEventId;
 }

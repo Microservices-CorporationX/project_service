@@ -72,12 +72,24 @@ public class MeetValidatorTest {
 
         IllegalStateException e = assertThrows(IllegalStateException.class,
                 () -> meetValidator.validate(meetDto, userId, projectService));
-        assertEquals("start date time must be before now date", e.getMessage());
+        assertEquals("start date time must be after now date", e.getMessage());
+    }
+
+    @Test
+    public void testValidateStartDateIsBeforeEndDate() {
+        mockSuccessResult();
+        meetDto.setStartDateTime(LocalDateTime.now().plusDays(1));
+        meetDto.setEndDateTime(LocalDateTime.now().plusHours(3));
+
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> meetValidator.validate(meetDto, userId, projectService));
+        assertEquals("start date time must be after end date", e.getMessage());
     }
 
     @Test
     public void testValidateSuccessful() {
         meetDto.setStartDateTime(LocalDateTime.now().plusDays(1));
+        meetDto.setEndDateTime(LocalDateTime.now().plusDays(2));
         mockSuccessResult();
 
         meetValidator.validate(meetDto, userId, projectService);

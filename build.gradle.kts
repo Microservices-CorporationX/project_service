@@ -24,18 +24,20 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 
-    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client
+    /**
+     * google calendar
+     */
     implementation("com.google.api-client:google-api-client:2.0.0")
-
-    // https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
-
-// https://mvnrepository.com/artifact/com.google.apis/google-api-services-calendar
     implementation("com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0")
 
+    /**
+     * oauth2
+     */
     implementation("org.springframework.security:spring-security-oauth2-client")
     implementation("org.springframework.security:spring-security-oauth2-jose")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.session:spring-session-jdbc")
 
     /**
      * Database

@@ -34,9 +34,21 @@ public class EpochSecondToLocalDateTimeDeserializer extends JsonDeserializer<Loc
                         dateArray[5],
                         0
                 );
-            } else {
-                throw new IOException("Invalid date array format");
             }
+
+            if (dateArray.length == 7) {
+                return LocalDateTime.of(
+                        dateArray[0],
+                        dateArray[1],
+                        dateArray[2],
+                        dateArray[3],
+                        dateArray[4],
+                        dateArray[5],
+                        dateArray[6]
+                );
+            }
+
+            throw new IOException("Invalid date array format");
         }
     }
 }

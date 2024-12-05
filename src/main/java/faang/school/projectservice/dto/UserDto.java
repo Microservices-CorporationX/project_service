@@ -9,6 +9,7 @@ import java.util.List;
 public class UserDto {
     private long id;
     private String username;
+    private String email;
     private boolean active;
     private String aboutMe;
     private String country;

@@ -11,8 +11,6 @@ import org.mapstruct.ReportingPolicy;
 public interface MeetMapper {
 
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     MeetDto toDto(Meet meet);
 
     @Mapping(target = "createdAt", ignore = true)
@@ -23,5 +21,5 @@ public interface MeetMapper {
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void update(MeetDto meetDto,@MappingTarget Meet meet);
+    void update(MeetDto meetDto, @MappingTarget Meet meet);
 }

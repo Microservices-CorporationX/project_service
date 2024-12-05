@@ -20,7 +20,11 @@ public class MeetValidator {
         validation(meetDto.getProjectId(), userId, projectService);
 
         if (meetDto.getStartDateTime().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("start date time must be before now date");
+            throw new IllegalStateException("start date time must be after now date");
+        }
+
+        if (meetDto.getEndDateTime().isBefore(meetDto.getStartDateTime())) {
+            throw new IllegalStateException("start date time must be after end date");
         }
     }
 

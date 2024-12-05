@@ -30,14 +30,14 @@ spring:
       client:
         registration:
           google:
-            client-id: 523144599976-otpi6d9avis6olm8j2bmplok654vkeru.apps.googleusercontent.com
-            client-secret: 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
+            client-id: 505043354003-fr1slmod1spf1a49gr9ub46pto40u5b1.apps.googleusercontent.com
+            client-secret: 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
             scope:
               - openid
               - profile
               - email
               - https://www.googleapis.com/auth/calendar
-#            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
 
 server:
   port: 8082
@@ -62,3 +62,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+ngrok:
+  base-url: 364a-109-106-143-123.ngrok-free.app

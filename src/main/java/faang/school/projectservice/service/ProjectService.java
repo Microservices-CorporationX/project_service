@@ -132,10 +132,15 @@ public class ProjectService {
     }
 
     public boolean hasUserInProject(long projectId, long userId) {
-        return projectRepository.getProjectById(projectId).getTeams().stream()
+        Project project = projectRepository.getProjectById(projectId);
+
+        boolean userInTeam = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
 
+        boolean userIsOwnerProject = project.getOwnerId().equals(userId);
+
+        return userInTeam || userIsOwnerProject;
     }
 
     private boolean isUserMemberOfPrivateProject(Project project, long userId) {
