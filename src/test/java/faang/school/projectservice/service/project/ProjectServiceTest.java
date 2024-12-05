@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.filters.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -16,12 +17,14 @@ import faang.school.projectservice.validator.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -468,6 +471,33 @@ public class ProjectServiceTest {
         List<CreateSubProjectDto> result = projectService.getProjectsByFilters(projectId, filterDto);
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void testChangeStorageSizeChanged() {
+        long projectId = 1L;
+        BigInteger storageSize = BigInteger.valueOf(2000L);
+        BigInteger maxStorageSize = BigInteger.valueOf(2000000000L);
+        BigInteger sizeToAdd = BigInteger.valueOf(1000L);
+        BigInteger newStorageSize = storageSize.add(sizeToAdd);
+        Project project = Project.builder().storageSize(storageSize).maxStorageSize(maxStorageSize).build();
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        Project expected = Project.builder().storageSize(newStorageSize).maxStorageSize(maxStorageSize).build();
+        when(projectRepository.save(project)).thenReturn(project);
+        assertEquals(expected, projectService.changeStorageSize(projectId, sizeToAdd.longValue()));
+    }
+
+    @Test
+    void testChangeStorageSizeWithSizeExceeded() {
+        long projectId = 1L;
+        BigInteger storageSize = BigInteger.valueOf(1800L);
+        BigInteger maxStorageSize = BigInteger.valueOf(2000L);
+        BigInteger sizeToAdd = BigInteger.valueOf(1000L);
+        Project project = Project.builder().storageSize(storageSize).maxStorageSize(maxStorageSize).build();
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
+        Executable executable = () -> projectService.changeStorageSize(projectId, sizeToAdd.longValue());
+        StorageSizeExceededException exception = assertThrows(StorageSizeExceededException.class, executable);
+        assertEquals("Storage size exceeded", exception.getMessage());
     }
 
 }

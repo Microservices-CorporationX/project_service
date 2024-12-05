@@ -38,9 +38,10 @@ calculations_messages_processing:
 services:
   s3:
     endpoint: http://localhost:9000
-    accessKey: user
-    secretKey: password
-    bucketName: projectbucket
+    username: user
+    password: password
+    bucketName: corpbucket
+    region: us-east-1
     isMocked: false
   payment-service:
     host: http://localhost
