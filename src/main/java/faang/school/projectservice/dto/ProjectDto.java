@@ -2,6 +2,8 @@ package faang.school.projectservice.dto;
 
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.stage.Stage;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,18 +21,29 @@ public class ProjectDto {
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;
 
+    @NotBlank(message = "Description must not be blank")
     @Size(max = 4096, message = "Description must not exceed 4096 characters")
     private String description;
 
     @NotNull(message = "OwnerId must not be null")
+    @Min(value = 0, message = "OwnerId must be non-negative")
     private Long ownerId;
+
     private Long parentProjectId;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
+
     private ProjectStatus status;
+
     @NotNull(message = "Visibility must not be null")
     private ProjectVisibility visibility;
+
     private String coverImageId;
+
     private List<Long> teamsIds;
+
     private List<Long> childrenIds;
+    private List<Stage> stages;
 }
