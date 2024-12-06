@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.internship;
+package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
@@ -8,7 +8,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

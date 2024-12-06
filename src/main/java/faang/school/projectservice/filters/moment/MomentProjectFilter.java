@@ -1,7 +1,7 @@
-package faang.school.projectservice.filter.moment;
+package faang.school.projectservice.filters.moment;
 
 import faang.school.projectservice.dto.filter.MomentFilterDto;
-import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filters.Filter;
 import faang.school.projectservice.model.Moment;
 import org.springframework.stereotype.Component;
 

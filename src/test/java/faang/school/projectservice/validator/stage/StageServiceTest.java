@@ -1,9 +1,9 @@
-package faang.school.projectservice;
+package faang.school.projectservice.validator.stage;
 
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.StageMapperImpl;
+import faang.school.projectservice.mapper.stage.StageMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -15,7 +15,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 
 import faang.school.projectservice.service.StageInvitationServiceImpl;
-import faang.school.projectservice.service.StageService;
+import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

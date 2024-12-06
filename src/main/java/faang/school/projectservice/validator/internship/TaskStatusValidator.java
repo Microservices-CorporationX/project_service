@@ -1,0 +1,93 @@
+package faang.school.projectservice.validator.internship;
+
+import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.InternshipStatus;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
+import faang.school.projectservice.repository.InternshipRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Component
+@RequiredArgsConstructor
+public class TaskStatusValidator {
+
+    private final TeamMemberRepository teamMemberRepository;
+
+    public Internship checkingInternsTaskStatus(Internship internship) {
+        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+            return changeInternsRoleIfInternshipCompleted(internship);
+        } else {
+            return changeInternsRoleIfInternshipInProgress(internship);
+        }
+    }
+
+    private Internship changeInternsRoleIfInternshipCompleted(Internship internship) {
+        List<TeamMember> interns = internship.getInterns();
+
+        List<Long> idsToDelete = interns.stream()
+                .filter(member -> {
+                    boolean hasUncompletedTasks = member.getStages().stream()
+                            .flatMap(stage -> stage.getTasks().stream())
+                            .anyMatch(task -> !task.getStatus().equals(TaskStatus.DONE));
+
+                    if (hasUncompletedTasks) {
+                        return true;
+                    }
+
+                    member.getRoles().remove(TeamRole.INTERN);
+                    return false;
+                })
+                .map(TeamMember::getId)
+                .toList();
+
+        interns.removeIf(member -> idsToDelete.contains(member.getId()));
+        idsToDelete.forEach(teamMemberRepository::deleteById);
+
+        internship.setInterns(interns);
+        return internship;
+    }
+
+
+    private Internship changeInternsRoleIfInternshipInProgress(Internship internship) {
+        List<TeamMember> interns = internship.getInterns();
+
+        List<Long> idsToDelete = interns.stream()
+                .filter(member -> {
+                    long totalTasks = member.getStages().stream()
+                            .mapToLong(stage -> stage.getTasks().size())
+                            .sum();
+
+                    long doneTasks = member.getStages().stream()
+                            .flatMap(stage -> stage.getTasks().stream())
+                            .filter(task -> task.getStatus() == TaskStatus.DONE)
+                            .count();
+
+                    boolean hasTasks = totalTasks > 0;
+                    boolean allTasksDone = doneTasks == totalTasks;
+
+                    if (hasTasks && allTasksDone) {
+                        member.getRoles().remove(TeamRole.INTERN);
+                        return false;
+                    }
+
+                    return hasTasks && !allTasksDone;
+                })
+                .map(TeamMember::getId)
+                .toList();
+
+        interns.removeIf(member -> idsToDelete.contains(member.getId()));
+        idsToDelete.forEach(teamMemberRepository::deleteById);
+
+        internship.setInterns(interns);
+        return internship;
+    }
+}

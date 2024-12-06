@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import faang.school.projectservice.dto.intership.InternshipFilterDto;
 import faang.school.projectservice.dto.intership.InternshipDto;
@@ -19,36 +19,36 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/internships")
+@RequestMapping("/api/v1")
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping
+    @PostMapping("/internships")
     public ResponseEntity<InternshipDto> createInternship(@RequestBody InternshipDto internshipDto) {
         InternshipDto responseDto = internshipService.createInternship(internshipDto);
-        URI location = URI.create("/api/internship/" + responseDto.getId());
+        URI location = URI.create("/api/v1/internships/" + responseDto.getId());
         return ResponseEntity.created(location).body(responseDto);
     }
 
-    @PutMapping
+    @PutMapping("/internships")
     public ResponseEntity<InternshipDto> updateInternship(@RequestBody @Valid InternshipDto internshipDto) {
         InternshipDto responseDto = internshipService.updateInternship(internshipDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping
+    @GetMapping("/internships")
     public ResponseEntity<List<InternshipDto>> getInternships() {
         List<InternshipDto> internships = internshipService.getInternships();
         return ResponseEntity.ok(internships);
     }
 
-    @GetMapping("/filters")
+    @GetMapping("/filters/internships")
     public ResponseEntity<List<InternshipDto>> getInternships(@RequestBody @Valid InternshipFilterDto filters) {
         List<InternshipDto> internships = internshipService.getInternships(filters);
         return ResponseEntity.ok(internships);
     }
 
-    @GetMapping("/{internshipId}")
+    @GetMapping("/{internshipId}/internships")
     public ResponseEntity<InternshipDto> getInternship(@PathVariable @Valid Long internshipId) {
         InternshipDto responseDto = internshipService.getInternship(internshipId);
         return ResponseEntity.ok(responseDto);

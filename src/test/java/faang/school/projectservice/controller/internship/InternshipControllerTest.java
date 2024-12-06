@@ -1,4 +1,4 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.internship;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import faang.school.projectservice.dto.intership.InternshipDto;
@@ -57,7 +57,7 @@ public class InternshipControllerTest {
 
         when(internshipService.createInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(post("/api/internships")
+        mockMvc.perform(post("/api/v1/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
@@ -78,7 +78,7 @@ public class InternshipControllerTest {
 
         when(internshipService.updateInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(put("/api/internships")
+        mockMvc.perform(put("/api/v1/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships()).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/internships")
+        mockMvc.perform(get("/api/v1/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -134,7 +134,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships(any(InternshipFilterDto.class))).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/internships/filters")
+        mockMvc.perform(get("/api/v1/filters/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -149,7 +149,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternship(internshipDto.getId())).thenReturn(internshipDto);
 
-        mockMvc.perform(get("/api/internships/{internshipId}", internshipDto.getId())
+        mockMvc.perform(get("/api/v1/{internshipId}/internships", internshipDto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())

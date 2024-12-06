@@ -7,6 +7,8 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.StorageSizeExceededException;
+import faang.school.projectservice.filters.project.NameProjectFilter;
+import faang.school.projectservice.filters.project.StatusProjectFilter;
 import faang.school.projectservice.filters.project.ProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
@@ -46,9 +48,9 @@ public class ProjectServiceTest {
     @Mock
     private CreateSubProjectMapper createSubProjectMapper;
     @Spy
-    private faang.school.projectservice.filters.project.NameProjectFilter nameProjectFilter;
+    private NameProjectFilter nameProjectFilter;
     @Spy
-    private faang.school.projectservice.filters.project.StatusProjectFilter statusProjectFilter;
+    private StatusProjectFilter statusProjectFilter;
     @Mock
     private ProjectRepository projectRepository;
     @Mock

@@ -1,6 +1,6 @@
-package faang.school.projectservice.controller;
+package faang.school.projectservice.controller.resource;
 
-import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;

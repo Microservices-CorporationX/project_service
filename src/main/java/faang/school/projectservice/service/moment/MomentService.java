@@ -3,7 +3,7 @@ package faang.school.projectservice.service.moment;
 import faang.school.projectservice.dto.filter.MomentFilterDto;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filters.Filter;
 import faang.school.projectservice.mapper.moment.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
