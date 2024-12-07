@@ -1,0 +1,27 @@
+package faang.school.projectservice.service.donation_analysis;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import faang.school.projectservice.dto.donation_analysis.FundRaisedEventDto;
+import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.publisher.donation_analysis.FundRaisedEventPublisher;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Component
+@RequiredArgsConstructor
+public class FundRaisedEventService {
+    private final FundRaisedEventPublisher eventPublisher;
+
+    public void processDonation(Donation donation) {
+        FundRaisedEventDto eventDto = new FundRaisedEventDto
+                (donation.getUserId(), donation.getAmount(), donation.getDonationTime());
+
+        try {
+            eventPublisher.publish(eventDto);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to publish event", e);
+        }
+    }
+}
