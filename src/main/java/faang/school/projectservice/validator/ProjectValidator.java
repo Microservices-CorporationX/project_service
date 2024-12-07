@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import org.springframework.stereotype.Component;
 
 import java.util.function.BiFunction;

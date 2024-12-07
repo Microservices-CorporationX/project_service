@@ -11,6 +11,4 @@ public interface SubProjectMapper {
     Project toProject(CreateSubProjectDto subProjectDto);
 
     CreateSubProjectDto toSubProjectDto(Project project);
-
-
 }
