@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class NameFilterTest {
+public class StageNameFilterTest {
     NameFilter nameFilter;
 
     ProjectFilterDto projectFilterDto;
