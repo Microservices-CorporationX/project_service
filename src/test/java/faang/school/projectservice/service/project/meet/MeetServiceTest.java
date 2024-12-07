@@ -8,7 +8,7 @@ import faang.school.projectservice.jpa.MeetRepository;
 import faang.school.projectservice.mapper.project.meet.MeetMapperImpl;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.validator.project.meet.MeetValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

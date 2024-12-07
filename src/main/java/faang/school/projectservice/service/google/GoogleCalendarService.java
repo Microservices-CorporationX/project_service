@@ -11,7 +11,7 @@ import faang.school.projectservice.client.google.calendar.GoogleCalendarClient;
 import faang.school.projectservice.dto.project.meet.MeetDto;
 import faang.school.projectservice.dto.project.meet.MeetFilterDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.project.meet.MeetService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

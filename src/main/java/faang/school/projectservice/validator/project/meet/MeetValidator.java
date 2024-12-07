@@ -2,7 +2,7 @@ package faang.school.projectservice.validator.project.meet;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.project.meet.MeetDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

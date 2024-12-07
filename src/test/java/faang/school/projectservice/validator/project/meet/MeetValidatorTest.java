@@ -3,7 +3,7 @@ package faang.school.projectservice.validator.project.meet;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.UserDto;
 import faang.school.projectservice.dto.project.meet.MeetDto;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.project.ProjectService;
 import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

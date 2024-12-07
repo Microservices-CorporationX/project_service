@@ -9,6 +9,7 @@ import faang.school.projectservice.dto.project.meet.MeetDto;
 import faang.school.projectservice.dto.project.meet.MeetFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.google.GoogleCalendarService;
+import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.project.meet.MeetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
