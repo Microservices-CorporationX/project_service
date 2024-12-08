@@ -37,6 +37,7 @@ public class InternshipController {
     public InternshipDto update(@Valid @RequestBody InternshipDto internshipDto) {
         internshipControllerValidation.validateInternshipDuration(internshipDto);
         internshipControllerValidation.validateInternshipId(internshipDto);
+
         return internshipService.update(internshipDto);
     }
 

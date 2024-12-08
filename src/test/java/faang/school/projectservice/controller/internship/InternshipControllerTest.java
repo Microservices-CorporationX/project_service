@@ -127,7 +127,9 @@ class InternshipControllerTest {
         @Test
         void updateNonExistentInternshipTest() {
             doNothing().when(internshipControllerValidation).validateInternshipDuration(internshipDto);
-
+            doThrow(new DataValidationException("Created internship must have an id."))
+                    .when(internshipControllerValidation)
+                    .validateInternshipId(internshipDto);
             assertThrows(DataValidationException.class, () -> internshipController.update(internshipDto));
 
             verifyNoInteractions(internshipService);

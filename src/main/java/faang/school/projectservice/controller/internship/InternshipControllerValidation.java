@@ -17,6 +17,12 @@ class InternshipControllerValidation {
 
     public static final int INTERNSHIP_MAX_DURATION_IN_MONTHS = 3;
 
+    public void validateInternshipId(InternshipDto internshipDto) {
+        if (internshipDto.getId() == null) {
+            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
+        }
+    }
+
     public void validateInternshipDuration(InternshipDto internshipDto) {
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();
@@ -29,12 +35,6 @@ class InternshipControllerValidation {
             String exceptionMessage = String.format(INTERNSHIP_DURATION_EXCEPTION.getMessage(),
                     INTERNSHIP_MAX_DURATION_IN_MONTHS);
             throw new DataValidationException(exceptionMessage);
-        }
-    }
-
-    public void validateInternshipId(InternshipDto internshipDto) {
-        if (internshipDto.getId() == null) {
-            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
         }
     }
 
