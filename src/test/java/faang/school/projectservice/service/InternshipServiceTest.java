@@ -84,7 +84,7 @@ class InternshipServiceTest {
 
     @Test
     void createInternship() {
-        when(internshipMapper.toEntity(internshipDto)).thenReturn(internship);
+        when(internshipMapper.toInternship(internshipDto)).thenReturn(internship);
         when(internshipRepository.save(internship)).thenReturn(internship);
         when(internshipMapper.toInternshipDto(internship)).thenReturn(internshipDto);
 

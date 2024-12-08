@@ -27,10 +27,12 @@ public class InternshipService {
 
     public InternshipDto createInternship(InternshipDto internshipDto) {
         validateInternship(internshipDto);
+        TeamMember mentor = teamMemberService.getTeamMember(internshipDto.mentorId());
+        List<TeamMember> interns = teamMemberService.getAllTeamMembersByIds(internshipDto.internIds());
 
-        Internship internship = internshipMapper.toEntity(internshipDto);
-        internship.setMentorId(teamMemberService.getTeamMember(internshipDto.mentorId()));
-        internship.setInterns(teamMemberService.getAllTeamMembersByIds(internshipDto.internIds()));
+        Internship internship = internshipMapper.toInternship(internshipDto);
+        internship.setMentorId(mentor);
+        internship.setInterns(interns);
 
         return internshipMapper.toInternshipDto(internshipRepository.save(internship));
     }
@@ -78,7 +80,12 @@ public class InternshipService {
     }
 
     public List<InternshipDto> getAllInternships() {
-        return internshipMapper.toInternshipDtos(internshipRepository.findAll());
+        List<Internship> internships = internshipRepository.findAll();
+        if (internships.isEmpty()) {
+            throw new DataValidationException("Не найдено ни одной стажировки");
+        }
+
+        return internshipMapper.toInternshipDtos(internships);
     }
 
     public InternshipDto getInternshipDtoById(long internshipId) {

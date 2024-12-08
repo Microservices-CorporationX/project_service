@@ -14,10 +14,8 @@ import faang.school.projectservice.mapper.ProjectMomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.BeforeEach;
 import faang.school.projectservice.utils.image.ImageUtils;
 import faang.school.projectservice.validator.FileValidator;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -38,9 +36,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -67,6 +64,8 @@ public class ProjectServiceTest {
     private FileValidator fileValidator;
     private S3Service s3Service;
     private ImageUtils imageUtils;
+
+    private Project project;
 
     long projectId;
     long ownerId;
@@ -111,6 +110,11 @@ public class ProjectServiceTest {
                 s3Service,
                 imageUtils
         );
+
+        project = new Project();
+        project.setId(1L);
+        project.setName("Test Project");
+        project.setStatus(ProjectStatus.COMPLETED);
     }
 
     @Test
@@ -360,11 +364,6 @@ public class ProjectServiceTest {
                 () -> projectService.addCover(projectId, file));
     }
 
-    private Project project;
-
-    @BeforeEach
-    public void setUp() {
-        project = new Project();
     @Test
     public void testFindProjectById() {
         // Arrange
@@ -385,28 +384,19 @@ public class ProjectServiceTest {
         // Arrange
         Project project = new Project();
         project.setId(1L);
-        project.setStatus(ProjectStatus.COMPLETED);
-    }
-
-    @Test
-    public void testGetProjectById() {
+        project.setName("Test Project");
         when(projectRepository.getProjectById(1L)).thenReturn(project);
 
-        assertEquals(project, projectService.getProjectById(1L));
-    }
+        // Act
+        Project result = projectService.getProjectById(1L);
 
-    @Test
-    public void testGetProjectByIdNotFound() {
-        when(projectRepository.getProjectById(project.getId())).thenReturn(null);
-
-        assertNull(projectService.getProjectById(project.getId()));
+        // Assert
+        assertEquals(project, result);
     }
 
     @Test
     public void testIsProjectComplete_Completed() {
         when(projectRepository.getProjectById(project.getId())).thenReturn(project);
-        // Act
-        Project result = projectService.getProjectById(1L);
 
         assertTrue(projectService.isProjectComplete(project.getId()));
     }
@@ -418,7 +408,6 @@ public class ProjectServiceTest {
 
         assertFalse(projectService.isProjectComplete(project.getId()));
     }
-
 
     private Project createProjectWithChildren(ProjectVisibility visibility, ProjectStatus status) {
         List<Project> children = getListOfProjects(visibility, status);

@@ -3,9 +3,6 @@ package faang.school.projectservice.mapper;
 import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.service.TeamMemberService;
-import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -24,12 +21,9 @@ public interface InternshipMapper {
     @Mapping(target = "mentorId", ignore = true)
     @Mapping(target = "interns", ignore = true)
     @Mapping(target = "project.id", source = "projectId")
-    Internship toEntity(InternshipDto dto);
+    Internship toInternship(InternshipDto dto);
 
-    List<Internship> toEntities(List<InternshipDto> dtos,
-                                @Context TeamMemberService teamMemberService,
-                                @Context ProjectService projectService
-    );
+    List<Internship> toInternships(List<InternshipDto> dtos);
 
     List<InternshipDto> toInternshipDtos(List<Internship> entities);
 

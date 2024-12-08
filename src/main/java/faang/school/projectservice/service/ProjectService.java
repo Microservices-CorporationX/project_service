@@ -53,8 +53,6 @@ public class ProjectService {
         Project parentProject = getProjectById(parentProjectId);
         projectValidator.validateCreateSubProject(parentProject, createDto);
 
-    public Project getProjectById(long projectId) {
-        return projectRepository.getProjectById(projectId);
         Project subProject = projectMapper.toEntity(createDto);
         subProject.setParentProject(parentProject);
         parentProject.addChildren(subProject);
@@ -69,12 +67,6 @@ public class ProjectService {
         return projectMapper.toProjectDto(subProject);
     }
 
-    public boolean isProjectComplete(long id){
-        return getProjectById(id).getStatus() == ProjectStatus.COMPLETED;
-    }
-
-    public ResponseProjectDto getProject(long projectId) {
-        Project project = getProjectById(projectId);
     @Transactional
     public ProjectDto updateSubProject(long projectId,
                                        UpdateSubProjectDto updateDto) {
@@ -161,6 +153,10 @@ public class ProjectService {
 
     public Project findProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
+    }
+
+    public boolean isProjectComplete(long id){
+        return getProjectById(id).getStatus() == ProjectStatus.COMPLETED;
     }
 
     private void mapStages(Project subProject, List<StageDto> stagesDto) {
