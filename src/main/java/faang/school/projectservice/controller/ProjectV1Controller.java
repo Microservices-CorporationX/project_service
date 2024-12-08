@@ -8,12 +8,17 @@ import faang.school.projectservice.service.TeamMemberService;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,5 +40,12 @@ public class ProjectV1Controller {
     @GetMapping("/{projectId}")
     public ResponseProjectDto getProject(@PathVariable @Positive Long projectId) {
         return projectService.getProject(projectId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{projectId}/cover")
+    public ResponseProjectDto addCover(@PathVariable @Positive long projectId,
+                         @RequestPart MultipartFile file) {
+        return projectService.addCover(projectId, file);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 
 public record ResponseProjectDto(
         @Positive long id,
-        @NotBlank String name
+        @NotBlank String name,
+        String coverImageId
 ) {
 }
