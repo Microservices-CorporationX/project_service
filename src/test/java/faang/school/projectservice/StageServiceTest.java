@@ -14,7 +14,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 
-import faang.school.projectservice.service.StageInvitationServiceImpl;
+import faang.school.projectservice.service.stageinvitation.StageInvitationServiceImpl;
 import faang.school.projectservice.service.StageService;
 import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Test;

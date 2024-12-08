@@ -15,6 +15,7 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.stageinvitation.StageInvitationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
