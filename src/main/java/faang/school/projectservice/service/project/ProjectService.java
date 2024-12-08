@@ -1,18 +1,28 @@
 package faang.school.projectservice.service.project;
 
-import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.filters.project.ProjectFilter;
+import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
+import faang.school.projectservice.mapper.project.ProjectMapper;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.helpers.ProjectSearcher;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.validator.project.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,22 +32,65 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
+    private final BigInteger DEFAULT_MAX_STORAGE_SIZE = BigInteger.valueOf(2000000000);
+
     private final UserContext userContext;
     private final ProjectMapper projectMapper;
+    private final CreateSubProjectMapper createSubProjectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> filters;
+    private final ProjectValidator projectValidator;
+    private final MomentService momentService;
 
     public ProjectDto create(ProjectDto projectDto) {
+        projectValidator.validateUniqueProject(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         project.setOwnerId(userContext.getUserId());
         project.setStatus(ProjectStatus.CREATED);
-        validateName(project.getName(), project.getOwnerId());
+        projectValidator.validateName(project.getName(), project.getOwnerId());
+        project.setMaxStorageSize(DEFAULT_MAX_STORAGE_SIZE);
+        project.setStorageSize(BigInteger.valueOf(0));
         LocalDateTime currentTime = LocalDateTime.now();
         project.setCreatedAt(currentTime);
         project.setUpdatedAt(currentTime);
+        project.setChildren(new ArrayList<>());
         project = projectRepository.save(project);
         log.info("User with id {} created a project {}", userContext.getUserId(), project);
         return projectMapper.toDto(project);
+    }
+
+    public CreateSubProjectDto createSubProject(CreateSubProjectDto projectDto) {
+        projectValidator.validateUniqueProject(projectDto);
+        Project project = createSubProjectMapper.toEntity(projectDto);
+        Project parent = projectRepository.getProjectById(projectDto.getParentId());
+        projectValidator.validateIsPublic(parent, project);
+        project.setOwnerId(userContext.getUserId());
+        project.setStatus(ProjectStatus.CREATED);
+        project.setParentProject(parent);
+        parent.getChildren().add(project);
+        LocalDateTime currentTime = LocalDateTime.now();
+        project.setCreatedAt(currentTime);
+        project.setUpdatedAt(currentTime);
+        project.setChildren(new ArrayList<>());
+        project = projectRepository.save(project);
+        projectRepository.save(parent);
+        log.info("User with id {} created subproject {}", userContext.getUserId(), project);
+        return createSubProjectMapper.toDto(project);
+    }
+
+    public CreateSubProjectDto updateSubProject(CreateSubProjectDto projectDto) {
+        projectValidator.validateProjectExists(projectDto);
+        Project project = projectRepository.getProjectById(projectDto.getId());
+        List<Project> children = project.getChildren();
+
+        if (projectValidator.needToUpdateVisibility(project, projectDto)) {
+            updateSubProjectsVisibility(project, projectDto.getVisibility(), children);
+        }
+
+        if (projectValidator.needToUpdateStatus(project, projectDto)) {
+            updateSubProjectsStatus(project, projectDto.getStatus(), children);
+        }
+        return createSubProjectMapper.toDto(projectRepository.save(project));
     }
 
     public ProjectDto updateStatus(ProjectStatus status, long projectId) {
@@ -47,6 +100,37 @@ public class ProjectService {
         project = projectRepository.save(project);
         logUpdate(project);
         return projectMapper.toDto(project);
+    }
+
+    public void updateSubProjectsStatus(Project project, ProjectStatus statusToUpdate, List<Project> children) {
+        projectValidator.validateProjectAlreadyCompleted(project);
+        if (statusToUpdate == ProjectStatus.COMPLETED){
+            if (projectValidator.validateAllChildProjectsCompleted(project)) {
+                MomentDto momentDto = MomentDto.builder()
+                        .name(project.getName() + " completed")
+                        .description("Project with id: " + project.getId() + " has been completed")
+                        .date(LocalDateTime.now())
+                        .projectIds(List.of(project.getId()))
+                        .build();
+                momentService.createMoment(momentDto);
+            }
+        } else {
+            children.forEach(e -> updateSubProjectsStatus(e, statusToUpdate, e.getChildren()));
+        }
+        project.setStatus(statusToUpdate);
+        project.setUpdatedAt(LocalDateTime.now());
+        log.info("Updated status for project id:{} is {}", project.getId(), statusToUpdate);
+    }
+
+    public void updateSubProjectsVisibility(Project project, ProjectVisibility visibilityToUpdate, List<Project> children) {
+        project.setVisibility(visibilityToUpdate);
+        project.setUpdatedAt(LocalDateTime.now());
+        log.info("Updated visibility for project id:{} is {}", project.getId(), visibilityToUpdate);
+        if (children != null && !children.isEmpty() && visibilityToUpdate.equals(ProjectVisibility.PRIVATE)) {
+            children.forEach(e -> updateSubProjectsVisibility(e, visibilityToUpdate, e.getChildren()));
+            children.forEach(projectRepository::save);
+            log.info("All children projects were updated with {} visibility", visibilityToUpdate);
+        }
     }
 
     public ProjectDto updateDescription(String description, long projectId) {
@@ -68,6 +152,18 @@ public class ProjectService {
                 .toList();
     }
 
+    public List<CreateSubProjectDto> getProjectsByFilters(Long projectId, ProjectFilterDto filterDto) {
+        Stream<Project> children = projectRepository.getProjectById(projectId).getChildren().stream();
+        return filters.stream()
+                .filter(e -> e. isApplicable(filterDto))
+                .reduce(children, (stream, filter) -> filter.apply(stream, filterDto),
+                        ((subStream, stream) -> stream))
+                .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
+                .distinct()
+                .map(createSubProjectMapper::toDto)
+                .toList();
+    }
+
     public List<ProjectDto> findAll() {
         Stream<Project> projects = projectRepository.findAll().stream().filter(this::filterPrivate);
         log.info("User with id {} requested all projects", userContext.getUserId());
@@ -83,12 +179,17 @@ public class ProjectService {
         return Optional.empty();
     }
 
-    private void validateName(String projectName, Long userId) {
-        if (projectRepository.existsByOwnerUserIdAndName(userId, projectName)) {
-            log.info("User with id {} tried to create a project with the same name", userContext.getUserId());
-            throw new DataValidationException("Can not create new project with this project name, " +
-                    "this name is already used for another project of this user");
+    public Project changeStorageSize(long projectId, long sizeToAdd) {
+        Project project = projectRepository.getProjectById(projectId);
+        BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(sizeToAdd));
+        if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
+            log.info("Can not add new file to storage for project {}. " +
+                    "Storage size exceeded. " +
+                    "New storage size: {} Max storage size: {}", project, newStorageSize, project.getMaxStorageSize());
+            throw new StorageSizeExceededException("Storage size exceeded");
         }
+        project.setStorageSize(newStorageSize);
+        return projectRepository.save(project);
     }
 
     private Project getProjectForOwner(long projectId) {
@@ -124,5 +225,17 @@ public class ProjectService {
 
     private void logUpdate(Project project) {
         log.info("User with id {} updated project {}", userContext.getUserId(), project);
+    }
+
+    public boolean existsById (Long projectId) {
+        return projectRepository.existsById(projectId);
+    }
+
+    public Project getById(Long projectId) {
+        return projectRepository.getProjectById(projectId);
+    }
+
+    public void save(Project project) {
+        projectRepository.save(project);
     }
 }

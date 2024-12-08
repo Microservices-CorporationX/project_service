@@ -1,6 +1,8 @@
 package faang.school.projectservice.exception.handler;
 
+import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -49,6 +51,16 @@ public class ValidationHandler {
 
     @ExceptionHandler(DataValidationException.class)
     public ResponseEntity<String> handleDataValidation(DataValidationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(StorageSizeExceededException.class)
+    public ResponseEntity<String> handleStorageSizeExceeded(StorageSizeExceededException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

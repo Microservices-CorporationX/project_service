@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "project_stage")
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Stage {
     @Id

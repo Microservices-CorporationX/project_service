@@ -166,6 +166,8 @@ public class InternshipControllerTest {
     private InternshipDto prepareInternshipDto(InternshipStatus internshipStatus) {
         return InternshipDto.builder()
                 .id(3L)
+                .name("Test")
+                .description("Test")
                 .internIds(List.of(1L, 2L))
                 .mentorId(4L)
                 .projectId(5L)
