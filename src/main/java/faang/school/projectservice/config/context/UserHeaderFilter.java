@@ -30,12 +30,15 @@ public class UserHeaderFilter implements Filter {
             userContext.setUserId(Long.parseLong(userId));
         }
 
-        Optional<String> sessionId = Arrays.stream(req.getCookies()).sequential()
-                .filter(cookie -> cookie.getName().equals("SESSION"))
-                .map(Cookie::getValue)
-                .findFirst();
+        if (req.getCookies() != null) {
+            Optional<String> sessionId = Arrays.stream(req.getCookies()).sequential()
+                    .filter(cookie -> cookie.getName().equals("SESSION"))
+                    .map(Cookie::getValue)
+                    .findFirst();
 
-        sessionId.ifPresent(userContext::setSessionId);
+            sessionId.ifPresent(userContext::setSessionId);
+        }
+
         try {
             chain.doFilter(request, response);
         } finally {

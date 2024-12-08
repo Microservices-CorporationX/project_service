@@ -2,7 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.CoverProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.CoverProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ public class ProjectCoverServiceTest {
     @Test
     public void testGetCoverProject() {
         long projectId = 1L;
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(projectService.getProjectEntityById(projectId)).thenReturn(project);
 
         projectCoverService.getCoverProject(projectId);
     }
@@ -71,7 +71,7 @@ public class ProjectCoverServiceTest {
                 "https://test-endpoint.com/test-bucket/"
         );
 
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(projectService.getProjectEntityById(projectId)).thenReturn(project);
         doNothing().when(coverProjectValidator).validation(any(), any());
         when(imageResizer.resizeImage(any())).thenReturn(byteArrayInputStream);
         when(s3Service.uploadFile(any(), any())).thenReturn(key);
@@ -88,7 +88,7 @@ public class ProjectCoverServiceTest {
     public void testDeleteCoverProject() {
         long projectId = 1L;
 
-        when(projectService.getProjectById(projectId)).thenReturn(project);
+        when(projectService.getProjectEntityById(projectId)).thenReturn(project);
         doNothing().when(coverProjectValidator).validation(any());
 
         CoverProjectDto dto = projectCoverService.deleteCoverProject(projectId);

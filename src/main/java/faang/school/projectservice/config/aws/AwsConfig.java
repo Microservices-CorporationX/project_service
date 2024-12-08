@@ -26,7 +26,7 @@ public class AwsConfig {
     private String bucketName;
 
     @Bean
-    public AmazonS3 amazonS3() {
+    public AmazonS3 s3Client() {
 
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 

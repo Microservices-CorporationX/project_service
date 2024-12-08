@@ -43,7 +43,7 @@ public class VacancyServiceImpl implements VacancyService {
 
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         vacancy.setId(null);
-        vacancy.setProject(projectService.getProjectById(vacancyDto.getProjectId()));
+        vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
         vacancy.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setStatus(VacancyStatus.OPEN);
 
@@ -63,7 +63,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         vacancy.setUpdatedBy(vacancyDto.getUpdatedBy());
         vacancy.setStatus(vacancyDto.getStatus());
-        vacancy.setProject(projectService.getProjectById(vacancyDto.getProjectId()));
+        vacancy.setProject(projectService.getProjectEntityById(vacancyDto.getProjectId()));
 
         return vacancyMapper.toDto(vacancyRepository.save(vacancy));
     }

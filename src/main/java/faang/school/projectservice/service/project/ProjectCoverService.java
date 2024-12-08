@@ -3,7 +3,7 @@ package faang.school.projectservice.service.project;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import faang.school.projectservice.dto.CoverProjectDto;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.service.S3Service;
+import faang.school.projectservice.service.s3.S3Service;
 import faang.school.projectservice.validator.CoverProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,7 @@ public class ProjectCoverService {
     private String URI;
 
     public CoverProjectDto getCoverProject(long projectId) {
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectService.getProjectEntityById(projectId);
 
         return CoverProjectDto.builder()
                 .URI(project.getCoverImageId())
@@ -33,7 +33,7 @@ public class ProjectCoverService {
     }
 
     public CoverProjectDto addCoverProject(long projectId, MultipartFile coverImage) {
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectService.getProjectEntityById(projectId);
 
         coverProjectValidator.validation(project, coverImage);
 
@@ -54,7 +54,7 @@ public class ProjectCoverService {
     }
 
     public CoverProjectDto deleteCoverProject(long projectId) {
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectService.getProjectEntityById(projectId);
         coverProjectValidator.validation(project);
 
         project.setCoverImageId(null);

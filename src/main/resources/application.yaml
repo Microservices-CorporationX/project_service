@@ -60,8 +60,6 @@ services:
     secretKey: password
     region: eu-west-1
     bucketName: projectbucket
-    region: us-east-1
-    bucketName: corpbucket
     isMocked: false
 
   payment-service:
