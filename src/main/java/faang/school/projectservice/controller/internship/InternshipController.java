@@ -36,11 +36,7 @@ public class InternshipController {
     @PutMapping
     public InternshipDto update(@Valid @RequestBody InternshipDto internshipDto) {
         internshipControllerValidation.validateInternshipDuration(internshipDto);
-
-        if (internshipDto.getId() == null) {
-            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
-        }
-
+        internshipControllerValidation.validateInternshipId(internshipDto);
         return internshipService.update(internshipDto);
     }
 

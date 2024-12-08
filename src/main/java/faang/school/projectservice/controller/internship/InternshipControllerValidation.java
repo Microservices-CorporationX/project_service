@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DATES_WRONG_ORDER_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_DURATION_EXCEPTION;
 import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.INTERNSHIP_IN_THE_PAST_CREATION_EXCEPTION;
+import static faang.school.projectservice.exception.InternshipValidationExceptionMessage.NULL_INTERNSHIP_ID_EXCEPTION;
 
 @Component
 class InternshipControllerValidation {
@@ -28,6 +29,12 @@ class InternshipControllerValidation {
             String exceptionMessage = String.format(INTERNSHIP_DURATION_EXCEPTION.getMessage(),
                     INTERNSHIP_MAX_DURATION_IN_MONTHS);
             throw new DataValidationException(exceptionMessage);
+        }
+    }
+
+    public void validateInternshipId(InternshipDto internshipDto) {
+        if (internshipDto.getId() == null) {
+            throw new DataValidationException(NULL_INTERNSHIP_ID_EXCEPTION.getMessage());
         }
     }
 
