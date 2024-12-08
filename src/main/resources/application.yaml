@@ -13,7 +13,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -28,6 +28,20 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 505043354003-fr1slmod1spf1a49gr9ub46pto40u5b1.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - openid
+              - profile
+              - email
+              - https://www.googleapis.com/auth/calendar
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
 
 server:
   port: 8082
@@ -46,10 +60,14 @@ services:
     secretKey: password
     region: eu-west-1
     bucketName: projectbucket
+    region: us-east-1
+    bucketName: corpbucket
     isMocked: false
+
   payment-service:
     host: http://localhost
     port: 9080
+
   user-service:
     host: http://localhost
     port: 8080

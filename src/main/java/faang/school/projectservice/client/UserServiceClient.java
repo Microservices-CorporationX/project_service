@@ -1,6 +1,6 @@
 package faang.school.projectservice.client;
 
-import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +12,18 @@ import java.util.List;
 @FeignClient(name = "user-service", url = "${services.user-service.host}:${services.user-service.port}")
 public interface UserServiceClient {
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/api/v1/users/{userId}")
     UserDto getUser(@PathVariable long userId);
 
     @PostMapping("/users")
     List<UserDto> getUsersByIds(@RequestBody List<Long> ids);
+
+    @PostMapping("/users/google/emails")
+    List<String> getGoogleEmailsOrDefaultByUserIds(@RequestBody List<Long> ids);
+
+    @GetMapping("/users/google/emails/{userId}")
+    String getGoogleEmailOrDefaultByUserId(@PathVariable long userId);
+
+    @GetMapping("/users/google")
+    String getAccessToken();
 }
