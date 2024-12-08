@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.S3ResourceService;
 import faang.school.projectservice.service.team.TeamServiceImpl;
 import faang.school.projectservice.validator.resource.ValidatorForResourceService;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ResourceService {
     private final ProjectService projectService;
-    private final S3Service s3Service;
+    private final S3ResourceService s3Service;
     private final UserContext userContext;
     private final ResourceRepository resourceRepository;
     private final ResourceMapper resourceMapper;

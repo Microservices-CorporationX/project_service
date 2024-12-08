@@ -93,6 +93,10 @@ public class ProjectService {
                 .toList();
     }
 
+    public Project saveProject(Project project) {
+        return projectRepository.save(project);
+    }
+
     public ProjectDto getProjectById(long id) {
         return projectMapper.toProjectDto(projectRepository.getProjectById(id));
     }
@@ -161,9 +165,6 @@ public class ProjectService {
 
     public Project getProjectEntityById(Long id) {
         return projectRepository.getProjectById(id);
-    }
-    public void saveProject(Project project){
-        projectRepository.save(project);
     }
 
     private boolean checkCancelledStatus(ProjectDto subProjectDto) {

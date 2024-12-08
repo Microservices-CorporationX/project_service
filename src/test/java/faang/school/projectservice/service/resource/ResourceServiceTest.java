@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.s3.S3Service;
+import faang.school.projectservice.service.s3.S3ResourceService;
 import faang.school.projectservice.service.team.TeamServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class ResourceServiceTest {
     @Mock
     private ProjectService projectService;
     @Mock
-    private S3Service s3Service;
+    private S3ResourceService s3Service;
     @Mock
     private UserContext userContext;
     @Mock
