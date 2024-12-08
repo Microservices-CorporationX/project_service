@@ -23,7 +23,7 @@ public class TaskStatusValidator {
     private final TeamMemberRepository teamMemberRepository;
 
     public Internship checkingInternsTaskStatus(Internship internship) {
-        if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
+        if (InternshipStatus.COMPLETED.equals(internship.getStatus())) {
             return changeInternsRoleIfInternshipCompleted(internship);
         } else {
             return changeInternsRoleIfInternshipInProgress(internship);
@@ -34,18 +34,7 @@ public class TaskStatusValidator {
         List<TeamMember> interns = internship.getInterns();
 
         List<Long> idsToDelete = interns.stream()
-                .filter(member -> {
-                    boolean hasUncompletedTasks = member.getStages().stream()
-                            .flatMap(stage -> stage.getTasks().stream())
-                            .anyMatch(task -> !task.getStatus().equals(TaskStatus.DONE));
-
-                    if (hasUncompletedTasks) {
-                        return true;
-                    }
-
-                    member.getRoles().remove(TeamRole.INTERN);
-                    return false;
-                })
+                .filter(this::hasUncompletedTasks)
                 .map(TeamMember::getId)
                 .toList();
 
@@ -61,26 +50,7 @@ public class TaskStatusValidator {
         List<TeamMember> interns = internship.getInterns();
 
         List<Long> idsToDelete = interns.stream()
-                .filter(member -> {
-                    long totalTasks = member.getStages().stream()
-                            .mapToLong(stage -> stage.getTasks().size())
-                            .sum();
-
-                    long doneTasks = member.getStages().stream()
-                            .flatMap(stage -> stage.getTasks().stream())
-                            .filter(task -> task.getStatus() == TaskStatus.DONE)
-                            .count();
-
-                    boolean hasTasks = totalTasks > 0;
-                    boolean allTasksDone = doneTasks == totalTasks;
-
-                    if (hasTasks && allTasksDone) {
-                        member.getRoles().remove(TeamRole.INTERN);
-                        return false;
-                    }
-
-                    return hasTasks && !allTasksDone;
-                })
+                .filter(this::compareCountOfTotalAndCompletedTasks)
                 .map(TeamMember::getId)
                 .toList();
 
@@ -89,5 +59,39 @@ public class TaskStatusValidator {
 
         internship.setInterns(interns);
         return internship;
+    }
+
+    private boolean hasUncompletedTasks(TeamMember member) {
+        boolean hasUncompletedTasks = member.getStages().stream()
+                .flatMap(stage -> stage.getTasks().stream())
+                .anyMatch(task -> !task.getStatus().equals(TaskStatus.DONE));
+
+        if (hasUncompletedTasks) {
+            return true;
+        }
+
+        member.getRoles().remove(TeamRole.INTERN);
+        return false;
+    }
+
+    private boolean compareCountOfTotalAndCompletedTasks(TeamMember member) {
+        long totalTasks = member.getStages().stream()
+                .mapToLong(stage -> stage.getTasks().size())
+                .sum();
+
+        long doneTasks = member.getStages().stream()
+                .flatMap(stage -> stage.getTasks().stream())
+                .filter(task -> task.getStatus() == TaskStatus.DONE)
+                .count();
+
+        boolean hasTasks = totalTasks > 0;
+        boolean allTasksDone = doneTasks == totalTasks;
+
+        if (hasTasks && allTasksDone) {
+            member.getRoles().remove(TeamRole.INTERN);
+            return false;
+        }
+
+        return hasTasks && !allTasksDone;
     }
 }

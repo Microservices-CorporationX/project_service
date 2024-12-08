@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.internship;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import faang.school.projectservice.config.web.WebConfig;
 import faang.school.projectservice.dto.intership.InternshipDto;
 import faang.school.projectservice.dto.intership.InternshipFilterDto;
 import faang.school.projectservice.model.InternshipStatus;
@@ -10,8 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,21 +37,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @ExtendWith(MockitoExtension.class)
+@TestPropertySource("${api.version}")
 public class InternshipControllerTest {
 
-    private MockMvc mockMvc;
+    @Mock
+    private InternshipService internshipService;
 
     @InjectMocks
     private InternshipController internshipController;
 
-    @Mock
-    private InternshipService internshipService;
+    private MockMvc mockMvc;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(internshipController).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(internshipController)
+                .build();
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -57,7 +65,7 @@ public class InternshipControllerTest {
 
         when(internshipService.createInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(post("/api/v1/internships")
+        mockMvc.perform(post("/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
@@ -78,7 +86,7 @@ public class InternshipControllerTest {
 
         when(internshipService.updateInternship(internshipDto)).thenReturn(internshipDto);
 
-        mockMvc.perform(put("/api/v1/internships")
+        mockMvc.perform(put("/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -101,7 +109,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships()).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/v1/internships")
+        mockMvc.perform(get("/internships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -134,7 +142,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternships(any(InternshipFilterDto.class))).thenReturn(allInternshipsDto);
 
-        mockMvc.perform(get("/api/v1/filters/internships")
+        mockMvc.perform(get("/internships/filters", filters.getStatusPattern())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -149,7 +157,7 @@ public class InternshipControllerTest {
 
         when(internshipService.getInternship(internshipDto.getId())).thenReturn(internshipDto);
 
-        mockMvc.perform(get("/api/v1/{internshipId}/internships", internshipDto.getId())
+        mockMvc.perform(get("/internships/{internshipId}", internshipDto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
