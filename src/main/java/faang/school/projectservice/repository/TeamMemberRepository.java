@@ -26,4 +26,16 @@ public class TeamMemberRepository {
     public long countUsersInProjectTeams(long projectId, List<Long> userIds) {
         return jpaRepository.countUsersInProjectTeams(projectId, userIds);
     }
+
+    public List<TeamMember> findAllByIds(List<Long> ids) {
+        return jpaRepository.findAllById(ids);
+    }
+
+    public TeamMember save(TeamMember teamMember) {
+        return jpaRepository.save(teamMember);
+    }
+
+    public boolean existsById(Long id) {
+        return jpaRepository.existsById(id);
+    }
 }
