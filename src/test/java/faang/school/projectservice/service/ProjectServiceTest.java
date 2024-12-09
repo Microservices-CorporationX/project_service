@@ -35,7 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,6 +64,8 @@ public class ProjectServiceTest {
     private FileValidator fileValidator;
     private S3Service s3Service;
     private ImageUtils imageUtils;
+
+    private Project project;
 
     long projectId;
     long ownerId;
@@ -106,6 +110,11 @@ public class ProjectServiceTest {
                 s3Service,
                 imageUtils
         );
+
+        project = new Project();
+        project.setId(1L);
+        project.setName("Test Project");
+        project.setStatus(ProjectStatus.COMPLETED);
     }
 
     @Test
@@ -383,6 +392,21 @@ public class ProjectServiceTest {
 
         // Assert
         assertEquals(project, result);
+    }
+
+    @Test
+    public void testIsProjectComplete_Completed() {
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+
+        assertTrue(projectService.isProjectComplete(project.getId()));
+    }
+
+    @Test
+    public void testIsProjectComplete_NotCompleted() {
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+
+        assertFalse(projectService.isProjectComplete(project.getId()));
     }
 
     private Project createProjectWithChildren(ProjectVisibility visibility, ProjectStatus status) {

@@ -11,6 +11,7 @@ import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.mapper.ProjectMomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.utils.image.ImageUtils;
@@ -152,6 +153,10 @@ public class ProjectService {
 
     public Project findProjectById(long projectId) {
         return projectRepository.getProjectById(projectId);
+    }
+
+    public boolean isProjectComplete(long id){
+        return getProjectById(id).getStatus() == ProjectStatus.COMPLETED;
     }
 
     private void mapStages(Project subProject, List<StageDto> stagesDto) {

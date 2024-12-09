@@ -29,7 +29,7 @@ public class TeamV1Controller {
 
     @PostMapping("/{teamId}/members")
     public ResponseTeamMemberDto addTeamMember(@RequestBody @Valid CreateTeamMemberDto teamMemberDto,
-                                             @PathVariable @Positive @NotNull Long teamId) {
+                                               @PathVariable @Positive @NotNull Long teamId) {
         return teamService.addTeamMember(teamMemberDto, teamId);
     }
 

@@ -2,10 +2,10 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teamMember.CreateTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.ResponseTeamMemberDto;
 import faang.school.projectservice.dto.teamMember.UpdateTeamMemberDto;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.mapper.TeamMemberMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 @Slf4j
 @RequiredArgsConstructor
-@Service
 public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
@@ -208,5 +208,32 @@ public class TeamMemberService {
     @Transactional
     public TeamMember getTeamMember(long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId);
+    }
+
+    public List<TeamMember> getAllTeamMembersByIds(List<Long> ids) {
+        return teamMemberRepository.findAllByIds(ids);
+    }
+
+    public void setTeamMembersRoleAndRemoveInternRole(List<Long> teamMemberIds, TeamRole teamRole) {
+        List<TeamMember> teamMembers = teamMemberRepository.findAllByIds(teamMemberIds);
+        teamMembers.forEach(intern -> {
+            if (intern.getRoles() == null) {
+                intern.setRoles(new ArrayList<>());
+            }
+            List<TeamRole> mutableRoles = new ArrayList<>(intern.getRoles());
+            mutableRoles.add(teamRole);
+            mutableRoles.remove(TeamRole.INTERN);
+            intern.setRoles(mutableRoles);
+        });
+
+        teamMemberRepository.saveAll(teamMembers);
+    }
+
+    public void removeTeamRole(TeamMember teamMember, TeamRole teamRole) {
+        List<TeamRole> mutableRoles = new ArrayList<>(teamMember.getRoles());
+        mutableRoles.remove(teamRole);
+        teamMember.setRoles(mutableRoles);
+
+        teamMemberRepository.save(teamMember);
     }
 }

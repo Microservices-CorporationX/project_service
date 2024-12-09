@@ -2,7 +2,6 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.StageInvitationDto;
 import faang.school.projectservice.dto.StageInvitationFilterDto;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.StageInvitationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

@@ -19,16 +19,29 @@ public class TeamMemberRepository {
                 new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
     }
 
+    public List<TeamMember> findAllByIds(List<Long> ids) {
+        List<TeamMember> teamMembers = jpaRepository.findAllById(ids);
+        if (teamMembers.isEmpty()) {
+            throw new EntityNotFoundException(String.format("Team members doesn't exist by ids: %s", ids));
+        }
+
+        return teamMembers;
+    }
+
+    public void saveAll(List<TeamMember> teamMembers) {
+        jpaRepository.saveAll(teamMembers);
+    }
+
+    public void save(TeamMember teamMember) {
+        jpaRepository.save(teamMember);
+    }
+
     public Optional<TeamMember> findByUserIdAndProjectId(Long userId, Long projectId) {
         return jpaRepository.findByUserIdAndProjectId(userId, projectId);
     }
 
     public List<TeamMember> findAllMembersByProjectId(Long projectId) {
         return jpaRepository.findAllMembersByProjectId(projectId);
-    }
-
-    public TeamMember save(TeamMember teamMember) {
-        return jpaRepository.save(teamMember);
     }
 
     public void delete(TeamMember teamMember) {
