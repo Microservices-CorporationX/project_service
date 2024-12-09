@@ -2,8 +2,8 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -17,6 +17,7 @@ import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
 import faang.school.projectservice.validator.ValidatorForProjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -91,6 +93,10 @@ public class ProjectService {
                 .toList();
     }
 
+    public Project saveProject(Project project) {
+        return projectRepository.save(project);
+    }
+
     public ProjectDto getProjectById(long id) {
         return projectMapper.toProjectDto(projectRepository.getProjectById(id));
     }
@@ -120,7 +126,7 @@ public class ProjectService {
     public ProjectDto updateProject(ProjectDto projectDto) {
         projectValidator.validate(projectDto, this::existsByOwnerUserIdAndName, userContext.getUserId());
         Project project = projectRepository.getProjectById(projectDto.getId());
-
+        log.info("GET project");
         projectMapper.update(projectDto, project);
         project.setUpdatedAt(LocalDateTime.now());
 
@@ -129,6 +135,18 @@ public class ProjectService {
 
     public boolean existsByOwnerUserIdAndName(Long userId, String projectName) {
         return projectRepository.existsByOwnerUserIdAndName(userId, projectName);
+    }
+
+    public boolean hasUserInProject(long projectId, long userId) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        boolean userInTeam = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
+
+        boolean userIsOwnerProject = project.getOwnerId().equals(userId);
+
+        return userInTeam || userIsOwnerProject;
     }
 
     private boolean isUserMemberOfPrivateProject(Project project, long userId) {
@@ -147,9 +165,6 @@ public class ProjectService {
 
     public Project getProjectEntityById(Long id) {
         return projectRepository.getProjectById(id);
-    }
-    public void saveProject(Project project){
-        projectRepository.save(project);
     }
 
     private boolean checkCancelledStatus(ProjectDto subProjectDto) {

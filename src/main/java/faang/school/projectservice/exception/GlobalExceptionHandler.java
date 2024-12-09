@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import faang.school.projectservice.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -8,6 +9,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+
 
 import java.util.List;
 
@@ -32,10 +36,28 @@ public class GlobalExceptionHandler {
         return new ErrorDto(errors.toString());
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleConstraintViolationException(ConstraintViolationException e) {
+        log.error("ConstraintViolationException", e);
+        List<String> errors = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .toList();
+
+        return new ErrorDto(errors.toString());
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleIllegalStateException(IllegalStateException e) {
         log.error("IllegalStateException", e);
+        return new ErrorDto(e.getMessage());
+    }
+
+    @ExceptionHandler(GoogleJsonResponseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleGoogleJsonResponseException(GoogleJsonResponseException e) {
+        log.error("GoogleJsonResponseException", e);
         return new ErrorDto(e.getMessage());
     }
 }
