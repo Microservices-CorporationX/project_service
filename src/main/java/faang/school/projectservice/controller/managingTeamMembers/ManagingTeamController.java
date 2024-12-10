@@ -46,11 +46,11 @@ public class ManagingTeamController {
         return ResponseEntity.ok(managingTeamService.updateTeamMember(projectId, teamMemberDto, teamMemberId, currentUserId));
     }
 
-    @DeleteMapping("/{projectId}/{teamMemberId}")
+    @DeleteMapping("/{projectId}/{teamMemberId}/{currentUserId}")
     public ResponseEntity<TeamMemberDto> deleteTeamMember(
             @PathVariable Long projectId,
             @PathVariable Long teamMemberId,
-            @RequestParam Long currentUserId) {
+            @PathVariable Long currentUserId) {
         log.info("Request to delete a team member with id: {}", teamMemberId);
         return ResponseEntity.ok(managingTeamService.deleteTeamMember(projectId, teamMemberId, currentUserId));
     }

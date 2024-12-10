@@ -12,6 +12,6 @@ public class ManagingFilter implements ManagingTeamFilter {
 
     @Override
     public Stream<TeamMember> apply(Stream<TeamMember> teamMembers, TeamMemberFilterDto filters) {
-        return teamMembers.filter(teamMember -> teamMember.getNickname().contains(filters.getName()));
+        return teamMembers.filter(teamMember -> teamMember.getName().contains(filters.getName()));
     }
 }

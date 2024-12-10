@@ -1,5 +1,7 @@
 package faang.school.projectservice.dto.teammember;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,18 +14,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TeamMemberDto{
+public class TeamMemberDto {
         @NotNull
         private Long id;
+
         @NotNull
         private Long team;
+
         @NotNull
-        Long userId;
+        private Long userId;
+
         @NotNull
-        String username;
+        private String username;
+
         @NotNull
         private List<String> roles;
+
         private String description;
-        @NotNull
+
         private Integer accessLevel;
 }

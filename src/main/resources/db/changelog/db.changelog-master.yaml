@@ -29,3 +29,5 @@ databaseChangeLog:
       file: db/changelog/changeset/project_V017_alter_meet_add_meet_date.sql
   - include:
       file: db/changelog/changeset/project_V018_addTeamMemberFields.sql
+  - include:
+      file: db/changelog/changeset/project_V019_addTeamMemberCarAtField.sql

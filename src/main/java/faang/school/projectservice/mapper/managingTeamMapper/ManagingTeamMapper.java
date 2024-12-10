@@ -15,14 +15,14 @@ public interface ManagingTeamMapper {
 
     @Mapping(source = "team.id", target = "team")
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapRolesToStrings")
-    @Mapping(source = "nickname", target = "username")
+    @Mapping(source = "name", target = "username")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "accessLevel", target = "accessLevel")
     TeamMemberDto toDto(TeamMember teamMember);
 
     @Mapping(source = "team", target = "team.id")
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapStringsToRoles")
-    @Mapping(source = "username", target = "nickname")
+    @Mapping(source = "username", target = "name")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "accessLevel", target = "accessLevel")
     TeamMember toEntity(TeamMemberDto TeamMemberDto);

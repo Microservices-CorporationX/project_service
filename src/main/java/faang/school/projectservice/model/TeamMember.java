@@ -40,21 +40,22 @@ public class TeamMember {
     @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
 
-    @Column(name = "nickname", length = 128)
-    private String nickname;
+    @Column(name = "name", length = 128)
+    private String name;
 
     @Column(name = "description", length = 4096)
     private String description;
 
-    @Column(name = "access_level")
+    @Column(name = "accesslevel")
     private Integer accessLevel;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "createdat")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
+    @Column(name = "updatedat")
     private LocalDateTime updatedAt;
 }
