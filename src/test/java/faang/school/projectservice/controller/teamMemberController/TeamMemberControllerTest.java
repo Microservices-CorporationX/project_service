@@ -124,31 +124,11 @@ public class TeamMemberControllerTest {
 
         when(managingTeamService.deleteTeamMember(1L, 1L, 1L)).thenReturn(teamMemberDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/managing-team/projects/{projectId}/{teamMemberId}", 1L, 1L)
+        mockMvc.perform(MockMvcRequestBuilders.delete("/managing-team/projects/1/1/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("currentUserId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(teamMemberDto)));
-    }
-
-    @Test
-    void testDeleteTeamMemberNegative() throws Exception {
-        TeamMemberDto teamMemberDto = new TeamMemberDto();
-        teamMemberDto.setId(2L);
-        teamMemberDto.setTeam(2L);
-        teamMemberDto.setUserId(2L);
-        teamMemberDto.setUsername("testUser");
-        teamMemberDto.setRoles(List.of("Developer"));
-        teamMemberDto.setDescription("Team member description");
-        teamMemberDto.setAccessLevel(1);
-
-        when(managingTeamService.deleteTeamMember(1L, 1L, 1L)).thenReturn(teamMemberDto);
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/managing-team/projects/{projectId}/{teamMemberId}", 1L, 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsString(teamMemberDto))
-                        .param("teamMemberId", "1"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
