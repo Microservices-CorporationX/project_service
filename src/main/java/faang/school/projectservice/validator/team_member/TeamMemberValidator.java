@@ -21,4 +21,11 @@ public class TeamMemberValidator {
             throw new DataValidationException("This team member is not participant of this project");
         }
     }
+
+    public void validateIsTeamMemberParticipantOfProject(TeamMember teamMember, Project project) {
+        if (project.getTeams().stream()
+                .noneMatch(team -> team.getTeamMembers().contains(teamMember))) {
+            throw new DataValidationException("This team member is not participant of this project");
+        }
+    }
 }
