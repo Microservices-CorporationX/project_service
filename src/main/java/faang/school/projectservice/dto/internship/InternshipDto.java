@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.intership;
+package faang.school.projectservice.dto.internship;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.InternshipStatus;

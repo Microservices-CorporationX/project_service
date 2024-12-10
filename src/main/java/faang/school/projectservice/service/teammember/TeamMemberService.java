@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.team;
+package faang.school.projectservice.service.teammember;
 
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;

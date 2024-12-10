@@ -1,11 +1,9 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.dto.intership.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.InternshipRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,17 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class InternshipValidator {
-    private final InternshipRepository internshipRepository;
-
-    public boolean validateForExistInternship(Long internshipId) {
-        if (internshipRepository.existsById(internshipId)) {
-            log.error("The internship already exists by ID: {}", internshipId);
-            throw new DataValidationException("The internship already exists");
-        }
-        return true;
-    }
 
     public boolean validate(InternshipDto internshipDto) {
         if (internshipDto.getProjectId() == null) {

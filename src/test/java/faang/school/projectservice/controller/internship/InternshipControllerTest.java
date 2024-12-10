@@ -1,9 +1,8 @@
 package faang.school.projectservice.controller.internship;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import faang.school.projectservice.config.web.WebConfig;
-import faang.school.projectservice.dto.intership.InternshipDto;
-import faang.school.projectservice.dto.intership.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.service.internship.InternshipService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
