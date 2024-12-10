@@ -5,19 +5,21 @@ import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.service.donation_analysis.FundRaisedEventService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("donation-analysis")
+@RequestMapping("/donation-analysis")
 @AllArgsConstructor
+@Validated
 public class FundRaisedEventController {
     private final FundRaisedEventService eventService;
 
     @PostMapping
-    public void processDonation(@Valid @RequestBody Donation donation) throws JsonProcessingException {
+    public void processDonation(@RequestBody @Valid Donation donation) throws JsonProcessingException {
         eventService.processDonation(donation);
     }
 }

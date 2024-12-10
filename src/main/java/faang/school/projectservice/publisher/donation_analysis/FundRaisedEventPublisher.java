@@ -22,3 +22,4 @@ public class FundRaisedEventPublisher {
         log.info("Published event to Redis: {}", json);
     }
 }
+
