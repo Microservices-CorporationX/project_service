@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.subprojectDto.subprojectDto.SubProjectDto
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.service.filters.SubprojectFilter;
+import faang.school.projectservice.service.filters.subprojectFilter.SubprojectFilter;
 import faang.school.projectservice.service.subprojectService.SubProjectService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

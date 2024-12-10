@@ -108,7 +108,6 @@ public class ManagingTeamService {
         checkProjectStatus(project);
 
         List<TeamMember> teamMembers = teamMemberJpaRepository.findAllByProjectId(projectId);
-
         List<TeamMemberDto> TeamMemberDto = teamMembers.stream()
                 .map(teamMemberMapper::toDto)
                 .toList();
@@ -117,21 +116,33 @@ public class ManagingTeamService {
     }
 
     public TeamMemberDto getTeamMember(Long projectId, Long teamMemberId) {
-        TeamMember teamMember = teamMemberJpaRepository.findById(teamMemberId).orElseThrow(() -> new EntityNotFoundException("Team member with given ID not found in project"));
+        Project project = projectRepository.getProjectById(projectId);
+
+        checkProjectStatus(project);
+
+        TeamMember teamMember = teamMemberJpaRepository.findById(teamMemberId)
+                .orElseThrow(() -> new EntityNotFoundException("Team member with given ID not found in project"));
+
+        if (!teamMember.getTeam().getProject().getId().equals(projectId)) {
+            throw new EntityNotFoundException("Team member with ID " + teamMemberId + " is not part of the project with ID " + projectId);
+        }
+
         return teamMemberMapper.toDto(teamMember);
     }
 
     public List<TeamMemberDto> getTeamMemberWithFilter(Long projectId, TeamMemberFilterDto filters) {
         if (teamMemberFilters == null) {
-           throw new IllegalStateException("Team member filters are not initialized");
+            throw new IllegalStateException("Team member filters are not initialized");
         }
-        Project project = projectRepository.getProjectById(projectId);
-        Stream<TeamMember> teamMembers = project.getTeams().stream().flatMap(team -> team.getTeamMembers().stream());
+        List<TeamMember> teamMembers = teamMemberJpaRepository.findAllByProjectIdWithRoles(projectId, filters.getRole());
+        Stream<TeamMember> teamMemberStream = teamMembers.stream();
 
-        return teamMemberFilters.stream()
-                .filter(filter -> filter.isApplicable(filters))
-                .flatMap(filter -> filter.apply(teamMembers, filters))
-                .map(teamMemberMapper::toDto)
+        for (ManagingTeamFilter filter : teamMemberFilters) {
+            if (filter.isApplicable(filters)) {
+                teamMemberStream = filter.apply(teamMemberStream, filters);
+            }
+        }
+        return teamMemberStream.map(teamMemberMapper::toDto)
                 .toList();
     }
 
