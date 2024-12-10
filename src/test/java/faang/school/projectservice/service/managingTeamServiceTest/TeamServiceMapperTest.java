@@ -26,7 +26,7 @@ class TeamServiceMapperTest {
                 .userId(2L)
                 .roles(List.of(TeamRole.OWNER, TeamRole.DEVELOPER))
                 .team(team)
-                .nickname("JohnDoe")
+                .name("JohnDoe")
                 .description("A team developer")
                 .accessLevel(5)
                 .build();
@@ -62,7 +62,7 @@ class TeamServiceMapperTest {
         assertEquals(2L, teamMember.getUserId());
         assertNotNull(teamMember.getTeam());
         assertEquals(10L, teamMember.getTeam().getId());
-        assertEquals("JohnDoe", teamMember.getNickname());
+        assertEquals("JohnDoe", teamMember.getName());
         assertEquals("A team member", teamMember.getDescription());
         assertEquals(5, teamMember.getAccessLevel());
         assertEquals(List.of(TeamRole.OWNER, TeamRole.DEVELOPER), teamMember.getRoles());

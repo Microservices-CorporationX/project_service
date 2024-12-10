@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.controller.managingTeamMembers.ManagingTeamController;
 import faang.school.projectservice.dto.managingTeamDto.TeamMemberFilterDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.managingTeamService.ManagingTeamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +168,7 @@ public class TeamMemberControllerTest {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         TeamMemberFilterDto teamMemberFilterDto = new TeamMemberFilterDto();
-        teamMemberFilterDto.setRole("Developer");
+        teamMemberFilterDto.setRole(TeamRole.DEVELOPER);
 
         when(managingTeamService.getTeamMemberWithFilter(1L, teamMemberFilterDto))
                 .thenReturn(List.of(teamMemberDto));
@@ -196,7 +197,7 @@ public class TeamMemberControllerTest {
         TeamMemberDto teamMemberDto = initializeTeamMemberController();
 
         TeamMemberFilterDto teamMemberFilterDto = new TeamMemberFilterDto();
-        teamMemberFilterDto.setRole("Developer");
+        teamMemberFilterDto.setRole(TeamRole.DEVELOPER);
 
         when(managingTeamService.getTeamMemberWithFilter(1L, teamMemberFilterDto))
                 .thenReturn(List.of(teamMemberDto));

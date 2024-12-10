@@ -83,11 +83,12 @@ public class ManagingTeamServiceTest {
         TeamMemberDto teamMemberDto = new TeamMemberDto();
 
         Project project = new Project();
+        project.setId(projectId);
         project.setStatus(ProjectStatus.CANCELLED);
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
                 managingTeamService.addTeamMember(projectId, teamMemberDto, teamId));
         assertEquals("Cannot add member to a cancelled or completed project", exception.getMessage());
     }
@@ -104,7 +105,7 @@ public class ManagingTeamServiceTest {
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () ->
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 managingTeamService.addTeamMember(projectId, teamMemberDto, teamId));
         assertEquals("Team with given ID not found in project", exception.getMessage());
     }
@@ -162,12 +163,12 @@ public class ManagingTeamServiceTest {
 
         TeamMember teamMemberToUpdate = new TeamMember();
         teamMemberToUpdate.setId(teamMemberId);
-        teamMemberToUpdate.setNickname("New Nickname");
+        teamMemberToUpdate.setName("New Nickname");
         teamMemberToUpdate.setDescription("New Description");
 
         TeamMember savedMember = new TeamMember();
         savedMember.setId(teamMemberId);
-        savedMember.setNickname("New Nickname");
+        savedMember.setName("New Nickname");
         savedMember.setDescription("New Description");
 
 
@@ -277,7 +278,6 @@ public class ManagingTeamServiceTest {
 
         when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamMemberJpaRepository.findById(teamMemberId)).thenReturn(Optional.of(teamMember));
-        when(teamMemberJpaRepository.findByUserId(currentUserId)).thenReturn(List.of(currentUser));
         when(teamMemberMapper.toDto(teamMember)).thenReturn(teamMemberDto);
 
         TeamMemberDto result = managingTeamService.deleteTeamMember(projectId, teamMemberId, currentUserId);
@@ -335,13 +335,13 @@ public class ManagingTeamServiceTest {
         TeamMember teamMember1 = TeamMember.builder()
                 .id(1L)
                 .userId(100L)
-                .nickname("User1")
+                .name("User1")
                 .build();
 
         TeamMember teamMember2 = TeamMember.builder()
                 .id(2L)
                 .userId(101L)
-                .nickname("User2")
+                .name("User2")
                 .build();
 
         when(projectRepository.getProjectById(projectId)).thenReturn(activeProject);
@@ -351,7 +351,7 @@ public class ManagingTeamServiceTest {
             return TeamMemberDto.builder()
                     .id(member.getId())
                     .userId(member.getUserId())
-                    .username(member.getNickname())
+                    .username(member.getName())
                     .build();
         });
 
@@ -379,7 +379,7 @@ public class ManagingTeamServiceTest {
             managingTeamService.getAllMembers(projectId);
         });
 
-        assertEquals("Cannot get members of a cancelled or completed project", exception.getMessage());
+        assertEquals("Cannot add member to a cancelled or completed project", exception.getMessage());
         verify(projectRepository).getProjectById(projectId);
         verifyNoInteractions(teamMemberJpaRepository, teamMemberMapper);
     }
@@ -388,12 +388,23 @@ public class ManagingTeamServiceTest {
     void shouldReturnTeamMemberDtoWhenMemberExists() {
         Long projectId = 1L;
         Long teamMemberId = 2L;
+
+        Project project = new Project();
+        project.setId(projectId);
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+
+        Team team = Team.builder()
+                .id(1L)
+                .project(project)
+                .build();
+
         TeamMember teamMember = TeamMember.builder()
                 .id(teamMemberId)
                 .userId(100L)
-                .nickname("User1")
+                .name("User1")
                 .description("A team member")
                 .accessLevel(3)
+                .team(team)
                 .build();
 
         TeamMemberDto expectedDto = TeamMemberDto.builder()
@@ -404,6 +415,7 @@ public class ManagingTeamServiceTest {
                 .accessLevel(3)
                 .build();
 
+        when(projectRepository.getProjectById(projectId)).thenReturn(project);
         when(teamMemberJpaRepository.findById(teamMemberId)).thenReturn(Optional.of(teamMember));
         when(teamMemberMapper.toDto(teamMember)).thenReturn(expectedDto);
 
@@ -414,6 +426,7 @@ public class ManagingTeamServiceTest {
         verify(teamMemberJpaRepository).findById(teamMemberId);
         verify(teamMemberMapper).toDto(teamMember);
     }
+
     @Test
     void shouldThrowExceptionWhenFiltersNotInitialized() {
         TeamMemberFilterDto filters = new TeamMemberFilterDto();
