@@ -1,5 +1,6 @@
-package faang.school.projectservice.filters;
+package faang.school.projectservice;
 
+import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
