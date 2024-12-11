@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +27,10 @@ public class ProjectServiceTest {
 
     @Mock
     private S3Service s3Service;
+
+    @MockBean
+    @Qualifier("s3Client")
+    private S3Service s3Client;
 
     @InjectMocks
     private ProjectService projectService;
