@@ -33,15 +33,17 @@ public class FundRaisedEventServiceTest {
     }
 
     @Test
-    public void testExceptionProcessDonation() throws JsonProcessingException {
-        doThrow(JsonProcessingException.class).when(eventPublisher).publish(any(FundRaisedEventDto.class));
+    public void testExceptionProcessDonation() {
+        doThrow(new RuntimeException("Failed to convert event to JSON"))
+                .when(eventPublisher).publish(any(FundRaisedEventDto.class));
 
-        Donation fundRaisedEventDto = Donation.builder()
+        Donation donation = Donation.builder()
+                .userId(1L)
                 .amount(BigDecimal.valueOf(1))
                 .donationTime(LocalDateTime.now())
                 .build();
 
-        assertThrows(RuntimeException.class, () -> fundRaisedEventService.processDonation(fundRaisedEventDto));
+        assertThrows(RuntimeException.class, () -> fundRaisedEventService.processDonation(donation));
         verify(eventPublisher, times(1)).publish(any(FundRaisedEventDto.class));
     }
 
