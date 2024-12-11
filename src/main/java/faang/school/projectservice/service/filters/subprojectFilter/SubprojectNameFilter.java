@@ -1,10 +1,9 @@
-package faang.school.projectservice.service.filters;
+package faang.school.projectservice.service.filters.subprojectFilter;
 
 import faang.school.projectservice.dto.subprojectDto.subprojectFilterDto.SubprojectFilterDto;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SubprojectNameFilter implements SubprojectFilter {

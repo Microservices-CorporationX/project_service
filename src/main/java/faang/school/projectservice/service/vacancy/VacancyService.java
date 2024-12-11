@@ -39,7 +39,7 @@ public class VacancyService {
     public VacancyDto createVacancy(VacancyDto vacancyDto){
         Project project = projectService.findProject(vacancyDto.projectId()).orElseThrow(
                 () -> new EntityNotFoundException(PROJECT_NOT_FOUND));
-        TeamMember supervisor = teamMemberService.findTeamMember(vacancyDto.supervisor().id()).orElseThrow(
+        TeamMember supervisor = teamMemberService.findTeamMember(vacancyDto.supervisor().getId()).orElseThrow(
                 () -> new EntityNotFoundException(TEAM_MEMBER_NOT_FOUND));
 
         vacancyValidator.validateSupervisorHasOwnerRole(supervisor);
@@ -77,7 +77,7 @@ public class VacancyService {
                 () -> new EntityNotFoundException(VACANCY_NOT_FOUND));
         Project project = projectService.findProject(vacancyDto.projectId()).orElseThrow(
                 () -> new EntityNotFoundException(PROJECT_NOT_FOUND));
-        TeamMember supervisor = teamMemberService.findTeamMember(vacancyDto.supervisor().id()).orElseThrow(
+        TeamMember supervisor = teamMemberService.findTeamMember(vacancyDto.supervisor().getId()).orElseThrow(
                 () -> new EntityNotFoundException(TEAM_MEMBER_NOT_FOUND));
 
         vacancy.setProject(project);

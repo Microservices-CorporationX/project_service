@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter;
+package faang.school.projectservice.filters;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
