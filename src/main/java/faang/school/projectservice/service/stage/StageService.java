@@ -1,10 +1,10 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.stage;
 
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageRolesDto;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.stage.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.Task;
@@ -14,6 +14,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.service.StageInvitationServiceImpl;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

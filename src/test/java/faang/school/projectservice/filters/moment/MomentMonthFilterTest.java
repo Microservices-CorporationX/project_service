@@ -1,4 +1,4 @@
-package faang.school.projectservice.filter.moment;
+package faang.school.projectservice.filters.moment;
 
 import faang.school.projectservice.dto.filter.MomentFilterDto;
 import faang.school.projectservice.model.Moment;
