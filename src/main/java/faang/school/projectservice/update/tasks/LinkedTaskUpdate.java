@@ -21,7 +21,7 @@ public class LinkedTaskUpdate implements TaskUpdate {
     public void apply(Task task, TaskDto taskDto) {
         task.setLinkedTasks(
                 taskDto.getLinkedTaskIds().stream()
-                        .map(taskRepository::getById)
+                        .map(taskRepository::getById) // Преобразование ID в сущности Task
                         .toList()
         );
     }

@@ -9,10 +9,12 @@ import faang.school.projectservice.update.TaskUpdate;
 import faang.school.projectservice.validator.task.TaskUserVerification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -21,8 +23,12 @@ public class TaskService {
     private final List<TaskUpdate> taskUpdates;
 
     public TaskDto createTask(Long userId, TaskDto taskDto) {
+        log.info("Create task:{}", taskDto.toString());
         Task task = taskMapper.toTask(taskDto);
-
+        taskUpdates.stream()
+                .filter(taskUpdate -> taskUpdate.isApplicable(taskDto))
+                .forEach(taskUpdate -> taskUpdate.apply(task, taskDto));
+        log.info(task.toString());
         return taskMapper.toTaskDto(taskRepository.create(userId, task));
     }
 
@@ -32,7 +38,7 @@ public class TaskService {
 
         taskUpdates.stream()
                 .filter(taskUpdate -> taskUpdate.isApplicable(taskDto))
-                .forEach(taskUpdate -> taskUpdate.apply(task,taskDto));
+                .forEach(taskUpdate -> taskUpdate.apply(task, taskDto));
 
         return taskMapper.toTaskDto(taskRepository.update(userId, task));
     }

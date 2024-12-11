@@ -18,15 +18,15 @@ public interface TaskMapper {
     @Mapping(source = "parentTask", target = "parentTaskId", qualifiedByName = "getParentTaskIds")
     @Mapping(source = "project", target = "projectId", qualifiedByName = "getProjectIds")
     @Mapping(source = "stage", target = "stageId", qualifiedByName = "getStageIds")
-    @Mapping(source = "linkedTask", target = "linkedTaskIds", qualifiedByName = "getLinkedTaskIds")
-    @Mapping(source = "task", target = "taskDto")
+    @Mapping(source = "linkedTasks", target = "linkedTaskIds", qualifiedByName = "getLinkedTaskIds")
+    //@Mapping(source = "task", target = "taskDto")
     TaskDto toTaskDto(Task task);
 
     @Mapping(target = "parentTask", ignore = true)
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "stage", ignore = true)
-    @Mapping(target = "linkedTaskIds" , ignore = true)
-    @Mapping(source = "taskDto", target = "task")
+    //@Mapping(target = "linkedTaskIds" , ignore = true)
+    //@Mapping(source = "taskDto", target = "task")
     Task toTask(TaskDto taskDto);
 
     @Named("getParentTaskIds")
@@ -53,11 +53,11 @@ public interface TaskMapper {
         return stage.getStageId();
     }
     @Named("getLinkedTaskIds")
-    default List<Long> getLinkedTaskIds(List<Task> linkedtasks) {
-        if(linkedtasks == null){
-            return null;
-        }
-        return linkedtasks.stream().map(Task::getId).toList();
+    default List<Long> getLinkedTaskIds(List<Task> linkedTasks) {
+//        if(linkedTasks == null){
+//            return null;
+//        }
+        return linkedTasks.stream().map(Task::getId).toList();
     }
 
 
