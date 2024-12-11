@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @ContextConfiguration(classes = {FundRaisedEventController.class})
 public class FundRaisedEventControllerTest {
 
-    private final static String URL = "/donation-analysis";
+    private final static String URL = "/api/v1/project-service";
 
     @Autowired
     private ObjectMapper objectMapper;

@@ -16,10 +16,14 @@ public class FundRaisedEventPublisher {
     private final ObjectMapper objectMapper;
     private static final Logger log = LoggerFactory.getLogger(FundRaisedEventPublisher.class);
 
-    public void publish(FundRaisedEventDto event) throws JsonProcessingException {
-        String json = objectMapper.writeValueAsString(event);
-        redisTemplate.convertAndSend("fundRaised_topic", json);
-        log.info("Published event to Redis: {}", json);
+    public void publish(FundRaisedEventDto event) {
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            redisTemplate.convertAndSend("fundRaised_topic", json);
+            log.info("Published event to Redis: {}", json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to publish event", e);
+        }
     }
 }
 

@@ -19,14 +19,10 @@ import java.time.LocalDateTime;
 public class FundRaisedEventService {
     private final FundRaisedEventPublisher eventPublisher;
 
-    public void processDonation(Donation donation) {
+    public void processDonation(Donation donation) throws JsonProcessingException {
         FundRaisedEventDto eventDto = new FundRaisedEventDto
                 (donation.getUserId(), donation.getAmount(), donation.getDonationTime());
 
-        try {
             eventPublisher.publish(eventDto);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to publish event", e);
-        }
     }
 }

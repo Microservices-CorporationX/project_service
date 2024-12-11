@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 public class FundRaisedEventDto {
     @NotNull
-    private Long userId;
+    private long userId;
 
     @NotNull
     @Positive
