@@ -44,7 +44,8 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public TaskDto getTask(@PathVariable long taskId) {
-        return taskService.getAllTasks(taskFilterDto);
+    public TaskDto getTask(@PathVariable long taskId,
+                           @RequestHeader("x-team-member-id") long requesterId) {
+        return taskService.getTask(taskId, requesterId);
     }
 }

@@ -8,13 +8,27 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
+import java.util.List;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TaskMapper {
 
-    @Mapping(source = "",target = "")
+    @Mapping(source = "parentTask.id", target = "parentTaskId")
+    @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "stage.stageId", target = "stageId")
+    @Mapping(source = "linkedTasks", target = "linkedTasksIds")
     TaskDto toTaskDto(Task task);
 
     Task toEntity(CreateTaskDto dto);
 
     Task toEntity(UpdateTaskDto dto);
+
+    default List<Long> mapTasksToIds(List<Task> tasks) {
+        if (tasks == null) {
+            return null;
+        }
+        return tasks.stream()
+                .map(Task::getId)
+                .toList();
+    }
 }

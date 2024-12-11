@@ -48,9 +48,9 @@ public class TaskService {
     }
 
     public void updateTask(UpdateTaskDto taskDto, long updaterId) {
-        TeamMember taskCreator = teamMemberService.findById(updaterId);
+        TeamMember taskUpdator = teamMemberService.findById(updaterId);
         Project project = projectService.getProjectById(taskDto.getProjectId());
-        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskCreator, project);
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskUpdator, project);
 
         Task task = taskMapper.toEntity(taskDto);
         task.setProject(project);
@@ -58,6 +58,15 @@ public class TaskService {
         setLinkedTasksIfListNotEmpty(task, taskDto.getLinkedTasksIds());
 
         taskRepository.save(task);
+    }
+
+    public TaskDto getTask(long taskId, long requesterId) {
+        Task task = findById(taskId);
+        TeamMember taskRequester = teamMemberService.findById(requesterId);
+        Project project = projectService.getProjectById(task.getProject().getId());
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskRequester, project);
+
+        return taskMapper.toTaskDto(task);
     }
 
     public List<TaskDto> getAllTasks(TaskFilterDto filterDto, long requesterId, Long projectId) {
