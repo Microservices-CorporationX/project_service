@@ -5,7 +5,7 @@ import faang.school.projectservice.exception.PermissionDeniedException;
 import faang.school.projectservice.exception.StorageSizeException;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
-import faang.school.projectservice.mapper.resource.ResourceDtoMapper;
+import faang.school.projectservice.mapper.resource.ResourceDtoMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.storage.ResourceStorageService;
@@ -29,7 +29,7 @@ public class ResourceService {
     private final TeamMemberJpaRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
     private final ResourceStorageService awsS3Service;
-    private final ResourceDtoMapper resourceDtoMapper;
+    private final ResourceDtoMapperImpl resourceDtoMapper;
 
     @Transactional
     public ResourceDto uploadResource(Long projectId, Long userId, MultipartFile file) {

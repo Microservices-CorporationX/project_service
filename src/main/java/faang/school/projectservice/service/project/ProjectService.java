@@ -2,7 +2,7 @@ package faang.school.projectservice.service.project;
 
 
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.filter.ProjectFilter;
+import faang.school.projectservice.filters.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.exception.project.StorageSizeExceededException;
 import faang.school.projectservice.model.Project;
