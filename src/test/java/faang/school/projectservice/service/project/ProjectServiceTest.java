@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +49,9 @@ public class ProjectServiceTest {
 
     @Mock
     private UserContext userContext;
+
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
 
     @InjectMocks
     private ProjectService projectService;
@@ -216,7 +220,7 @@ public class ProjectServiceTest {
         when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests);
 
         ProjectService projectService = new ProjectService(
-                projectRepository, projectMapper, userContext, List.of(filterMock));
+                projectRepository, projectMapper, userContext, List.of(filterMock), projectViewEventPublisher);
 
         List<ProjectResponseDto> projectResponseDtos = projectService.findAllProjectsWithFilters(filterDto);
 

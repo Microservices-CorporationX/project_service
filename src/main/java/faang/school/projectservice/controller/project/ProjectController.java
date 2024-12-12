@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.project;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
+@Validated
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @PostMapping
     public ProjectResponseDto createProject(@Valid @RequestBody ProjectCreateDto projectCreateDto) {
@@ -50,5 +54,11 @@ public class ProjectController {
     @GetMapping("/get/{projectId}")
     public ProjectResponseDto getProjectById(@Valid @Positive @PathVariable Long projectId) {
         return projectService.getProjectById(projectId);
+    }
+
+    @GetMapping("/view/{projectId}")
+    public ProjectResponseDto viewProject(@Positive @PathVariable Long projectId) {
+        long userId = userContext.getUserId();
+        return projectService.viewProject(projectId, userId);
     }
 }
