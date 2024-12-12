@@ -26,7 +26,7 @@ public class ProjectViewEventPublisher implements MessagePublish<ProjectViewEven
         try {
             String message = objectMapper.writeValueAsString(event);
             redisTemplate.convertAndSend(channelName, message);
-            log.info("Successfully published event to channel '{}'. Event: {}", channelName, event);
+            log.info("Successfully published event to channel '{}'. Message: {}", channelName, message);
         } catch (JsonProcessingException e) {
             log.error("JSON serialization error. Event: {}. Error: {}", event, e.getMessage(), e);
         } catch (RedisConnectionFailureException e) {
