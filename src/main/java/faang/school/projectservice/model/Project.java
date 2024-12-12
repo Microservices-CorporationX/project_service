@@ -114,6 +114,9 @@ public class Project {
         children.add(subProject);
     }
 
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
 
     public boolean hasChildren() {
         return children != null && !children.isEmpty();
@@ -143,7 +146,8 @@ public class Project {
         return visibility.equals(ProjectVisibility.PRIVATE);
     }
 
-    public void addResource(Resource resource) {
-        resources.add(resource);
+    public boolean hasNoTeamMember(long userId) {
+        return teams.stream()
+                .allMatch(team -> team.hasNoTeamMember(userId));
     }
 }

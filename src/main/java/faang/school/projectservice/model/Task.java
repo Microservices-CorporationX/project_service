@@ -70,5 +70,17 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "stage_id")
     private Stage stage;
+
+    public boolean isParentTaskInactive() {
+        if (parentTask == null) {
+            return false;
+        }
+        return parentTask.status.equals(TaskStatus.DONE) ||
+                getParentTask().status.equals(TaskStatus.CANCELLED);
+    }
+
+    public boolean isProjectNotEqual(Project otherProject) {
+        return !project.equals(otherProject);
+    }
 }
 
