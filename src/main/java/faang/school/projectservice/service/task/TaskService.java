@@ -36,33 +36,13 @@ public class TaskService {
     private final List<Filter<Task, TaskFilterDto>> filters;
 
     public void createTask(CreateUpdateTaskDto taskDto, long creatorId) {
-        //create method for three rows below???
-        //add logging
-
-        TeamMember taskCreator = teamMemberService.findById(creatorId);
-        Project project = projectService.getProjectById(taskDto.getProjectId());
-        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskCreator, project);
-
-        Task task = taskMapper.toEntity(taskDto);
-        task.setProject(project);
-        setParentTaskIfIdNotNull(task, taskDto.getParentTaskId());
-        setLinkedTasksIfListNotEmpty(task, taskDto.getLinkedTasksIds());
-        setStageIfIdNotNull(task, taskDto.getStageId());
-
-        taskRepository.save(task);
+        processTask(taskDto, creatorId);
+        log.info("Task created by team member with id: {}", creatorId);
     }
 
     public void updateTask(CreateUpdateTaskDto taskDto, long updaterId) {
-        TeamMember taskUpdator = teamMemberService.findById(updaterId);
-        Project project = projectService.getProjectById(taskDto.getProjectId());
-        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskUpdator, project);
-
-        Task task = taskMapper.toEntity(taskDto);
-        task.setProject(project);
-        setParentTaskIfIdNotNull(task, taskDto.getParentTaskId());
-        setLinkedTasksIfListNotEmpty(task, taskDto.getLinkedTasksIds());
-
-        taskRepository.save(task);
+        processTask(taskDto, updaterId);
+        log.info("Task with id: {}, updated by team member with id: {}", taskDto.getId(), updaterId);
     }
 
     public TaskDto getTask(long taskId, long requesterId) {
@@ -71,16 +51,20 @@ public class TaskService {
         Project project = projectService.getProjectById(task.getProject().getId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskRequester, project);
 
+        log.info("Getting task with id: {}, and requester id: {}", taskId, requesterId);
         return taskMapper.toTaskDto(task);
     }
 
-    public List<TaskDto> getAllTasks(TaskFilterDto filterDto, long requesterId, Long projectId) {
+    public List<TaskDto> getAllTasks(TaskFilterDto filterDto, long requesterId, long projectId) {
         TeamMember requester = teamMemberService.findById(requesterId);
         Project project = projectService.getProjectById(projectId);
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(requester, project);
 
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
-        return filterTasks(tasks.stream(), filterDto);
+        List<TaskDto> resultTasks = filterTasks(tasks.stream(), filterDto);
+        log.info("Got {} tasks of project with id: {}, for team member with id: {}",
+                resultTasks.size(), projectId, requesterId);
+        return resultTasks;
     }
 
     private List<TaskDto> filterTasks(Stream<Task> taskStream, TaskFilterDto taskFilter) {
@@ -91,6 +75,20 @@ public class TaskService {
                         (a, b) -> b)
                 .map(taskMapper::toTaskDto)
                 .toList();
+    }
+
+    private void processTask(CreateUpdateTaskDto taskDto, long teamMemberId) {
+        TeamMember taskCreator = teamMemberService.findById(teamMemberId);
+        Project project = projectService.getProjectById(taskDto.getProjectId());
+        teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskCreator, project);
+
+        Task task = taskMapper.toEntity(taskDto);
+        task.setProject(project);
+        setParentTaskIfIdNotNull(task, taskDto.getParentTaskId());
+        setLinkedTasksIfListNotEmpty(task, taskDto.getLinkedTasksIds());
+        setStageIfIdNotNull(task, taskDto.getStageId());
+
+        taskRepository.save(task);
     }
 
     private Task findById(long id) {

@@ -21,11 +21,11 @@ public class CreateUpdateTaskDto {
     private Long id;
 
     @NotBlank
-    @NotNull
+    @NotNull(message = "Task name can't be null")
     private String name;
 
     @NotBlank
-    @NotNull
+    @NotNull(message = "Task description can't be null")
     private String description;
 
     @NotNull(message = "Task status should be set")
@@ -34,7 +34,7 @@ public class CreateUpdateTaskDto {
     @NotNull(message = "Task should have executor")
     private Long performerUserId;
 
-    @NotNull
+    @NotNull(message = "Task reporter can't be null")
     private Long reporterUserId;
 
     @NotNull(message = "Task should have project Id")
