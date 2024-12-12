@@ -16,7 +16,9 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateTaskDto {
+public class CreateUpdateTaskDto {
+
+    private Long id;
 
     @NotBlank
     @NotNull
@@ -26,20 +28,20 @@ public class CreateTaskDto {
     @NotNull
     private String description;
 
-    @NotNull
+    @NotNull(message = "Task status should be set")
     private TaskStatus status;
 
-    @NotNull
+    @NotNull(message = "Task should have executor")
     private Long performerUserId;
 
     @NotNull
     private Long reporterUserId;
 
-    private Long parentTaskId;
-    private List<Long> linkedTasksIds;
-
-    @NotNull
+    @NotNull(message = "Task should have project Id")
     private Long projectId;
 
+    private Integer minutesTracked;
+    private Long parentTaskId;
+    private List<Long> linkedTasksIds;
     private Long stageId;
 }

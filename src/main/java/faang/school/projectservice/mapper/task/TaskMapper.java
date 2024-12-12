@@ -1,8 +1,7 @@
 package faang.school.projectservice.mapper.task;
 
-import faang.school.projectservice.dto.task.CreateTaskDto;
+import faang.school.projectservice.dto.task.CreateUpdateTaskDto;
 import faang.school.projectservice.dto.task.TaskDto;
-import faang.school.projectservice.dto.task.UpdateTaskDto;
 import faang.school.projectservice.model.Task;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,9 +18,7 @@ public interface TaskMapper {
     @Mapping(source = "linkedTasks", target = "linkedTasksIds")
     TaskDto toTaskDto(Task task);
 
-    Task toEntity(CreateTaskDto dto);
-
-    Task toEntity(UpdateTaskDto dto);
+    Task toEntity(CreateUpdateTaskDto dto);
 
     default List<Long> mapTasksToIds(List<Task> tasks) {
         if (tasks == null) {

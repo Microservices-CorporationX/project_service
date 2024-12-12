@@ -3,9 +3,11 @@ package faang.school.projectservice.filter.task;
 import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.model.Task;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
+@Component
 public class TaskPerformerFilter implements Filter<Task, TaskFilterDto> {
 
     @Override

@@ -1,9 +1,8 @@
 package faang.school.projectservice.service.task;
 
-import faang.school.projectservice.dto.task.CreateTaskDto;
+import faang.school.projectservice.dto.task.CreateUpdateTaskDto;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
-import faang.school.projectservice.dto.task.UpdateTaskDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
 import faang.school.projectservice.jpa.TaskRepository;
@@ -16,11 +15,14 @@ import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -33,7 +35,10 @@ public class TaskService {
     private final StageService stageService;
     private final List<Filter<Task, TaskFilterDto>> filters;
 
-    public void createTask(CreateTaskDto taskDto, long creatorId) {
+    public void createTask(CreateUpdateTaskDto taskDto, long creatorId) {
+        //create method for three rows below???
+        //add logging
+
         TeamMember taskCreator = teamMemberService.findById(creatorId);
         Project project = projectService.getProjectById(taskDto.getProjectId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskCreator, project);
@@ -47,7 +52,7 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    public void updateTask(UpdateTaskDto taskDto, long updaterId) {
+    public void updateTask(CreateUpdateTaskDto taskDto, long updaterId) {
         TeamMember taskUpdator = teamMemberService.findById(updaterId);
         Project project = projectService.getProjectById(taskDto.getProjectId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskUpdator, project);
@@ -81,8 +86,8 @@ public class TaskService {
     private List<TaskDto> filterTasks(Stream<Task> taskStream, TaskFilterDto taskFilter) {
         return filters.stream()
                 .filter(filter -> filter.isApplicable(taskFilter))
-                .reduce(taskStream, (subStream, filter) ->
-                                filter.apply(subStream, taskFilter),
+                .reduce(taskStream,
+                        (subStream, filter) -> filter.apply(subStream, taskFilter),
                         (a, b) -> b)
                 .map(taskMapper::toTaskDto)
                 .toList();
@@ -99,10 +104,11 @@ public class TaskService {
     }
 
     private void setLinkedTasksIfListNotEmpty(Task task, List<Long> tasksIds) {
+        List<Task> tasks = new ArrayList<>();
         if (!tasksIds.isEmpty()) {
-            tasksIds.forEach(taskId ->
-                    task.getLinkedTasks().add(findById(taskId)));
+            tasksIds.forEach(taskId -> tasks.add(findById(taskId)));
         }
+        task.setLinkedTasks(tasks);
     }
 
     private void setStageIfIdNotNull(Task task, Long id) {
