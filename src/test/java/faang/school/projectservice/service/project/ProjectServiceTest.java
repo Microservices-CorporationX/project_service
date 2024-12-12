@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.event.ProjectEvent;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
@@ -12,11 +13,13 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.impl.ProjectEventPublisher;
 import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -49,6 +52,9 @@ public class ProjectServiceTest {
     @Mock
     private AmazonClientService amazonClient;
 
+    @Mock
+    private ProjectEventPublisher projectEventPublisher;
+
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
 
@@ -62,7 +68,8 @@ public class ProjectServiceTest {
         projectFilters.add(new ProjectNameFilter());
         projectFilters.add(new ProjectStatusFilter());
 
-        projectService = new ProjectService(projectMapper, projectFilters, projectRepository, amazonClient);
+        projectService = new ProjectService(projectMapper, projectFilters,
+                projectRepository, amazonClient, projectEventPublisher);
     }
 
     @Test
@@ -191,6 +198,7 @@ public class ProjectServiceTest {
 
     @Test
     public void createProjectTest() {
+        ArgumentCaptor<ProjectEvent> captor = ArgumentCaptor.forClass(ProjectEvent.class);
         ProjectDto projectDto = ProjectDto.builder()
                 .id(1L)
                 .name("Project1")
@@ -215,10 +223,15 @@ public class ProjectServiceTest {
 
         ProjectDto result = projectService.createProject(projectDto, 1L);
 
+        verify(projectEventPublisher).publish(captor.capture());
         verify(projectRepository).save(project);
         assertEquals(projectDto.getId(), result.getId());
         assertEquals(projectDto.getName(), result.getName());
         assertNotNull(result.getStorageSize());
+
+        ProjectEvent resultEvent = captor.getValue();
+        assertEquals(project.getId(),resultEvent.getProjectId());
+        assertEquals(project.getOwnerId(),resultEvent.getAuthorId());
     }
 
     @Test
