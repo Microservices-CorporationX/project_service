@@ -10,9 +10,11 @@ import faang.school.projectservice.publisher.team.TeamEventPublisher;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.team.TeamValidator;
+import faang.school.projectservice.validator.teammember.TeamMemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,17 +28,22 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamMapper teamMapper;
     private final TeamValidator teamValidator;
+    private final TeamMemberValidator teamMemberValidator;
     private final TeamEventPublisher teamEventPublisher;
 
+    @Transactional
     public TeamDto createTeam(TeamDto teamDto) {
         teamValidator.validateTeam(teamDto);
-        teamValidator.validateUser(teamDto.getAuthorId());
+        teamValidator.validateAuthor(teamDto.getAuthorId());
+        teamMemberValidator.validateMembers(teamDto.getTeamMembers());
 
         Team team = teamMapper.toEntity(teamDto);
-        List<TeamMember> teamMembers = teamMemberRepository.findAllById(teamDto.getTeamMemberIds());
+        List<TeamMember> teamMembers = team.getTeamMembers();
         team.setTeamMembers(teamMembers);
 
         teamRepository.save(team);
+        teamMembers.forEach(member -> member.setTeam(team));
+        teamMemberRepository.saveAll(teamMembers);
         log.info("The team with ID {} was created.", team.getId());
 
         teamEventPublisher.publish(new TeamEvent(
@@ -50,7 +57,7 @@ public class TeamService {
     public List<TeamDto> getTeams() {
         List<Team> allTeams = teamRepository.findAll();
         log.info("The request for all teams was successful");
-        return teamMapper.mapToDtoList(allTeams);
+        return teamMapper.toDtoList(allTeams);
     }
 
     public TeamDto getTeam(Long teamId) {

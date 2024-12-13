@@ -2,6 +2,7 @@ package faang.school.projectservice.validator.team;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.exception.DataValidationException;
 import feign.FeignException;
@@ -42,20 +43,9 @@ public class TeamValidatorTest {
     }
 
     @Test
-    void testValidateIsInternsListEmpty() {
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> teamValidator.validateTeam(TeamDto.builder()
-                        .projectId(1L)
-                        .teamMemberIds(List.of())
-                        .build()));
-
-        assertEquals("A team is not created without members", exception.getMessage());
-    }
-
-    @Test
     void testSuccessfulTeamValidation() {
         TeamDto teamDto = TeamDto.builder()
-                .teamMemberIds(List.of(1L, 2L))
+                .teamMembers(List.of(new TeamMemberDto()))
                 .projectId(3L)
                 .build();
 
@@ -69,7 +59,7 @@ public class TeamValidatorTest {
         when(userServiceClient.getUser(1L)).thenThrow(FeignException.NotFound.class);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> teamValidator.validateUser(1L));
+                () -> teamValidator.validateAuthor(1L));
 
         assertEquals("User with given ID does not exist.", exception.getMessage());
     }
@@ -81,7 +71,7 @@ public class TeamValidatorTest {
                 .build();
         when(userServiceClient.getUser(1L)).thenReturn(userDto);
 
-        teamValidator.validateUser(userDto.getId());
+        teamValidator.validateAuthor(userDto.getId());
 
         verify(userServiceClient).getUser(userDto.getId());
     }

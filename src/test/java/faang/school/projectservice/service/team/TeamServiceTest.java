@@ -1,9 +1,11 @@
 package faang.school.projectservice.service.team;
 
+import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.dto.team.TeamEvent;
 import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.mapper.team.TeamMapperImpl;
+import faang.school.projectservice.mapper.teammember.TeamMemberMapper;
+import faang.school.projectservice.mapper.team.TeamMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -11,13 +13,13 @@ import faang.school.projectservice.publisher.team.TeamEventPublisher;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.team.TeamValidator;
+import faang.school.projectservice.validator.teammember.TeamMemberValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -25,7 +27,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,11 +40,17 @@ public class TeamServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
 
-    @Spy
-    private TeamMapperImpl teamMapper;
+    @Mock
+    private TeamMemberMapper teamMemberMapper;
+
+    @Mock
+    private TeamMapper teamMapper;
 
     @Mock
     private TeamValidator teamValidator;
+
+    @Mock
+    private TeamMemberValidator teamMemberValidator;
 
     @Mock
     private TeamEventPublisher teamEventPublisher;
@@ -50,39 +58,36 @@ public class TeamServiceTest {
     @InjectMocks
     private TeamService teamService;
 
-    @Captor
-    private ArgumentCaptor<Team> teamCaptor;
-
-    @Captor
-    private ArgumentCaptor<TeamEvent> teamEventCaptor;
-
     @Test
-    void testSuccessfulCreateInternship() {
+    void testCreateTeam() {
         TeamDto teamDto = prepareTeamDto();
-        TeamMember firstMember = TeamMember.builder()
-                .id(2L)
+        Team team = Team.builder()
+                .id(1L)
+                .authorId(2L)
+                .project(Project.builder().id(3L).build())
+                .teamMembers(List.of(new TeamMember()))
                 .build();
-        TeamMember secondMember = TeamMember.builder()
-                .id(3L)
-                .build();
-        List<TeamMember> teamMembers = List.of(firstMember, secondMember);
-        when(teamMemberRepository.findAllById(teamDto.getTeamMemberIds())).thenReturn(teamMembers);
+        List<TeamMember> teamMembers = List.of(new TeamMember(), new TeamMember());
 
-        TeamDto teamDtoAfterSave = teamService.createTeam(teamDto);
-        verify(teamRepository).save(teamCaptor.capture());
-        Team teamToSave = teamCaptor.getValue();
-        verify(teamEventPublisher).publish(teamEventCaptor.capture());
-        TeamEvent event = teamEventCaptor.getValue();
+        when(teamMapper.toEntity(teamDto)).thenReturn(team);
+        when(teamMapper.toDto(team)).thenReturn(teamDto);
 
-        assertEquals(teamDto, teamDtoAfterSave);
-        verify(teamRepository, times(1)).save(teamToSave);
-        verify(teamEventPublisher).publish(event);
+        TeamDto createdTeamDto = teamService.createTeam(teamDto);
+
+        verify(teamValidator).validateTeam(teamDto);
+        verify(teamValidator).validateAuthor(teamDto.getAuthorId());
+        verify(teamMemberValidator).validateMembers(teamDto.getTeamMembers());
+        verify(teamMapper).toEntity(teamDto);
+        verify(teamRepository).save(team);
+        verify(teamEventPublisher).publish(any());
+
+        assertEquals(teamDto, createdTeamDto);
     }
 
     @Test
-    void testGetAllInternships() {
+    void testGetAllTeams() {
         List<Team> teams = List.of(prepareTeam(), prepareTeam());
-        List<TeamDto> expectedTeams = teamMapper.mapToDtoList(teams);
+        List<TeamDto> expectedTeams = teamMapper.toDtoList(teams);
         when(teamRepository.findAll()).thenReturn(teams);
 
         List<TeamDto> actualTeams = teamService.getTeams();
@@ -116,7 +121,9 @@ public class TeamServiceTest {
         return TeamDto.builder()
                 .id(1L)
                 .authorId(5L)
-                .teamMemberIds(List.of(2L, 3L))
+                .teamMembers(List.of(
+                        TeamMemberDto.builder().userId(2L).build(),
+                        TeamMemberDto.builder().userId(3L).build()))
                 .projectId(4L)
                 .build();
     }

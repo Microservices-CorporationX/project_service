@@ -71,7 +71,7 @@ public class InternshipServiceTest {
                 .id(2L)
                 .build();
         List<TeamMember> interns = List.of(firstIntern, secondIntern);
-        when(teamMemberRepository.findAllById(internshipDto.getInternIds())).thenReturn(interns);
+        when(teamMemberRepository.findAllByIdIn(internshipDto.getInternIds())).thenReturn(Optional.of(interns));
 
         InternshipDto internshipDtoAfterSave = internshipService.createInternship(internshipDto);
         verify(internshipRepository).save(internshipCaptor.capture());
@@ -105,7 +105,7 @@ public class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(interns);
         when(internshipRepository.findById(internshipDto.getId())).thenReturn(Optional.of(internship));
-        when(teamMemberRepository.findAllById(internshipDto.getInternIds())).thenReturn(interns);
+        when(teamMemberRepository.findAllByIdIn(internshipDto.getInternIds())).thenReturn(Optional.of(interns));
         when(taskStatusValidator.checkingInternsTaskStatus(internship)).thenReturn(internship);
 
         InternshipDto internshipDtoAfterUpdate = internshipService.updateInternship(internshipDto);
