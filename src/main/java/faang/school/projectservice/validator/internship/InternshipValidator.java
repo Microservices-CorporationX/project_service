@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.internship;
+package faang.school.projectservice.validator.internship;
 
 import faang.school.projectservice.dto.intership.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
