@@ -27,13 +27,13 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TaskService {
 
+    private final List<Filter<Task, TaskFilterDto>> filters;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    private final TeamMemberService teamMemberService;
-    private final ProjectService projectService;
-    private final TeamMemberValidator teamMemberValidator;
     private final StageService stageService;
-    private final List<Filter<Task, TaskFilterDto>> filters;
+    private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
+    private final TeamMemberValidator teamMemberValidator;
 
     public void createTask(CreateUpdateTaskDto taskDto, long creatorId) {
         processTask(taskDto, creatorId);
