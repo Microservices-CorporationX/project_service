@@ -10,7 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
-import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stageinvitation.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationJpaRepository invitationRepository;
     private final TeamMemberService teamMemberService;
-    private final StageService stageService;
+    private final StageRepository stageRepository;
     private final StageInvitationMapper invitationMapper;
     private final StageInvitationValidator invitationValidator;
     private final List<StageInvitationFilter> invitationFilters;
@@ -42,7 +42,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
 
         TeamMember author = teamMemberService.findById(authorId);
         TeamMember invited = teamMemberService.findById(invitedId);
-        Stage stage = stageService.findById(stageId);
+        Stage stage = stageRepository.getById(stageId);
         invitationValidator.validateInvitationDoesNotExist(invited, stage);
 
         StageInvitation stageInvitation = StageInvitation.builder()

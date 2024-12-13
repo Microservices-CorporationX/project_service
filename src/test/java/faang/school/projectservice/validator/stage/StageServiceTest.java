@@ -13,12 +13,9 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-
-import faang.school.projectservice.service.stageinvitation.StageInvitationServiceImpl;
-import faang.school.projectservice.service.StageService;
-import faang.school.projectservice.service.StageInvitationServiceImpl;
-import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.stage.StageService;
+import faang.school.projectservice.service.stageinvitation.StageInvitationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -350,7 +347,7 @@ public class StageServiceTest {
 
         when(projectService.getById(projectId)).thenReturn(project);
 
-        stageService.sendMissingRolesInvite(roles, rolesOrig,stageDto);
+        stageService.sendMissingRolesInvite(roles, rolesOrig, stageDto);
 
         verify(stageInvitationService).sendStageInvitation(any());
     }
@@ -388,7 +385,7 @@ public class StageServiceTest {
                 .teams(teams)
                 .stages(List.of(stageMapper.toEntity(stageDto))).build();
 
-        stageService.sendMissingRolesInvite(roles, rolesOrig,stageDto);
+        stageService.sendMissingRolesInvite(roles, rolesOrig, stageDto);
 
         verify(stageInvitationService, times(0)).sendStageInvitation(any());
     }

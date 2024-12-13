@@ -14,9 +14,8 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.StageInvitationServiceImpl;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.stageinvitation.StageInvitationServiceImpl;
+import faang.school.projectservice.service.stageinvitation.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectService projectService;
     private final StageMapper stageMapper;
-    private final StageInvitationServiceImpl stageInvitationService;
+    private final StageInvitationService stageInvitationService;
     private final Random random = new Random();
 
     public StageDto create(StageDto stageDto) {
@@ -133,6 +132,10 @@ public class StageService {
         return stageMapper.toDto(stage);
     }
 
+    public Stage findEntityById(Long id) {
+        return stageRepository.getById(id);
+    }
+
     public void sendMissingRolesInvite(List<StageRolesDto> dtoRoles, List<StageRolesDto> dtoRolesOrig,
                                        StageDto stageDto) {
         Map<TeamRole, Integer> neededRolesMap = getNeededRolesMap(dtoRoles, dtoRolesOrig);
@@ -195,9 +198,5 @@ public class StageService {
             log.error("Не существующий проект");
             throw new DataValidationException("Проект не существует");
         }
-    }
-
-    public interface StageService {
-        Stage findById(Long id);
     }
 }

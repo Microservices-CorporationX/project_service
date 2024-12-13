@@ -10,6 +10,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stageinvitation.StageInvitationValidator;
@@ -43,7 +44,7 @@ class StageInvitationServiceImplTest {
     @Mock
     private TeamMemberService teamMemberService;
     @Mock
-    private StageService stageService;
+    private StageRepository stageRepository;
     @Mock
     private StageInvitationMapper invitationMapper;
     @Mock
@@ -56,7 +57,7 @@ class StageInvitationServiceImplTest {
         stageInvitationService = new StageInvitationServiceImpl(
                 invitationRepository,
                 teamMemberService,
-                stageService,
+                stageRepository,
                 invitationMapper,
                 invitationValidator,
                 invitationFilters
@@ -74,7 +75,7 @@ class StageInvitationServiceImplTest {
                 .thenReturn(new TeamMember());
         when(teamMemberService.findById(invitationDto.getInvitedId()))
                 .thenReturn(new TeamMember());
-        when(stageService.findById(invitationDto.getStageId()))
+        when(stageRepository.getById(invitationDto.getStageId()))
                 .thenReturn(new Stage());
         ArgumentCaptor<StageInvitation> argumentCaptor = ArgumentCaptor.forClass(StageInvitation.class);
 
