@@ -14,8 +14,8 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.StageRepository;
-import faang.school.projectservice.service.StageInvitationServiceImpl;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.stageinvitation.StageInvitationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class StageService {
     private final StageRepository stageRepository;
     private final ProjectService projectService;
     private final StageMapper stageMapper;
-    private final StageInvitationServiceImpl stageInvitationService;
+    private final StageInvitationService stageInvitationService;
     private final Random random = new Random();
 
     public StageDto create(StageDto stageDto) {
@@ -69,7 +69,7 @@ public class StageService {
         return stageMapper.toDto(filteredStages);
     }
 
-    public StageDto deleteCascade(StageDto stageDto){
+    public StageDto deleteCascade(StageDto stageDto) {
         validateExisting(stageDto.getProjectId());
         Stage stage = stageRepository.getById(stageDto.getStageId());
         List<Long> idsTasksToDelete = stage.getTasks().stream().map(Task::getId).toList();
@@ -87,7 +87,7 @@ public class StageService {
         return stageDto;
     }
 
-    public StageDto postponeTasks(StageDto stageDto, Long nextStageId){
+    public StageDto postponeTasks(StageDto stageDto, Long nextStageId) {
         Stage stage = stageRepository.getById(stageDto.getStageId());
         Stage postponeStage = stageRepository.getById(nextStageId);
         List<Task> tasksToPostpone = stage.getTasks();
@@ -120,16 +120,20 @@ public class StageService {
         return stageMapper.toDto(stageRepository.save(stageOrig));
     }
 
-    public List<StageDto> getAllStages(Long projectId){
+    public List<StageDto> getAllStages(Long projectId) {
         validateExisting(projectId);
         Project project = projectService.getById(projectId);
         List<Stage> stages = project.getStages();
         return stageMapper.toDto(stages);
     }
 
-    public StageDto getById(Long stageId){
+    public StageDto getById(Long stageId) {
         Stage stage = stageRepository.getById(stageId);
         return stageMapper.toDto(stage);
+    }
+
+    public Stage findEntityById(Long id) {
+        return stageRepository.getById(id);
     }
 
     public void sendMissingRolesInvite(List<StageRolesDto> dtoRoles, List<StageRolesDto> dtoRolesOrig,
@@ -190,7 +194,7 @@ public class StageService {
     }
 
     public void validateExisting(Long projectId) {
-        if (!projectService.existsById(projectId)){
+        if (!projectService.existsById(projectId)) {
             log.error("Не существующий проект");
             throw new DataValidationException("Проект не существует");
         }
