@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.projectview.ProjectViewEvent;
 import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 
@@ -19,11 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -231,6 +228,34 @@ public class ProjectServiceTest {
 
         assertEquals(1, projectResponseDtos.size());
         assertEquals("New", projectResponseDtos.get(0).getName());
+    }
+
+    @Test
+    void testViewProject_published_Positive() {
+        long projectId = 1L;
+        long userId = 5L;
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(projectForTests());
+        when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests());
+
+        ProjectResponseDto responseDto = projectService.viewProject(projectId, userId);
+
+        verify(projectViewEventPublisher).publish(any(ProjectViewEvent.class));
+        assertNotNull(responseDto);
+    }
+
+    @Test
+    void testViewProject_published_Negative() {
+        long projectId = 1L;
+        long userId = 1L;
+
+        when(projectRepository.getProjectById(projectId)).thenReturn(projectForTests());
+        when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests());
+
+        ProjectResponseDto responseDto = projectService.viewProject(projectId, userId);
+
+        verify(projectViewEventPublisher, never()).publish(any(ProjectViewEvent.class));
+        assertNotNull(responseDto);
     }
 
     private ProjectUpdateDto projectDtoForUpdate() {

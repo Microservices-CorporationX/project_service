@@ -31,10 +31,10 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UserContext userContext;
     private final List<ProjectFilter> filtersForProjects;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     private static final ProjectStatus projectDefaultStatus = ProjectStatus.CREATED;
     private static final ProjectVisibility projectDefaultVisibility = ProjectVisibility.PUBLIC;
-    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public ProjectResponseDto createProject(ProjectCreateDto projectCreateDto) {
         Long currentUserId = userContext.getUserId();
