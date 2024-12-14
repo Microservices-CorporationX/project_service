@@ -113,7 +113,7 @@ public class ProjectService {
                     .build();
                 projectViewEventPublisher.publish(event);
         } else {
-            log.info("User ID {} is the owner of Project ID {}. No event will be published.", userId, projectId);
+            log.warn("User ID {} is the owner of Project ID {}. No event will be published.", userId, projectId);
         }
 
         ProjectResponseDto responseDto = projectMapper.toResponseDtoFromEntity(project);
