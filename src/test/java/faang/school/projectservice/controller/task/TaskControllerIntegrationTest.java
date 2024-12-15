@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @Testcontainers
-class TaskControllerIntTest {
+class TaskControllerIntegrationTest {
 
     @Autowired
     private TaskController taskController;

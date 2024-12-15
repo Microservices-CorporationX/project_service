@@ -8,12 +8,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 @Builder
 @Setter
 @Getter
+@Validated
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateUpdateTaskDto {
