@@ -26,15 +26,15 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping()
-    public void createTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
-                           @RequestHeader("x-team-member-id") long creatorId) {
-        taskService.createTask(taskDto, creatorId);
+    public TaskDto createTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
+                              @RequestHeader("x-team-member-id") long creatorId) {
+        return taskService.createTask(taskDto, creatorId);
     }
 
     @PutMapping()
-    public void updateTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
+    public TaskDto updateTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
                            @RequestHeader("x-team-member-id") long updaterId) {
-        taskService.updateTask(taskDto, updaterId);
+       return taskService.updateTask(taskDto, updaterId);
     }
 
     @PostMapping("/filters")

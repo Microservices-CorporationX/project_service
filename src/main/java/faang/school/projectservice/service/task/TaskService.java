@@ -14,6 +14,7 @@ import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,16 +36,21 @@ public class TaskService {
     private final TeamMemberService teamMemberService;
     private final TeamMemberValidator teamMemberValidator;
 
-    public void createTask(CreateUpdateTaskDto taskDto, long creatorId) {
-        processTask(taskDto, creatorId);
+    @Transactional
+    public TaskDto createTask(CreateUpdateTaskDto taskDto, long creatorId) {
+        TaskDto savedTask = processTask(taskDto, creatorId);
         log.info("Task created by team member with id: {}", creatorId);
+        return savedTask;
     }
 
-    public void updateTask(CreateUpdateTaskDto taskDto, long updaterId) {
-        processTask(taskDto, updaterId);
+    @Transactional
+    public TaskDto updateTask(CreateUpdateTaskDto taskDto, long updaterId) {
+        TaskDto updatedTask = processTask(taskDto, updaterId);
         log.info("Task with id: {}, updated by team member with id: {}", taskDto.getId(), updaterId);
+        return updatedTask;
     }
 
+    @Transactional
     public TaskDto getTask(long taskId, long requesterId) {
         Task task = findById(taskId);
         TeamMember taskRequester = teamMemberService.findById(requesterId);
@@ -55,6 +61,7 @@ public class TaskService {
         return taskMapper.toTaskDto(task);
     }
 
+    @Transactional
     public List<TaskDto> getAllTasks(TaskFilterDto filterDto, long requesterId, long projectId) {
         TeamMember requester = teamMemberService.findById(requesterId);
         Project project = projectService.getProjectById(projectId);
@@ -77,7 +84,7 @@ public class TaskService {
                 .toList();
     }
 
-    private void processTask(CreateUpdateTaskDto taskDto, long teamMemberId) {
+    private TaskDto processTask(CreateUpdateTaskDto taskDto, long teamMemberId) {
         TeamMember taskCreator = teamMemberService.findById(teamMemberId);
         Project project = projectService.getProjectById(taskDto.getProjectId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskCreator, project);
@@ -88,7 +95,7 @@ public class TaskService {
         setLinkedTasksIfListNotEmpty(task, taskDto.getLinkedTasksIds());
         setStageIfIdNotNull(task, taskDto.getStageId());
 
-        taskRepository.save(task);
+        return taskMapper.toTaskDto(taskRepository.save(task));
     }
 
     private Task findById(long id) {
