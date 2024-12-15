@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.team;
 
-import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.service.team.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class TeamController {
     private final TeamService teamService;
-    private final UserContext userContext;
 
     @PostMapping(value = "/users/{userId}")
     public TeamDto createTeam(@RequestBody TeamDto teamDto, @PathVariable Long userId) {
