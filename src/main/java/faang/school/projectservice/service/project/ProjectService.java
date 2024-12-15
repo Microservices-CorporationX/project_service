@@ -2,6 +2,7 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.event.ProjectEvent;
 import faang.school.projectservice.exception.AlreadyExistsException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.Filter;
@@ -9,6 +10,7 @@ import faang.school.projectservice.jpa.ProjectJpaRepository;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.impl.ProjectEventPublisher;
 import faang.school.projectservice.service.amazonclient.AmazonClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +31,10 @@ public class ProjectService {
     private final static String PROJECT = "Project";
 
     private final ProjectMapper projectMapper;
-    private final List<Filter<Project,ProjectFilterDto>> projectFilters;
+    private final List<Filter<Project, ProjectFilterDto>> projectFilters;
     private final ProjectJpaRepository projectRepository;
     private final AmazonClientService amazonClient;
+    private final ProjectEventPublisher projectEventPublisher;
 
     @Transactional(readOnly = true)
     public ProjectDto findById(long projectId) {
@@ -59,8 +62,16 @@ public class ProjectService {
         project.setOwnerId(userId);
         project.setStorageSize(BigInteger.ZERO);
         Project savedProject = projectRepository.save(project);
+        ProjectDto result = projectMapper.toDto(savedProject);
+
+        ProjectEvent projectEvent = ProjectEvent.builder()
+                .authorId(userId)
+                .projectId(result.getId())
+                .build();
+        projectEventPublisher.publish(projectEvent);
+
         log.info("Project created with ID: {}", savedProject.getId());
-        return projectMapper.toDto(savedProject);
+        return result;
     }
 
     @Transactional
@@ -122,17 +133,18 @@ public class ProjectService {
                 || project.getOwnerId().equals(userId);
     }
 
-    private void validateProjectExistsForUser (Long userId, String name){
+    private void validateProjectExistsForUser(Long userId, String name) {
         if (projectRepository.existsByOwnerIdAndName(userId, name)) {
             throw new AlreadyExistsException(PROJECT);
         }
     }
 
-    private Stream<Project> applyFilters (Project project, ProjectFilterDto filters){
+    private Stream<Project> applyFilters(Project project, ProjectFilterDto filters) {
         return projectFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .reduce(Stream.of(project),
                         (stream, filter) -> filter.apply(stream, filters),
                         Stream::concat);
     }
+
 }
