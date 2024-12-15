@@ -6,6 +6,8 @@ import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.service.task.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RestController()
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
@@ -26,27 +29,31 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping()
-    public TaskDto createTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
-                              @RequestHeader("x-team-member-id") long creatorId) {
-        return taskService.createTask(taskDto, creatorId);
+    public ResponseEntity<TaskDto> createTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
+                                              @RequestHeader("x-team-member-id") long creatorId) {
+        TaskDto resultTaskDto = taskService.createTask(taskDto, creatorId);
+        return ResponseEntity.ok(resultTaskDto);
     }
 
     @PutMapping()
-    public TaskDto updateTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
-                           @RequestHeader("x-team-member-id") long updaterId) {
-       return taskService.updateTask(taskDto, updaterId);
+    public ResponseEntity<TaskDto> updateTask(@RequestBody @Valid CreateUpdateTaskDto taskDto,
+                                              @RequestHeader("x-team-member-id") long updaterId) {
+        TaskDto resultTaskDto = taskService.updateTask(taskDto, updaterId);
+        return ResponseEntity.ok(resultTaskDto);
     }
 
     @PostMapping("/filters")
-    public List<TaskDto> getAllTasks(@RequestBody TaskFilterDto taskFilterDto,
-                                     @RequestParam Long projectId,
-                                     @RequestHeader("x-team-member-id") long requesterId) {
-        return taskService.getAllTasks(taskFilterDto, requesterId, projectId);
+    public ResponseEntity<List<TaskDto>> getAllTasks(@RequestBody TaskFilterDto taskFilterDto,
+                                                     @RequestParam Long projectId,
+                                                     @RequestHeader("x-team-member-id") long requesterId) {
+        List<TaskDto> resultTaskDto = taskService.getAllTasks(taskFilterDto, projectId, requesterId);
+        return ResponseEntity.ok(resultTaskDto);
     }
 
     @GetMapping("/{taskId}")
-    public TaskDto getTask(@PathVariable long taskId,
-                           @RequestHeader("x-team-member-id") long requesterId) {
-        return taskService.getTask(taskId, requesterId);
+    public ResponseEntity<TaskDto> getTask(@PathVariable long taskId,
+                                           @RequestHeader("x-team-member-id") long requesterId) {
+        TaskDto resultTaskDto = taskService.getTask(taskId, requesterId);
+        return ResponseEntity.ok(resultTaskDto);
     }
 }

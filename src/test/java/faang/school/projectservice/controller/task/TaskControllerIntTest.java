@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -58,7 +59,8 @@ class TaskControllerIntTest {
         long taskId = 1L;
         long requesterId = 1L;
 
-        TaskDto result = taskController.getTask(taskId, requesterId);
+        ResponseEntity<TaskDto> response = taskController.getTask(taskId, requesterId);
+        TaskDto result = response.getBody();
 
         assertNotNull(result);
     }
@@ -80,7 +82,9 @@ class TaskControllerIntTest {
                 .stageId(1L)
                 .build();
 
-        TaskDto result = taskController.createTask(taskDto, creatorId);
+        ResponseEntity<TaskDto> response = taskController.createTask(taskDto, creatorId);
+        TaskDto result = response.getBody();
+        assert result != null;
         Task task = taskRepository.findById(result.getId()).orElseThrow(EntityNotFoundException::new);
         assertEquals(taskDto.getName(), task.getName());
         assertEquals(taskDto.getDescription(), task.getDescription());
@@ -126,8 +130,10 @@ class TaskControllerIntTest {
         long requesterId = 1L;
         TaskFilterDto taskFilterDto = TaskFilterDto.builder().build();
 
-        List<TaskDto> result = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
+        ResponseEntity<List<TaskDto>> response = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
+        List<TaskDto> result = response.getBody();
 
+        assert result != null;
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
