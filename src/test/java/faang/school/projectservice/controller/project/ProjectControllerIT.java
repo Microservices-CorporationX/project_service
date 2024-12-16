@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class ProjectControllerIT {
 
     @Container
@@ -36,6 +38,23 @@ public class ProjectControllerIT {
     @Container
     private static final RedisContainer REDIS_CONTAINER =
             new RedisContainer(DockerImageName.parse("redis/redis-stack:latest"));
+
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
+        registry.add("spring.liquibase.contexts", () -> "test");
+
+        registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379));
+        registry.add("spring.data.redis.host", REDIS_CONTAINER::getHost);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Value("${spring.data.redis.channels.projects_view_channel.name}")
     private String channelName;
@@ -94,9 +113,9 @@ public class ProjectControllerIT {
                         .header("x-user-id", userId))
                 .andExpect(status().isNotFound());
     }
-
     @Getter
     private static class MyPubSub extends JedisPubSub {
+
 
         private String receivedMessage;
 
@@ -105,21 +124,5 @@ public class ProjectControllerIT {
             receivedMessage = message;
         }
 
-    }
-
-    @DynamicPropertySource
-    static void start(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
-
-        registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379));
-        registry.add("spring.data.redis.host", REDIS_CONTAINER::getHost);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

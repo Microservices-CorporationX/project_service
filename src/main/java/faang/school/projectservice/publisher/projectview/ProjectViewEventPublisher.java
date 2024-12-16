@@ -22,7 +22,7 @@ public class ProjectViewEventPublisher implements MessagePublish<ProjectViewEven
 
     @Override
     public void publish(ProjectViewEvent event) {
-        log.debug("Attempting to publish event to channel '{}'. Event: {}", channelName, event);
+        log.info("Attempting to publish event to channel '{}'. Event: {}", channelName, event);
         try {
             String message = objectMapper.writeValueAsString(event);
             redisTemplate.convertAndSend(channelName, message);
