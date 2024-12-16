@@ -9,4 +9,7 @@ public class UrlUtils {
     public static final String PROJECTS = "/projects";
     public static final String FILTER = "/filter";
     public static final String ID = "/{id}";
+
+    public static final String PROJECT_COVER = "/project-cover";
+    public static final String PROJECT_COVER_ID = "/{projectId}";
 }
