@@ -8,9 +8,12 @@ import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.mapper.donation.DonationMapper;
+import faang.school.projectservice.mapper.donation.FundRaisedEventMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.campaign.CampaignService;
 import feign.FeignException;
@@ -23,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +47,10 @@ class DonationServiceTest {
     private CampaignService campaignService;
     @Mock
     private UserContext userContext;
+    @Mock
+    private FundRaisedEventMapper fundRaisedEventMapper;
+    @Mock
+    private FundRaisedEventPublisher fundRaisedEventPublisher;
     @InjectMocks
     private DonationService donationService;
 
@@ -89,7 +97,12 @@ class DonationServiceTest {
         DonationDto donationDto = getDonationDto();
         Campaign campaign = new Campaign();
         campaign.setStatus(CampaignStatus.ACTIVE);
-        Donation donation = new Donation();
+        campaign.setProject(new Project());
+        Donation donation = Donation.builder()
+                .userId(USER_ID)
+                .campaign(campaign)
+                .amount(BigDecimal.valueOf(1L))
+                .build();
         when(userContext.getUserId()).thenReturn(USER_ID);
         when(userServiceClient.getUser(USER_ID)).thenReturn(new UserDto());
         when(campaignService.getCampaignById(donationDto.getCampaignId())).thenReturn(campaign);
@@ -98,6 +111,7 @@ class DonationServiceTest {
         donationService.saveDonation(donationDto);
 
         verify(donationRepository).save(donation);
+        verify(fundRaisedEventPublisher).publish(any());
         verify(donationMapper).toDto(donation);
     }
 

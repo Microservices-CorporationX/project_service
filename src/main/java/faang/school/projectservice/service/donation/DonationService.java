@@ -6,10 +6,13 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.PaymentRequest;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationDto;
+import faang.school.projectservice.dto.event.FundRaisedEvent;
 import faang.school.projectservice.mapper.donation.DonationMapper;
+import faang.school.projectservice.mapper.donation.FundRaisedEventMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
+import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.campaign.CampaignService;
 import feign.FeignException;
@@ -29,6 +32,8 @@ public class DonationService {
     private final PaymentServiceClient paymentServiceClient;
     private final CampaignService campaignService;
     private final UserContext userContext;
+    private final FundRaisedEventPublisher fundRaisedEventPublisher;
+    private final FundRaisedEventMapper fundRaisedEventMapper;
 
     public DonationDto saveDonation(DonationDto donationDto) {
         log.info("donation initiation - amount: {}; currency: {}; userId: {}; campaign: {}",
@@ -45,10 +50,17 @@ public class DonationService {
         entity.setDonationTime(LocalDateTime.now());
         donationRepository.save(entity);
 
+        publishDonationEvent(entity);
+
         log.info("successful creation of a donation - amount: {}; currency: {}; userId: {}; campaign: {}",
                 donationDto.getAmount(), donationDto.getCurrency(),
                 donationDto.getUserId(), donationDto.getCampaignId());
         return donationMapper.toDto(entity);
+    }
+
+    private void publishDonationEvent(Donation entity) {
+        FundRaisedEvent fundRaisedEvent = fundRaisedEventMapper.donationToFundRaiseEvent(entity);
+        fundRaisedEventPublisher.publish(fundRaisedEvent);
     }
 
     private void sendPayment(DonationDto donationDto) {
