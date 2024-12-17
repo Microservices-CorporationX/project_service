@@ -19,22 +19,28 @@ public class TeamMemberValidator {
     private final UserServiceClient userServiceClient;
 
     public void validateMembers(List<TeamMemberDto> teamMembers) {
+        if (teamMembers == null || teamMembers.isEmpty()) {
+            throw new DataValidationException("Team members list cannot be null or empty.");
+        }
+
         List<Long> userIds = teamMembers.stream()
                 .map(TeamMemberDto::getUserId)
                 .distinct()
                 .toList();
 
-        for (Long userId : userIds) {
-            try {
-                UserDto user = userServiceClient.getUser(userId);
-                if (user == null) {
-                    log.error("User with ID {} does not exist.", userId);
-                    throw new DataValidationException("User with given ID does not exist.");
-                }
-            } catch (FeignException.NotFound e) {
-                log.error("User with ID {} does not exist.", userId);
-                throw new IllegalArgumentException("User with given ID does not exist.");
-            }
+        if (userIds.isEmpty()) {
+            return;
+        }
+
+        try {
+            List<UserDto> users = userServiceClient.getUsersByIds(userIds);
+        } catch (FeignException.NotFound e) {
+            log.error("User does not exist: {}", e.getMessage());
+            throw new DataValidationException("User with given ID does not exist.");
+        } catch (Exception e) {
+            log.error("An error occurred while validating users: {}", e.getMessage());
+            throw new DataValidationException("An error occurred during user validation.");
         }
     }
 }
+

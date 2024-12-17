@@ -2,7 +2,6 @@ package faang.school.projectservice.validator.team;
 
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
-import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.exception.DataValidationException;
 import feign.FeignException;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Slf4j
 @Component
