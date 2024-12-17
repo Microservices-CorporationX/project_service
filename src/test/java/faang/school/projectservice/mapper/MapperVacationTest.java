@@ -9,121 +9,173 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
-import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import utils.VacationDataCreatorTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class MapperVacationTest {
     public static final LocalDateTime PRE_SET_LOCAL_DATE_TIME = LocalDateTime.now();
-    @Mock
-    CandidateRepository candidateRepository;
-    @Mock
-    ProjectRepository projectRepository;
+
     @InjectMocks
     private MapperVacationImpl mapperVacation;
 
     @Test
-    void testVacancyToVacancyDToSuccess() {
-        Vacancy vacancy = VacationDataCreatorTest.getServiceVacancy(1L);
-        VacancyDto vacancyDto = VacationDataCreatorTest.getVacancyDtoMapperTest();
-        assertEquals(vacancyDto, mapperVacation.vacancyToVacancyDTo(vacancy));
+    void vacancyToVacancyDToSuccessTest() {
+        assertEquals(getVacancyDtoFromVacancyResult(), mapperVacation.vacancyToVacancyDTo(getVacancyForTransferToDto()));
     }
 
     @Test
-    void testVacancyDToToVacancySuccess() {
-        VacancyDto vacancyDto = getVacancyDto();
-        Vacancy vacancy = getVacancy();
-        when(candidateRepository.findAllCandidateByVacancyId(vacancyDto.id())).thenReturn(getCandidates());
-        when(projectRepository.findById(vacancyDto.id())).thenReturn(getProject(vacancyDto.id()));
-        assertEquals(vacancy, mapperVacation.vacancyDToToVacancy(vacancyDto));
+    void tVacancyDToToVacancySuccessTest() {
+        Vacancy vacancy = mapperVacation.vacancyDToToVacancy(getCreateVacancyDto());
+        assertEquals(getCreateVacancy(), vacancy);
     }
 
     @Test
-    void testUpdateSuccess() {
-        VacancyDto vacancyDto = getVacancyDto();
-        Vacancy vacancy = getVacancyTestUpdate();
-        Vacancy vacancyReference = getVacancy();
-
-        when(projectRepository.findById(vacancyDto.id())).thenReturn(getProject(vacancyDto.id()));
-
-        mapperVacation.update(vacancyDto, vacancy);
-        assertEquals(vacancyReference, vacancy);
+    void updateSuccessTest() {
+        Vacancy vacancy = getUpdateVacancyInput();
+        mapperVacation.update(getUpdateVacancyDto(), vacancy);
+        assertEquals(getUpdateVacancyResult(), vacancy);
     }
 
-    public Vacancy getVacancy() {
-        return new Vacancy(
-                1L,
-                "Name Vacancy",
-                "description",
-                getProject(1L),
-                getCandidates(),
-                PRE_SET_LOCAL_DATE_TIME,
-                PRE_SET_LOCAL_DATE_TIME,
-                1L,
-                1L,
-                VacancyStatus.OPEN,
-                100.00,
-                WorkSchedule.FULL_TIME,
-                3,
-                getLongListIdForDto());
+    private VacancyDto getCreateVacancyDto() {
+        return VacancyDto.builder()
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(PRE_SET_LOCAL_DATE_TIME)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .projectId(1L)
+                .candidates(getLongListIdForDto())
+                .build();
     }
 
-    public Vacancy getVacancyTestUpdate() {
-        return new Vacancy(
-                1L,
-                "Name Vacancy Test",
-                "description Test",
-                getProject(2L),
-                getCandidates(),
-                PRE_SET_LOCAL_DATE_TIME,
-                PRE_SET_LOCAL_DATE_TIME,
-                1L,
-                2L,
-                VacancyStatus.POSTPONED,
-                150.00,
-                WorkSchedule.SHIFT_WORK,
-                4,
-                getLongListIdForDto());
+    private Vacancy getCreateVacancy() {
+        return Vacancy.builder()
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(PRE_SET_LOCAL_DATE_TIME)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .project(Project.builder().id(1L).build())
+                .build();
     }
 
-    public VacancyDto getVacancyDto() {
-        return new VacancyDto(
-                1L,
-                "Name Vacancy",
-                "description",
-                1L,
-                getLongListIdForDto(),
-                PRE_SET_LOCAL_DATE_TIME,
-                PRE_SET_LOCAL_DATE_TIME,
-                1L,
-                1L,
-                VacancyStatus.OPEN,
-                100.00,
-                WorkSchedule.FULL_TIME,
-                3,
-                getLongListIdForDto());
+    private VacancyDto getUpdateVacancyDto() {
+        return VacancyDto.builder()
+                .id(1L)
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(PRE_SET_LOCAL_DATE_TIME)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .projectId(1L)
+                .candidates(getLongListIdForDto())
+                .build();
     }
 
-    public Project getProject(Long id) {
+    private Vacancy getUpdateVacancyResult() {
+        return Vacancy.builder()
+                .id(1L)
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(LocalDateTime.MIN)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(2L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .project(Project.builder().id(1L).build())
+                .build();
+    }
+
+    private Vacancy getUpdateVacancyInput() {
+        return Vacancy.builder()
+                .id(1L)
+                .name("Name Vacancy 1")
+                .description("description 1")
+                .createdAt(LocalDateTime.MIN)
+                .createdBy(2L)
+                .updatedAt(LocalDateTime.MIN)
+                .updatedBy(2L)
+                .status(VacancyStatus.POSTPONED)
+                .salary(150.00)
+                .workSchedule(WorkSchedule.SHIFT_WORK)
+                .count(4)
+                .project(Project.builder().id(2L).build())
+                .build();
+    }
+
+    private Vacancy getVacancyForTransferToDto() {
+        return Vacancy.builder()
+                .id(1L)
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(PRE_SET_LOCAL_DATE_TIME)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .project(getProject())
+                .candidates(getCandidates())
+                .requiredSkillIds(getLongListIdForDto())
+                .build();
+    }
+
+    private VacancyDto getVacancyDtoFromVacancyResult() {
+        return VacancyDto.builder()
+                .id(1L)
+                .name("Name Vacancy")
+                .description("description")
+                .createdAt(PRE_SET_LOCAL_DATE_TIME)
+                .updatedAt(PRE_SET_LOCAL_DATE_TIME)
+                .createdBy(1L)
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(100.00)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(3)
+                .projectId(1L)
+                .candidates(getLongListIdForDto())
+                .requiredSkillIds(getLongListIdForDto())
+                .build();
+    }
+
+    private Project getProject() {
         return new Project(
-                id,
+                1L,
                 "project name",
                 "project description",
                 null,
                 null,
-                id,
+                1L,
                 null,
                 null,
                 null,
@@ -141,7 +193,7 @@ class MapperVacationTest {
                 null);
     }
 
-    public List<Candidate> getCandidates() {
+    private List<Candidate> getCandidates() {
         return getLongListIdForDto().stream().map(id -> new Candidate(
                         id,
                         id,
@@ -152,7 +204,7 @@ class MapperVacationTest {
                 .toList();
     }
 
-    public List<Long> getLongListIdForDto() {
+    private List<Long> getLongListIdForDto() {
         return List.of(1L, 2L, 3L);
     }
 }

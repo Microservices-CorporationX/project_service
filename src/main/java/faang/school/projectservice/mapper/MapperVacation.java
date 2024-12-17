@@ -4,47 +4,47 @@ import faang.school.projectservice.dto.vacation.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.repository.CandidateRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public abstract class MapperVacation {
-    @Autowired
-    protected ProjectRepository projectRepository;
-    @Autowired
-    protected CandidateRepository candidateRepository;
+public interface MapperVacation {
 
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(target = "candidates", expression = "java(createCandidatesDto(vacancy.getCandidates()))")
-    public abstract VacancyDto vacancyToVacancyDTo(Vacancy vacancy);
+    @Mapping(target = "candidates", expression = "java(createCandidatesDto(vacancy))")
+    VacancyDto vacancyToVacancyDTo(Vacancy vacancy);
 
-    @Mapping(target = "candidates", expression = "java(createCandidatesVacancy(vacancyDto.id()))")
-    @Mapping(target = "project", expression = "java(createProjectVacancy(vacancyDto.projectId()))")
-    public abstract Vacancy vacancyDToToVacancy(VacancyDto vacancyDto);
+    @Mapping(target = "candidates", ignore = true)
+    @Mapping(target = "requiredSkillIds", ignore = true)
+    @Mapping(source = "projectId", target = "project.id")
+    Vacancy vacancyDToToVacancy(VacancyDto vacancyDto);
 
     @Mapping(target = "candidates", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "requiredSkillIds", ignore = true)
-    @Mapping(target = "project", expression = "java(createProjectVacancy(vacancyDto.projectId()))")
-    public abstract void update(VacancyDto vacancyDto, @MappingTarget Vacancy vacancy);
+    @Mapping(target = "project", expression = "java(createProjectForUpdate(vacancyDto, vacancy))")
+    void update(VacancyDto vacancyDto, @MappingTarget Vacancy vacancy);
 
-    List<Candidate> createCandidatesVacancy(Long vacancyId) {
-        return candidateRepository.findAllCandidateByVacancyId(vacancyId);
+    default List<Long> createCandidatesDto(Vacancy vacancy) {
+        return (vacancy == null || vacancy.getCandidates() == null)
+                ? null
+                : vacancy.getCandidates().stream().map(Candidate::getId).toList();
     }
 
-    Project createProjectVacancy(Long projectId) {
-        return projectRepository.findById(projectId);
-    }
-
-    List<Long> createCandidatesDto(List<Candidate> candidates) {
-        return candidates == null ? null : candidates.stream().map(Candidate::getId).toList();
+    default Project createProjectForUpdate(VacancyDto vacancyDto, Vacancy vacancy) {
+        if (vacancy == null) {
+            return null;
+        }
+        if (vacancyDto == null
+                || vacancyDto.projectId() == null
+                || vacancyDto.projectId().equals(vacancy.getProject().getId())) {
+            return vacancy.getProject();
+        }
+        return Project.builder().id(vacancyDto.id()).build();
     }
 }

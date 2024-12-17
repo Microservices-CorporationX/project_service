@@ -5,10 +5,11 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Builder
 public record VacancyDto(
     @Min(value = 1, message = "Value <vacancy id> has to be min 1")
     Long id,
