@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -27,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @Testcontainers
+@Sql(scripts = "/task-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class TaskControllerIntegrationTest {
 
     @Autowired
@@ -54,19 +54,16 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
-    @Sql("/task-test-data.sql")
     void getTask() {
         long taskId = 1L;
         long requesterId = 1L;
 
-        ResponseEntity<TaskDto> response = taskController.getTask(taskId, requesterId);
-        TaskDto result = response.getBody();
+        TaskDto result = taskController.getTask(taskId, requesterId);
 
         assertNotNull(result);
     }
 
     @Test
-    @Sql("/task-test-data.sql")
     public void createTaskTest() {
         long creatorId = 1L;
         CreateUpdateTaskDto taskDto = CreateUpdateTaskDto.builder()
@@ -82,8 +79,7 @@ class TaskControllerIntegrationTest {
                 .stageId(1L)
                 .build();
 
-        ResponseEntity<TaskDto> response = taskController.createTask(taskDto, creatorId);
-        TaskDto result = response.getBody();
+        TaskDto result = taskController.createTask(taskDto, creatorId);
         assert result != null;
         Task task = taskRepository.findById(result.getId()).orElseThrow(EntityNotFoundException::new);
         assertEquals(taskDto.getName(), task.getName());
@@ -95,7 +91,6 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
-    @Sql("/task-test-data.sql")
     public void updateTaskTest() {
         long updaterId = 1L;
         CreateUpdateTaskDto taskDto = CreateUpdateTaskDto.builder()
@@ -124,14 +119,12 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
-    @Sql("/task-test-data.sql")
     void getAllTasksTest() {
         long projectId = 1L;
         long requesterId = 1L;
         TaskFilterDto taskFilterDto = TaskFilterDto.builder().build();
 
-        ResponseEntity<List<TaskDto>> response = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
-        List<TaskDto> result = response.getBody();
+        List<TaskDto> result = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
 
         assert result != null;
         assertEquals(2, result.size());
