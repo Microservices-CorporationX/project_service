@@ -13,6 +13,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
+import faang.school.projectservice.validator.task.TaskValidator;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class TaskService {
     private final List<Filter<Task, TaskFilterDto>> filters;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    private final TaskValidator taskValidator;
     private final StageService stageService;
     private final ProjectService projectService;
     private final TeamMemberService teamMemberService;
@@ -38,6 +40,7 @@ public class TaskService {
 
     @Transactional
     public TaskDto createTask(CreateUpdateTaskDto taskDto, long creatorId) {
+        taskValidator.validateTaskIdIsNull(taskDto.getId());
         TaskDto savedTask = processTask(taskDto, creatorId);
         log.info("Task created by team member with id: {}", creatorId);
         return savedTask;
@@ -45,19 +48,20 @@ public class TaskService {
 
     @Transactional
     public TaskDto updateTask(CreateUpdateTaskDto taskDto, long updaterId) {
+        taskValidator.validateTaskIdIsNotNull(taskDto.getId());
         TaskDto updatedTask = processTask(taskDto, updaterId);
         log.info("Task with id: {}, updated by team member with id: {}", taskDto.getId(), updaterId);
         return updatedTask;
     }
 
-    @Transactional
+    @Transactional()
     public TaskDto getTask(long taskId, long requesterId) {
         Task task = findById(taskId);
         TeamMember taskRequester = teamMemberService.findById(requesterId);
         Project project = projectService.getProjectById(task.getProject().getId());
         teamMemberValidator.validateIsTeamMemberParticipantOfProject(taskRequester, project);
 
-        log.info("Getting task with id: {}, and requester id: {}", taskId, requesterId);
+        log.info("Getting task with id: {}, requester id: {}", taskId, requesterId);
         return taskMapper.toTaskDto(task);
     }
 

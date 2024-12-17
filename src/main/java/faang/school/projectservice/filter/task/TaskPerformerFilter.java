@@ -12,7 +12,8 @@ public class TaskPerformerFilter implements Filter<Task, TaskFilterDto> {
 
     @Override
     public boolean isApplicable(TaskFilterDto filterDto) {
-        return filterDto.getPerformerUserId() != null;
+        return filterDto != null &&
+                filterDto.getPerformerUserId() != null;
     }
 
     @Override

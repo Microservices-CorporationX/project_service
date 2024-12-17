@@ -16,6 +16,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.stage.StageService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
+import faang.school.projectservice.validator.task.TaskValidator;
 import faang.school.projectservice.validator.team_member.TeamMemberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ class TaskServiceTest {
     private TeamMemberValidator teamMemberValidator;
 
     @Mock
+    private TaskValidator taskValidator;
+
+    @Mock
     private Filter<Task, TaskFilterDto> filter;
 
     private TaskService taskService;
@@ -67,11 +71,10 @@ class TaskServiceTest {
     @BeforeEach
     void setUp() {
         taskMapper = new TaskMapperImpl();
-
         List<Filter<Task, TaskFilterDto>> filters = new ArrayList<>(List.of(filter));
 
-        taskService = new TaskService(filters, taskRepository, taskMapper, stageService,
-                projectService, teamMemberService, teamMemberValidator);
+        taskService = new TaskService(filters, taskRepository, taskMapper, taskValidator,
+                stageService, projectService, teamMemberService, teamMemberValidator);
     }
 
     @Test
@@ -83,7 +86,6 @@ class TaskServiceTest {
         ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
 
         CreateUpdateTaskDto taskDto = CreateUpdateTaskDto.builder()
-                .id(1L)
                 .name("name")
                 .description("description")
                 .status(TaskStatus.TODO)
@@ -102,7 +104,6 @@ class TaskServiceTest {
                 .id(taskDto.getProjectId())
                 .build();
         Task taskToSave = Task.builder()
-                .id(1L)
                 .name("name")
                 .description("description")
                 .status(TaskStatus.TODO)
@@ -115,6 +116,7 @@ class TaskServiceTest {
                 .stage(stage)
                 .build();
 
+        doNothing().when(taskValidator).validateTaskIdIsNull(taskDto.getId());
         when(teamMemberService.findById(teamMember.getId())).thenReturn(teamMember);
         when(projectService.getProjectById(project.getId())).thenReturn(project);
         doNothing().when(teamMemberValidator).
@@ -128,6 +130,7 @@ class TaskServiceTest {
 
         taskService.createTask(taskDto, taskCreator);
 
+        verify(taskValidator, times(1)).validateTaskIdIsNull(taskDto.getId());
         verify(teamMemberService, times(1)).findById(teamMember.getId());
         verify(projectService).getProjectById(project.getId());
         verify(teamMemberValidator).
@@ -181,6 +184,7 @@ class TaskServiceTest {
                 .stage(stage)
                 .build();
 
+        doNothing().when(taskValidator).validateTaskIdIsNotNull(taskDto.getId());
         when(teamMemberService.findById(teamMember.getId())).thenReturn(teamMember);
         when(projectService.getProjectById(project.getId())).thenReturn(project);
         doNothing().when(teamMemberValidator).
@@ -194,6 +198,7 @@ class TaskServiceTest {
 
         taskService.updateTask(taskDto, taskUpdater);
 
+        verify(taskValidator, times(1)).validateTaskIdIsNotNull(taskDto.getId());
         verify(teamMemberService, times(1)).findById(teamMember.getId());
         verify(projectService).getProjectById(project.getId());
         verify(teamMemberValidator).
@@ -331,17 +336,17 @@ class TaskServiceTest {
         when(taskRepository.findAllByProjectId(projectId)).
                 thenReturn(tasks);
         when(filter.isApplicable(taskFilterDto)).thenReturn(true);
-        when(filter.apply(any(),eq(taskFilterDto))).thenReturn(tasks.stream());
+        when(filter.apply(any(), eq(taskFilterDto))).thenReturn(tasks.stream());
 
-       List<TaskDto> result = taskService.getAllTasks(taskFilterDto,requesterId,projectId);
-       assertEquals(listTaskDto, result);
+        List<TaskDto> result = taskService.getAllTasks(taskFilterDto, requesterId, projectId);
+        assertEquals(listTaskDto, result);
 
-       verify(teamMemberService, times(1)).findById(requesterId);
-       verify(projectService, times(1)).getProjectById(projectId);
-       verify(teamMemberValidator,times(1)).
-               validateIsTeamMemberParticipantOfProject(teamMember, project);
-       verify(taskRepository, times(1)).findAllByProjectId(projectId);
-       verify(filter,times(1)).apply(any(),eq(taskFilterDto));
-       verify(filter,times(1)).apply(any(),eq(taskFilterDto));
+        verify(teamMemberService, times(1)).findById(requesterId);
+        verify(projectService, times(1)).getProjectById(projectId);
+        verify(teamMemberValidator, times(1)).
+                validateIsTeamMemberParticipantOfProject(teamMember, project);
+        verify(taskRepository, times(1)).findAllByProjectId(projectId);
+        verify(filter, times(1)).apply(any(), eq(taskFilterDto));
+        verify(filter, times(1)).apply(any(), eq(taskFilterDto));
     }
 }

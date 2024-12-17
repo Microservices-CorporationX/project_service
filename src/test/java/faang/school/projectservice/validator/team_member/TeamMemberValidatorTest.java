@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator.team_member;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
@@ -59,7 +59,7 @@ class TeamMemberValidatorTest {
         TeamMember teamMember = new TeamMember();
         teamMember.setStages(new ArrayList<>(List.of(anotherStage)));
 
-        assertThrows(DataValidationException.class,
+        assertThrows(ForbiddenException.class,
                 () -> teamMemberValidator.validateIsTeamMemberParticipantOfProject(
                         teamMember, stageInvitation));
     }
@@ -88,7 +88,7 @@ class TeamMemberValidatorTest {
                 .teams(new ArrayList<>(List.of(team)))
                 .build();
 
-        assertThrows(DataValidationException.class,
+        assertThrows(ForbiddenException.class,
                 () -> teamMemberValidator.validateIsTeamMemberParticipantOfProject(
                         teamMember, project));
     }

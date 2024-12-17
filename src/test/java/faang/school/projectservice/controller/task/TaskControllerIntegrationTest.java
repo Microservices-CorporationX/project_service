@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller.task;
 
+import faang.school.projectservice.ProjectServiceApplicationTests;
 import faang.school.projectservice.dto.task.CreateUpdateTaskDto;
 import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.dto.task.TaskFilterDto;
@@ -10,11 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
@@ -27,25 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 @Testcontainers
 @Sql(scripts = "/task-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class TaskControllerIntegrationTest {
+class TaskControllerIntegrationTest extends ProjectServiceApplicationTests {
 
     @Autowired
     private TaskController taskController;
 
     @Autowired
     private TaskRepository taskRepository;
-
-    @Container
-    public static PostgreSQLContainer<?> POSTGRESQL_CONTAINER =
-            new PostgreSQLContainer<>("postgres:13.3");
-
-    @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.driver-class-name", POSTGRESQL_CONTAINER::getDriverClassName);
-        registry.add("spring.datasource.url", POSTGRESQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRESQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", POSTGRESQL_CONTAINER::getPassword);
-    }
 
     @Test
     void connectionEstablished() {
@@ -61,6 +46,20 @@ class TaskControllerIntegrationTest {
         TaskDto result = taskController.getTask(taskId, requesterId);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void getAllTasksTest() {
+        long projectId = 1L;
+        long requesterId = 1L;
+        TaskFilterDto taskFilterDto = TaskFilterDto.builder().build();
+
+        List<TaskDto> result = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
+
+        assert result != null;
+        assertEquals(4, result.size());
+        assertEquals(1L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
     }
 
     @Test
@@ -107,7 +106,7 @@ class TaskControllerIntegrationTest {
                 .stageId(1L)
                 .build();
 
-        taskController.createTask(taskDto, updaterId);
+        taskController.updateTask(taskDto, updaterId);
 
         Task task = taskRepository.findById(2L).orElseThrow(EntityNotFoundException::new);
         assertEquals(taskDto.getName(), task.getName());
@@ -116,19 +115,5 @@ class TaskControllerIntegrationTest {
         assertEquals(taskDto.getParentTaskId(), task.getParentTask().getId());
         assertEquals(taskDto.getProjectId(), task.getProject().getId());
         assertEquals(taskDto.getStageId(), task.getStage().getStageId());
-    }
-
-    @Test
-    void getAllTasksTest() {
-        long projectId = 1L;
-        long requesterId = 1L;
-        TaskFilterDto taskFilterDto = TaskFilterDto.builder().build();
-
-        List<TaskDto> result = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
-
-        assert result != null;
-        assertEquals(2, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals(2L, result.get(1).getId());
     }
 }
