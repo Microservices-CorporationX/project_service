@@ -1,16 +1,13 @@
 package faang.school.projectservice.validator.team_member;
 
-import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ForbiddenException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +21,14 @@ public class TeamMemberValidator {
                 .noneMatch(stage -> stage.getProject().getId().equals(invitationProject.getId()));
 
         if (isNotParticipant) {
-            throw new DataValidationException("This team member is not participant of this project");
+            throw new ForbiddenException("This team member is not participant of this project");
+        }
+    }
+
+    public void validateIsTeamMemberParticipantOfProject(TeamMember teamMember, Project project) {
+        if (project.getTeams().stream()
+                .noneMatch(team -> team.getTeamMembers().contains(teamMember))) {
+            throw new ForbiddenException("This team member is not participant of this project");
         }
     }
 
@@ -34,5 +38,4 @@ public class TeamMemberValidator {
             throw new DataValidationException(message);
         }
     }
-
 }

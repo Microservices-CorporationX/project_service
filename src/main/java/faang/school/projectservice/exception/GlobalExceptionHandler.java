@@ -34,12 +34,6 @@ public class GlobalExceptionHandler {
         return buildResponse(e);
     }
 
-    @ExceptionHandler(StorageExceededException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleStorageExceededException(StorageExceededException e) {
-        return buildResponse(e);
-    }
-
     @ExceptionHandler(ServiceCallException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorResponse handleServiceCallException(ServiceCallException e) {
@@ -52,9 +46,9 @@ public class GlobalExceptionHandler {
         return buildResponse(e);
     }
 
-    @ExceptionHandler(ForbiddenException.class)
+    @ExceptionHandler({ForbiddenException.class,StorageExceededException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenException(ForbiddenException e) {
+    public ErrorResponse handleForbiddenStorageExceededExceptions(ForbiddenException e) {
         return buildResponse(e);
     }
 
