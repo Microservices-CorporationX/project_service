@@ -39,7 +39,7 @@ class S3ServiceImplTest {
     String key = "123456-1234-1234-12345678";
 
     @Test
-    void testToS3FileSuccess() {
+    void toS3FileSuccessTest() {
         String contentType = "jpg";
         InputStream inputStream = new ByteArrayInputStream(new byte[0]);
 
@@ -48,7 +48,7 @@ class S3ServiceImplTest {
     }
 
     @Test
-    void testToS3FileShouldThrowExceptionFail() {
+    void toS3FileShouldThrowExceptionFailTest() {
         String contentType = "jpg";
         InputStream inputStream = new ByteArrayInputStream(new byte[0]);
         String message = "Message: Saved fail.";
@@ -61,7 +61,7 @@ class S3ServiceImplTest {
     }
 
     @Test
-    void testFromS3FileSuccess() {
+    void fromS3FileSuccessTest() {
         S3Object s3Object = mock(S3Object.class);
         when(s3Client.getObject(anyString(), anyString())).thenReturn(s3Object);
 
@@ -70,7 +70,7 @@ class S3ServiceImplTest {
     }
 
     @Test
-    void testFromS3FileShouldThrowExceptionFail() {
+    void fromS3FileShouldThrowExceptionFailTest() {
         String message = "Message: Upload fail.";
         when(s3Client.getObject(anyString(), anyString())).thenThrow(new RuntimeException(message));
         FileWriteReadS3Exception exception = assertThrows(FileWriteReadS3Exception.class, () ->
@@ -79,13 +79,13 @@ class S3ServiceImplTest {
     }
 
     @Test
-    void deleteFile() {
+    void deleteFileSuccessTest() {
         s3ServiceImpl.deleteFile(bucketName, key);
         verify(s3Client, times(1)).deleteObject(bucketName, key);
     }
 
     @Test
-    void getKeyName() {
+    void getKeyNameSuccessTest() {
         String key = s3ServiceImpl.getKeyName();
 
         assertNotNull(key);

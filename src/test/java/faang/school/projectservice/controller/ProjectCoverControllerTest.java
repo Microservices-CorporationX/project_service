@@ -1,70 +1,103 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.config.context.UserHeaderFilter;
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.handler.ExceptionApiHandler;
 import faang.school.projectservice.service.ProjectCoverService;
+import faang.school.projectservice.service.s3.FileUploadConfig;
+import faang.school.projectservice.utilities.UrlUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+
+@WebMvcTest(ProjectCoverController.class)
+@Import({ProjectCoverController.class,
+        ExceptionApiHandler.class,
+        UserContext.class,
+        UserHeaderFilter.class,
+        FileUploadConfig.class})
 class ProjectCoverControllerTest {
 
-    @Mock
+    @MockBean
     ProjectCoverService projectCoverService;
-    @Mock
-    MultipartFile file;
 
-    @InjectMocks
-    ProjectCoverController projectCoverController;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    private MockMvc mockMvc;
 
+    private MockMultipartFile file;
     private final Long projectId = 1L;
     private final String key = "123456-0bcd-ef01-12345678";
+    private final String mainPartUrl = UrlUtils.MAIN_URL + UrlUtils.V1 + UrlUtils.PROJECT_COVER;
+    private ResourceDto resourceDto;
 
-    @Test
-    void testAddResourceSuccess() {
-        ResourceDto resourceDto = new ResourceDto(key);
-        when(projectCoverService.add(projectId, file)).thenReturn(resourceDto);
-
-        ResourceDto resourceDtoResult = projectCoverController.addResource(projectId, file);
-        assertEquals(resourceDto, resourceDtoResult);
-        verify(projectCoverService, times(1)).add(anyLong(), any());
+    @BeforeEach
+    void setUp() {
+        file = new MockMultipartFile(key,
+                "test.jpg",
+                "image/jpeg",
+                new byte[]{1, 2, 3, 4, 5});
+        resourceDto = new ResourceDto(key);
     }
 
     @Test
-    void testUploadResourceSuccess() {
-        byte[] bytes = new byte[]{1, 2, 3, 4, 5};
-        InputStream inputStream = new ByteArrayInputStream(bytes);
+    void addResourceSuccessTest() throws Exception {
+        when(projectCoverService.add(eq(projectId), any())).thenReturn(resourceDto);
+
+        mockMvc.perform(multipart(mainPartUrl + UrlUtils.PROJECT_COVER_ID, projectId)
+                        .file(file)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idImage").value(key));
+    }
+
+    @Test
+    @GetMapping
+    void uploadSuccessTest() throws Exception {
+        byte[] imageBytes = new byte[]{1, 2, 3, 4, 5};
+        InputStream inputStream = new ByteArrayInputStream(imageBytes);
         when(projectCoverService.upload(projectId)).thenReturn(inputStream);
 
-        ResponseEntity<byte[]> responseEntityResult = projectCoverController.uploadResource(projectId);
-
-        assertEquals(HttpStatus.OK, responseEntityResult.getStatusCode());
-        assertArrayEquals(bytes, responseEntityResult.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.get(mainPartUrl + UrlUtils.PROJECT_COVER_ID, projectId))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE))
+                .andExpect(content().bytes(imageBytes));
     }
 
     @Test
-    void testDeleteResourceSuccess() {
+    void deleteResourceSuccessTest() throws Exception {
         ResourceDto resourceDto = new ResourceDto(key);
         when(projectCoverService.delete(projectId)).thenReturn(resourceDto);
-
-        ResourceDto resourceDtoResult = projectCoverController.deleteResource(projectId);
-        assertEquals(resourceDto, resourceDtoResult);
-        verify(projectCoverService, times(1)).delete(anyLong());
+        mockMvc.perform(MockMvcRequestBuilders.delete(
+                        mainPartUrl + UrlUtils.PROJECT_COVER_ID, projectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idImage").value(key));
     }
 }

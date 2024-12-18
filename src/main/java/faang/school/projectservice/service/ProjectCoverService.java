@@ -8,7 +8,6 @@ import faang.school.projectservice.utilities.ImageConvert;
 import jakarta.validation.ValidationException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -61,21 +60,21 @@ public class ProjectCoverService {
         return new ResourceDto(key);
     }
 
-    public InputStream upload(Long idProject) {
-        log.info("Start upload a cover for the project: {}", idProject);
+    public InputStream upload(Long projectId) {
+        log.info("Start upload a cover for the project: {}", projectId);
 
-        Project project = projectRepository.getProjectById(idProject);
+        Project project = projectRepository.getProjectById(projectId);
         return s3Service.fromS3File(bucketName, project.getCoverImageId());
     }
 
-    public ResourceDto delete(Long idProject) {
-        log.info("Start delete a cover for the project: {}", idProject);
+    public ResourceDto delete(Long projectId) {
+        log.info("Start delete a cover for the project: {}", projectId);
 
-        Project project = projectRepository.getProjectById(idProject);
+        Project project = projectRepository.getProjectById(projectId);
         if (project.getCoverImageId() != null) {
             s3Service.deleteFile(bucketName, project.getCoverImageId());
         } else {
-            String message = String.format("The KeyId is Null for the project id %d", idProject);
+            String message = String.format("The KeyId is Null for the project id %d", projectId);
             log.error(message);
             throw new ValidationException(message);
         }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.exception.FileWriteReadS3Exception;
 import jakarta.validation.ValidationException;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.model.Project;
@@ -23,10 +24,12 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +71,7 @@ class ProjectCoverServiceTest {
     }
 
     @Test
-    void testAddSuccess() throws IOException {
+    void addSuccessTest() throws IOException {
         int targetImageSize = 100;
 
         String oldKey = folder + "/B234-1234-1234-12345678";
@@ -99,7 +102,31 @@ class ProjectCoverServiceTest {
     }
 
     @Test
-    void testUploadSuccess() {
+    void addFailTest() throws IOException {
+        int targetImageSize = 100;
+        String message = "Error add!";
+
+        String oldKey = folder + "/B234-1234-1234-12345678";
+        project.setCoverImageId(oldKey);
+
+        when(projectRepository.getProjectById(id)).thenReturn(project);
+        when(s3Service.getKeyName()).thenReturn(key);
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(file.getContentType()).thenReturn("jpg");
+        when(imageConvert.resizeImageJpg(file.getInputStream(),targetImageSize)).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+        doThrow( new FileWriteReadS3Exception(message)).when(s3Service).toS3File(
+                anyString(),
+                anyString(),
+                anyString(),
+                any());
+
+        FileWriteReadS3Exception exception  = assertThrows( FileWriteReadS3Exception.class, () -> projectCoverService.add(id, file));
+        assertEquals(message, exception.getMessage());
+    }
+
+    @Test
+    void uploadSuccessTest() {
         String newKey = folder + "/" + key;
 
         project.setCoverImageId(newKey);
@@ -113,7 +140,7 @@ class ProjectCoverServiceTest {
     }
 
     @Test
-    void testDeleteSuccess() {
+    void deleteSuccessTest() {
         String newKey = folder + "/" + key;
 
         project.setCoverImageId(newKey);
@@ -127,7 +154,7 @@ class ProjectCoverServiceTest {
     }
 
     @Test
-    void testDeleteFalse() {
+    void deleteFalseTest() {
         project.setCoverImageId(null);
 
         when(projectRepository.getProjectById(id)).thenReturn(project);
