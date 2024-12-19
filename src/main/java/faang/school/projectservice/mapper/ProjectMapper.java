@@ -1,27 +1,33 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.Team;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
-    @Mapping(target = "status", constant = "CREATED")
-    @Mapping(target = "ownerId", source = "requestUserId")
-    @Mapping(target = "visibility", source = "projectDto.visibility", defaultValue = "PUBLIC")
-    Project toEntity(ProjectDto projectDto, long requestUserId);
-
-    ProjectDto toDto(Project project);
-
+    @Mapping(target = "tasks", ignore = true)
+    @Mapping(target = "teams", ignore = true)
     Project toEntity(ProjectDto projectDto);
 
-    List<ProjectDto> toDtoList(List<Project> projectList);
+    @Mapping(source = "tasks", target = "taskIds", qualifiedByName = "tasksToIds")
+    @Mapping(source = "teams", target = "teamIds", qualifiedByName = "teamsToIds")
+    ProjectDto toDto(Project project);
 
-    List<Project> toProjectList(List<ProjectDto> projectDtoList);
+    @Named("tasksToIds")
+    default List<Long> tasksToIds(List<Task> taskList) {
+        return taskList.stream().map(Task::getId).toList();
+    }
+
+    @Named("teamsToIds")
+    default List<Long> teamsToIds(List<Team> teamList) {
+        return teamList.stream().map(Team::getId).toList();
+    }
 
 }
