@@ -87,6 +87,8 @@ val jacocoIncludePackagesList = listOf(
     "**/service/**",
     "**/mapper/**",
     "**/utilities/**"
+    "**/validation/**",
+    "**/filter/**"
 )
 val jacocoExcludePackAgeList = listOf(
     "**/model/**",

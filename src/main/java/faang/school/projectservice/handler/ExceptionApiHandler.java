@@ -47,8 +47,8 @@ public class ExceptionApiHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorMessage(exception.getMessage()));
     }
-
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
+  
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorMessage> handleMaxSizeException(MaxUploadSizeExceededException exception) {
         return ResponseEntity
                 .status(HttpStatus.PAYLOAD_TOO_LARGE)
