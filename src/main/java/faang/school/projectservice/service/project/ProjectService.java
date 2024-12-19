@@ -2,8 +2,8 @@ package faang.school.projectservice.service.project;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
-import faang.school.projectservice.dto.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -93,6 +93,10 @@ public class ProjectService {
                 .toList();
     }
 
+    public Project saveProject(Project project) {
+        return projectRepository.save(project);
+    }
+
     public ProjectDto getProjectById(long id) {
         return projectMapper.toProjectDto(projectRepository.getProjectById(id));
     }
@@ -133,6 +137,18 @@ public class ProjectService {
         return projectRepository.existsByOwnerUserIdAndName(userId, projectName);
     }
 
+    public boolean hasUserInProject(long projectId, long userId) {
+        Project project = projectRepository.getProjectById(projectId);
+
+        boolean userInTeam = project.getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream())
+                .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
+
+        boolean userIsOwnerProject = project.getOwnerId().equals(userId);
+
+        return userInTeam || userIsOwnerProject;
+    }
+
     private boolean isUserMemberOfPrivateProject(Project project, long userId) {
         if (project.getVisibility().equals(ProjectVisibility.PRIVATE)) {
             if (project.getTeams() != null) {
@@ -149,9 +165,6 @@ public class ProjectService {
 
     public Project getProjectEntityById(Long id) {
         return projectRepository.getProjectById(id);
-    }
-    public void saveProject(Project project){
-        projectRepository.save(project);
     }
 
     private boolean checkCancelledStatus(ProjectDto subProjectDto) {

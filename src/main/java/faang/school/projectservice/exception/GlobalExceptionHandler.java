@@ -1,5 +1,6 @@
 package faang.school.projectservice.exception;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import faang.school.projectservice.dto.ErrorDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -50,6 +51,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleIllegalStateException(IllegalStateException e) {
         log.error("IllegalStateException", e);
+        return new ErrorDto(e.getMessage());
+    }
+
+    @ExceptionHandler(GoogleJsonResponseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleGoogleJsonResponseException(GoogleJsonResponseException e) {
+        log.error("GoogleJsonResponseException", e);
         return new ErrorDto(e.getMessage());
     }
 }
