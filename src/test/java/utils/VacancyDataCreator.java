@@ -1,10 +1,7 @@
 package utils;
 
-import faang.school.projectservice.dto.vacation.FilterVacancyDto;
-import faang.school.projectservice.dto.vacation.VacancyDto;
-import faang.school.projectservice.filter.FilterVacancy;
-import faang.school.projectservice.filter.FilterVacancyName;
-import faang.school.projectservice.filter.FilterVacancySalary;
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
@@ -18,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VacationDataCreatorTest {
+public class VacancyDataCreator {
     public static final LocalDateTime PRE_SET_LOCAL_DATE_TIME = LocalDateTime.now();
 
     public static VacancyDto getSaveInputVacancyDto() {
@@ -57,24 +54,6 @@ public class VacationDataCreatorTest {
                 getLongList());
     }
 
-    public static VacancyDto getVacancyDtoMapperTest() {
-        return new VacancyDto(
-                2L,
-                "Name Vacancy 1",
-                "description 1",
-                1L,
-                getLongList(),
-                PRE_SET_LOCAL_DATE_TIME,
-                PRE_SET_LOCAL_DATE_TIME,
-                1L,
-                1L,
-                VacancyStatus.OPEN,
-                100.00,
-                WorkSchedule.FULL_TIME,
-                3,
-                getLongList());
-    }
-
     public static VacancyDto getSaveOutputVacancyDto(int numberElement) {
         return getVacancyDto(numberElement, VacancyStatus.OPEN);
     }
@@ -83,7 +62,7 @@ public class VacationDataCreatorTest {
         return getVacancyDto(numberElement, VacancyStatus.CLOSED);
     }
 
-    public static VacancyDto getVacancyDto(int numberElement, VacancyStatus vacancyStatus ) {
+    public static VacancyDto getVacancyDto(int numberElement, VacancyStatus vacancyStatus) {
         return new VacancyDto(
                 1L + numberElement,
                 "Name Vacancy " + numberElement,
@@ -133,6 +112,7 @@ public class VacationDataCreatorTest {
                         new Vacancy()))
                 .toList();
     }
+
     public static FilterVacancyDto getFilter() {
         return new FilterVacancyDto("1", 1.0);
     }
@@ -143,10 +123,6 @@ public class VacationDataCreatorTest {
             vacancyDtoList.add(getSaveOutputVacancyDto(i));
         }
         return vacancyDtoList;
-    }
-
-    public static List<FilterVacancy> setSetFilter() {
-        return List.of(new FilterVacancyName(), new FilterVacancySalary());
     }
 
     public static Project getServiceProject(Long id) {

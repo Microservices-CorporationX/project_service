@@ -21,11 +21,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,110 +43,110 @@ class ValidationVacanciesTest {
     private ValidationVacancies validationVacancies;
 
     @Test
-    void testHasToBeNotNullStringStringSuccess() {
-        assertDoesNotThrow(() -> validationVacancies.hasToBeNotNull("Value", "Message"));
+    void checkNotNullStringStringSuccessTest() {
+        assertDoesNotThrow(() -> validationVacancies.checkNotNull("Value", "Message"));
     }
 
     @Test
-    void testHasToBeNotNullLongStringSuccess() {
-        assertDoesNotThrow(() -> validationVacancies.hasToBeNotNull(1L, "Message"));
+    void checkNotNullLongStringSuccessTest() {
+        assertDoesNotThrow(() -> validationVacancies.checkNotNull(1L, "Message"));
     }
 
     @Test
-    void testHasToBeNotNullIntegerStringSuccess() {
-        assertDoesNotThrow(() -> validationVacancies.hasToBeNotNull(1, "Message"));
+    void checkNotNullIntegerStringSuccessTest() {
+        assertDoesNotThrow(() -> validationVacancies.checkNotNull(1, "Message"));
     }
 
     @Test
-    void testHasToBeNotNullStringStringThrowFail() {
-        assertThrows(ValidationException.class, () -> validationVacancies.hasToBeNotNull((String) null, "Message"));
+    void checkNotNullStringStringThrowFailTest() {
+        assertThrows(ValidationException.class, () -> validationVacancies.checkNotNull((String) null, "Message"));
     }
 
     @Test
-    void testHasToBeNotNullLongStringThrowFail() {
-        assertThrows(ValidationException.class, () -> validationVacancies.hasToBeNotNull((Long) null, "Message"));
+    void checkNotNullLongStringThrowFailTest() {
+        assertThrows(ValidationException.class, () -> validationVacancies.checkNotNull((Long) null, "Message"));
     }
 
     @Test
-    void testHasToBeNotNullIntegerStringThrowFail() {
-        assertThrows(ValidationException.class, () -> validationVacancies.hasToBeNotNull((Integer) null, "Message"));
+    void checkNotNullIntegerStringThrowFailTest() {
+        assertThrows(ValidationException.class, () -> validationVacancies.checkNotNull((Integer) null, "Message"));
     }
 
     @Test
-    void testHasToBeNullListLongStringSuccess() {
-        assertDoesNotThrow(() -> validationVacancies.hasToBeNull((List<Long>) null, "Message"));
+    void checkNullListLongStringSuccessTest() {
+        assertDoesNotThrow(() -> validationVacancies.checkNull((List<Long>) null, "Message"));
     }
 
     @Test
-    void testHasToBeNullListLongStringThrowFail() {
-        assertThrows(ValidationException.class, () -> validationVacancies.hasToBeNull(new ArrayList<>(), "Message"));
+    void checkNullListLongStringThrowFailTest() {
+        assertThrows(ValidationException.class, () -> validationVacancies.checkNull(new ArrayList<>(), "Message"));
     }
 
     @Test
-    void testHasToBeNullLongStringSuccess() {
-        assertDoesNotThrow(() -> validationVacancies.hasToBeNull((Long) null, "Message"));
+    void checkNullLongStringSuccessTest() {
+        assertDoesNotThrow(() -> validationVacancies.checkNull((Long) null, "Message"));
     }
 
     @Test
-    void testHasToBeNullLongStringThrowFail() {
-        assertThrows(ValidationException.class, () -> validationVacancies.hasToBeNull(1L, "Message"));
+    void checkNullLongStringThrowFailTest() {
+        assertThrows(ValidationException.class, () -> validationVacancies.checkNull(1L, "Message"));
     }
 
     @Test
-    void testIsProjectExistSuccess() {
+    void projectExistSuccessTest() {
         Long idProject = 1L;
         when(projectRepository.existsById(idProject)).thenReturn(true);
-        assertDoesNotThrow(() -> validationVacancies.isProjectExist(idProject));
+        assertDoesNotThrow(() -> validationVacancies.projectExist(idProject));
     }
 
     @Test
-    void testIsProjectExistIdNegativeThrowFail() {
+    void projectExistIdNegativeThrowFailTestTest() {
         Long idProject = -1L;
-        assertThrows(ValidationException.class, () -> validationVacancies.isProjectExist(idProject));
+        assertThrows(ValidationException.class, () -> validationVacancies.projectExist(idProject));
     }
 
     @Test
-    void testIsProjectExistIdNotFoundThrowFail() {
+    void projectExistIdNotFoundThrowFailTest() {
         Long idProject = 1L;
         when(projectRepository.existsById(idProject)).thenReturn(false);
-        assertThrows(ValidationException.class, () -> validationVacancies.isProjectExist(idProject));
+        assertThrows(ValidationException.class, () -> validationVacancies.projectExist(idProject));
     }
 
     @Test
-    void testIsVacancyExistSuccess() {
+    void vacancyExistSuccessTest() {
         Long idVacancy = 1L;
         when(vacancyRepository.existsById(idVacancy)).thenReturn(true);
-        assertDoesNotThrow(() -> validationVacancies.isVacancyExist(idVacancy));
+        assertDoesNotThrow(() -> validationVacancies.vacancyExist(idVacancy));
     }
 
     @Test
-    void testIsVacancyExistIdNegativeThrowFail() {
+    void vacancyExistIdNegativeThrowFailTest() {
         Long idVacancy = 0L;
-        assertThrows(ValidationException.class, () -> validationVacancies.isVacancyExist(idVacancy));
+        assertThrows(ValidationException.class, () -> validationVacancies.vacancyExist(idVacancy));
     }
 
     @Test
-    void testIsVacancyExistIdNotFoundThrowFail() {
+    void vacancyExistIdNotFoundThrowFailTest() {
         Long idVacancy = 1L;
-        assertThrows(ValidationException.class, () -> validationVacancies.isVacancyExist(idVacancy));
+        assertThrows(ValidationException.class, () -> validationVacancies.vacancyExist(idVacancy));
     }
 
     @Test
-    void testNumberCandidatesForCloserSuccess() {
+    void numberCandidatesForCloserSuccessTest() {
         List<Candidate> candidateList = List.of(new Candidate(), new Candidate(), new Candidate());
         Integer necessaryNumberCandidates = 2;
         assertDoesNotThrow(() -> validationVacancies.numberCandidatesForCloser(candidateList, necessaryNumberCandidates));
     }
 
     @Test
-    void testNumberCandidatesForCloserNullCandidateListFail() {
+    void numberCandidatesForCloserNullCandidateListFailTest() {
         Integer numberCandidates = 3;
         assertThrows(ValidationException.class, () ->
                 validationVacancies.numberCandidatesForCloser(null, numberCandidates));
     }
 
     @Test
-    void testNumberCandidatesForCloserNotEnoughCandidatesFail() {
+    void numberCandidatesForCloserNotEnoughCandidatesFailTest() {
         List<Candidate> candidateList = List.of(new Candidate(), new Candidate());
         Integer numberCandidates = 3;
         assertThrows(ValidationException.class, () ->
@@ -156,7 +154,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testPersonHasNecessaryRoleNoTeamMemberFail() {
+    void personHasNecessaryRoleNoTeamMemberFailTest() {
         long idPersonBy = 1L;
         long projectId = 1L;
         String nameUser = "User1";
@@ -169,7 +167,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testPersonHasNecessaryRoleNoNecessaryRolesFail() {
+    void personHasNecessaryRoleNoNecessaryRolesFailTest() {
         long idPersonBy = 1L;
         long projectId = 1L;
         String nameUser = "User2";
@@ -186,7 +184,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testPersonHasNecessaryRoleSuccess() {
+    void personHasNecessaryRoleSuccessTest() {
         long idPersonBy = 1L;
         long projectId = 1L;
         List<TeamRole> tpmTeamRoleList = List.of(TeamRole.MANAGER, TeamRole.DESIGNER);
@@ -201,7 +199,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testProjectRepositoryExistSuccess() {
+    void projectRepositoryExistSuccessTest() {
         when(projectRepository.existsById(1L)).thenReturn(true);
         projectRepository.existsById(1L);
         verify(projectRepository, times(1)).existsById(1L);
@@ -211,7 +209,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testVacancyRepositoryExistSuccess() {
+    void vacancyRepositoryExistSuccessTest() {
         when(vacancyRepository.existsById(1L)).thenReturn(true);
         vacancyRepository.existsById(1L);
         verify(vacancyRepository, times(1)).existsById(1L);
@@ -221,7 +219,7 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testTeamMemberRepositoryExistSuccess() {
+    void teamMemberRepositoryExistSuccessTest() {
         when(teamMemberRepository.findById(1L)).thenReturn(new TeamMember());
         teamMemberRepository.findById(1L);
         verify(teamMemberRepository, times(1)).findById(1L);
@@ -231,24 +229,24 @@ class ValidationVacanciesTest {
     }
 
     @Test
-    void testToStringSuccess() {
+    void toStringSuccessTest() {
         assertNotNull(validationVacancies.toString());
     }
 
     @Test
-    void testEqualsSuccess() {
+    void equalsSuccessTest() {
         ValidationVacancies v1 = new ValidationVacancies(projectRepository, vacancyRepository, teamMemberRepository);
         ValidationVacancies v2 = new ValidationVacancies(projectRepository, vacancyRepository, teamMemberRepository);
         ValidationVacancies v3 = new ValidationVacancies(null, vacancyRepository, teamMemberRepository);
-        assertTrue(v1.equals(v2));
-        assertTrue(validationVacancies.equals(validationVacancies));
-        assertFalse(v1.equals(v3));
-        assertFalse(validationVacancies.equals(null));
-        assertFalse(validationVacancies.equals(new Object()));
+        assertEquals(v1, v2);
+        assertEquals(validationVacancies, validationVacancies);
+        assertNotEquals(v1, v3);
+        assertNotNull(validationVacancies);
+        assertNotNull(validationVacancies);
     }
 
     @Test
-    void testHashCodeSuccess() {
+    void hashCodeSuccessTest() {
         ValidationVacancies v1 = new ValidationVacancies(null, null, null);
         ValidationVacancies v2 = new ValidationVacancies(null, null, null);
         assertEquals(v1.hashCode(), v2.hashCode());

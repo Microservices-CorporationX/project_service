@@ -1,9 +1,9 @@
 package faang.school.projectservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.projectservice.dto.vacation.FilterVacancyDto;
-import faang.school.projectservice.dto.vacation.VacancyDto;
-import faang.school.projectservice.service.VacationService;
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.service.VacancyService;
 import faang.school.projectservice.utilities.UrlUtils;
 import faang.school.projectservice.validation.ValidationVacancies;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import utils.VacationDataCreatorTest;
+import utils.VacancyDataCreator;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ class VacancyControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Mock
-    private VacationService vacationService;
+    private VacancyService vacancyService;
     @Mock
     private ValidationVacancies validationVacancies;
     @InjectMocks
@@ -54,10 +54,10 @@ class VacancyControllerTest {
 
     @Test
     void testSaveSuccess() throws Exception {
-        VacancyDto vacancyDtoInput = VacationDataCreatorTest.getSaveInputVacancyDto();
-        VacancyDto vacancyDtoOutput = VacationDataCreatorTest.getSaveOutputVacancyDto(1);
+        VacancyDto vacancyDtoInput = VacancyDataCreator.getSaveInputVacancyDto();
+        VacancyDto vacancyDtoOutput = VacancyDataCreator.getSaveOutputVacancyDto(1);
 
-        when(vacationService.saveVacation(vacancyDtoInput)).
+        when(vacancyService.saveVacancy(vacancyDtoInput)).
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -76,7 +76,7 @@ class VacancyControllerTest {
                 .andExpect(jsonPath("$.count").value(vacancyDtoOutput.count()))
                 .andExpect(jsonPath("$.workSchedule").value(vacancyDtoOutput.workSchedule().name()))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).saveVacation(vacancyDtoInput);
+        verify(vacancyService, times(1)).saveVacancy(vacancyDtoInput);
     }
 
     @Test
@@ -90,15 +90,15 @@ class VacancyControllerTest {
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
-        verify(vacationService, times(0)).saveVacation(vacancyDtoInput);
+        verify(vacancyService, times(0)).saveVacancy(vacancyDtoInput);
     }
 
     @Test
     void testUpdateSuccess() throws Exception {
-        VacancyDto vacancyDtoInput = VacationDataCreatorTest.getSaveOutputVacancyDto(1);
-        VacancyDto vacancyDtoOutput = VacationDataCreatorTest.getSaveOutputVacancyDto(1);
+        VacancyDto vacancyDtoInput = VacancyDataCreator.getSaveOutputVacancyDto(1);
+        VacancyDto vacancyDtoOutput = VacancyDataCreator.getSaveOutputVacancyDto(1);
 
-        when(vacationService.updateVacation(vacancyDtoInput)).
+        when(vacancyService.updateVacancy(vacancyDtoInput)).
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -117,7 +117,7 @@ class VacancyControllerTest {
                 .andExpect(jsonPath("$.count").value(vacancyDtoOutput.count()))
                 .andExpect(jsonPath("$.workSchedule").value(vacancyDtoOutput.workSchedule().name()))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).updateVacation(vacancyDtoInput);
+        verify(vacancyService, times(1)).updateVacancy(vacancyDtoInput);
     }
 
     @Test
@@ -131,15 +131,15 @@ class VacancyControllerTest {
                         .content(objectMapper.writeValueAsString(vacancyDtoInput)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
-        verify(vacationService, times(0)).updateVacation(vacancyDtoInput);
+        verify(vacancyService, times(0)).updateVacancy(vacancyDtoInput);
     }
 
     @Test
     void testDeleteSuccess() throws Exception {
-        VacancyDto vacancyDtoInput = VacationDataCreatorTest.getDeleteInputVacancyDto();
-        VacancyDto vacancyDtoOutput = VacationDataCreatorTest.getSaveOutputVacancyDto(1);
+        VacancyDto vacancyDtoInput = VacancyDataCreator.getDeleteInputVacancyDto();
+        VacancyDto vacancyDtoOutput = VacancyDataCreator.getSaveOutputVacancyDto(1);
 
-        when(vacationService.deleteVacation(vacancyDtoInput.id())).
+        when(vacancyService.deleteVacancy(vacancyDtoInput.id())).
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -158,8 +158,8 @@ class VacancyControllerTest {
                 .andExpect(jsonPath("$.count").value(vacancyDtoOutput.count()))
                 .andExpect(jsonPath("$.workSchedule").value(vacancyDtoOutput.workSchedule().name()))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).deleteVacation(vacancyDtoInput.id());
-        verify(validationVacancies, times(1)).isVacancyExist(vacancyDtoInput.id());
+        verify(vacancyService, times(1)).deleteVacancy(vacancyDtoInput.id());
+        verify(validationVacancies, times(1)).vacancyExist(vacancyDtoInput.id());
     }
 
     @Test
@@ -177,10 +177,10 @@ class VacancyControllerTest {
 
     @Test
     void testGetVacancyByIdSuccess() throws Exception {
-        VacancyDto vacancyDtoInput = VacationDataCreatorTest.getDeleteInputVacancyDto();
-        VacancyDto vacancyDtoOutput = VacationDataCreatorTest.getSaveOutputVacancyDto(1);
+        VacancyDto vacancyDtoInput = VacancyDataCreator.getDeleteInputVacancyDto();
+        VacancyDto vacancyDtoOutput = VacancyDataCreator.getSaveOutputVacancyDto(1);
 
-        when(vacationService.getVacancyById(vacancyDtoInput.id())).
+        when(vacancyService.getVacancyById(vacancyDtoInput.id())).
                 thenReturn(vacancyDtoOutput);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -199,7 +199,7 @@ class VacancyControllerTest {
                 .andExpect(jsonPath("$.count").value(vacancyDtoOutput.count()))
                 .andExpect(jsonPath("$.workSchedule").value(vacancyDtoOutput.workSchedule().name()))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).getVacancyById(vacancyDtoInput.id());
+        verify(vacancyService, times(1)).getVacancyById(vacancyDtoInput.id());
     }
 
     @Test
@@ -217,10 +217,10 @@ class VacancyControllerTest {
 
     @Test
     void testFilterSuccess() throws Exception {
-        List<VacancyDto> vacancyDtoList = VacationDataCreatorTest.getListVacancyDto(3);
-        FilterVacancyDto filterVacancyDto = VacationDataCreatorTest.getFilter();
+        List<VacancyDto> vacancyDtoList = VacancyDataCreator.getListVacancyDto(3);
+        FilterVacancyDto filterVacancyDto = VacancyDataCreator.getFilter();
 
-        when(vacationService.findByFilter(filterVacancyDto)).
+        when(vacancyService.findByFilter(filterVacancyDto)).
                 thenReturn(vacancyDtoList);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -234,15 +234,15 @@ class VacancyControllerTest {
                 .andExpect(jsonPath("$.[1].id").value(vacancyDtoList.get(1).id()))
                 .andExpect(jsonPath("$.[2].id").value(vacancyDtoList.get(2).id()))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).findByFilter(filterVacancyDto);
+        verify(vacancyService, times(1)).findByFilter(filterVacancyDto);
     }
 
     @Test
     void testFilterNullOutputSuccess() throws Exception {
         List<VacancyDto> vacancyDtoList = null;
-        FilterVacancyDto filterVacancyDto = VacationDataCreatorTest.getFilter();
+        FilterVacancyDto filterVacancyDto = VacancyDataCreator.getFilter();
 
-        when(vacationService.findByFilter(filterVacancyDto)).
+        when(vacancyService.findByFilter(filterVacancyDto)).
                 thenReturn(vacancyDtoList);
 
         mockMvc.perform(MockMvcRequestBuilders.
@@ -253,6 +253,6 @@ class VacancyControllerTest {
                 .andDo(print())
                 .andExpect(content().string(""))
                 .andExpect(status().isOk());
-        verify(vacationService, times(1)).findByFilter(filterVacancyDto);
+        verify(vacancyService, times(1)).findByFilter(filterVacancyDto);
     }
 }

@@ -1,9 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.vacation.FilterVacancyDto;
-import faang.school.projectservice.dto.vacation.VacancyDto;
+import faang.school.projectservice.dto.vacancy.FilterVacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.filter.FilterVacancy;
-import faang.school.projectservice.mapper.MapperVacation;
+import faang.school.projectservice.mapper.MapperVacancy;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
@@ -19,29 +19,29 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VacationService {
+public class VacancyService {
     private final VacancyExtraRepository vacancyExtraRepository;
-    private final MapperVacation mapperVacation;
+    private final MapperVacancy mapperVacancy;
     private final ValidationVacancies validationVacancies;
     private final CandidateService candidateService;
     private final List<FilterVacancy> filter;
     public final static List<CandidateStatus> CANDIDATE_STATUS_DELETE = List.of(CandidateStatus.WAITING_RESPONSE, CandidateStatus.REJECTED);
 
-    public VacancyDto saveVacation(VacancyDto vacancyDto) {
-        log.info("saveVacation, vacancyDto:{} ", vacancyDto);
+    public VacancyDto saveVacancy(VacancyDto vacancyDto) {
+        log.info("saveVacancy, vacancyDto:{} ", vacancyDto);
 
-        validationVacancies.isProjectExist(vacancyDto.projectId());
+        validationVacancies.projectExist(vacancyDto.projectId());
         validationVacancies.personHasNecessaryRole(vacancyDto.createdBy(), "createdBy", vacancyDto.projectId());
         validationVacancies.personHasNecessaryRole(vacancyDto.updatedBy(), "updatedBy", vacancyDto.projectId());
 
-        return mapperVacation.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository().save(mapperVacation.vacancyDToToVacancy(vacancyDto)));
+        return mapperVacancy.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository().save(mapperVacancy.vacancyDToToVacancy(vacancyDto)));
     }
 
-    public VacancyDto updateVacation(VacancyDto vacancyDto) {
-        log.info("updateVacation, vacancyDto:{} ", vacancyDto);
+    public VacancyDto updateVacancy(VacancyDto vacancyDto) {
+        log.info("updateVacancy, vacancyDto:{} ", vacancyDto);
 
-        validationVacancies.isVacancyExist(vacancyDto.id());
-        validationVacancies.isProjectExist(vacancyDto.projectId());
+        validationVacancies.vacancyExist(vacancyDto.id());
+        validationVacancies.projectExist(vacancyDto.projectId());
         validationVacancies.personHasNecessaryRole(vacancyDto.createdBy(), "createdBy", vacancyDto.projectId());
         validationVacancies.personHasNecessaryRole(vacancyDto.updatedBy(), "updatedBy", vacancyDto.projectId());
 
@@ -50,14 +50,14 @@ public class VacationService {
             validationVacancies.numberCandidatesForCloser(tempVacancy.getCandidates(), tempVacancy.getCount());
         }
 
-        mapperVacation.update(vacancyDto, tempVacancy);
+        mapperVacancy.update(vacancyDto, tempVacancy);
 
-        return mapperVacation.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository().save(tempVacancy));
+        return mapperVacancy.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository().save(tempVacancy));
     }
 
-    public VacancyDto deleteVacation(Long id) {
-        log.info("deleteVacation, id:{} ", id);
-        VacancyDto tempVacancyDto = mapperVacation.vacancyToVacancyDTo(vacancyExtraRepository.findById(id));
+    public VacancyDto deleteVacancy(Long id) {
+        log.info("deleteVacancy, id:{} ", id);
+        VacancyDto tempVacancyDto = mapperVacancy.vacancyToVacancyDTo(vacancyExtraRepository.findById(id));
         tempVacancyDto.candidates()
                 .forEach(idCandidate -> CANDIDATE_STATUS_DELETE
                         .forEach(candidateStatus -> candidateService.deleteCandidateByIdByStatus(idCandidate, candidateStatus)));
@@ -75,13 +75,13 @@ public class VacationService {
                 .reduce(vacancyExtraRepository.getVacancyRepository().findAll().stream(),
                         (vacancyStream, filter1) -> filter1.apply(vacancyStream, filterVacancyDto),
                         (vacancyStream, vacancyStream2) -> vacancyStream)
-                .map(mapperVacation::vacancyToVacancyDTo)
+                .map(mapperVacancy::vacancyToVacancyDTo)
                 .toList();
     }
 
     public VacancyDto getVacancyById(Long id) {
         log.info("getVacancyById, id:{} ", id);
-        return mapperVacation.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository()
+        return mapperVacancy.vacancyToVacancyDTo(vacancyExtraRepository.getVacancyRepository()
                 .findById(id).orElseThrow(() -> new ValidationException(String.format("There is not vacancy with id %s", id))));
     }
 }

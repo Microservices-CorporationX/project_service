@@ -1,4 +1,3 @@
-/*
 insert into project(id, name, description, parent_project_id, storage_size,max_storage_size, owner_id, created_at ,
                     updated_at,    status, visibility, cover_image_id)
 VALUES (1,
@@ -47,8 +46,6 @@ VALUES (1,
         100,
         'FULL_TIME',
         1);
-
-*/
 insert into candidate( user_id, resume_doc_key, cover_letter, candidate_status, vacancy_id)
 values (1, 'resume_doc_key 1', 'cover_letter 1', 'WAITING_RESPONSE', 1 );
 

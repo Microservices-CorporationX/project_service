@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto.vacation;
+package faang.school.projectservice.dto.vacancy;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import faang.school.projectservice.model.VacancyStatus;

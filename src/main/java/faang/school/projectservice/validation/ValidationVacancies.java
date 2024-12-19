@@ -23,28 +23,28 @@ public class ValidationVacancies {
     private final VacancyRepository vacancyRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    public void hasToBeNotNull(String parameterValue, String nameFieldForMessage) {
+    public void checkNotNull(String parameterValue, String nameFieldForMessage) {
         if (parameterValue == null) {
             log.error(String.format("%s can not be null. Current is: null", nameFieldForMessage));
             throw new ValidationException(String.format("%s can not be null. Current is: null", nameFieldForMessage));
         }
     }
 
-    public void hasToBeNotNull(Long parameterValue, String nameFieldForMessage) {
+    public void checkNotNull(Long parameterValue, String nameFieldForMessage) {
         if (parameterValue == null) {
             log.error(String.format("%s can not be null. Current is: null", nameFieldForMessage));
             throw new ValidationException(String.format("%s can not be null. Current is: null", nameFieldForMessage));
         }
     }
 
-    public void hasToBeNotNull(Integer parameterValue, String nameFieldForMessage) {
+    public void checkNotNull(Integer parameterValue, String nameFieldForMessage) {
         if (parameterValue == null) {
             log.error(String.format("%s can not be null. Current is: null", nameFieldForMessage));
             throw new ValidationException(String.format("%s can not be null. Current is: null", nameFieldForMessage));
         }
     }
 
-    public void hasToBeNull(Long parameterValue, String nameFieldForMessage) {
+    public void checkNull(Long parameterValue, String nameFieldForMessage) {
         if (parameterValue != null) {
             log.error(String.format("%s has to be null or absent. Current is: %s", nameFieldForMessage, parameterValue));
             throw new ValidationException(String.format("%s has to be null or absent. Current is: %s",
@@ -53,7 +53,7 @@ public class ValidationVacancies {
         }
     }
 
-    public void hasToBeNull(List<Long> parameterValue, String nameFieldForMessage) {
+    public void checkNull(List<Long> parameterValue, String nameFieldForMessage) {
         if (parameterValue != null) {
             log.error(String.format("%s has to be null or absent. Current is: %s", nameFieldForMessage, parameterValue));
             throw new ValidationException(String.format("%s has to be null or absent. Current is: %s",
@@ -62,14 +62,14 @@ public class ValidationVacancies {
         }
     }
 
-    public void isProjectExist(Long idProject) {
+    public void projectExist(Long idProject) {
         if (idProject <= 0 || !projectRepository.existsById(idProject)) {
             log.error(String.format("There is not project with id %s", idProject));
             throw new ValidationException(String.format("There is not project with id %s", idProject));
         }
     }
 
-    public void isVacancyExist(Long idVacancy) {
+    public void vacancyExist(Long idVacancy) {
         if (!vacancyRepository.existsById(idVacancy)) {
             log.error(String.format("There is not vacancy with id %s", idVacancy));
             throw new ValidationException(String.format("There is not vacancy with id %s", idVacancy));

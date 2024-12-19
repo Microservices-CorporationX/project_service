@@ -29,13 +29,13 @@ class CandidateServiceTest {
         Candidate candidate = new Candidate();
         when(candidateRepository.findById(idCandidate)).thenReturn(Optional.of(candidate));
 
-        VacationService.CANDIDATE_STATUS_DELETE.forEach(candidateStatus -> {
+        VacancyService.CANDIDATE_STATUS_DELETE.forEach(candidateStatus -> {
             candidate.setCandidateStatus(candidateStatus);
             candidateService.deleteCandidateByIdByStatus(idCandidate,
                     candidateStatus);
         });
         verify(candidateRepository,
-                times(VacationService.CANDIDATE_STATUS_DELETE.size()))
+                times(VacancyService.CANDIDATE_STATUS_DELETE.size()))
                 .deleteById(idCandidate);
     }
 
@@ -44,7 +44,7 @@ class CandidateServiceTest {
         Long idCandidate = 2L;
         when(candidateRepository.findById(idCandidate)).thenReturn(Optional.empty());
         candidateService.deleteCandidateByIdByStatus(idCandidate,
-                VacationService.CANDIDATE_STATUS_DELETE.get(0));
+                VacancyService.CANDIDATE_STATUS_DELETE.get(0));
         verify(candidateRepository, times(0)).deleteById(idCandidate);
     }
 
@@ -54,7 +54,7 @@ class CandidateServiceTest {
         Candidate candidate = new Candidate();
         when(candidateRepository.findById(idCandidate)).thenReturn(Optional.of(candidate));
         candidateService.deleteCandidateByIdByStatus(idCandidate,
-                VacationService.CANDIDATE_STATUS_DELETE.get(0));
+                VacancyService.CANDIDATE_STATUS_DELETE.get(0));
         verify(candidateRepository, times(0)).deleteById(idCandidate);
     }
 

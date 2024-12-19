@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.vacation.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
@@ -12,7 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MapperVacation {
+public interface MapperVacancy {
 
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(target = "candidates", expression = "java(createCandidatesDto(vacancy))")

@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.vacation.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.Project;
@@ -21,27 +21,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith(MockitoExtension.class)
-class MapperVacationTest {
+class MapperVacancyTest {
     public static final LocalDateTime PRE_SET_LOCAL_DATE_TIME = LocalDateTime.now();
 
     @InjectMocks
-    private MapperVacationImpl mapperVacation;
+    private MapperVacancyImpl mapperVacancy;
 
     @Test
     void vacancyToVacancyDToSuccessTest() {
-        assertEquals(getVacancyDtoFromVacancyResult(), mapperVacation.vacancyToVacancyDTo(getVacancyForTransferToDto()));
+        assertEquals(getVacancyDtoFromVacancyResult(), mapperVacancy.vacancyToVacancyDTo(getVacancyForTransferToDto()));
     }
 
     @Test
     void tVacancyDToToVacancySuccessTest() {
-        Vacancy vacancy = mapperVacation.vacancyDToToVacancy(getCreateVacancyDto());
+        Vacancy vacancy = mapperVacancy.vacancyDToToVacancy(getCreateVacancyDto());
         assertEquals(getCreateVacancy(), vacancy);
     }
 
     @Test
     void updateSuccessTest() {
         Vacancy vacancy = getUpdateVacancyInput();
-        mapperVacation.update(getUpdateVacancyDto(), vacancy);
+        mapperVacancy.update(getUpdateVacancyDto(), vacancy);
         assertEquals(getUpdateVacancyResult(), vacancy);
     }
 
