@@ -12,12 +12,17 @@ import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -70,38 +75,84 @@ public class S3ServiceImpl implements S3Service {
                 .build();
     }
 
-//    @Override
-//    public Resource uploadFile(MultipartFile file, String folder) {
-//        long fileSize = file.getSize();
-//        ObjectMetadata objectMetadata = new ObjectMetadata();
-//        objectMetadata.setContentLength(fileSize);
-//        objectMetadata.setContentType(file.getContentType());
-//        String key = String.format("%s/xd%s%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
-//
-//        try {
-//            PutObjectRequest putObjectRequest = new PutObjectRequest(
-//                    bucketName,
-//                    key,
-//                    file.getInputStream(),
-//                    objectMetadata
-//            );
-//            s3Client.putObject(putObjectRequest);
-//        } catch (Exception e) {
-//            log.error(e.getMessage());
-//            throw new FileException(ErrorMessage.FILE_EXCEPTION);
-//        }
-//
-//        Resource resource = new Resource();
-//        resource.setKey(key);
-//        resource.setSize(BigInteger.valueOf(fileSize));
-//        resource.setCreatedAt(LocalDateTime.now());
-//        resource.setUpdatedAt(LocalDateTime.now());
-//        resource.setStatus(ResourceStatus.ACTIVE);
-//        resource.setType(ResourceType.getResourceType(file.getContentType()));
-//        resource.setName(file.getOriginalFilename());
-//
-//        return resource;
-//    }
+    @Override
+    public String uploadCover(MultipartFile file) {
+        try {
+            BufferedImage originalImage = ImageIO.read(file.getInputStream());
+            if (originalImage == null) {
+                throw new FileException(ErrorMessage.INVALID_IMAGE_FILE);
+            }
+
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+
+            BufferedImage resizedImage = originalImage;
+
+            if (width > height) {
+                if (width > 1080 || height > 566) {
+                    resizedImage = Thumbnails.of(originalImage)
+                            .size(1080, 566)
+                            .asBufferedImage();
+                }
+            } else {
+                if (width > 1080 || height > 1080) {
+                    resizedImage = Thumbnails.of(originalImage)
+                            .size(1080, 1080)
+                            .asBufferedImage();
+                }
+            }
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            String formatName = getFormatName(file.getContentType());
+            ImageIO.write(resizedImage, formatName, os);
+            byte[] imageBytes = os.toByteArray();
+
+            long fileSize = imageBytes.length;
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(fileSize);
+            objectMetadata.setContentType(file.getContentType());
+
+            String sanitizedFileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String key = String.format("cover-images/xd%s-%s", System.currentTimeMillis(), sanitizedFileName);
+
+            log.info("Uploaded cover image to MinIO with key: {}", key);
+
+            addInCloud(imageBytes, key, objectMetadata);
+
+            return key;
+
+        } catch (IOException e) {
+            log.error("Error processing the image: {}", e.getMessage());
+            throw new FileException(ErrorMessage.FILE_EXCEPTION, e);
+        } catch (Exception e) {
+            log.error("Error uploading the image: {}", e.getMessage());
+            throw new FileException(ErrorMessage.FILE_EXCEPTION, e);
+        }
+    }
+
+    private void addInCloud(byte[] imageBytes, String key, ObjectMetadata objectMetadata) {
+        try (InputStream inputStream = new ByteArrayInputStream(imageBytes)) {
+            PutObjectRequest putObjectRequest = new PutObjectRequest(
+                    bucketName,
+                    key,
+                    inputStream,
+                    objectMetadata
+            );
+            s3Client.putObject(putObjectRequest);
+        } catch (IOException | AmazonServiceException e) {
+            log.error("Failed to uploadCover file to S3: {}", e.getMessage());
+            throw new FileException(ErrorMessage.FILE_EXCEPTION, e);
+        }
+    }
+
+    private String getFormatName(String contentType) {
+        return switch (contentType) {
+            case "image/jpeg" -> "jpg";
+            case "image/png" -> "png";
+            case "image/gif" -> "gif";
+            default -> "jpg";
+        };
+    }
 
     @Override
     public void deleteFile(String key) {

@@ -3,7 +3,7 @@ package faang.school.projectservice.exception;
 import lombok.Getter;
 
 @Getter
-public class FileException extends RuntimeException{
+public class FileException extends RuntimeException {
     private final ErrorMessage errorMessage;
 
     public FileException(ErrorMessage errorMessage) {

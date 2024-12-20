@@ -9,4 +9,5 @@ public interface S3Service {
     Resource uploadFile(MultipartFile file, String folder);
     void deleteFile(String key);
     InputStream downloadFile(String key);
+    String uploadCover(MultipartFile file);
 }

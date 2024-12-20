@@ -3,13 +3,12 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.exception.ErrorMessage;
+import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.exception.SizeExceeded;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import feign.FeignException;
@@ -22,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,6 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
     private final UserServiceClient userServiceClient;
     private final ResourceRepository resourceRepository;
-    private final TeamMemberJpaRepository teamMemberDpaRepository;
 
     @Transactional
     public ResourceDto addResource(Long projectId, MultipartFile file) {
@@ -56,6 +54,39 @@ public class ResourceService {
         log.info("The project with {}id has been successfully saved in repository", project.getId());
 
         return resourceMapper.toDto(resource);
+    }
+
+    public String uploadProjectCover(Long projectId, MultipartFile file) {
+        validateImageFile(file);
+
+        String key = s3Service.uploadCover(file);
+
+        Project project = projectRepository.getProjectById(projectId);
+
+        if (project.getCoverImageId() != null && !project.getCoverImageId().isEmpty()) {
+            s3Service.deleteFile(project.getCoverImageId());
+            log.info("Deleted old cover image with key: {}", project.getCoverImageId());
+        }
+
+        project.setCoverImageId(key);
+        projectRepository.save(project);
+
+        return key;
+    }
+
+    private void validateImageFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new FileException(ErrorMessage.FILE_NOT_PROVIDED);
+        }
+
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new FileException(ErrorMessage.FILE_SIZE_EXCEEDED);
+        }
+
+        String contentType = Objects.requireNonNull(file.getContentType(), "File content type is missing.");
+        if (!contentType.startsWith("image/")) {
+            throw new FileException(ErrorMessage.INVALID_FILE_TYPE);
+        }
     }
 
     @Transactional
@@ -83,20 +114,6 @@ public class ResourceService {
         BigInteger newSize = project.getStorageSize().subtract(resource.getSize());
         project.setStorageSize(newSize);
     }
-
-    @Transactional(readOnly = true)
-    public List<ResourceDto> getAvailableResources(long projectId, Long userId) {
-        TeamMember teamMember = teamMemberDpaRepository.findByUserIdAndProjectId(userId, projectId);
-        Project project = projectRepository.getProjectById(projectId);
-//        return getAllAvailable(project, teamMember);
-        return null;
-    }
-
-//    private List<ResourceDto> getAllAvailable(Project project, TeamMember teamMember) {
-//        // Логика для получения всех доступных ресурсов для проекта и участника команды
-////        List<Resource> resources = resourceRepository.findAllByProjectAndTeamMember(project, teamMember);
-//        return resourceMapper.toDto(resources);
-//    }
 
     @Transactional
     public ResourceDto updateResource(Long resourceId, Long userId, MultipartFile file) {

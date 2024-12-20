@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ import java.util.List;
 @Builder
 @Schema(name = "Project")
 @AllArgsConstructor
-@NoArgsConstructor
 public class ProjectDto {
     @Schema(name = "Id")
     private Long id;
