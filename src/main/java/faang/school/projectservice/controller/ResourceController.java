@@ -5,7 +5,7 @@ import faang.school.projectservice.dto.ResourceDto;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceType;
-import faang.school.projectservice.service.ResourceService;
+import faang.school.projectservice.service.resource.ResourceServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import java.io.InputStream;
 @Slf4j
 public class ResourceController {
 
-    private final ResourceService resourceService;
+    private final ResourceServiceImpl resourceService;
     private final UserContext userContext;
     private final ResourceRepository resourceRepository;
 
