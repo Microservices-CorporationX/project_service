@@ -1,2 +1,13 @@
 calculations_messages_processing:
   enabled: false
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: user
+    password: password
+  liquibase:
+    enabled: true
+    contexts: test
+    change-log: classpath:/db/changelog/db.changelog-test.yaml
