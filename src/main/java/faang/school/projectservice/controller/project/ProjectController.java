@@ -10,8 +10,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -37,7 +44,7 @@ public class ProjectController {
     }
 
     @PostMapping("/filtered")
-    public List<ProjectDto> findWithFilters(@RequestBody @NonNull ProjectFilterDto filters) {
+    public List<ProjectDto> findWithFilters(@RequestBody @NonNull @Valid ProjectFilterDto filters) {
         return projectService.findWithFilters(filters);
     }
 
@@ -47,12 +54,12 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull Long id) {
+    public ResponseEntity<ProjectDto> findById(@PathVariable @NonNull @Positive Long id) {
         return projectService.findById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("{projectId}/filterChildren")
-    public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody ProjectFilterDto filterDto, @PathVariable@Positive @NotNull Long projectId){
+    public ResponseEntity<List<CreateSubProjectDto>> getProjectsByFilters(@RequestBody @Valid ProjectFilterDto filterDto, @PathVariable @Positive @NotNull Long projectId) {
         return ResponseEntity.ok(projectService.getProjectsByFilters(projectId, filterDto));
     }
 }
