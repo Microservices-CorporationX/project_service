@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.stageinvitation;
 
 import faang.school.projectservice.dto.RejectionDto;
+import faang.school.projectservice.dto.invitation.InviteSentEvent;
 import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.invitation.StageInvitationFilterDto;
 import faang.school.projectservice.filters.stageinvitation.StageInvitationFilter;
@@ -10,6 +11,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
+import faang.school.projectservice.publisher.invite.InvitePublisher;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import faang.school.projectservice.validator.stageinvitation.StageInvitationValidator;
@@ -30,6 +32,7 @@ public class StageInvitationServiceImpl implements StageInvitationService {
     private final StageInvitationMapper invitationMapper;
     private final StageInvitationValidator invitationValidator;
     private final List<StageInvitationFilter> invitationFilters;
+    private final InvitePublisher invitePublisher;
 
     @Override
     public StageInvitationDto sendStageInvitation(StageInvitationDto stageInvitationDto) {
@@ -52,6 +55,8 @@ public class StageInvitationServiceImpl implements StageInvitationService {
                 .invited(invited)
                 .build();
         invitationRepository.save(stageInvitation);
+
+        invitePublisher.publish(new InviteSentEvent(authorId, invitedId, stage.getProject().getId()));
 
         log.info("successful invitation creation with id: {}", stageInvitation.getId());
         return invitationMapper.toDto(stageInvitation);
