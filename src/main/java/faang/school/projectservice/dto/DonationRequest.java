@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DonationRequest {
-    private Long userId;
     private Long projectId;
     private Long amount;
 }

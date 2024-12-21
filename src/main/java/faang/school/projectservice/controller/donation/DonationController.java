@@ -17,6 +17,12 @@ public class DonationController {
 
     @PostMapping("/donate")
     public ResponseEntity<String> donate(@RequestBody DonationRequest donationRequest) {
-        return donationService.donate(donationRequest);
+        boolean isSuccessful = donationService.donate(donationRequest);
+
+        if (isSuccessful) {
+            return ResponseEntity.ok("Donation successful");
+        } else {
+            return ResponseEntity.status(500).body("Donation failed");
+        }
     }
 }

@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.donation;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.DonationRequest;
 import faang.school.projectservice.dto.FundRaisedEvent;
 import faang.school.projectservice.publisher.FundRaisedEventPublisher;
@@ -13,16 +14,17 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class DonationService {
     private final FundRaisedEventPublisher fundRaisedEventPublisher;
+    private final UserContext userContext;
 
-    public ResponseEntity<String> donate(DonationRequest donationRequest) {
+    public boolean donate(DonationRequest donationRequest) {
         FundRaisedEvent event = new FundRaisedEvent(
-                donationRequest.getUserId(),
+                userContext.getUserId(),
                 donationRequest.getProjectId(),
                 donationRequest.getAmount(),
                 LocalDateTime.now()
         );
 
         fundRaisedEventPublisher.publish(event);
-        return ResponseEntity.ok("Donation successful");
+        return true;
     }
 }

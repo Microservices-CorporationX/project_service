@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.donation;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.DonationRequest;
 import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import org.junit.jupiter.api.Test;
@@ -22,19 +23,22 @@ public class DonationServiceTest {
     @Mock
     private FundRaisedEventPublisher fundRaisedEventPublisher;
 
+    @Mock
+    private UserContext userContext;
+
     @Test
     void testDonate() {
-        DonationRequest donationRequest = new DonationRequest(123L, 456L, 150L);
+        DonationRequest donationRequest = new DonationRequest(456L, 150L);
 
-        ResponseEntity<String> response = donationService.donate(donationRequest);
+        boolean response = donationService.donate(donationRequest);
 
         verify(fundRaisedEventPublisher, times(1)).publish(argThat(event ->
-                event.getUserId().equals(donationRequest.getUserId()) &&
+                event.getUserId().equals(userContext.getUserId()) &&
                 event.getProjectId().equals(donationRequest.getProjectId()) &&
                 event.getPaymentAmount().equals(donationRequest.getAmount()) &&
                 event.getLocalDateTime() != null
         ));
 
-        assertEquals("Donation successful", response.getBody());
+        assertEquals(true, response);
     }
 }

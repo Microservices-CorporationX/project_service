@@ -34,9 +34,9 @@ public class DonationControllerTest {
 
     @Test
     void testDonateSuccess() throws Exception {
-        DonationRequest donationRequest = new DonationRequest(123L, 456L, 150L);
+        DonationRequest donationRequest = new DonationRequest(456L, 150L);
 
-        when(donationService.donate(donationRequest)).thenReturn(ResponseEntity.ok("Donation successful"));
+        when(donationService.donate(donationRequest)).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/donations/donate")
                 .contentType(MediaType.APPLICATION_JSON)
