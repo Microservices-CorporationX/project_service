@@ -9,6 +9,8 @@ import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.ResourceService;
 import faang.school.projectservice.service.s3.S3Service;
@@ -16,12 +18,16 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -44,7 +50,7 @@ public class ResourceServiceImpl implements ResourceService {
         log.info("The file {} has been successfully verified for add", file.getOriginalFilename());
 
         String folder = project.getId() + project.getName();
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = getResource(file, folder);
 
         resource.setProject(project);
         resource = resourceRepository.save(resource);
@@ -55,6 +61,20 @@ public class ResourceServiceImpl implements ResourceService {
         log.info("The project with {}id has been successfully saved in repository", project.getId());
 
         return resourceMapper.toDto(resource);
+    }
+
+    private Resource getResource(MultipartFile file, String folder) {
+        String key = s3Service.uploadFile(file, folder);
+
+        return Resource.builder()
+                .key(key)
+                .size(BigInteger.valueOf(file.getSize()))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .status(ResourceStatus.ACTIVE)
+                .type(ResourceType.getResourceType(file.getContentType()))
+                .name(file.getOriginalFilename())
+                .build();
     }
 
     @Transactional
@@ -98,6 +118,36 @@ public class ResourceServiceImpl implements ResourceService {
         return s3Service.downloadFile(resource.getKey());
     }
 
+    public HttpHeaders getHeaders(Long resourceId) {
+        Resource resource = resourceRepository.findById(resourceId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Resource with %s id not found", resourceId)));
+        MediaType mediaType = getMediaTypeForResourceType(resource.getType());
+
+        long contentLength = resource.getSize().longValue();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(mediaType);
+        headers.setContentLength(contentLength);
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(resource.getName())
+                .build());
+        return headers;
+    }
+
+    private MediaType getMediaTypeForResourceType(ResourceType resourceType) {
+        return switch (resourceType) {
+            case PDF -> MediaType.APPLICATION_PDF;
+            case IMAGE -> MediaType.IMAGE_JPEG;
+            case VIDEO -> MediaType.valueOf("video/mp4");
+            case AUDIO -> MediaType.valueOf("audio/mpeg");
+            case MSWORD -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            case MSEXCEL -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            case TEXT -> MediaType.TEXT_PLAIN;
+            default -> MediaType.APPLICATION_OCTET_STREAM;
+        };
+    }
+
     @Transactional
     public void deleteResource(long resourceId, long userId) {
         try {
@@ -132,7 +182,8 @@ public class ResourceServiceImpl implements ResourceService {
         String folder = project.getId() + project.getName();
         s3Service.deleteFile(resourceFromDB.getKey());
 
-        Resource resource = s3Service.uploadFile(file, folder);
+        Resource resource = getResource(file, folder);
+
         resourceFromDB.setKey(resource.getKey());
         resourceFromDB.setSize(resource.getSize());
         resourceFromDB.setUpdatedAt(resource.getUpdatedAt());

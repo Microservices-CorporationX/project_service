@@ -7,9 +7,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.FileException;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.model.ResourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -25,8 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Slf4j
@@ -41,7 +36,7 @@ public class S3ServiceImpl implements S3Service {
     private String bucketName;
 
     @Override
-    public Resource uploadFile(MultipartFile file, String folder) {
+    public String uploadFile(MultipartFile file, String folder) {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
@@ -64,15 +59,7 @@ public class S3ServiceImpl implements S3Service {
             throw new FileException(ErrorMessage.FILE_EXCEPTION, e);
         }
 
-        return Resource.builder()
-                .key(key)
-                .size(BigInteger.valueOf(fileSize))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .status(ResourceStatus.ACTIVE)
-                .type(ResourceType.getResourceType(file.getContentType()))
-                .name(file.getOriginalFilename())
-                .build();
+        return key;
     }
 
     @Override
@@ -83,24 +70,7 @@ public class S3ServiceImpl implements S3Service {
                 throw new FileException(ErrorMessage.INVALID_IMAGE_FILE);
             }
 
-            int width = originalImage.getWidth();
-            int height = originalImage.getHeight();
-
-            BufferedImage resizedImage = originalImage;
-
-            if (width > height) {
-                if (width > 1080 || height > 566) {
-                    resizedImage = Thumbnails.of(originalImage)
-                            .size(1080, 566)
-                            .asBufferedImage();
-                }
-            } else {
-                if (width > 1080 || height > 1080) {
-                    resizedImage = Thumbnails.of(originalImage)
-                            .size(1080, 1080)
-                            .asBufferedImage();
-                }
-            }
+            BufferedImage resizedImage = getBufferedImage(originalImage);
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             String formatName = getFormatName(file.getContentType());
@@ -128,6 +98,28 @@ public class S3ServiceImpl implements S3Service {
             log.error("Error uploading the image: {}", e.getMessage());
             throw new FileException(ErrorMessage.FILE_EXCEPTION, e);
         }
+    }
+
+    private static BufferedImage getBufferedImage(BufferedImage originalImage) throws IOException {
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+
+        BufferedImage resizedImage = originalImage;
+
+        if (width > height) {
+            if (width > 1080 || height > 566) {
+                resizedImage = Thumbnails.of(originalImage)
+                        .size(1080, 566)
+                        .asBufferedImage();
+            }
+        } else {
+            if (width > 1080 || height > 1080) {
+                resizedImage = Thumbnails.of(originalImage)
+                        .size(1080, 1080)
+                        .asBufferedImage();
+            }
+        }
+        return resizedImage;
     }
 
     private void addInCloud(byte[] imageBytes, String key, ObjectMetadata objectMetadata) {

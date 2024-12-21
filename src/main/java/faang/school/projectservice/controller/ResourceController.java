@@ -2,18 +2,12 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
-import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.service.resource.ResourceServiceImpl;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,43 +30,17 @@ public class ResourceController {
 
     private final ResourceServiceImpl resourceService;
     private final UserContext userContext;
-    private final ResourceRepository resourceRepository;
 
     @GetMapping("/{resourceId}")
     public ResponseEntity<InputStreamResource> downloadResource(@PathVariable Long resourceId) {
-            Resource resource = resourceRepository.findById(resourceId)
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            String.format("Resource with %s id not found", resourceId)));
-            InputStream inputStream = resourceService.downloadResource(resourceId);
-            InputStreamResource resourceStream = new InputStreamResource(inputStream);
+        InputStream inputStream = resourceService.downloadResource(resourceId);
+        InputStreamResource resourceStream = new InputStreamResource(inputStream);
 
-            MediaType mediaType = getMediaTypeForResourceType(resource.getType());
+        HttpHeaders headers = resourceService.getHeaders(resourceId);
 
-            long contentLength = resource.getSize().longValue();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(mediaType);
-            headers.setContentLength(contentLength);
-            headers.setContentDisposition(ContentDisposition.builder("attachment")
-                    .filename(resource.getName())
-                    .build());
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resourceStream);
-    }
-
-    private MediaType getMediaTypeForResourceType(ResourceType resourceType) {
-        return switch (resourceType) {
-            case PDF -> MediaType.APPLICATION_PDF;
-            case IMAGE -> MediaType.IMAGE_JPEG;
-            case VIDEO -> MediaType.valueOf("video/mp4");
-            case AUDIO -> MediaType.valueOf("audio/mpeg");
-            case MSWORD -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            case MSEXCEL -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            case TEXT -> MediaType.TEXT_PLAIN;
-            default -> MediaType.APPLICATION_OCTET_STREAM;
-        };
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resourceStream);
     }
 
     @DeleteMapping("/{resourceId}")
