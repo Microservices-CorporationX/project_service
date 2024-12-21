@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.events.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
 import faang.school.projectservice.mapper.project.SubProjectMapperImpl;
@@ -12,6 +13,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.update.ProjectUpdate;
@@ -69,6 +71,9 @@ public class ProjectServiceTest {
     @Mock
     private ProjectFilter filter;
 
+    @Mock
+    private ProjectViewEventPublisher projectViewEventPublisher;
+
     private List<ProjectUpdate> projectUpdates;
 
     private List<ProjectFilter> projectFilters;
@@ -86,7 +91,7 @@ public class ProjectServiceTest {
         List<ProjectFilter> projectFilters = List.of(filter, filter);
         List<ProjectUpdate> projectUpdates = List.of(projectUpdate, projectUpdate);
 
-        projectService = new ProjectService(projectRepository, subProjectMapper, projectMapper, projectUpdates, projectFilters, projectValidator, userContext);
+        projectService = new ProjectService(projectRepository, subProjectMapper, projectMapper, projectUpdates, projectFilters, projectValidator, userContext, projectViewEventPublisher);
     }
 
     @Test
@@ -250,6 +255,27 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectById(0L)).thenThrow(new EntityNotFoundException());
         assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(0L));
     }
+
+    @Test
+    public void testGetProjectByIdWithUserIdSuccessful() {
+        Project project = new Project();
+        project.setId(1L);
+
+        when(projectRepository.getProjectById(project.getId())).thenReturn(project);
+        ProjectDto result = projectService.getProjectById(project.getId(), 1L);
+
+        verify(projectViewEventPublisher, times(1)).publish(any(ProjectViewEvent.class));
+        assertEquals(project.getId(), result.getId());
+    }
+
+    @Test
+    public void testGetProjectByIdWithUserFailed() {
+        when(projectRepository.getProjectById(0L)).thenThrow(new EntityNotFoundException());
+        verify(projectViewEventPublisher, times(0)).publish(any(ProjectViewEvent.class));
+        assertThrows(EntityNotFoundException.class, () -> projectService.getProjectById(0L));
+    }
+
+
 
     @Test
     public void testGetAllProjectsSuccessfulWhenUserIsTeamMember() {

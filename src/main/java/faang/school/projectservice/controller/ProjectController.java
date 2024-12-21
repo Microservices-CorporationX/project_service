@@ -1,5 +1,6 @@
 package faang.school.projectservice.controller;
 
+import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,7 @@ import java.util.List;
 @Tag(name = "Контроллер для управления проектами")
 public class ProjectController {
     private final ProjectService projectService;
+    private final UserContext userContext;
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить проект по id")
@@ -43,7 +45,8 @@ public class ProjectController {
                     content = @Content)})
     public ProjectDto getProjectById(@Parameter(description = "id проекта который хотим получить")
                                      @PathVariable long id) {
-        return projectService.getProjectById(id);
+        long userId = userContext.getUserId();
+        return projectService.getProjectById(id, userId);
     }
 
     @GetMapping
