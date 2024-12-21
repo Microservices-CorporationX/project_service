@@ -22,7 +22,6 @@ public class UserDto {
 
     @NotBlank(message = "Username should not be blank")
     @Size(max = 255, message = "Username should not exceed 255 characters")
-
     private String username;
     private String aboutMe;
 

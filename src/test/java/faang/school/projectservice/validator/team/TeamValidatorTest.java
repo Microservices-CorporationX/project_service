@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.dto.team.TeamDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.UserNotFoundException;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +59,7 @@ public class TeamValidatorTest {
     void testValidateIfUserNotFound() {
         when(userServiceClient.getUser(1L)).thenThrow(FeignException.NotFound.class);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
                 () -> teamValidator.validateAuthor(1L));
 
         assertEquals("User with given ID does not exist.", exception.getMessage());

@@ -29,7 +29,7 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "team")
     @Column(name = "team_member_id")
     private List<TeamMember> teamMembers;
 

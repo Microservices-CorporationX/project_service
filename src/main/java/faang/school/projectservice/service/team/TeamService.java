@@ -46,11 +46,8 @@ public class TeamService {
         teamMemberRepository.saveAll(teamMembers);
         log.info("The team with ID {} was created.", team.getId());
 
-        teamEventPublisher.publish(new TeamEvent(
-                team.getId(),
-                team.getAuthorId(),
-                team.getProject().getId(),
-                LocalDateTime.now()));
+        publishTeamCreationEvent(team);
+
         return teamMapper.toDto(team);
     }
 
@@ -65,5 +62,13 @@ public class TeamService {
                 .orElseThrow(() -> new DataValidationException(String.format("Team doesn't exist by id: %s", teamId)));
         log.info("The request for a team by ID {} was successful", teamId);
         return teamMapper.toDto(team);
+    }
+
+    private void publishTeamCreationEvent(Team team) {
+        teamEventPublisher.publish(new TeamEvent(
+                team.getId(),
+                team.getAuthorId(),
+                team.getProject().getId(),
+                LocalDateTime.now()));
     }
 }

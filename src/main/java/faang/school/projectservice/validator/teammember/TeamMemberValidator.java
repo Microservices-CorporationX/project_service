@@ -4,6 +4,7 @@ import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.teammember.TeamMemberDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.UserNotFoundException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,18 +29,11 @@ public class TeamMemberValidator {
                 .distinct()
                 .toList();
 
-        if (userIds.isEmpty()) {
-            return;
-        }
-
         try {
             List<UserDto> users = userServiceClient.getUsersByIds(userIds);
         } catch (FeignException.NotFound e) {
             log.error("User does not exist: {}", e.getMessage());
-            throw new DataValidationException("User with given ID does not exist.");
-        } catch (Exception e) {
-            log.error("An error occurred while validating users: {}", e.getMessage());
-            throw new DataValidationException("An error occurred during user validation.");
+            throw new UserNotFoundException("User with given ID does not exist.");
         }
     }
 }
