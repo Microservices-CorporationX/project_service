@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.ResourceDto;
-import faang.school.projectservice.service.resource.ResourceServiceImpl;
+import faang.school.projectservice.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -28,7 +28,7 @@ import java.io.InputStream;
 @Slf4j
 public class ResourceController {
 
-    private final ResourceServiceImpl resourceService;
+    private final ResourceService resourceService;
     private final UserContext userContext;
 
     @GetMapping("/{resourceId}")
