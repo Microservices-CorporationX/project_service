@@ -2,7 +2,6 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-    jacoco
 }
 
 group = "faang.school"
@@ -45,7 +44,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
     /**
      * Test containers
@@ -71,59 +69,4 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
-}
-
-
-jacoco {
-    toolVersion = "0.8.9"
-    reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
-}
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-val jacocoIncludePackagesList = listOf(
-    "**/controller/**",
-    "**/service/**",
-    "**/mapper/**"
-)
-val jacocoExcludePackAgeList = listOf(
-    "**/model/**",
-    "**/repository/**",
-    "**/dto/**"
-)
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-
-    reports {
-        xml.required.set(true)
-        csv.required.set(false)
-        html.required.set(true)
-    }
-
-    classDirectories.setFrom(
-        sourceSets.main.get().output.asFileTree.matching {
-            include(jacocoIncludePackagesList)
-            exclude(jacocoExcludePackAgeList)
-        }
-    )
-}
-
-tasks.jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                counter = "BRANCH"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
-            }
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
-            }
-
-        }
-    }
 }

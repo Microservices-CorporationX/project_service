@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS meet (
     status VARCHAR(16) NOT NULL,
     title VARCHAR(128) NOT NULL,
     description VARCHAR(512) NOT NULL,
+    starts_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_meet_project FOREIGN KEY (project_id) REFERENCES project (id),
