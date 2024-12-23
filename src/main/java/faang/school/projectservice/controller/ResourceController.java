@@ -1,13 +1,19 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.dto.resource.ExtendedResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.service.ResourceService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,14 +39,11 @@ public class ResourceController {
 
     @GetMapping("/{resourceId}")
     public ResponseEntity<InputStreamResource> downloadResource(@PathVariable Long resourceId) {
-        InputStream inputStream = resourceService.downloadResource(resourceId);
-        InputStreamResource resourceStream = new InputStreamResource(inputStream);
-
-        HttpHeaders headers = resourceService.getHeaders(resourceId);
+        ExtendedResourceDto resourceDto = resourceService.downloadResource(resourceId);
 
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(resourceStream);
+                .headers(resourceDto.getHeaders())
+                .body(resourceDto.getResourceStream());
     }
 
     @DeleteMapping("/{resourceId}")

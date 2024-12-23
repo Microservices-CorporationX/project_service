@@ -1,7 +1,8 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.dto.resource.ExtendedResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.ErrorMessage;
 import faang.school.projectservice.exception.FileException;
 import faang.school.projectservice.exception.SizeExceeded;
@@ -18,6 +19,7 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -112,18 +114,13 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Transactional
-    public InputStream downloadResource(Long resourceId) {
+    public ExtendedResourceDto downloadResource(Long resourceId) {
         Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new EntityNotFoundException("Resource with " + resourceId + " id not found"));
-        return s3Service.downloadFile(resource.getKey());
-    }
-
-    public HttpHeaders getHeaders(Long resourceId) {
-        Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Resource with %s id not found", resourceId)));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Resource with " + resourceId + " id not found"));
+        InputStream inputStream = s3Service.downloadFile(resource.getKey());
+        InputStreamResource resourceStream = new InputStreamResource(inputStream);
         MediaType mediaType = getMediaTypeForResourceType(resource.getType());
-
         long contentLength = resource.getSize().longValue();
 
         HttpHeaders headers = new HttpHeaders();
@@ -132,7 +129,11 @@ public class ResourceServiceImpl implements ResourceService {
         headers.setContentDisposition(ContentDisposition.builder("attachment")
                 .filename(resource.getName())
                 .build());
-        return headers;
+
+        return ExtendedResourceDto.builder()
+                .resourceStream(resourceStream)
+                .headers(headers)
+                .build();
     }
 
     private MediaType getMediaTypeForResourceType(ResourceType resourceType) {
