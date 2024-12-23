@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 @Testcontainers
 @Sql(scripts = "/task-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class TaskControllerIntegrationTest extends ProjectServiceApplicationTests {
+class TaskControllerIT extends ProjectServiceApplicationTests {
 
     @Autowired
     private TaskController taskController;
@@ -56,7 +56,7 @@ class TaskControllerIntegrationTest extends ProjectServiceApplicationTests {
 
         List<TaskDto> result = taskController.getAllTasks(taskFilterDto, projectId, requesterId);
 
-        assert result != null;
+        assertNotNull(result);
         assertEquals(4, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());

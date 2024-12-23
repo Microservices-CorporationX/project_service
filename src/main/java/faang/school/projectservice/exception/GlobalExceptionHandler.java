@@ -46,9 +46,15 @@ public class GlobalExceptionHandler {
         return buildResponse(e);
     }
 
-    @ExceptionHandler({ForbiddenException.class,StorageExceededException.class})
+    @ExceptionHandler({ForbiddenException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenStorageExceededExceptions(ForbiddenException e) {
+    public ErrorResponse handleForbiddenException(ForbiddenException e) {
+        return buildResponse(e);
+    }
+
+    @ExceptionHandler(StorageExceededException.class)
+    @ResponseStatus(HttpStatus.INSUFFICIENT_STORAGE)
+    public ErrorResponse handleStorageExceededException(StorageExceededException e) {
         return buildResponse(e);
     }
 
