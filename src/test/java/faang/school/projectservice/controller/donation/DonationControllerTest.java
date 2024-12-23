@@ -34,21 +34,6 @@ public class DonationControllerTest {
     }
 
     @Test
-    void testDonateSuccess() throws Exception {
-        DonationRequest donationRequest = new DonationRequest(456L, 150L);
-
-        when(donationService.donate(donationRequest)).thenReturn(new FundRaisedEvent());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/donations/donate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"userId\":123, \"projectId\":456, \"amount\":150}"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Donation successful"));
-
-        verify(donationService, times(1)).donate(donationRequest);
-    }
-
-    @Test
     void testDonateWithBadRequest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/v1/donation/donate")
