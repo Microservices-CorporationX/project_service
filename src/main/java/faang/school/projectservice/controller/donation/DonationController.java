@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.donation;
 
 import faang.school.projectservice.dto.DonationRequest;
+import faang.school.projectservice.dto.FundRaisedEvent;
 import faang.school.projectservice.service.donation.DonationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,9 @@ public class DonationController {
     private final DonationService donationService;
 
     @PostMapping("/donate")
-    public ResponseEntity<String> donate(@RequestBody DonationRequest donationRequest) {
-        boolean isSuccessful = donationService.donate(donationRequest);
+    public ResponseEntity<FundRaisedEvent> donate(@RequestBody DonationRequest donationRequest) {
+        FundRaisedEvent event = donationService.donate(donationRequest);
 
-        if (isSuccessful) {
-            return ResponseEntity.ok("Donation successful");
-        } else {
-            return ResponseEntity.status(500).body("Donation failed");
-        }
+        return ResponseEntity.ok(event);
     }
 }

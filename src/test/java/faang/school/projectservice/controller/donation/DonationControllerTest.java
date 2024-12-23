@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.donation;
 
 import faang.school.projectservice.dto.DonationRequest;
+import faang.school.projectservice.dto.FundRaisedEvent;
 import faang.school.projectservice.service.donation.DonationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ public class DonationControllerTest {
     void testDonateSuccess() throws Exception {
         DonationRequest donationRequest = new DonationRequest(456L, 150L);
 
-        when(donationService.donate(donationRequest)).thenReturn(true);
+        when(donationService.donate(donationRequest)).thenReturn(new FundRaisedEvent());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/donations/donate")
                 .contentType(MediaType.APPLICATION_JSON)

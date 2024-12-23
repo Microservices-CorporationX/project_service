@@ -2,6 +2,7 @@ package faang.school.projectservice.service.donation;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.DonationRequest;
+import faang.school.projectservice.dto.FundRaisedEvent;
 import faang.school.projectservice.publisher.FundRaisedEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ public class DonationServiceTest {
     void testDonate() {
         DonationRequest donationRequest = new DonationRequest(456L, 150L);
 
-        boolean response = donationService.donate(donationRequest);
+        FundRaisedEvent fundRaisedEvent = donationService.donate(donationRequest);
 
         verify(fundRaisedEventPublisher, times(1)).publish(argThat(event ->
                 event.getUserId().equals(userContext.getUserId()) &&
@@ -38,7 +39,5 @@ public class DonationServiceTest {
                 event.getPaymentAmount().equals(donationRequest.getAmount()) &&
                 event.getLocalDateTime() != null
         ));
-
-        assertEquals(true, response);
     }
 }
