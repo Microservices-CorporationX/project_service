@@ -97,12 +97,15 @@ class TaskServiceTest {
                 .linkedTasksIds(new ArrayList<>(List.of(3L)))
                 .stageId(8L)
                 .build();
+
         TeamMember teamMember = TeamMember.builder()
                 .id(taskCreator)
                 .build();
+
         Project project = Project.builder()
                 .id(taskDto.getProjectId())
                 .build();
+
         Task taskToSave = Task.builder()
                 .name("name")
                 .description("description")
@@ -164,12 +167,15 @@ class TaskServiceTest {
                 .linkedTasksIds(new ArrayList<>(List.of(3L)))
                 .stageId(8L)
                 .build();
+
         TeamMember teamMember = TeamMember.builder()
                 .id(taskUpdater)
                 .build();
+
         Project project = Project.builder()
                 .id(taskDto.getProjectId())
                 .build();
+
         Task taskToSave = Task.builder()
                 .id(1L)
                 .name("name")
@@ -230,16 +236,21 @@ class TaskServiceTest {
         Task parentTask = Task.builder()
                 .id(10L)
                 .build();
+
         Task linkedTask = Task.builder()
                 .id(11L)
                 .build();
+
         Stage stage = Stage.builder()
                 .stageId(12L)
                 .build();
+
         Project project = Project.builder()
                 .id(projectId)
                 .build();
+
         TeamMember teamMember = TeamMember.builder().build();
+
         Task task = Task.builder()
                 .id(taskId)
                 .name("name")
@@ -285,18 +296,23 @@ class TaskServiceTest {
 
         TaskFilterDto taskFilterDto = TaskFilterDto.builder().build();
         TeamMember teamMember = TeamMember.builder().build();
+
         Project project = Project.builder()
                 .id(projectId)
                 .build();
+
         Task parentTask = Task.builder()
                 .id(10L)
                 .build();
+
         Task linkedTask = Task.builder()
                 .id(11L)
                 .build();
+
         Stage stage = Stage.builder()
                 .stageId(12L)
                 .build();
+
         Task firstTask = Task.builder()
                 .id(1L)
                 .name("name")
@@ -310,6 +326,7 @@ class TaskServiceTest {
                 .linkedTasks(new ArrayList<>(List.of(linkedTask)))
                 .stage(stage)
                 .build();
+
         Task secondTask = Task.builder().build();
         List<Task> tasks = new ArrayList<>(List.of(firstTask, secondTask));
 
@@ -326,6 +343,7 @@ class TaskServiceTest {
                 .linkedTasksIds(new ArrayList<>(List.of(linkedTask.getId())))
                 .stageId(stage.getStageId())
                 .build();
+
         TaskDto secondTaskDto = TaskDto.builder().build();
         List<TaskDto> listTaskDto = new ArrayList<>(List.of(firstTaskDto, secondTaskDto));
 

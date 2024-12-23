@@ -108,8 +108,10 @@ public class TaskService {
                         String.format("Task with Id: %d not found", id)));
     }
 
-    private void setParentTaskIfIdNotNull(Task task, Long id) {
-        if (id != null) task.setParentTask(findById(id));
+    private void setParentTaskIfIdNotNull(Task task, Long parentTaskId) {
+        if (parentTaskId != null) {
+            task.setParentTask(findById(parentTaskId));
+        }
     }
 
     private void setLinkedTasksIfListNotEmpty(Task task, List<Long> tasksIds) {
@@ -120,7 +122,9 @@ public class TaskService {
         task.setLinkedTasks(tasks);
     }
 
-    private void setStageIfIdNotNull(Task task, Long id) {
-        if (id != null) task.setStage(stageService.getStageEntity(id));
+    private void setStageIfIdNotNull(Task task, Long stageId) {
+        if (stageId != null) {
+            task.setStage(stageService.getStageEntity(stageId));
+        }
     }
 }

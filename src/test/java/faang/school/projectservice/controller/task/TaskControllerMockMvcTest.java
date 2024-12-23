@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
@@ -48,6 +49,7 @@ public class TaskControllerMockMvcTest {
 
     private CreateUpdateTaskDto createTaskDto;
     private TaskDto taskDto;
+    private String taskUrl;
 
     @BeforeEach
     void setUp() {
@@ -72,18 +74,19 @@ public class TaskControllerMockMvcTest {
                 .performerUserId(1L)
                 .reporterUserId(2L)
                 .minutesTracked(10)
-
                 .parentTaskId(2L)
                 .linkedTasksIds(new ArrayList<>(List.of(1L)))
                 .projectId(1L)
                 .stageId(1L)
                 .build();
+
+        taskUrl = "/tasks";
     }
 
     @Test
     void createTaskClientErrorTest() throws Exception {
         mockMvc.perform(
-                post("/tasks")
+                post(taskUrl)
                         .header("x-team-member-id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")
@@ -97,39 +100,19 @@ public class TaskControllerMockMvcTest {
         when(taskService.createTask(any(CreateUpdateTaskDto.class), anyLong())).thenReturn(taskDto);
 
         mockMvc.perform(
-                        post("/tasks")
+                        post(taskUrl)
                                 .header("x-team-member-id", creatorId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding(StandardCharsets.UTF_8)
                                 .content(objectMapper.writeValueAsString(createTaskDto))
                 ).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(taskDto.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").
-                        value(taskDto.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").
-                        value(taskDto.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").
-                        value(taskDto.getStatus().toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.performerUserId").
-                        value(taskDto.getPerformerUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.reporterUserId").
-                        value(taskDto.getReporterUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.minutesTracked").
-                        value(taskDto.getMinutesTracked()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.parentTaskId").
-                        value(taskDto.getParentTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.linkedTasksIds[0]").
-                        value(taskDto.getLinkedTasksIds().get(0)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.projectId").
-                        value(taskDto.getProjectId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.stageId").
-                        value(taskDto.getStageId()));
+                .andExpect(this::assertJsonResponse);
     }
 
     @Test
     void updateTaskClientErrorTest() throws Exception {
         mockMvc.perform(
-                put("/tasks")
+                put(taskUrl)
                         .header("x-team-member-id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")
@@ -143,33 +126,13 @@ public class TaskControllerMockMvcTest {
         when(taskService.updateTask(any(CreateUpdateTaskDto.class), anyLong())).thenReturn(taskDto);
 
         mockMvc.perform(
-                        put("/tasks")
+                        put(taskUrl)
                                 .header("x-team-member-id", updaterId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding(StandardCharsets.UTF_8)
                                 .content(objectMapper.writeValueAsString(createTaskDto))
                 ).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(taskDto.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").
-                        value(taskDto.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").
-                        value(taskDto.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").
-                        value(taskDto.getStatus().toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.performerUserId").
-                        value(taskDto.getPerformerUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.reporterUserId").
-                        value(taskDto.getReporterUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.minutesTracked").
-                        value(taskDto.getMinutesTracked()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.parentTaskId").
-                        value(taskDto.getParentTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.linkedTasksIds[0]").
-                        value(taskDto.getLinkedTasksIds().get(0)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.projectId").
-                        value(taskDto.getProjectId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.stageId").
-                        value(taskDto.getStageId()));
+                .andExpect(this::assertJsonResponse);
     }
 
     @Test
@@ -200,27 +163,7 @@ public class TaskControllerMockMvcTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding(StandardCharsets.UTF_8)
                 ).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(taskDto.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").
-                        value(taskDto.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").
-                        value(taskDto.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").
-                        value(taskDto.getStatus().toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.performerUserId").
-                        value(taskDto.getPerformerUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.reporterUserId").
-                        value(taskDto.getReporterUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.minutesTracked").
-                        value(taskDto.getMinutesTracked()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.parentTaskId").
-                        value(taskDto.getParentTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.linkedTasksIds[0]").
-                        value(taskDto.getLinkedTasksIds().get(0)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.projectId").
-                        value(taskDto.getProjectId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.stageId").
-                        value(taskDto.getStageId()));
+                .andExpect(this::assertJsonResponse);
     }
 
     @Test
@@ -240,27 +183,34 @@ public class TaskControllerMockMvcTest {
                                 .content(objectMapper.writeValueAsString(taskFilterDto))
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").
-                        value(taskDto.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").
-                        value(taskDto.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").
-                        value(taskDto.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].status").
-                        value(taskDto.getStatus().toString()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].performerUserId").
-                        value(taskDto.getPerformerUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].reporterUserId").
-                        value(taskDto.getReporterUserId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].minutesTracked").
-                        value(taskDto.getMinutesTracked()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].parentTaskId").
-                        value(taskDto.getParentTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].linkedTasksIds[0]").
-                        value(taskDto.getLinkedTasksIds().get(0)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].projectId").
-                        value(taskDto.getProjectId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].stageId").
-                        value(taskDto.getStageId()));
+                .andExpect(this::assertJsonArrayResponse);
+    }
+
+    private void assertJsonResponse(MvcResult result) throws Exception {
+        MockMvcResultMatchers.jsonPath("$.id").value(taskDto.getId()).match(result);
+        MockMvcResultMatchers.jsonPath("$.name").value(taskDto.getName()).match(result);
+        MockMvcResultMatchers.jsonPath("$.description").value(taskDto.getDescription()).match(result);
+        MockMvcResultMatchers.jsonPath("$.status").value(taskDto.getStatus().toString()).match(result);
+        MockMvcResultMatchers.jsonPath("$.performerUserId").value(taskDto.getPerformerUserId()).match(result);
+        MockMvcResultMatchers.jsonPath("$.reporterUserId").value(taskDto.getReporterUserId()).match(result);
+        MockMvcResultMatchers.jsonPath("$.minutesTracked").value(taskDto.getMinutesTracked()).match(result);
+        MockMvcResultMatchers.jsonPath("$.parentTaskId").value(taskDto.getParentTaskId()).match(result);
+        MockMvcResultMatchers.jsonPath("$.linkedTasksIds[0]").value(taskDto.getLinkedTasksIds().get(0)).match(result);
+        MockMvcResultMatchers.jsonPath("$.projectId").value(taskDto.getProjectId()).match(result);
+        MockMvcResultMatchers.jsonPath("$.stageId").value(taskDto.getStageId()).match(result);
+    }
+
+    private void assertJsonArrayResponse(MvcResult result) throws Exception {
+        MockMvcResultMatchers.jsonPath("$[0].id").value(taskDto.getId()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].name").value(taskDto.getName()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].description").value(taskDto.getDescription()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].status").value(taskDto.getStatus().toString()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].performerUserId").value(taskDto.getPerformerUserId()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].reporterUserId").value(taskDto.getReporterUserId()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].minutesTracked").value(taskDto.getMinutesTracked()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].parentTaskId").value(taskDto.getParentTaskId()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].linkedTasksIds[0]").value(taskDto.getLinkedTasksIds().get(0)).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].projectId").value(taskDto.getProjectId()).match(result);
+        MockMvcResultMatchers.jsonPath("$[0].stageId").value(taskDto.getStageId()).match(result);
     }
 }
