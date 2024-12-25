@@ -48,16 +48,12 @@ class ResourceServiceTest {
     private long userId;
     private long projectId;
     private String coverImageKey;
-    private int maxCoverWidth;
-    private int maxCoverHeight;
 
     @BeforeEach
     void setUp() {
         userId = 1L;
         projectId = 1L;
         coverImageKey = "project_covers/1/cover.jpg";
-        maxCoverWidth = ResourceValidator.MAX_COVER_WIDTH_PX;
-        maxCoverHeight = ResourceValidator.MAX_COVER_HEIGHT_PX;
 
         doNothing().when(projectValidator).validateProjectExistsById(projectId);
         doNothing().when(projectValidator).validateUserIsProjectOwner(userId, projectId);
