@@ -120,7 +120,7 @@ class SubProjectControllerTest {
     void testFilterSubProjects() throws Exception {
         ProjectFilterDto projectFilterDto = ProjectFilterDto.builder()
                 .name("John")
-                .nameProjectPattern("Pattern")
+                .name("Pattern")
                 .status(ProjectStatus.IN_PROGRESS)
                 .build();
         List<ProjectDto> projectDtos = List.of(projectDto, projectDto, projectDto);
@@ -128,7 +128,6 @@ class SubProjectControllerTest {
 
         mockMvc.perform(get("/subprojects/1")
                         .param("name", projectFilterDto.getName())
-                        .param("nameProjectPattern", projectFilterDto.getNameProjectPattern())
                         .param("status", projectFilterDto.getStatus().name())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

@@ -90,7 +90,7 @@ class ProjectControllerTest {
     void testGetProjectsByFilterSuccessful() {
         when(projectService.getProjectsByFilter(filterDto, ownerId)).thenReturn(List.of(projectDto));
 
-        ResponseEntity<List<ProjectDto>> response = projectController.getProjectsByFilter(filterDto, ownerId);
+        ResponseEntity<List<ProjectDto>> response = projectController.getProjectsByFilter(filterDto.getName(), filterDto.getStatus(), ownerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(projectDto, Objects.requireNonNull(response.getBody()).get(0));

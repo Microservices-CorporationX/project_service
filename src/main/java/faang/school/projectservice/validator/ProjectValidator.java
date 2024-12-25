@@ -5,6 +5,8 @@ import faang.school.projectservice.dto.project.CreateProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.NotUniqueProjectException;
 import faang.school.projectservice.exception.ProjectNotAccessibleException;
+import faang.school.projectservice.exception.ProjectNotFoundException;
+import faang.school.projectservice.exception.UnauthorizedAccessException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -14,7 +16,6 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.NoStatusChangeException;
 import faang.school.projectservice.exception.ProjectVisibilityException;
 import faang.school.projectservice.repository.ProjectRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,7 @@ public class ProjectValidator {
         log.info("Validating project existence by id {}", projectId);
         if (!projectRepository.existsById(projectId)) {
             log.error("Project with id {} doesn't exist", projectId);
-            throw new EntityNotFoundException(String.format("Project with id %d doesn't exist", projectId));
+            throw new ProjectNotFoundException(String.format("Project with id %d doesn't exist", projectId));
         }
         log.info("Project with id {} exists", projectId);
     }

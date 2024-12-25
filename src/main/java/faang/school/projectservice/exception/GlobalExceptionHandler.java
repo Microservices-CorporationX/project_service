@@ -1,5 +1,7 @@
 package faang.school.projectservice.exception;
 
+import faang.school.projectservice.exception.dto.ErrorResponse;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -63,6 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotUniqueProjectException.class)
     public ResponseEntity<String> handleNotUniqueProjectException(NotUniqueProjectException ex) {
+        log.error("Not unique project exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
@@ -88,7 +91,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
         log.error("Unexpected illegal state exception error: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
@@ -110,5 +113,53 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUnsupportedResourceException(UnsupportedResourceException ex) {
         log.error("Unsupported resource exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FeignException.NotFound.class)
+    public ResponseEntity<ErrorResponse> handleFeignNotFoundException(FeignException.NotFound ex) {
+        log.error("Feign exception: {}", ex.getMessage(), ex);
+        String errorMessage = extractMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(errorMessage, "External service returned a 404 error"));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("IllegalArgumentException: {}", ex.getMessage(), ex);
+        String errorMessage = extractMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(errorMessage, "Error message: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
+        log.error("Unauthorized access exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MeetingAlreadyCancelledException.class)
+    public ResponseEntity<String> handleMeetingAlreadyCancelledException(MeetingAlreadyCancelledException ex) {
+        log.error("Meeting already cancelled exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException ex) {
+        log.error("User not found exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<String> handleProjectNotFoundException(ProjectNotFoundException ex) {
+        log.error("Project not found exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    private String extractMessage(String fullMessage) {
+        int lastBracketIndex = fullMessage.lastIndexOf("[");
+        if (lastBracketIndex != -1 && lastBracketIndex + 1 < fullMessage.length()) {
+            return fullMessage.substring(lastBracketIndex + 1, fullMessage.length() - 1);
+        }
+        return "Unknown error";
     }
 }
