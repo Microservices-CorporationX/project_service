@@ -46,7 +46,7 @@ public class ResourceHandler {
         boolean isSquare = resourceValidator.isSquareImage(image);
 
         BufferedImage resizedImage = Scalr.resize(image, Scalr.Mode.FIT_TO_WIDTH, maxWidth);
-        if (!isSquare && image.getHeight() > maxHeight) {
+        if (!isSquare && resizedImage.getHeight() > maxHeight) {
             resizedImage = Scalr.resize(image, Scalr.Mode.FIT_TO_HEIGHT, maxHeight);
         }
 

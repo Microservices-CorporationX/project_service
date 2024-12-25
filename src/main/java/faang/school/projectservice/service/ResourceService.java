@@ -65,7 +65,6 @@ public class ResourceService {
         }
 
         String key = project.getCoverImageId();
-        storageService.deleteResource(key);
 
         try {
             storageService.deleteResource(key);
