@@ -1,0 +1,2 @@
+ALTER TABLE team
+ADD COLUMN author_id BIGINT;

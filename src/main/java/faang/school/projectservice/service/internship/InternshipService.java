@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.intership.InternshipFilterDto;
-import faang.school.projectservice.dto.intership.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,7 +37,8 @@ public class InternshipService {
         internshipValidator.validateInternshipTotalDuration(internshipDto);
 
         Internship internshipToSave = internshipMapper.toEntity(internshipDto);
-        List<TeamMember> interns = teamMemberRepository.findAllById(internshipDto.getInternIds());
+        List<TeamMember> interns = teamMemberRepository.findAllByIdIn(internshipDto.getInternIds())
+                .orElse(Collections.emptyList());
         internshipToSave.setInterns(interns);
 
         internshipRepository.save(internshipToSave);
@@ -51,9 +53,10 @@ public class InternshipService {
 
         Internship internship = internshipRepository.findById(internshipDto.getId())
                 .orElseThrow(() -> new DataValidationException(String.format("Internship doesn't exist by id: %s", internshipDto.getId())));
-        List<TeamMember> internsBeforeUpdate = teamMemberRepository.findAllById(internship.getInterns().stream()
+        List<TeamMember> internsBeforeUpdate = teamMemberRepository.findAllByIdIn(internship.getInterns().stream()
                 .map(TeamMember::getId)
-                .toList());
+                .toList())
+                .orElse(Collections.emptyList());
         if (internshipValidator.validateInternsNotAddedAfterStart(internship, internsBeforeUpdate, internshipDto)) {
             internship = internshipMapper.update(internshipDto, internship);
         }

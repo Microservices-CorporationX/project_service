@@ -1,14 +1,12 @@
 package faang.school.projectservice.validator.internship;
 
-import faang.school.projectservice.dto.intership.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
-import faang.school.projectservice.repository.InternshipRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -17,37 +15,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipValidatorTest {
     @InjectMocks
     private InternshipValidator internshipValidator;
-
-    @Mock
-    private InternshipRepository internshipRepository;
-
-    @Test
-    void testValidateInternshipDoesNotExist() {
-        InternshipDto internshipDto = InternshipDto.builder()
-                .id(1L)
-                .build();
-        when(internshipRepository.existsById(internshipDto.getId())).thenReturn(false);
-
-        assertTrue(internshipValidator.validateForExistInternship(internshipDto.getId()));
-    }
-
-    @Test
-    void testValidateInternshipAlreadyExist() {
-        InternshipDto internshipDto = InternshipDto.builder()
-                .id(1L)
-                .build();
-        when(internshipRepository.existsById(internshipDto.getId())).thenReturn(true);
-        DataValidationException exception = assertThrows(DataValidationException.class,
-                () -> internshipValidator.validateForExistInternship(internshipDto.getId()));
-
-        assertEquals("The internship already exists", exception.getMessage());
-    }
 
     @Test
     void testValidateNullProjectId() {
