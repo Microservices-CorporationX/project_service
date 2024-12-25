@@ -15,22 +15,29 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @Slf4j
 public class S3BucketManager {
     private final S3Client s3Client;
-    private final MinioConfigProperties minioConfigProperties;
+    private final MinioProperties minioProperties;
 
     @PostConstruct
     public void checkBucketExists() {
-        String bucketName = minioConfigProperties.getBucketName();
+        String bucketName = minioProperties.bucketName();
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
-        } catch (NoSuchBucketException e) {
+        } catch (NoSuchBucketException ex) {
             log.warn("Bucket '{}' doesn't exist. Creating new bucket", bucketName);
-            try {
-                s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
-                log.info("Bucket '{}' successfully created", bucketName);
-            } catch (S3Exception bucketCreateException) {
-                log.error("Failed to create bucket '{}': {}", bucketName, bucketCreateException.awsErrorDetails().errorMessage());
-                throw bucketCreateException;
-            }
+            createBucket(bucketName);
+        } catch (S3Exception ex) {
+            log.error("Failed to check bucket '{}': {}", bucketName, ex.awsErrorDetails().errorMessage(), ex);
+            throw ex;
+        }
+    }
+
+    private void createBucket(String bucketName) {
+        try {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
+            log.info("Bucket '{}' successfully created", bucketName);
+        } catch (S3Exception ex) {
+            log.error("Failed to create bucket '{}': {}", bucketName, ex.awsErrorDetails().errorMessage());
+            throw ex;
         }
     }
 }

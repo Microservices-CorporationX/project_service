@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.s3.MinioConfigProperties;
+import faang.school.projectservice.config.s3.MinioProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,11 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class StorageService {
     private final S3Client s3Client;
-    private final MinioConfigProperties minioConfigProperties;
+    private final MinioProperties minioProperties;
 
     public void uploadResource(MultipartFile file, String key) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(minioConfigProperties.getBucketName())
+                .bucket(minioProperties.bucketName())
                 .key(key)
                 .contentType(file.getContentType())
                 .contentLength(file.getSize())
@@ -32,15 +32,15 @@ public class StorageService {
             RequestBody requestBody = RequestBody.fromBytes(file.getBytes());
             s3Client.putObject(putObjectRequest, requestBody);
             log.info("File '{}' uploaded successfully", file.getOriginalFilename());
-        } catch (IOException e) {
+        } catch (IOException ex) {
             throw new IllegalStateException(
-                    String.format("An error occurred while uploading file '%s'.", file.getOriginalFilename()), e);
+                    String.format("An error occurred while uploading file '%s'.", file.getOriginalFilename()), ex);
         }
     }
 
     public byte[] downloadResource(String key) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(minioConfigProperties.getBucketName())
+                .bucket(minioProperties.bucketName())
                 .key(key)
                 .build();
 
@@ -52,7 +52,7 @@ public class StorageService {
 
     public void deleteResource(String key) {
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(minioConfigProperties.getBucketName())
+                .bucket(minioProperties.bucketName())
                 .key(key)
                 .build();
 

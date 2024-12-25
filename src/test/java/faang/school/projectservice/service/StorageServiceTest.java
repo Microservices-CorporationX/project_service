@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.config.s3.MinioConfigProperties;
+import faang.school.projectservice.config.s3.MinioProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +31,12 @@ class StorageServiceTest {
     private S3Client s3Client;
 
     @Mock
-    private MinioConfigProperties minioConfigProperties;
-
-    @Mock
     private MultipartFile mockFile;
 
     @InjectMocks
     private StorageService storageService;
 
+    private MinioProperties minioProperties;
     private String bucketName;
     private String key;
     private String contentType;
@@ -53,7 +51,8 @@ class StorageServiceTest {
         size = 3L;
         content = new byte[]{1, 2, 3};
 
-        when(minioConfigProperties.getBucketName()).thenReturn(bucketName);
+        minioProperties = new MinioProperties("http://localhost:9000", "user", "password", bucketName);
+        storageService = new StorageService(s3Client, minioProperties);
     }
 
     @Test
@@ -89,7 +88,7 @@ class StorageServiceTest {
                 content);
         when(s3Client.getObjectAsBytes(getObjectRequest)).thenReturn(responseBytes);
 
-        byte[] result =  storageService.downloadResource(key);
+        byte[] result = storageService.downloadResource(key);
 
         assertThat(result).isEqualTo(content);
     }

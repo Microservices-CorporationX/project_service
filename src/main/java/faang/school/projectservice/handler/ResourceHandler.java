@@ -22,11 +22,11 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @Slf4j
 public class ResourceHandler {
+    private static final int INDEX_TO_REMOVE_DOT = 1;
     private final ResourceValidator resourceValidator;
 
     public BufferedImage getImageFromMultipartFile(MultipartFile file) {
-        try {
-            InputStream inputStream = file.getInputStream();
+        try (InputStream inputStream = file.getInputStream()) {
             BufferedImage image = ImageIO.read(inputStream);
 
             if (image == null) {
@@ -45,23 +45,21 @@ public class ResourceHandler {
     public BufferedImage resizeImage(BufferedImage image, int maxWidth, int maxHeight) {
         boolean isSquare = resourceValidator.isSquareImage(image);
 
-        image = Scalr.resize(image, Scalr.Mode.FIT_TO_WIDTH, maxWidth);
+        BufferedImage resizedImage = Scalr.resize(image, Scalr.Mode.FIT_TO_WIDTH, maxWidth);
         if (!isSquare && image.getHeight() > maxHeight) {
-            image = Scalr.resize(image, Scalr.Mode.FIT_TO_HEIGHT, maxHeight);
+            resizedImage = Scalr.resize(image, Scalr.Mode.FIT_TO_HEIGHT, maxHeight);
         }
 
-        return image;
+        return resizedImage;
     }
 
     public MultipartFile convertImageToMultipartFile(MultipartFile file, BufferedImage image) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] resizedImageBytes;
 
-        try {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             String format = getResourceExtension(file);
             ImageIO.write(image, format, baos);
             resizedImageBytes = baos.toByteArray();
-            baos.close();
         } catch (IOException e) {
             throw new IllegalStateException(
                     String.format("An error occurred while converting image into MultipartFile '%s'",
@@ -94,7 +92,7 @@ public class ResourceHandler {
 
         try {
             MimeType mimeType = mimeTypes.forName(file.getContentType());
-            return mimeType.getExtension().substring(1);
+            return mimeType.getExtension().substring(INDEX_TO_REMOVE_DOT);
         } catch (MimeTypeException e) {
             throw new IllegalStateException(
                     String.format("An error occurred while getting file '%s' extension.",

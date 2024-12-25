@@ -60,7 +60,7 @@ public class MomentControllerTest {
     public void testUpdateMomentWithPartner() {
         when(momentService.updateMoment(any(MomentDto.class))).thenReturn(momentDto);
 
-        ResponseEntity<MomentDto> response = momentController.updateMomentWithPartner(momentDto);
+        ResponseEntity<MomentDto> response = momentController.updateMomentWithParthner(momentDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(momentDto, response.getBody());

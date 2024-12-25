@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 @Slf4j
@@ -36,7 +37,15 @@ public class ResourceService {
 
         String folderName = String.format("project_covers/%d", projectId);
         String key = String.format("%s/%d_%s", folderName, System.currentTimeMillis(), file.getOriginalFilename());
-        storageService.uploadResource(coverFile, key);
+
+        try {
+            storageService.uploadResource(coverFile, key);
+        } catch (S3Exception ex) {
+            log.error("An error occurred while uploading the cover for project with ID: {}. Error: {}",
+                    projectId, ex.getMessage(), ex);
+            throw new IllegalStateException(
+                    String.format("Failed to upload cover image for project with ID %d", projectId), ex);
+        }
 
         project.setCoverImageId(key);
         projectService.saveProject(project);
@@ -57,6 +66,17 @@ public class ResourceService {
 
         String key = project.getCoverImageId();
         storageService.deleteResource(key);
+
+        try {
+            storageService.deleteResource(key);
+        } catch (S3Exception ex) {
+            log.error("An error occurred while deleting the cover for project with ID: {}. Error: {}",
+                    projectId, ex.getMessage(), ex);
+            throw new IllegalStateException(
+                    String.format("An error occurred while deleting cover image for project with ID: %d. Error: %s",
+                            projectId, ex.getMessage()), ex);
+        }
+
         project.setCoverImageId(null);
         projectService.saveProject(project);
 
@@ -68,7 +88,16 @@ public class ResourceService {
         projectValidator.validateUserIsProjectOwner(userId, projectId);
 
         Project project = projectService.getProjectById(projectId);
-        byte[] coverAsBytes = storageService.downloadResource(project.getCoverImageId());
+        byte[] coverAsBytes;
+
+        try {
+            coverAsBytes = storageService.downloadResource(project.getCoverImageId());
+        } catch (S3Exception ex) {
+            log.error("Failed to download cover for project ID: {}. Error: {}", projectId, ex.getMessage(), ex);
+            throw new IllegalStateException(
+                    String.format("An error occurred while downloading cover for project with ID: %d. Error: %s",
+                            projectId, ex.getMessage()), ex);
+        }
 
         log.info("Project {} cover successfully downloaded.", projectId);
         return coverAsBytes;
