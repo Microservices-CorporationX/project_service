@@ -4,6 +4,7 @@ import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.events.ProjectViewEvent;
 import faang.school.projectservice.filter.ProjectFilter;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.mapper.project.SubProjectMapper;
@@ -12,6 +13,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.update.ProjectUpdate;
 import faang.school.projectservice.validator.ProjectValidator;
@@ -36,6 +38,7 @@ public class ProjectService {
     private final List<ProjectFilter> projectFilters;
     private final ProjectValidator projectValidator;
     private final UserContext userContext;
+    private final ProjectViewEventPublisher projectViewEventPublisher;
 
     public ProjectDto createSubProject(Long projectId, CreateSubProjectDto createSubProjectDto) {
         Project mainProject = getProject(projectId);
@@ -95,6 +98,12 @@ public class ProjectService {
 
     public Project saveProject(Project project) {
         return projectRepository.save(project);
+    }
+
+    public ProjectDto getProjectById(long id, long userId) {
+        Project project = projectRepository.getProjectById(id);
+        projectViewEventPublisher.publish(new ProjectViewEvent(project.getId(), userId, LocalDateTime.now()));
+        return projectMapper.toProjectDto(project);
     }
 
     public ProjectDto getProjectById(long id) {

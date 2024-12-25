@@ -30,6 +30,8 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        project_view_channel:
+          name: project_view
 
   security:
     oauth2:

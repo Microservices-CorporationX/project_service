@@ -9,11 +9,12 @@ import org.springframework.data.redis.listener.ChannelTopic;
 
 @RequiredArgsConstructor
 @Slf4j
-public abstract class AbstractEventPublisher<T> {
+public abstract class AbstractEventPublisher<T> implements MessagePublisher<T>{
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelTopic channelTopic;
     private final ObjectMapper objectMapper;
 
+    @Override
     public void publish(T event) {
         try {
             String json = objectMapper.writeValueAsString(event);
