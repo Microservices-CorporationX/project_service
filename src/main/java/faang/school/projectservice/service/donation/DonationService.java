@@ -77,7 +77,7 @@ public class DonationService {
 
     private Campaign validateAndGetCampaign(Long campaignId) {
         Campaign campaign = campaignService.getCampaignById(campaignId);
-        if (!campaign.getStatus().equals(CampaignStatus.ACTIVE)) {
+        if (!CampaignStatus.ACTIVE.equals(campaign.getStatus())) {
             throw new IllegalArgumentException("campaign is inactive");
         }
         return campaign;
