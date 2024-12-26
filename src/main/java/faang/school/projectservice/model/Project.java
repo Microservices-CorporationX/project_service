@@ -6,7 +6,9 @@ import java.util.List;
 
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -106,4 +108,15 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private List<Meet> meets;
+
+    @Column(name = "presentation_file_key")
+    private String presentationFileKey;
+
+    @Column(name = "presentation_generated_at")
+    private LocalDateTime presentationGeneratedAt;
+
+    @ElementCollection
+    @CollectionTable(name = "project_gallery", joinColumns = @JoinColumn(name = "project_id"))
+    @Column(name = "file_key", nullable = false)
+    private List<String> galleryFileKeys;
 }
