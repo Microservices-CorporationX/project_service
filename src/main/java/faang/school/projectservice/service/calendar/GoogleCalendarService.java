@@ -11,9 +11,12 @@ import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.teammember.TeamMemberService;
 import feign.FeignException;
+import feign.RetryableException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +24,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class GoogleCalendarService {
+    private static final int RETRYABLE_DELAY = 1000;
+    private static final int RETRYABLE_MULTIPLIER = 2;
+
+
     private final UserContext userContext;
     private final TeamMemberService teamMemberService;
     private final ProjectService projectService;
@@ -38,6 +45,10 @@ public class GoogleCalendarService {
         return calendarId;
     }
 
+    @Retryable(
+            retryFor = RetryableException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = RETRYABLE_DELAY, multiplier = RETRYABLE_MULTIPLIER))
     public String addEvent(long projectId, long eventId) {
         try {
             EventDto eventDto = userServiceClient.getEvent(eventId);
