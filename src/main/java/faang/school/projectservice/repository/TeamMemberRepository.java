@@ -1,28 +1,28 @@
 package faang.school.projectservice.repository;
 
-import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.model.TeamMember;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
-public class TeamMemberRepository {
-    private final TeamMemberJpaRepository jpaRepository;
+public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
-    public TeamMember findById(Long id) {
-        return jpaRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Team member doesn't exist by id: %s", id)));
-    }
+    Optional<TeamMember> findById(long id);
 
-    public List<TeamMember> findAllById(List<Long> internIds) {
-        return jpaRepository.findAllById(internIds);
-    }
+    Optional<List<TeamMember>> findAllByIdIn(List<Long> memberIds);
 
-    public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
-    }
+    void deleteById(long id);
+
+    @Query(
+            "SELECT tm FROM TeamMember tm JOIN tm.team t " +
+                    "WHERE tm.userId = :userId " +
+                    "AND t.project.id = :projectId"
+    )
+    TeamMember findByUserIdAndProjectId(long userId, long projectId);
+
+    List<TeamMember> findByUserId(long userId);
 }

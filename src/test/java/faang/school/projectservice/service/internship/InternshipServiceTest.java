@@ -1,16 +1,18 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.intership.InternshipDto;
-import faang.school.projectservice.dto.intership.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.filters.internship.InternshipFilter;
-import faang.school.projectservice.mapper.InternshipMapperImpl;
+import faang.school.projectservice.mapper.internship.InternshipMapperImpl;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.internship.InternshipValidator;
+import faang.school.projectservice.validator.internship.TaskStatusValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +71,7 @@ public class InternshipServiceTest {
                 .id(2L)
                 .build();
         List<TeamMember> interns = List.of(firstIntern, secondIntern);
-        when(teamMemberRepository.findAllById(internshipDto.getInternIds())).thenReturn(interns);
+        when(teamMemberRepository.findAllByIdIn(internshipDto.getInternIds())).thenReturn(Optional.of(interns));
 
         InternshipDto internshipDtoAfterSave = internshipService.createInternship(internshipDto);
         verify(internshipRepository).save(internshipCaptor.capture());
@@ -103,7 +105,7 @@ public class InternshipServiceTest {
         Internship internship = internshipMapper.toEntity(internshipDto);
         internship.setInterns(interns);
         when(internshipRepository.findById(internshipDto.getId())).thenReturn(Optional.of(internship));
-        when(teamMemberRepository.findAllById(internshipDto.getInternIds())).thenReturn(interns);
+        when(teamMemberRepository.findAllByIdIn(internshipDto.getInternIds())).thenReturn(Optional.of(interns));
         when(taskStatusValidator.checkingInternsTaskStatus(internship)).thenReturn(internship);
 
         InternshipDto internshipDtoAfterUpdate = internshipService.updateInternship(internshipDto);

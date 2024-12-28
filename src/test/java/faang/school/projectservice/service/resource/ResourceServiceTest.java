@@ -1,14 +1,14 @@
 package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.jpa.ResourceRepository;
-import faang.school.projectservice.mapper.ResourceMapperImpl;
+import faang.school.projectservice.mapper.resource.ResourceMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.service.team.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

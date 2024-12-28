@@ -24,6 +24,10 @@ spring:
       channels:
         calculations_channel:
           name: calculations_channel
+        fund_raised_channel:
+          name: fund_raised_channel
+        team-channel:
+          name: team_channel
 
 server:
   port: 8082
@@ -55,3 +59,6 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+api:
+  version: "/api/v1"
