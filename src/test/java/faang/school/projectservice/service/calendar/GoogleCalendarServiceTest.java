@@ -9,7 +9,7 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.team.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;

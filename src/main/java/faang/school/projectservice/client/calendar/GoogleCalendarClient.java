@@ -44,23 +44,14 @@ public class GoogleCalendarClient {
                     redirectUri
             ).execute();
         } catch (Exception e) {
-            log.error("Exception when requesting token", e);
-            throw new IllegalStateException("Exception when requesting token: " + e.getMessage());
+            log.error("Exception when requesting google calendar token", e);
+            throw new IllegalStateException("Exception when requesting google calendar token: " + e.getMessage());
         }
     }
 
     public TokenResponse refreshToken(String refreshToken) {
         try {
-            HttpExecuteInterceptor clientAuthentication = request ->
-                    request.getHeaders().setAuthorization(
-                            "Basic " + Base64.getEncoder().encodeToString(
-                                    (
-                                            clientSecrets.getDetails().getClientId()
-                                                    + ":"
-                                                    + clientSecrets.getDetails().getClientSecret()
-                                    ).getBytes()
-                            )
-                    );
+            HttpExecuteInterceptor clientAuthentication = getClientAuth();
             return new RefreshTokenRequest(
                     new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
@@ -68,61 +59,83 @@ public class GoogleCalendarClient {
                     refreshToken
             ).setClientAuthentication(clientAuthentication).execute();
         } catch (Exception ex) {
-            log.error("Exception when refreshing token", ex);
-            throw new IllegalStateException("Exception when refreshing token: " + ex.getMessage());
+            log.error("Exception when refreshing google calendar token", ex);
+            throw new IllegalStateException("Exception when refreshing google calendar token: " + ex.getMessage());
         }
     }
 
     public com.google.api.services.calendar.model.Calendar createCalendar(
             String token, com.google.api.services.calendar.model.Calendar calendar) {
         try {
-            GoogleCredentials credentials = GoogleCredentials.create(new AccessToken(token, null))
+            GoogleCredentials credentials = GoogleCredentials
+                    .create(new AccessToken(token, null))
                     .createScoped(Collections.singleton(CalendarScopes.CALENDAR));
             Calendar service = new Calendar.Builder(
                     new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
                     new HttpCredentialsAdapter(credentials)
             ).setApplicationName(applicationName).build();
-            return service.calendars()
-                    .insert(calendar).execute();
+            return service
+                    .calendars()
+                    .insert(calendar)
+                    .execute();
         } catch (Exception ex) {
-            log.error("Error while creating calendar", ex);
-            throw new IllegalStateException("Error while creating calendar: " + ex.getMessage());
+            log.error("Error while creating google calendar", ex);
+            throw new IllegalStateException("Error while creating google calendar: " + ex.getMessage());
         }
     }
 
     public com.google.api.services.calendar.model.Event addEventToCalendar(String token, com.google.api.services.calendar.model.Event event,
                                                                            String calendarId) {
         try {
-            GoogleCredentials credentials = GoogleCredentials.create(new AccessToken(token, null))
+            GoogleCredentials credentials = GoogleCredentials
+                    .create(new AccessToken(token, null))
                     .createScoped(Collections.singleton(CalendarScopes.CALENDAR));
             Calendar service = new Calendar.Builder(
                     new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
                     new HttpCredentialsAdapter(credentials)
             ).setApplicationName(applicationName).build();
-            return service.events().insert(calendarId, event)
+            return service
+                    .events()
+                    .insert(calendarId, event)
                     .execute();
         } catch (Exception ex) {
-            log.error("Error while creating event", ex);
-            throw new IllegalStateException("Error while creating event: " + ex.getMessage());
+            log.error("Error while creating event for google calendar", ex);
+            throw new IllegalStateException("Error while creating event for google calendar: " + ex.getMessage());
         }
     }
 
     public AclRule addAclRule(String token, AclRule rule, String calendarId) {
         try {
-            GoogleCredentials credentials = GoogleCredentials.create(new AccessToken(token, null))
+            GoogleCredentials credentials = GoogleCredentials
+                    .create(new AccessToken(token, null))
                     .createScoped(Collections.singleton(CalendarScopes.CALENDAR));
             Calendar service = new Calendar.Builder(
                     new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
                     new HttpCredentialsAdapter(credentials)
             ).setApplicationName(applicationName).build();
-            return service.acl().insert(calendarId, rule)
+            return service
+                    .acl()
+                    .insert(calendarId, rule)
                     .execute();
         } catch (Exception ex) {
-            log.error("Error while creating ACL rule", ex);
-            throw new IllegalStateException("Error while creating ACL rule: " + ex.getMessage());
+            log.error("Error while creating ACL rule for google calendar", ex);
+            throw new IllegalStateException("Error while creating ACL rule for google calendar: " + ex.getMessage());
         }
+    }
+
+    private HttpExecuteInterceptor getClientAuth() {
+        return request ->
+                request.getHeaders().setAuthorization(
+                        "Basic " + Base64.getEncoder().encodeToString(
+                                (
+                                        clientSecrets.getDetails().getClientId()
+                                                + ":"
+                                                + clientSecrets.getDetails().getClientSecret()
+                                ).getBytes()
+                        )
+                );
     }
 }

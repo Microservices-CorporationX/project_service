@@ -62,7 +62,7 @@ class GoogleCalendarApiServiceTest {
         when(googleCalendarTokenRepository.findByUserId(1L)).thenReturn(googleCalendarToken);
         IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> googleCalendarApiService.acquireToken("code"));
-        assertEquals("Token for this user already exists", exception.getMessage());
+        assertEquals("Google calendar token for this user already exists", exception.getMessage());
     }
 
     @Test

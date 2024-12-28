@@ -3,37 +3,31 @@ package faang.school.projectservice.controller.calendar;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import faang.school.projectservice.service.calendar.GoogleCalendarApiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("google-oauth")
 public class GoogleAuthController {
     private final GoogleClientSecrets clientSecrets;
+    private final GoogleCalendarApiService googleAuthService;
     @Value("${google.redirect-uri}")
     private String redirectUri;
-    private final GoogleCalendarApiService googleAuthService;
 
-    @GetMapping("/oauth2/google")
+    @GetMapping
     public String initiateGoogleAuth() {
-        String authUrl = clientSecrets.getDetails().getAuthUri()
-                + "?client_id=" + clientSecrets.getDetails().getClientId()
-                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
-                + "&scope=" + URLEncoder.encode("https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events", StandardCharsets.UTF_8)
-                + "&response_type=code"
-                + "&access_type=offline"
-                + "&approval_prompt=force";
-
+        String authUrl = googleAuthService.getAuthUrl();
+        log.info(authUrl);
         return "Перейдите по <a href='" + authUrl + "'>ссылке</a> для авторизации через Google.";
     }
 
-    @GetMapping("/oauth2/callback")
+    @GetMapping("/callback")
     public void googleCallback(@RequestParam("code") String code) {
         googleAuthService.acquireToken(code);
     }

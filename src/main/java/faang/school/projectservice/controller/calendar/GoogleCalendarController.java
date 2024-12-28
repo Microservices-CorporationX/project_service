@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.*;
 public class GoogleCalendarController {
     private final GoogleCalendarService googleCalendarService;
 
-    @PostMapping("/{projectId}")
+    @PostMapping("/projects/{projectId}")
     @ResponseStatus(HttpStatus.CREATED)
     public String createProjectCalendar(@PathVariable long projectId) {
         return googleCalendarService.createProjectCalendar(projectId);
     }
 
-    @PostMapping("/event/{projectId}")
+    @PostMapping("/events/{projectId}")
     @ResponseStatus(HttpStatus.CREATED)
     public String addEvent(@PathVariable long projectId, @PathParam("eventId") long eventId) {
         return googleCalendarService.addEvent(projectId, eventId);
     }
 
-    @PostMapping("/acl/{projectId}")
+    @PostMapping("/acl-rules/{projectId}")
     public String addAclRule(@PathVariable long projectId, @PathParam("email") String email, @PathParam("role") String role) {
         return googleCalendarService.addCalendarAccess(projectId, email, role);
     }

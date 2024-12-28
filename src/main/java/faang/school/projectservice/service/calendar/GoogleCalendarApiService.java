@@ -11,12 +11,14 @@ import faang.school.projectservice.exception.AccessDeniedException;
 import faang.school.projectservice.model.calendar.GoogleCalendarToken;
 import faang.school.projectservice.repository.GoogleCalendarTokenRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.team.TeamMemberService;
+import faang.school.projectservice.service.teammember.TeamMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -37,6 +39,17 @@ public class GoogleCalendarApiService {
     @Value("${google.application-name}")
     private String applicationName;
 
+    public String getAuthUrl() {
+        log.info(redirectUri);
+        return clientSecrets.getDetails().getAuthUri()
+                + "?client_id=" + clientSecrets.getDetails().getClientId()
+                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                + "&scope=" + URLEncoder.encode("https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events", StandardCharsets.UTF_8)
+                + "&response_type=code"
+                + "&access_type=offline"
+                + "&approval_prompt=force";
+    }
+
     public void acquireToken(String code) {
         TokenResponse tokenResponse = googleCalendarClient.requestToken(code);
         GoogleCalendarToken token = googleCalendarTokenRepository.findByUserId(userContext.getUserId());
@@ -49,7 +62,7 @@ public class GoogleCalendarApiService {
             googleCalendarTokenRepository.save(token);
         } else {
             log.info("Google calendar token for user with id {} already exists", userContext.getUserId());
-            throw new IllegalStateException("Token for this user already exists");
+            throw new IllegalStateException("Google calendar token for this user already exists");
         }
     }
 
@@ -61,7 +74,7 @@ public class GoogleCalendarApiService {
         newCalendar.setTimeZone(TIMEZONE);
         com.google.api.services.calendar.model.Calendar createdCalendar = googleCalendarClient
                 .createCalendar(token, newCalendar);
-        log.info("Created google calendar with id {}", createdCalendar.getId());
+        log.info("Created google calendar with id {}for user with id: {}", createdCalendar.getId(), userContext.getUserId());
         return createdCalendar.getId();
     }
 
@@ -82,7 +95,7 @@ public class GoogleCalendarApiService {
                 .setTimeZone(TIMEZONE));
         com.google.api.services.calendar.model.Event createdEvent = googleCalendarClient
                 .addEventToCalendar(token, event, calendarId);
-        log.info("Event created successfully with id: {}", createdEvent.getId());
+        log.info("Event created successfully with id: {} for user with id: {}", createdEvent.getId(), userContext.getUserId());
         return createdEvent.getId();
     }
 
@@ -96,7 +109,7 @@ public class GoogleCalendarApiService {
         rule.setRole(role);
         com.google.api.services.calendar.model.AclRule createdRule = googleCalendarClient
                 .addAclRule(token, rule, calendarId);
-        log.info("Created ACL rule with id: {}", createdRule.getId());
+        log.info("Created ACL rule with id: {} for user with id {}", createdRule.getId(), userContext.getUserId());
         return createdRule.getId();
     }
 
@@ -108,7 +121,7 @@ public class GoogleCalendarApiService {
         }
         token.setExpirationTime(LocalDateTime.now().plusSeconds(tokenResponse.getExpiresInSeconds()));
         googleCalendarTokenRepository.save(token);
-        log.info("Refreshed token {}", token);
+        log.info("Refreshed token for google calendar {} for user with id {}", token, userContext.getUserId());
     }
 
     private String validateGoogleAuth() {

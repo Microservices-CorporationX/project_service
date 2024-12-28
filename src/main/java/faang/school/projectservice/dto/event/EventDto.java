@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventDto {
-
+    @NotNull
     private Long id;
 
     @NotNull
