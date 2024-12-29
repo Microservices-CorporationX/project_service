@@ -150,4 +150,13 @@ public class Project {
         return teams.stream()
                 .allMatch(team -> team.hasNoTeamMember(userId));
     }
+
+    public boolean isUserNotManager(long userId) {
+        return teams.stream()
+                .noneMatch(team -> team.isUserManager(userId));
+    }
+
+    public boolean isUserNotOwner(long userId) {
+        return !ownerId.equals(userId);
+    }
 }
