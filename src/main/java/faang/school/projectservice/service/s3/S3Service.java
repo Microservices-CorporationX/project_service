@@ -1,13 +1,13 @@
 package faang.school.projectservice.service.s3;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.InputStream;
 
 public interface S3Service {
-    void deleteFile(String key);
+    void toS3File(String bucketName, String key, String contentType, InputStream inputStream);
 
-    InputStream downloadFile(String key);
+    void deleteFile(String bucketName, String key);
 
-    String uploadFile(MultipartFile file, String folder);
+    InputStream fromS3File(String bucketName, String key);
+
+    String getKeyName();
 }

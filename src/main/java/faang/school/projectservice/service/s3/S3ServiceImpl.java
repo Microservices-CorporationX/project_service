@@ -4,57 +4,65 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.FileWriteReadS3Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.UUID;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
+@ConditionalOnProperty(value = "services.s3.is-mocked", havingValue = "false", matchIfMissing = true)
 public class S3ServiceImpl implements S3Service {
-    private final AmazonS3 s3client;
-
-    @Value("${services.s3.bucketName}")
-    private String bucketName;
+    private final AmazonS3 s3Client;
 
     @Override
-    public String uploadFile(MultipartFile file, String folder) {
-        long fileSize = file.getSize();
+    public void toS3File(String bucketName, String key, String contentType, InputStream inputStream) {
+        log.info("Start save / update a file to S3 for: bucketName:{}, key:{}, contentType:{}, inputStream ...",
+                bucketName, key, contentType);
+
         ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(file.getContentType());
-        String key = String.format("%s/%d%s", folder, System.currentTimeMillis(), file.getOriginalFilename());
+        objectMetadata.setContentType(contentType);
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucketName, key, file.getInputStream(), objectMetadata);
-            s3client.putObject(putObjectRequest);
+                    bucketName,
+                    key,
+                    inputStream,
+                    objectMetadata);
+            s3Client.putObject(putObjectRequest);
         } catch (Exception e) {
-            log.error("Error uploading file to storage", e);
-            throw new RuntimeException("Error uploading file to storage");
+            log.error(e.getMessage());
+            throw new FileWriteReadS3Exception(e.getMessage());
         }
-        return key;
     }
 
     @Override
-    public void deleteFile(String key) {
-        s3client.deleteObject(bucketName, key);
-    }
-
-    @Override
-    public InputStream downloadFile(String key) {
+    public InputStream fromS3File(String bucketName, String key) {
+        log.info("Start upload a file from S3 for: bucketName:{}, key:{}",
+                bucketName, key);
         try {
-            S3Object object = s3client.getObject(bucketName, key);
-            return object.getObjectContent();
+            S3Object s3Object = s3Client.getObject(bucketName, key);
+            return s3Object.getObjectContent();
         } catch (Exception e) {
-            log.error("Error download file from storage", e);
-            throw new RuntimeException("Error download file from storage");
+            log.error(e.getMessage());
+            throw new FileWriteReadS3Exception(e.getMessage());
         }
+    }
+
+    @Override
+    public void deleteFile(String bucketName, String key) {
+        log.info("Start delete a file in S3 for: bucketName:{}, key:{}",
+                bucketName, key);
+        s3Client.deleteObject(bucketName, key);
+    }
+
+    @Override
+    public String getKeyName() {
+        return UUID.randomUUID().toString();
     }
 }
