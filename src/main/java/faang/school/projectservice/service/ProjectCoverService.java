@@ -57,7 +57,10 @@ public class ProjectCoverService {
             log.info("Delete a cover for the project: {}. Id was: {} ", projectId, oldKey);
             s3Service.deleteFile(bucketName, oldKey);
         }
-        return new ResourceDto(key);
+
+        return ResourceDto.builder()
+                .key(key)
+                .build();
     }
 
     public InputStream upload(Long projectId) {
@@ -78,6 +81,8 @@ public class ProjectCoverService {
             log.error(message);
             throw new ValidationException(message);
         }
-        return new ResourceDto(project.getCoverImageId());
+        return ResourceDto.builder()
+                .key(project.getCoverImageId())
+                .build();
     }
 }

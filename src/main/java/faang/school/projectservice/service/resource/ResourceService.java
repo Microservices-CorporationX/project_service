@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,11 +46,18 @@ public class ResourceService {
     private final UserValidator userValidator;
     private final ResourceMapper resourceMapper;
 
-    @Transactional
+    @Value("${file.folder.resource-name}")
+    private String folder;
+
+    @Value("${services.s3.bucket-name}")
+    private String bucketName;
+
     public ResourceDtoStored downloadResource(Long resourceId) {
         try {
             Resource resource = getResourceById(resourceId);
-            byte[] fileBytes = s3Service.downloadFile(resource.getKey()).readAllBytes();
+
+            byte[] fileBytes = s3Service.fromS3File(bucketName, resource.getKey()).readAllBytes();
+
             ResourceDtoStored resourceDtoStored = resourceMapper.toResourceDtoStored(resource);
             resourceDtoStored.setFileBytes(fileBytes);
             return resourceDtoStored;
@@ -71,7 +79,7 @@ public class ResourceService {
         BigInteger newStorageSize = project.getStorageSize().subtract(resource.getSize());
         String resourceKey = getResourceKey(resourceId);
 
-        s3Service.deleteFile(resourceKey);
+        s3Service.deleteFile(bucketName, resourceKey);
 
         LocalDateTime now = LocalDateTime.now();
         resource.setSize(BigInteger.valueOf(0));
@@ -101,9 +109,12 @@ public class ResourceService {
 
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
-        String folder = project.getId() + project.getName();
-        s3Service.deleteFile(resource.getKey());
-        String key = s3Service.uploadFile(file, folder);
+        s3Service.deleteFile(bucketName, resource.getKey());
+
+        String key = getKey(file.getOriginalFilename(), project.getName(), project.getId());
+
+        toS3File(file, key, project.getId());
+
         LocalDateTime now = LocalDateTime.now();
 
         resource.setKey(key);
@@ -130,10 +141,11 @@ public class ResourceService {
         BigInteger newStorageSize = project.getStorageSize().add(BigInteger.valueOf(file.getSize()));
         checkStorageSizeExceeded(newStorageSize, project.getMaxStorageSize());
 
-        String folder = project.getId() + project.getName();
-        String key = s3Service.uploadFile(file, folder);
-        LocalDateTime now = LocalDateTime.now();
+        String key = getKey(file.getOriginalFilename(), project.getName(), project.getId());
 
+        toS3File(file, key, project.getId());
+
+        LocalDateTime now = LocalDateTime.now();
 
         Resource resource = Resource.builder()
                 .key(key)
@@ -155,6 +167,24 @@ public class ResourceService {
         projectRepository.save(project);
 
         return resourceMapper.toDto(resource);
+    }
+
+    private String getKey(String originalFilename, String projectName, Long projectId) {
+        String folderS3 = getFolder(projectName, projectId);
+        return String.format("%s/%d%s", folderS3, System.currentTimeMillis(), originalFilename);
+    }
+
+    private String getFolder(String projectName, Long projectId) {
+        return folder + "_" + projectName + "_" + projectId;
+    }
+
+    private void toS3File(MultipartFile file, String key, Long projectId) {
+        try {
+            s3Service.toS3File(file, bucketName, key);
+        } catch (IOException e) {
+            log.error("Error transformation file from MultipartFile to InputStream for the project: {}. Error Message:\n {}", projectId, e);
+            throw new RuntimeException(String.format("Error transformation file from MultipartFile to InputStream for the project: %s", projectId));
+        }
     }
 
     private void checkStorageSizeExceeded(BigInteger newStorageSize, BigInteger maxStorageSize) {

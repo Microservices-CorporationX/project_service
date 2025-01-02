@@ -95,7 +95,7 @@ class ProjectCoverServiceTest {
         ResourceDto result = projectCoverService.add(id, file);
 
         assertNotNull(result);
-        assertEquals(folder + "/" + key, result.idImage());
+        assertEquals(folder + "/" + key, result.getKey());
 
         verify(projectRepository).save(project);
         verify(s3Service).deleteFile(bucketName, oldKey);

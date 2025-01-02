@@ -60,7 +60,9 @@ class ProjectCoverControllerTest {
                 "test.jpg",
                 "image/jpeg",
                 new byte[]{1, 2, 3, 4, 5});
-        resourceDto = new ResourceDto(key);
+        resourceDto = ResourceDto.builder()
+                .key(key)
+                .build();
     }
 
     @Test
@@ -75,7 +77,7 @@ class ProjectCoverControllerTest {
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idImage").value(key));
+                .andExpect(jsonPath("$.key").value(key));
     }
 
     @Test
@@ -93,11 +95,13 @@ class ProjectCoverControllerTest {
 
     @Test
     void deleteResourceSuccessTest() throws Exception {
-        ResourceDto resourceDto = new ResourceDto(key);
+        ResourceDto resourceDto = ResourceDto.builder()
+                .key(key)
+                .build();
         when(projectCoverService.delete(projectId)).thenReturn(resourceDto);
         mockMvc.perform(MockMvcRequestBuilders.delete(
                         mainPartUrl + UrlUtils.PROJECT_COVER_ID, projectId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idImage").value(key));
+                .andExpect(jsonPath("$.key").value(key));
     }
 }
