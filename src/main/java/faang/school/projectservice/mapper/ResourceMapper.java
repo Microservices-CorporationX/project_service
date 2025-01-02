@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDtoStored;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.TeamMember;
@@ -22,6 +23,12 @@ public interface ResourceMapper {
     @Mapping(target = "updatedBy", expression = "java(mapUpdatedById(resourceDto.getUpdatedById()))")
     @Mapping(target = "project", expression = "java(mapProjectId(resourceDto.getProjectId()))")
     Resource toEntity(ResourceDto resourceDto);
+
+
+    @Mapping(source = "createdBy.id", target = "createdById")
+    @Mapping(source = "updatedBy.id", target = "updatedById")
+    @Mapping(source = "project.id", target = "projectId")
+    ResourceDtoStored toResourceDtoStored(Resource resource);
 
     default TeamMember mapCreatedById(Long createdById) {
         return TeamMember.builder()

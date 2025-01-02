@@ -1,6 +1,7 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.resource;
 
 import faang.school.projectservice.dto.resource.ResourceDto;
+import faang.school.projectservice.dto.resource.ResourceDtoStored;
 import faang.school.projectservice.jpa.ResourceRepository;
 import faang.school.projectservice.jpa.TeamMemberJpaRepository;
 import faang.school.projectservice.mapper.ResourceMapper;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,13 +31,12 @@ import java.util.ArrayList;
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
-
-    private final static long TWO_GB_IN_BYTES = 2_147_483_648L;
+    public final static String RESOURCE_NOT_FOUND_BY_ID = "Resource with id = %s not found";
     private final static String EXCEEDING_MAXIMUM_STORAGE_SIZE = "Exceeding maximum storage size!!!";
-    private final static String RESOURCE_NOT_FOUND_BY_ID = "Resource with id = %s not found";
     private final static String RESOURCE_KEY_IS_NULL = "Resource key is null for resourceId = %s";
     private final static String TEAM_MEMBER_NOT_FOUND = "Team member with userId = %s and projectId = %s not found";
     private final static String CHECK_PERMISSIONS_ERROR = "Check permissions error";
+    private final static long TWO_GB_IN_BYTES = 2_147_483_648L;
 
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
@@ -46,9 +46,18 @@ public class ResourceService {
     private final ResourceMapper resourceMapper;
 
     @Transactional
-    public InputStream downloadResource(Long resourceId) {
-        Resource resource = getResourceById(resourceId);
-        return s3Service.downloadFile(resource.getKey());
+    public ResourceDtoStored downloadResource(Long resourceId) {
+        try {
+            Resource resource = getResourceById(resourceId);
+            byte[] fileBytes = s3Service.downloadFile(resource.getKey()).readAllBytes();
+            ResourceDtoStored resourceDtoStored = resourceMapper.toResourceDtoStored(resource);
+            resourceDtoStored.setFileBytes(fileBytes);
+            return resourceDtoStored;
+
+        } catch (IOException e) {
+            log.error(String.format(RESOURCE_NOT_FOUND_BY_ID, resourceId), e);
+            throw new EntityNotFoundException(String.format(RESOURCE_NOT_FOUND_BY_ID, resourceId));
+        }
     }
 
     @Transactional
