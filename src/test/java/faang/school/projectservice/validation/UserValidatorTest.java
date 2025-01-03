@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validation;
 
 import faang.school.projectservice.client.UserServiceClient;
 import feign.FeignException;
@@ -64,5 +64,4 @@ public class UserValidatorTest {
 
         verify(userServiceClient, times(1)).getUser(userId);
     }
-
 }

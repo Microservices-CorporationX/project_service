@@ -13,7 +13,7 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.s3.S3Service;
-import faang.school.projectservice.validator.UserValidator;
+import faang.school.projectservice.validation.UserValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
@@ -32,12 +32,12 @@ import java.util.ArrayList;
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
+    public final static long TWO_GB_IN_BYTES = 2_147_483_648L;
     public final static String RESOURCE_NOT_FOUND_BY_ID = "Resource with id = %s not found";
-    private final static String EXCEEDING_MAXIMUM_STORAGE_SIZE = "Exceeding maximum storage size!!!";
-    private final static String RESOURCE_KEY_IS_NULL = "Resource key is null for resourceId = %s";
-    private final static String TEAM_MEMBER_NOT_FOUND = "Team member with userId = %s and projectId = %s not found";
-    private final static String CHECK_PERMISSIONS_ERROR = "Check permissions error";
-    private final static long TWO_GB_IN_BYTES = 2_147_483_648L;
+    public final static String TEAM_MEMBER_NOT_FOUND = "Team member with userId = %s and projectId = %s not found";
+    public final static String CHECK_PERMISSIONS_ERROR = "Check permissions error";
+    public final static String RESOURCE_KEY_IS_NULL = "Resource key is null for resourceId = %s";
+    public final static String EXCEEDING_MAXIMUM_STORAGE_SIZE = "Exceeding maximum storage size!!!";
 
     private final ResourceRepository resourceRepository;
     private final TeamMemberJpaRepository teamMemberJpaRepository;
@@ -62,7 +62,7 @@ public class ResourceService {
             resourceDtoStored.setFileBytes(fileBytes);
             return resourceDtoStored;
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(String.format(RESOURCE_NOT_FOUND_BY_ID, resourceId), e);
             throw new EntityNotFoundException(String.format(RESOURCE_NOT_FOUND_BY_ID, resourceId));
         }
@@ -233,6 +233,5 @@ public class ResourceService {
     private String getResourceKey(long resourceId) {
         return resourceRepository.getResourceKeyById(resourceId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(RESOURCE_KEY_IS_NULL, resourceId)));
-
     }
 }

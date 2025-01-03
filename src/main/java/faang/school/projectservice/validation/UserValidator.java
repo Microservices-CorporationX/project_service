@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validation;
 
 import faang.school.projectservice.client.UserServiceClient;
 import feign.FeignException;
