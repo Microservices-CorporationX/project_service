@@ -14,16 +14,20 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StageInvitationDto {
     @PositiveOrZero
+    @NotNull
     private Long id;
 
     private StageInvitationStatus status;
 
     @PositiveOrZero
+    @NotNull
     private Long stageId;
 
     @PositiveOrZero
+    @NotNull
     private Long authorId;
 
     @PositiveOrZero
+    @NotNull
     private Long invitedId;
 }
