@@ -57,7 +57,7 @@ public class MomentControllerTest {
     }
 
     @Test
-    public void testUpdateMomentWithParthner() {
+    public void testUpdateMomentWithPartner() {
         when(momentService.updateMoment(any(MomentDto.class))).thenReturn(momentDto);
 
         ResponseEntity<MomentDto> response = momentController.updateMomentWithParthner(momentDto);

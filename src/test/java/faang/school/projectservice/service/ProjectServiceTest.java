@@ -347,9 +347,8 @@ class ProjectServiceTest {
     void findByIdWhenProjectDoesNotExistShouldThrowException() {
         when(projectRepository.getProjectById(1L)).thenThrow(new EntityNotFoundException("Project not found"));
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            projectService.findById(1L);
-        });
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> projectService.findById(1L));
 
         assertEquals("Project not found", exception.getMessage());
 
@@ -455,7 +454,6 @@ class ProjectServiceTest {
         assertEquals(ProjectVisibility.PRIVATE, responseDto.getVisibility());
     }
 
-
     @Test
     @DisplayName("UpdateSubProject project not found")
     void testUpdateSubProject_ProjectNotFound() {
@@ -469,8 +467,8 @@ class ProjectServiceTest {
     @DisplayName("Filter SubProjects success")
     void testFilterSubProjects() {
         initializeForFilterSubProjectsTest();
-        when (projectRepository.getProjectById(parentProject.getId())).thenReturn(parentProject);
-        when (projectValidator.isPublicProject(any(Project.class))).thenReturn(true);
+        when(projectRepository.getProjectById(parentProject.getId())).thenReturn(parentProject);
+        when(projectValidator.isPublicProject(any(Project.class))).thenReturn(true);
 
         List<ProjectDto> result = projectService.filterSubProjects(parentProject.getId(), projectFilterDto);
 
@@ -483,7 +481,7 @@ class ProjectServiceTest {
     @DisplayName("Filter SubProjects project not found")
     void testFilterSubProjects_ProjectNotFound() {
         initializeForFilterSubProjectsTest();
-        when (projectRepository.getProjectById(parentProject.getId())).thenThrow(EntityNotFoundException.class);
+        when(projectRepository.getProjectById(parentProject.getId())).thenThrow(EntityNotFoundException.class);
 
         assertThrows(EntityNotFoundException.class, () -> projectService.filterSubProjects(parentProject.getId(), projectFilterDto));
     }
