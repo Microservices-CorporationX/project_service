@@ -44,14 +44,4 @@ public interface StageInvitationMapper {
                 .id(id)
                 .build();
     }
-
-//    @Named("toInvitedId")
-//    default TeamMember mapStageToInvitedId(Long invitedId) {
-//        if (invitedId == null) {
-//            return null;
-//        }
-//        TeamMember teamMember = new TeamMember();
-//        teamMember.setId(invitedId);
-//        return teamMember;
-//    }
 }

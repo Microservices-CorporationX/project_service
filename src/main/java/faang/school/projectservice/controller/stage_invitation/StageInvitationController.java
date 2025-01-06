@@ -23,7 +23,7 @@ public class StageInvitationController {
         return invitationService.create(stageInvitationDto);
     }
 
-    @PostMapping("accept-invitation")
+    @PostMapping("/accept-invitation")
     public StageInvitationDto acceptInvitation(@RequestParam @NotNull Long invitationId,
                                                @RequestParam @NotNull Long invitedId) {
         return invitationService.acceptInvitation(invitationId, invitedId);

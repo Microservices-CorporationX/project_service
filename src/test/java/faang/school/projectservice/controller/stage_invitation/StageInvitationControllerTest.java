@@ -46,9 +46,6 @@ public class StageInvitationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-//    @Autowired
-//    private StageInvitationController stageInvitationController;
-
     @Test
     void positiveTestForCreate() throws Exception {
         StageInvitationDto stageInvitationDto = StageInvitationDto.builder()
