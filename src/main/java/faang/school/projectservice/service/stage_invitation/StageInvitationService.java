@@ -9,13 +9,15 @@ import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.validator.invitation.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Validated
 public class StageInvitationService {
@@ -24,6 +26,7 @@ public class StageInvitationService {
     private final StageRepository stageRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final List<StageInvitationFilter> stageInvitationFilters;
+    private final StageInvitationValidator stageInvitationValidator;
 
     public StageInvitationDto create(StageInvitationDto stageInvitationDto) {
         StageInvitation stageInvitationEntity = invitationMapper.toEntity(stageInvitationDto);
@@ -76,16 +79,8 @@ public class StageInvitationService {
     }
 
     private void validation(StageInvitation stageInvitation, Long invitedId, String rejectDescription) {
-        if (rejectDescription == null && rejectDescription.isEmpty()) {
-            throw new IllegalArgumentException("description не может быть равен null или быть пустым");
-        }
-
-        if (!stageInvitation.getStatus().equals(StageInvitationStatus.PENDING)) {
-            throw new IllegalStateException("Invitation is not in a PENDING state");
-        }
-
-        if (!stageInvitation.getInvited().getId().equals(invitedId)) {
-            throw new IllegalArgumentException("");
-        }
+        stageInvitationValidator.validatePendingStatus(stageInvitation);
+        stageInvitationValidator.validateInvitedId(stageInvitation, invitedId);
+        stageInvitationValidator.validateRejectDescription(rejectDescription);
     }
 }
