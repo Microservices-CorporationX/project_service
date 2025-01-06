@@ -62,7 +62,7 @@ public class CampaignService {
         return campaignMapper.toCampaignDto(campaigns);
     }
 
-    private Campaign findCampaignById(long campaignId) {
+    public Campaign findCampaignById(long campaignId) {
         return campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Campaign under id %d does not exist", campaignId)
