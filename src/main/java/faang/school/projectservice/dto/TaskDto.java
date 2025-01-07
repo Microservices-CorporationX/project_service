@@ -18,7 +18,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
-
     private Long id;
 
     @NotBlank(message = "Name must not be blank")
@@ -33,9 +32,7 @@ public class TaskDto {
     private TaskStatus status;
 
     private Long performerUserId;
-
     private Long reporterUserId;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

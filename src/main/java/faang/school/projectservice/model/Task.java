@@ -1,18 +1,18 @@
 package faang.school.projectservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import faang.school.projectservice.model.stage.Stage;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+//@Data- зацикливание при сохранении в бд из-за toString
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -63,11 +63,13 @@ public class Task {
     )
     private List<Task> linkedTasks;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "stage_id")
     private Stage stage;
 }

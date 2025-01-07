@@ -2,7 +2,6 @@ package faang.school.projectservice.repository;
 
 import faang.school.projectservice.jpa.TaskJpaRepository;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,14 +14,16 @@ import java.util.List;
 public class TaskRepository {
     private final TaskJpaRepository taskJpaRepository;
 
-    public Task create(Long userId, Task task) {
-        task.setCreatedAt(LocalDateTime.now());
-        task.setUpdatedAt(LocalDateTime.now());
-        task.setStatus(TaskStatus.TODO);
-        task.setPerformerUserId(userId);
-
-        return taskJpaRepository.save(task);
+    public Task create(String name, String description, String status, Long performerUserId,
+                       Long parentTaskId, Long projectId, Long stageId) {
+        return taskJpaRepository.createTask(name, description, status, performerUserId,
+                parentTaskId, projectId, stageId
+        );
     }
+
+   public void linkTask(Long taskId, Long linkedTaskId){
+        taskJpaRepository.linkTask(taskId, linkedTaskId);
+   }
 
     public Task update(Long userId, Task task) {
         task.setUpdatedAt(LocalDateTime.now());
