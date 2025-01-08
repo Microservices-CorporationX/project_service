@@ -36,6 +36,7 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
                 SET 
                     description = :description,
                     status = :status,
+                    minutes_tracked = :minutesTracked,
                     reporter_user_id = :reporterUserId,
                     parent_task_id = :parentTaskId,
                     updated_at = NOW()
@@ -66,7 +67,7 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
     void unlinkTask(@Param("taskId") Long taskId);
 
     @Query(value = """
-            SELECT * FROM task WHERE project_id  = :projectId;
+            SELECT * FROM task WHERE project_id  = :projectId
             """, nativeQuery = true)
     List<Task> findAllByProjectId(@Param("projectId") Long projectId);
 

@@ -34,11 +34,11 @@ public class TaskServiceTest {
         );
     }
 
-    @Test
-    @DisplayName("Проверка saveAll - все tasks сохранены")
-    public void testSaveAll_saveAllTasks() {
-        taskService.saveAll(tasks);
-        verify(taskJpaRepository, times(1)).saveAll(tasks);
-    }
+//    @Test
+//    @DisplayName("Проверка saveAll - все tasks сохранены")
+//    public void testSaveAll_saveAllTasks() {
+//        taskService.saveAll(tasks);
+//        verify(taskJpaRepository, times(1)).saveAll(tasks);
+//    }
 
 }

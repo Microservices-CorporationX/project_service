@@ -5,6 +5,7 @@ import faang.school.projectservice.mapper.task.TaskMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.validator.task.TaskUserVerification;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,13 +68,19 @@ public class TaskService {
     }
 
     public TaskDto getTaskById(Long userId, Long taskId) {
-        //TaskUserVerification.userVerification(userId, task);
-        return taskMapper.toTaskDto(taskRepository.getById(taskId));
+        Task task = taskRepository.getById(taskId);
+        TaskUserVerification.userVerification(userId, task);
+        return taskMapper.toTaskDto(task);
     }
 
     public List<TaskDto> getTasksByProject(Long userId, Long projectId) {
-        //TaskUserVerification.userVerification(userId, task);
-        return taskMapper.toTaskDtos(taskRepository.findAllByProjectId(projectId));
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        if (tasks.isEmpty()) {
+            throw new EntityNotFoundException("No tasks found for project: " + projectId);
+        }
+
+        TaskUserVerification.userVerification(userId, tasks.get(1));
+        return taskMapper.toTaskDtos(tasks);
     }
 
     public void saveAll(List<Task> taskList) {
