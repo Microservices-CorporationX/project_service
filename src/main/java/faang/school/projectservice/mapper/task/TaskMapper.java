@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper.task;
 
-import faang.school.projectservice.dto.TaskDto;
+import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.mapper.stage.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
@@ -25,7 +25,7 @@ public interface TaskMapper {
     @Mapping(target = "parentTask", ignore = true)
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "stage", ignore = true)
-    //@Mapping(target = "linkedTaskIds" , ignore = true)
+    @Mapping(target = "linkedTasks" , ignore = true)
     //@Mapping(source = "taskDto", target = "task")
     Task toTask(TaskDto taskDto);
 
@@ -54,9 +54,9 @@ public interface TaskMapper {
     }
     @Named("getLinkedTaskIds")
     default List<Long> getLinkedTaskIds(List<Task> linkedTasks) {
-//        if(linkedTasks == null){
-//            return null;
-//        }
+        if(linkedTasks == null){
+            return null;
+        }
         return linkedTasks.stream().map(Task::getId).toList();
     }
 

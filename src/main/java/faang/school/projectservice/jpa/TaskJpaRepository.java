@@ -70,5 +70,4 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
             SELECT * FROM task WHERE project_id  = :projectId
             """, nativeQuery = true)
     List<Task> findAllByProjectId(@Param("projectId") Long projectId);
-
 }

@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.task;
 
-import faang.school.projectservice.dto.TaskDto;
+import faang.school.projectservice.dto.task.TaskDto;
+import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.mapper.task.TaskMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
@@ -67,12 +68,19 @@ public class TaskService {
         return taskMapper.toTaskDto(task);
     }
 
+    @Transactional
+    public List<TaskDto> getTaskByFilter(Long userId, TaskFilterDto taskFilterDto) {
+       return taskMapper.toTaskDtos(taskRepository.findByFilter(taskFilterDto));
+    }
+
+    @Transactional
     public TaskDto getTaskById(Long userId, Long taskId) {
         Task task = taskRepository.getById(taskId);
         TaskUserVerification.userVerification(userId, task);
         return taskMapper.toTaskDto(task);
     }
 
+    @Transactional
     public List<TaskDto> getTasksByProject(Long userId, Long projectId) {
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
         if (tasks.isEmpty()) {

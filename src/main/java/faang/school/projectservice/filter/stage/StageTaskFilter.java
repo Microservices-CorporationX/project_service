@@ -1,10 +1,8 @@
 package faang.school.projectservice.filter.stage;
 
-import faang.school.projectservice.dto.TaskDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage.StageRoles;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;

@@ -1,6 +1,6 @@
 package faang.school.projectservice.update;
 
-import faang.school.projectservice.dto.TaskDto;
+import faang.school.projectservice.dto.task.TaskDto;
 import faang.school.projectservice.model.Task;
 
 public interface TaskUpdate {

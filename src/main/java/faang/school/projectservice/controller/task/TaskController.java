@@ -1,6 +1,7 @@
 package faang.school.projectservice.controller.task;
 
-import faang.school.projectservice.dto.TaskDto;
+import faang.school.projectservice.dto.task.TaskDto;
+import faang.school.projectservice.dto.task.TaskFilterDto;
 import faang.school.projectservice.service.task.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,11 @@ public class TaskController {
     @PutMapping("users/{userId}")
     public TaskDto updateTask(@PathVariable Long userId, @Valid @RequestBody TaskDto taskDto) {
         return taskService.updateTask(userId, taskDto);
+    }
+
+    @GetMapping("filters/users/{userId}")
+    public List<TaskDto> getTaskByFilter(@PathVariable Long userId, @RequestBody TaskFilterDto taskFilterDto){
+        return taskService.getTaskByFilter(userId, taskFilterDto);
     }
 
     @GetMapping("{taskId}/users/{userId}")

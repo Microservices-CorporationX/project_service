@@ -1,4 +1,4 @@
-package faang.school.projectservice.dto;
+package faang.school.projectservice.dto.task;
 
 import faang.school.projectservice.model.TaskStatus;
 import jakarta.validation.constraints.Min;
@@ -20,7 +20,7 @@ import java.util.List;
 public class TaskDto {
     private Long id;
 
-    //@NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;
 
