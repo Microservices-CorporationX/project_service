@@ -10,9 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//@Data- зацикливание при сохранении в бд из-за toString
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -51,10 +49,12 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "task_linked_tasks",
@@ -63,11 +63,13 @@ public class Task {
     )
     private List<Task> linkedTasks;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "stage_id")

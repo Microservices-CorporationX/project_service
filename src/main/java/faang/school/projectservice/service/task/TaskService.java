@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.TaskDto;
 import faang.school.projectservice.mapper.task.TaskMapper;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.update.TaskUpdate;
 import faang.school.projectservice.validator.task.TaskUserVerification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,48 +18,63 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    private final List<TaskUpdate> taskUpdates;
 
     @Transactional
     public TaskDto createTask(Long userId, TaskDto taskDto) {
         log.info("Create task: {}", taskDto.toString());
 
-        Task task = taskRepository.create(
+        Task task = taskRepository.save(
                 taskDto.getName(),
                 taskDto.getDescription(),
                 taskDto.getStatus().name(),
                 userId,
+                taskDto.getReporterUserId(),
                 taskDto.getParentTaskId(),
                 taskDto.getProjectId(),
                 taskDto.getStageId()
         );
         if (taskDto.getLinkedTaskIds() != null) {
             taskDto.getLinkedTaskIds().forEach(linkedTaskId ->
-                taskRepository.linkTask(task.getId(), linkedTaskId)
+                    taskRepository.linkTask(task.getId(), linkedTaskId)
             );
         }
         log.info("Task created: {}", task.toString());
         return taskMapper.toTaskDto(task);
     }
 
+    @Transactional
     public TaskDto updateTask(Long userId, TaskDto taskDto) {
+        log.info("Update task: {}", taskDto.toString());
         Task task = taskRepository.getById(taskDto.getId());
         TaskUserVerification.userVerification(userId, task);
 
-        taskUpdates.stream()
-                .filter(taskUpdate -> taskUpdate.isApplicable(taskDto))
-                .forEach(taskUpdate -> taskUpdate.apply(task, taskDto));
-
-        return taskMapper.toTaskDto(taskRepository.update(userId, task));
+        taskRepository.update(
+                task.getId(),
+                taskDto.getDescription(),
+                taskDto.getStatus().name(),
+                taskDto.getMinutesTracked(),
+                userId,
+                taskDto.getParentTaskId()
+        );
+        if (taskDto.getLinkedTaskIds() != null) {
+            taskRepository.unlinkTask(task.getId());
+            taskDto.getLinkedTaskIds().forEach(linkedTaskId ->
+                    taskRepository.linkTask(task.getId(), linkedTaskId)
+            );
+        }
+        log.info("Task updated: {}", task.toString());
+        return taskMapper.toTaskDto(task);
     }
 
-    public TaskDto getTaskById(Long taskId) {
+    public TaskDto getTaskById(Long userId, Long taskId) {
+        //TaskUserVerification.userVerification(userId, task);
         return taskMapper.toTaskDto(taskRepository.getById(taskId));
     }
 
-//    public List<TaskDto> getAllTasks() {
-//        return taskMapper.toTaskDtos(taskRepository.findAll());
-//    }
+    public List<TaskDto> getTasksByProject(Long userId, Long projectId) {
+        //TaskUserVerification.userVerification(userId, task);
+        return taskMapper.toTaskDtos(taskRepository.findAllByProjectId(projectId));
+    }
 
     public void saveAll(List<Task> taskList) {
         taskRepository.saveAll(taskList);

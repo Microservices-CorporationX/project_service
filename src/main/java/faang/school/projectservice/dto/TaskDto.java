@@ -20,7 +20,7 @@ import java.util.List;
 public class TaskDto {
     private Long id;
 
-    @NotBlank(message = "Name must not be blank")
+    //@NotBlank(message = "Name must not be blank")
     @Size(max = 128, message = "Name must not exceed 128 characters")
     private String name;
 
@@ -33,6 +33,7 @@ public class TaskDto {
 
     private Long performerUserId;
     private Long reporterUserId;
+    private Integer minutesTracked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

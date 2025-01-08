@@ -16,18 +16,39 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
                 INSERT INTO task 
                 (name, description, status, performer_user_id, reporter_user_id,  
                  parent_task_id, project_id, stage_id, created_at, updated_at) 
-                VALUES (:name, :description, :status, :performerUserId, 1, :parentTaskId,
+                VALUES (:name, :description, :status, :performerUserId, :reporterUserId, :parentTaskId,
                         :projectId, :stageId, NOW(), NOW()) 
                 RETURNING * 
             """, nativeQuery = true)
-    Task createTask(
+    Task save(
             @Param("name") String name,
             @Param("description") String description,
             @Param("status") String status,
             @Param("performerUserId") Long performerUserId,
+            @Param("reporterUserId") Long reporterUserId,
             @Param("parentTaskId") Long parentTaskId,
             @Param("projectId") Long projectId,
             @Param("stageId") Long stageId
+    );
+
+    @Query(value = """
+                UPDATE task 
+                SET 
+                    description = :description,
+                    status = :status,
+                    reporter_user_id = :reporterUserId,
+                    parent_task_id = :parentTaskId,
+                    updated_at = NOW()
+                WHERE id = :id
+                RETURNING *;
+            """, nativeQuery = true)
+    Task updateTask(
+            @Param("id") Long id,
+            @Param("description") String description,
+            @Param("status") String status,
+            @Param("minutesTracked") Integer minutesTracked,
+            @Param("reporterUserId") Long reporterUserId,
+            @Param("parentTaskId") Long parentTaskId
     );
 
     @Modifying
@@ -37,5 +58,16 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
             """, nativeQuery = true)
     void linkTask(@Param("taskId") Long taskId, @Param("linkedTaskId") Long linkedTaskId);
 
-    List<Task> findAllByProjectId(Long projectId);
+    @Modifying
+    @Query(value = """
+            DELETE FROM task_linked_tasks 
+            WHERE task_id = :taskId
+            """, nativeQuery = true)
+    void unlinkTask(@Param("taskId") Long taskId);
+
+    @Query(value = """
+            SELECT * FROM task WHERE project_id  = :projectId;
+            """, nativeQuery = true)
+    List<Task> findAllByProjectId(@Param("projectId") Long projectId);
+
 }

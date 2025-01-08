@@ -6,7 +6,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,22 +13,24 @@ import java.util.List;
 public class TaskRepository {
     private final TaskJpaRepository taskJpaRepository;
 
-    public Task create(String name, String description, String status, Long performerUserId,
-                       Long parentTaskId, Long projectId, Long stageId) {
-        return taskJpaRepository.createTask(name, description, status, performerUserId,
-                parentTaskId, projectId, stageId
-        );
+    public Task save(String name, String description, String status, Long reporterUserId,
+                     Long performerUserId, Long parentTaskId, Long projectId, Long stageId) {
+        return taskJpaRepository.save(name, description, status, reporterUserId,
+                performerUserId, parentTaskId, projectId, stageId);
     }
 
-   public void linkTask(Long taskId, Long linkedTaskId){
+    public void linkTask(Long taskId, Long linkedTaskId) {
         taskJpaRepository.linkTask(taskId, linkedTaskId);
-   }
+    }
 
-    public Task update(Long userId, Task task) {
-        task.setUpdatedAt(LocalDateTime.now());
-        task.setReporterUserId(userId);
+    public void unlinkTask(Long taskId) {
+        taskJpaRepository.unlinkTask(taskId);
+    }
 
-        return taskJpaRepository.save(task);
+    public void update(Long taskId, String description, String status,
+                       Integer minutesTracked, Long reporterUserId, Long parentTaskId) {
+        taskJpaRepository.updateTask(taskId, description, status, minutesTracked,
+                reporterUserId, parentTaskId);
     }
 
     public Task getById(Long taskId) {
@@ -40,6 +41,10 @@ public class TaskRepository {
 
     public List<Task> findAll() {
         return taskJpaRepository.findAll();
+    }
+
+    public List<Task> findAllByProjectId(Long projectId){
+        return taskJpaRepository.findAllByProjectId(projectId);
     }
 
     public Task save(Task task) {
