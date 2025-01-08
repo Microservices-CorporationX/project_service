@@ -43,7 +43,6 @@ public class ProjectService {
     private final MomentService momentService;
 
     public ProjectDto create(ProjectDto projectDto) {
-        projectValidator.validateUniqueProject(projectDto);
         Project project = projectMapper.toEntity(projectDto);
         project.setOwnerId(userContext.getUserId());
         project.setStatus(ProjectStatus.CREATED);

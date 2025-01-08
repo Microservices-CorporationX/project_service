@@ -39,6 +39,12 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+google:
+  credentials:
+    path: credentials/google_credentials.json
+  redirect-uri: http://localhost:8082${api.version}/google-oauth/callback
+  application-name: corporation-x-projects-medusa
+
 services:
   s3:
     endpoint: http://localhost:9000
@@ -53,6 +59,5 @@ services:
   user-service:
     host: http://localhost
     port: 8080
-
 api:
   version: "/api/v1"

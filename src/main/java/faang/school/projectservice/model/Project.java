@@ -105,4 +105,7 @@ public class Project {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Meet> meets;
+
+    @Column(name = "calendar_id")
+    private String calendarId;
 }
