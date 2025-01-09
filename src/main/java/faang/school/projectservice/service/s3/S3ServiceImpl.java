@@ -32,7 +32,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void toS3File(MultipartFile file, String bucketName, String key) throws IOException {
+    public void toS3File(String bucketName, String key, MultipartFile file) throws IOException {
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);

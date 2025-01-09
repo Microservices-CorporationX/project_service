@@ -90,11 +90,10 @@ public class ResourceServiceTest {
     @Captor
     private ArgumentCaptor<Project> projectCaptor;
 
-    private String bucketName;
-    private String folder;
-    private String projectName = "project_test";
-    private String fileName = "test_file";
-    private String fileType = "pdf";
+    private final static String bucketName = "resourceBucket";
+    private final static String projectName = "project_test";
+    private final static String fileName = "test_file";
+    private final static String fileType = "pdf";
 
     private final long fileSize = 1000L;
 
@@ -108,9 +107,6 @@ public class ResourceServiceTest {
     public void setUp() {
         ReflectionTestUtils.setField(resourceService, "bucketName", "resourceBucket");
         ReflectionTestUtils.setField(resourceService, "folder", "resourceFolder");
-
-        bucketName = "resourceBucket";
-        folder = "resourceFolder";
     }
 
     @Test
@@ -174,9 +170,9 @@ public class ResourceServiceTest {
         when(file.getSize()).thenReturn(fileSize);
 
         doNothing().when(s3Service).toS3File(
-                eq(file),
                 eq(bucketName),
-                keyCaptor.capture()
+                keyCaptor.capture(),
+                eq(file)
         );
 
         when(projectRepository.save(project)).thenReturn(project);
@@ -285,9 +281,9 @@ public class ResourceServiceTest {
         doNothing().when(s3Service).deleteFile(eq(bucketName), resourceKeyCaptor.capture());
 
         doNothing().when(s3Service).toS3File(
-                eq(file),
                 eq(bucketName),
-                keyCaptor.capture()
+                keyCaptor.capture(),
+                eq(file)
         );
 
         when(projectRepository.save(projectCaptor.capture())).thenReturn(project);

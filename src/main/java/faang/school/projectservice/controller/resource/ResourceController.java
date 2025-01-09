@@ -32,20 +32,6 @@ public class ResourceController {
         return resourceService.downloadResource(resourceId);
     }
 
-//    @GetMapping(path = UrlUtils.ID, produces = "application/octet-stream")
-//    public ResponseEntity<byte[]> downloadResource(@PathVariable("id") @Min(1) Long resourceId) {
-//        byte[] fileBytes = null;
-//        try {
-//            fileBytes = resourceService.downloadResource(resourceId).readAllBytes();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.IMAGE_PNG);
-//
-//        return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
-//    }
-
     @DeleteMapping(UrlUtils.ID)
     public long deleteResource(@PathVariable("id") @Min(1) Long resourceId) {
         return resourceService.deleteResource(resourceId, userContext.getUserId());

@@ -82,6 +82,7 @@ public class ResourceService {
         s3Service.deleteFile(bucketName, resourceKey);
 
         LocalDateTime now = LocalDateTime.now();
+
         resource.setSize(BigInteger.valueOf(0));
         resource.setKey("");
         resource.setStatus(ResourceStatus.DELETED);
@@ -117,11 +118,11 @@ public class ResourceService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        resource.setKey(key);
         resource.setSize(BigInteger.valueOf(file.getSize()));
-        resource.setUpdatedAt(now);
+        resource.setKey(key);
         resource.setName(file.getOriginalFilename());
         resource.setType(ResourceType.getResourceType(file.getContentType()));
+        resource.setUpdatedAt(now);
         resource.setUpdatedBy(teamMember);
         Resource resourceSaved = resourceRepository.save(resource);
 
@@ -180,7 +181,7 @@ public class ResourceService {
 
     private void toS3File(MultipartFile file, String key, Long projectId) {
         try {
-            s3Service.toS3File(file, bucketName, key);
+            s3Service.toS3File(bucketName, key, file);
         } catch (IOException e) {
             log.error("Error transformation file from MultipartFile to InputStream for the project: {}. Error Message:\n {}", projectId, e);
             throw new RuntimeException(String.format("Error transformation file from MultipartFile to InputStream for the project: %s", projectId));

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface S3Service {
-    void toS3File(MultipartFile file, String bucketName, String key) throws IOException;
+    void toS3File(String bucketName, String key, MultipartFile file) throws IOException;
 
     void toS3File(String bucketName, String key, String contentType, InputStream inputStream);
 
