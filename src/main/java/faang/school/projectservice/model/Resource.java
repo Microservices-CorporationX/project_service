@@ -15,8 +15,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -26,7 +29,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "project_resource")
-@Data
+@Setter
+@Getter
+@EqualsAndHashCode
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {

@@ -52,6 +52,7 @@ services:
 file:
   folder:
     project-cover-name: Project-cover
+    resource-name: Resource
   extension:
     type: jpg
     target-image-size: 1080

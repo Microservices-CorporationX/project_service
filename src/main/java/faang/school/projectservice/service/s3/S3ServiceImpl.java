@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -22,11 +24,26 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void toS3File(String bucketName, String key, String contentType, InputStream inputStream) {
-        log.info("Start save / update a file to S3 for: bucketName:{}, key:{}, contentType:{}, inputStream ...",
-                bucketName, key, contentType);
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType(contentType);
+
+        toS3File(bucketName, key, contentType, inputStream, objectMetadata);
+    }
+
+    @Override
+    public void toS3File(String bucketName, String key, MultipartFile file) throws IOException {
+        long fileSize = file.getSize();
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(fileSize);
+        objectMetadata.setContentType(file.getContentType());
+
+        toS3File(bucketName, key, file.getContentType(), file.getInputStream(), objectMetadata);
+    }
+
+    private void toS3File(String bucketName, String key, String contentType, InputStream inputStream, ObjectMetadata objectMetadata) {
+        log.info("Start save / update a file to S3 for: bucketName:{}, key:{}, contentType:{}, inputStream ...",
+                bucketName, key, contentType);
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
