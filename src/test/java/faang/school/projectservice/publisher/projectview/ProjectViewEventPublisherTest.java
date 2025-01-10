@@ -33,7 +33,7 @@ class ProjectViewEventPublisherTest {
 
     @BeforeEach
     void setup() {
-        ReflectionTestUtils.setField(projectViewEventPublisher, "channelName", CHANNEL_NAME);
+        ReflectionTestUtils.setField(projectViewEventPublisher, "projects_view_channel", CHANNEL_NAME);
     }
 
     @Test

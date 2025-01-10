@@ -32,5 +32,3 @@ create table if not exists project_stage_executors
     constraint fk_team_member
         foreign key (executor_id) references team_member (id)
 );
-
-create index project_stage_executors_stage_id_idx on project_stage_executors (stage_id);

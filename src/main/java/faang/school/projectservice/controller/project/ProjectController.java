@@ -1,15 +1,16 @@
 package faang.school.projectservice.controller.project;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.project.ChangeTaskStatusDto;
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.project.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,5 +61,12 @@ public class ProjectController {
     public ProjectResponseDto viewProject(@Positive @PathVariable Long projectId) {
         long userId = userContext.getUserId();
         return projectService.viewProject(projectId, userId);
+    }
+
+    @PutMapping("/tasks/status")
+    @Operation(summary = "Change task status")
+    public ChangeTaskStatusDto changeTaskStatus(
+            @Valid @RequestBody ChangeTaskStatusDto changeTaskStatusDto) {
+        return projectService.changeTaskStatus(changeTaskStatusDto, userContext.getUserId());
     }
 }

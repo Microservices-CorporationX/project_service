@@ -26,6 +26,8 @@ spring:
           name: calculations_channel
         projects_view_channel:
           name: projects_view_channel
+        tasks_view_channel:
+          name: tasks_view_channel
 
 server:
   port: 8082
@@ -52,7 +54,6 @@ services:
     secretKey: password
     bucketName: corpbucket
     isMocked: false
-
 
   payment-service:
     host: http://localhost
