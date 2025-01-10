@@ -26,18 +26,19 @@ public class TaskController {
         return taskService.updateTask(userId, taskDto);
     }
 
-    @GetMapping("filters/users/{userId}")
-    public List<TaskDto> getTaskByFilter(@PathVariable Long userId, @RequestBody TaskFilterDto taskFilterDto){
-        return taskService.getTaskByFilter(userId, taskFilterDto);
+    @GetMapping("filters/users/{userId}/projects/{projectId}")
+    public List<TaskDto> getTaskByFilter(@PathVariable Long userId, @PathVariable Long projectId,
+                                         @RequestBody TaskFilterDto taskFilterDto) {
+        return taskService.getTaskByFilter(userId, projectId, taskFilterDto);
     }
 
     @GetMapping("{taskId}/users/{userId}")
-    public TaskDto getTaskById(@PathVariable Long userId, @PathVariable Long taskId){
+    public TaskDto getTaskById(@PathVariable Long userId, @PathVariable Long taskId) {
         return taskService.getTaskById(userId, taskId);
     }
 
     @GetMapping("users/{userId}/projects/{projectId}")
-    public List<TaskDto> getTasksByProject(@PathVariable Long userId, @PathVariable Long projectId){
+    public List<TaskDto> getTasksByProject(@PathVariable Long userId, @PathVariable Long projectId) {
         return taskService.getTasksByProject(userId, projectId);
     }
 }

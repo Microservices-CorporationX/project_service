@@ -69,8 +69,14 @@ public class TaskService {
     }
 
     @Transactional
-    public List<TaskDto> getTaskByFilter(Long userId, TaskFilterDto taskFilterDto) {
-       return taskMapper.toTaskDtos(taskRepository.findByFilter(taskFilterDto));
+    public List<TaskDto> getTaskByFilter(Long userId, Long projectId, TaskFilterDto taskFilterDto) {
+        List<Task> tasks = taskRepository.findByFilter(taskFilterDto);
+        listVerification(tasks, userId, projectId);
+//        if (tasks.isEmpty()) {
+//            throw new EntityNotFoundException("No tasks found for project: " + projectId);
+//        }
+//        TaskUserVerification.userVerification(userId, tasks.get(1));
+        return taskMapper.toTaskDtos(tasks);
     }
 
     @Transactional
@@ -83,12 +89,19 @@ public class TaskService {
     @Transactional
     public List<TaskDto> getTasksByProject(Long userId, Long projectId) {
         List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        listVerification(tasks, userId, projectId);
+//        if (tasks.isEmpty()) {
+//            throw new EntityNotFoundException("No tasks found for project: " + projectId);
+//        }
+//        TaskUserVerification.userVerification(userId, tasks.get(1));
+        return taskMapper.toTaskDtos(tasks);
+    }
+
+    private void listVerification(List<Task> tasks, Long userId, Long projectId) {
         if (tasks.isEmpty()) {
             throw new EntityNotFoundException("No tasks found for project: " + projectId);
         }
-
         TaskUserVerification.userVerification(userId, tasks.get(1));
-        return taskMapper.toTaskDtos(tasks);
     }
 
     public void saveAll(List<Task> taskList) {
