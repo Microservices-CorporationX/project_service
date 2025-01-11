@@ -3,6 +3,7 @@ package faang.school.projectservice.publisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.projectservice.dto.event.FundRaisedEvent;
+import faang.school.projectservice.publisher.fund.FundRaisedEventPublisher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

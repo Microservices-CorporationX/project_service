@@ -12,7 +12,7 @@ import faang.school.projectservice.mapper.donation.FundRaisedEventMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.CampaignStatus;
 import faang.school.projectservice.model.Donation;
-import faang.school.projectservice.publisher.FundRaisedEventPublisher;
+import faang.school.projectservice.publisher.fund.FundRaisedEventPublisher;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.campaign.CampaignService;
 import feign.FeignException;

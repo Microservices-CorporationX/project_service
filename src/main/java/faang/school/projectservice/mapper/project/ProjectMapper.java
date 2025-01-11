@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper.project;
 
 import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectEvent;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,6 +18,9 @@ public interface ProjectMapper {
 
     @Mapping(source = "children", target = "childrenIds", qualifiedByName = "getChildrenIds")
     ProjectDto toDto(Project project);
+
+    @Mapping(target = "projectId", source = "id")
+    ProjectEvent toEvent(Project project);
 
     @Named("getChildrenIds")
     default List<Long> getChildrenIds(List<Project> children) {
