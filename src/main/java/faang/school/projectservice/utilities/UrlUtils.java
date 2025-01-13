@@ -15,5 +15,13 @@ public class UrlUtils {
         public static final String VACANCY_ID = "/id";
   
         public static final String PROJECT_COVER = "/project-cover";
-        public static final String PROJECT_COVER_ID = "/{projectId}"
+        public static final String PROJECT_COVER_ID = "/{projectId}";
+
+        public static final String TEAM_MEMBER = "/team-member";
+        public static final String TEAM_MEMBER_ID = "/id";
+
+        public static final String TEAM = "/team";
+        public static final String TEAM_ID = "/id";
+
+
 }
