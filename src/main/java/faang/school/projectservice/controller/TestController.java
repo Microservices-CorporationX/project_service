@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TestController {
+    //
     @GetMapping("/fail")
     public String fail() {
         // Намеренная ошибка в логике
