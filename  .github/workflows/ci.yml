@@ -5,28 +5,32 @@ on:
     branches:
       - "feature-BJS2-52787"
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   build-and-test:
     name: Build and Test with Gradle
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Клонируем репозиторий
+      # Проверка кода
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем JDK 17
+      # Установка JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Настраиваем Gradle
+      # Настройка Gradle
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 4. Кэшируем зависимости Gradle
+      # Кеширование зависимостей Gradle
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
@@ -37,15 +41,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 5. Сборка проекта
+      # Сборка проекта
       - name: Build with Gradle
         run: ./gradlew clean build --no-daemon
 
-      # 6. Запуск тестов
+      # Запуск тестов
       - name: Run Tests
         run: ./gradlew test --no-daemon
         env:
           CI: true
+
+      # Проверка Checkstyle
+      - name: Checkstyle verification
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon
+
+      # Архивация отчета о тестах
+      - name: Archive test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_report
+          path: build/reports/tests/test
+
+      # Архивация отчета Checkstyle
+      - name: Archive checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle_report
+          path: build/reports/checkstyle
+
       # Добавление комментария о результате билда в PR
       - name: Comment on Pull Request if build failed
         if: failure()
