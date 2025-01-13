@@ -2,10 +2,14 @@ package faang.school.projectservice.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
-public class TestController {
+import org.springframework.web.bind.annotation.RestController;
 
-    @GetMapping("/test")
-    public String testEndpoint() {
-        return "This is a test endpoint.";
+@RestController
+public class TestController {
+    @GetMapping("/fail")
+    public String fail() {
+        // Намеренная ошибка в логике
+        return "This will fail!";
     }
 }
+
