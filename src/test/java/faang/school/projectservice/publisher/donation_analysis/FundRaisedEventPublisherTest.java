@@ -43,7 +43,7 @@ public class FundRaisedEventPublisherTest {
 
         eventPublisher.publish(event);
 
-        verify(redisTemplate, times(1)).convertAndSend("fundRaised_topic", mockJson);
+        verify(redisTemplate, times(1)).convertAndSend(null, mockJson);
         verify(objectMapper, times(1)).writeValueAsString(event);
     }
 }

@@ -1,6 +1,6 @@
 package faang.school.projectservice.model;
 
-public enum TaskStatus {
+    public enum TaskStatus {
     TODO,
     IN_PROGRESS,
     REVIEW,

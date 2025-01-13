@@ -10,6 +10,7 @@ import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.publisher.TaskCompletedEvent.TaskCompletedEventPublisher;
 import faang.school.projectservice.publisher.projectview.ProjectViewEvent;
 import faang.school.projectservice.publisher.projectview.ProjectViewEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -49,6 +50,9 @@ public class ProjectServiceTest {
 
     @Mock
     private ProjectViewEventPublisher projectViewEventPublisher;
+
+    @Mock
+    private TaskCompletedEventPublisher taskCompletedEventPublisher;
 
     @InjectMocks
     private ProjectService projectService;
@@ -217,7 +221,7 @@ public class ProjectServiceTest {
         when(projectMapper.toResponseDtoFromEntity(any(Project.class))).thenReturn(responseDtoForTests);
 
         ProjectService projectService = new ProjectService(
-                projectRepository, projectMapper, userContext, List.of(filterMock), projectViewEventPublisher);
+                projectRepository, projectMapper, userContext, List.of(filterMock), projectViewEventPublisher, taskCompletedEventPublisher);
 
         List<ProjectResponseDto> projectResponseDtos = projectService.findAllProjectsWithFilters(filterDto);
 
