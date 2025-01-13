@@ -3,7 +3,7 @@ name: Java CI with Gradle
 on:
   pull_request:
     branches:
-      - "werewolf-master-stream8"
+      - "feature-BJS2-52787"
 
 jobs:
   build-and-test:
