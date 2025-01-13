@@ -13,4 +13,11 @@ public class VacancyService {
     public void createVacancy(Vacancy vacancy) {
         repository.save(vacancy);
     }
+
+    public void updateVacancy(Vacancy vacancy) {
+        repository.save(vacancy);
+    }
+    public void removeVacancy(Long id) {
+        repository.deleteById(id);
+    }
 }
