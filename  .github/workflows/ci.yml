@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - phoenix-master-stream8
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Gradle build
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: 8.3
+          arguments: build
+
+      - name: Run Test
+        run: ./gradlew test --stacktrace
