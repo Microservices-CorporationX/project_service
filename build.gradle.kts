@@ -35,11 +35,6 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.481")
 
     /**
-     * CI
-     */
-    implementation("com.puppycrawl.tools:checkstyle:10.3")
-
-    /**
      * Utils & Logging
      */
     implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
@@ -74,15 +69,4 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 
 tasks.bootJar {
     archiveFileName.set("service.jar")
-}
-
-tasks.register("checkstyleMain", Checkstyle::class) {
-    configFile = file("config/checkstyle/checkstyle.xml")
-
-    configDirectory.set(file("config/checkstyle"))
-
-    classpath = files(sourceSets.main.get().runtimeClasspath)
-    checkstyleClasspath = files(sourceSets.main.get().runtimeClasspath)
-
-    source = fileTree("src/main/java")
 }
