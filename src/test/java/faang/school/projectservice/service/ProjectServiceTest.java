@@ -143,7 +143,7 @@ class ProjectServiceTest {
         when(projectRepository.findAll()).thenReturn(List.of(project, privateProject));
         when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        List<ProjectDto> result = projectService.getProjectsByFilter("Test Project", ProjectStatus.CREATED, 1L);
+        List<ProjectDto> result = projectService.getProjects("Test Project", ProjectStatus.CREATED, 1L);
 
         assertEquals(1, result.size());
         assertEquals("Test Project", result.get(0).getName());
