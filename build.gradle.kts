@@ -77,12 +77,12 @@ tasks.bootJar {
 }
 
 tasks.register("checkstyleMain", Checkstyle::class) {
-    configFile = file("${project.projectDir}/config/checkstyle/checkstyle.xml")
+    configFile = file("config/checkstyle/checkstyle.xml")
 
-    configDirectory.set(file("${project.rootDir}/config/checkstyle"))
+    configDirectory.set(file("config/checkstyle"))
 
     classpath = files(sourceSets.main.get().runtimeClasspath)
     checkstyleClasspath = files(sourceSets.main.get().runtimeClasspath)
 
-    source = fileTree("${project.projectDir}/src/main/java")
+    source = fileTree("src/main/java")
 }
