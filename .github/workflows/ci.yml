@@ -24,8 +24,7 @@ jobs:
           arguments: build
 
       - name: Run Checkstyle
-        run: |
-          java -jar config/checkstyle.jar -c config/checkstyle/checkstyle.xml src/main/java
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
       - name: Run Tests
         uses: gradle/gradle-build-action@v2
