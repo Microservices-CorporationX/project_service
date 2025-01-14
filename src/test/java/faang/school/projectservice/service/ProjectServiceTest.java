@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.CreateProjectRequestDto;
-import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -41,8 +40,7 @@ class ProjectServiceTest {
     private ProjectService projectService;
 
     private Project project;
-    private CreateProjectRequestDto projectRequestDto;
-    private ProjectResponseDto projectResponseDto;
+    private ProjectDto projectDto;
 
     @BeforeEach
     void setUp() {
@@ -57,31 +55,23 @@ class ProjectServiceTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        projectRequestDto = CreateProjectRequestDto.builder()
-                .name("Test Project")
-                .description("Test Description")
-                .visibility(ProjectVisibility.PUBLIC)
-                .build();
-
-        projectResponseDto = ProjectResponseDto.builder()
+        projectDto = ProjectDto.builder()
                 .id(1L)
                 .name("Test Project")
                 .description("Test Description")
-                .ownerId(1L)
                 .status(ProjectStatus.CREATED)
                 .visibility(ProjectVisibility.PUBLIC)
-                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
     @Test
     void createProject_shouldSaveProject() {
         when(projectRepository.existsByOwnerIdAndName(1L, "Test Project")).thenReturn(false);
-        when(projectMapper.toEntity(projectRequestDto)).thenReturn(project);
+        when(projectMapper.toEntity(projectDto)).thenReturn(project);
         when(projectRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toResponseDto(project)).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        ProjectResponseDto result = projectService.createProject(projectRequestDto, 1L);
+        ProjectDto result = projectService.createProject(projectDto, 1L);
 
         assertNotNull(result);
         assertEquals("Test Project", result.getName());
@@ -93,7 +83,7 @@ class ProjectServiceTest {
         when(projectRepository.existsByOwnerIdAndName(1L, "Test Project")).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> projectService.createProject(projectRequestDto, 1L));
+                () -> projectService.createProject(projectDto, 1L));
 
         assertEquals("Project with the same name already exists for this owner", exception.getMessage());
     }
@@ -102,9 +92,9 @@ class ProjectServiceTest {
     void updateProject_shouldUpdateExistingProject() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
         when(projectRepository.save(any(Project.class))).thenReturn(project);
-        when(projectMapper.toResponseDto(any(Project.class))).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(any(Project.class))).thenReturn(projectDto);
 
-        ProjectResponseDto updatedDto = projectService.updateProject(1L, projectRequestDto);
+        ProjectDto updatedDto = projectService.updateProject(projectDto);
 
         assertNotNull(updatedDto);
         assertEquals("Test Project", updatedDto.getName());
@@ -117,7 +107,7 @@ class ProjectServiceTest {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> projectService.updateProject(1L, projectRequestDto));
+                () -> projectService.updateProject(projectDto));
 
         assertEquals("Project not found", exception.getMessage());
     }
@@ -132,9 +122,9 @@ class ProjectServiceTest {
                 .build();
 
         when(projectRepository.findAll()).thenReturn(List.of(project, anotherProject));
-        when(projectMapper.toResponseDto(project)).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        List<ProjectResponseDto> result = projectService.getProjects("Test Project", ProjectStatus.CREATED, 1L);
+        List<ProjectDto> result = projectService.getProjects("Test Project", ProjectStatus.CREATED, 1L);
 
         assertEquals(1, result.size());
         assertEquals("Test Project", result.get(0).getName());
@@ -151,9 +141,9 @@ class ProjectServiceTest {
                 .build();
 
         when(projectRepository.findAll()).thenReturn(List.of(project, privateProject));
-        when(projectMapper.toResponseDto(project)).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        List<ProjectResponseDto> result = projectService.getProjects("Test Project", ProjectStatus.CREATED, 1L);
+        List<ProjectDto> result = projectService.getProjects("Test Project", ProjectStatus.CREATED, 1L);
 
         assertEquals(1, result.size());
         assertEquals("Test Project", result.get(0).getName());
@@ -162,9 +152,9 @@ class ProjectServiceTest {
     @Test
     void getAllProjects_shouldReturnAllProjects() {
         when(projectRepository.findAll()).thenReturn(List.of(project));
-        when(projectMapper.toResponseDto(project)).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        List<ProjectResponseDto> result = projectService.getAllProjects();
+        List<ProjectDto> result = projectService.getAllProjects();
 
         assertEquals(1, result.size());
         assertEquals("Test Project", result.get(0).getName());
@@ -175,7 +165,7 @@ class ProjectServiceTest {
     void getAllProjects_shouldReturnEmptyListIfNoProjectsExist() {
         when(projectRepository.findAll()).thenReturn(List.of());
 
-        List<ProjectResponseDto> result = projectService.getAllProjects();
+        List<ProjectDto> result = projectService.getAllProjects();
 
         assertTrue(result.isEmpty());
         verify(projectRepository, times(1)).findAll();
@@ -184,9 +174,9 @@ class ProjectServiceTest {
     @Test
     void getProjectById_shouldReturnProjectIfVisible() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(projectMapper.toResponseDto(project)).thenReturn(projectResponseDto);
+        when(projectMapper.toDto(project)).thenReturn(projectDto);
 
-        ProjectResponseDto result = projectService.getProjectById(1L, 1L);
+        ProjectDto result = projectService.getProjectById(1L, 1L);
 
         assertNotNull(result);
         assertEquals("Test Project", result.getName());
@@ -200,7 +190,7 @@ class ProjectServiceTest {
 
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        IllegalAccessException exception = assertThrows(IllegalAccessException.class,
                 () -> projectService.getProjectById(1L, 1L));
 
         assertEquals("You don't have access to this project", exception.getMessage());
