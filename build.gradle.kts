@@ -77,7 +77,7 @@ tasks.bootJar {
 }
 
 tasks.register("checkstyleMain", Checkstyle::class) {
-    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    configFile = file("${project.projectDir}/config/checkstyle/checkstyle.xml")
 
     configDirectory.set(file("${project.rootDir}/config/checkstyle"))
 
