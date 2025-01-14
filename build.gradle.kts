@@ -70,3 +70,8 @@ val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true 
 tasks.bootJar {
     archiveFileName.set("service.jar")
 }
+
+tasks.register("checkstyleMain", Checkstyle::class) {
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    source = fileTree("${project.projectDir}/src/main/java")
+}
