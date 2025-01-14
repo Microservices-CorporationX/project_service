@@ -76,10 +76,7 @@ tasks.register("checkstyleMain", Checkstyle::class) {
 
     configDirectory.set(file("${project.rootDir}/config/checkstyle"))
 
-    checkstyleClasspath = files(
-        sourceSets.main.get().output.classesDirs,
-        sourceSets.main.get().runtimeClasspath
-    )
+    classpath = files(sourceSets.main.get().runtimeClasspath)
 
     source = fileTree("${project.projectDir}/src/main/java")
 }
