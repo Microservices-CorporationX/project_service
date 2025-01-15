@@ -19,11 +19,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Run Gradle build
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: 8.3
-          arguments: build
-
-      - name: Run Test
+      - name: Run Gradle Test
         run: ./gradlew test --stacktrace
