@@ -21,12 +21,10 @@ jobs:
       - name: Gradle build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build
+          arguments: build -x test
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
 
       - name: Run Tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: test
+        run: ./gradlew test --no-daemon
