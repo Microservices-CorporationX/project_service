@@ -18,10 +18,11 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Gradle build
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: build -x test
+
+      - name: Gradle build
+        run: ./gradlew build -x test --no-daemon
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
