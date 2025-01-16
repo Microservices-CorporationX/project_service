@@ -4,7 +4,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
-import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,26 +13,24 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
-    private final TeamMemberRepository memberRepository;
     private final VacancyRepository vacancyRepository;
 
-    public void createValidate(Vacancy vacancy) {
-        creatorValidate(vacancy.getCreatedBy());
+    public void validateCreateVacancy(Vacancy vacancy, Optional<TeamMember> creator) {
+        validateCreator(creator);
         if (vacancy.getCount() < 1) {
             throw new IllegalArgumentException("Количество вакантных мест не может быть меньше 1");
         }
     }
 
-    public void updateValidate(Vacancy vacancy) {
-        creatorValidate(vacancy.getCreatedBy());
+    public void validateUpdateVacancy(Vacancy vacancy, Optional<TeamMember> creator) {
+        validateCreator(creator);
         if (vacancy.getStatus().equals(VacancyStatus.CLOSED) &&
                 vacancy.getCandidates().size() != vacancy.getCount()) {
             throw new IllegalArgumentException("Количество кандидатов у закрытой вакансии должно совпадать с количеством вакантных мест");
         }
     }
 
-    public void removeValidate(Long id) {
-        Optional<Vacancy> target = vacancyRepository.findById(id);
+    public void validateRemoveVacancy(Optional<Vacancy> target) {
         if (target.isEmpty()) {
             throw new IllegalArgumentException("Не удалось получить вакансию по id");
         }
@@ -42,8 +39,7 @@ public class VacancyValidator {
         }
     }
 
-    private void creatorValidate(Long creatorId) {
-        Optional<TeamMember> creator = memberRepository.findById(creatorId);
+    private void validateCreator(Optional<TeamMember> creator) {
         if (creator.isEmpty()) {
             throw new IllegalArgumentException("Не удалось получить автора вакансии по id");
         }

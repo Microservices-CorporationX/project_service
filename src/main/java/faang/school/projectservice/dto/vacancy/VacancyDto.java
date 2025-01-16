@@ -1,12 +1,7 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.TeamRole;
-import lombok.Data;
+import jakarta.validation.constraints.NotNull;
 
-@Data
-public class VacancyDto {
-    private long id;
-    private TeamRole position;
-    private Integer count;
-    private long creatorId;
+public record VacancyDto(@NotNull long id, @NotNull TeamRole position, @NotNull int count, @NotNull long creatorId) {
 }

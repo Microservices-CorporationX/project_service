@@ -1,10 +1,8 @@
 package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.vacancy.VacancyDto;
-import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -28,11 +26,11 @@ public class VacancyController {
         service.removeVacancy(id);
     }
 
-    public List<Vacancy> filterByPosition(TeamRole role) {
-        return service.filterByPosition(role);
+    public List<VacancyDto> filterByPosition(TeamRole position) {
+        return service.filterByPosition(position);
     }
 
-    public List<Vacancy> filterByName(String str) {
+    public List<VacancyDto> filterByName(String str) {
         return service.filterByName(str);
     }
 }
