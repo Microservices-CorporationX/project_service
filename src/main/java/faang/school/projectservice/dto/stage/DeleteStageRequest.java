@@ -2,20 +2,21 @@ package faang.school.projectservice.dto.stage;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.Builder;
 
 import java.util.Collections;
 import java.util.List;
 
 @Builder
-public record StageDto(
+public record DeleteStageRequest(
         Long stageId,
         @NotBlank String stageName,
         @NotNull Long projectId,
-        List<StageRolesDto> stageRolesDto
+        List<StageRolesDto> stageRolesDto,
+        String deletionStrategy,
+        Long targetStageId
 ) {
-    public StageDto {
+    public DeleteStageRequest {
         stageRolesDto = stageRolesDto != null ? stageRolesDto : Collections.emptyList();
     }
 }

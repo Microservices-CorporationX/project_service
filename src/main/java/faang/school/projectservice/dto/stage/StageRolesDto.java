@@ -1,11 +1,14 @@
 package faang.school.projectservice.dto.stage;
 
 import faang.school.projectservice.model.TeamRole;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Builder;
 
+
+@Builder
 public record StageRolesDto(
-        @PositiveOrZero Long id,
+        @NotNull Long id,
         TeamRole teamRole,
         @Positive Integer count
 ) {
