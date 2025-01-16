@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 public class StatusFilter implements ProjectFilter {
     @Override
     public Stream<Project> filter(Stream<Project> stream, FilterProjectRequest request) {
-        return request.status() == null ? stream : stream.filter(project -> project.getStatus().equals(request.status()));
+        return request.status() == null
+                ? stream : stream
+                .filter(project -> project.getStatus().equals(request.status()));
     }
 }

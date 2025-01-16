@@ -50,7 +50,7 @@ public class ProjectService {
         }
 
         Project project = getProjectById(updateProjectRequest.id());
-        projectMapper.updateProjectFromDTO(updateProjectRequest, project);
+        projectMapper.updateProjectFromDto(updateProjectRequest, project);
         project = projectRepository.save(project);
         return projectMapper.toProjectResponse(project);
     }
@@ -105,6 +105,6 @@ public class ProjectService {
                         || (project.getOwnerId().equals(userId)) // Пользователь - владелец
                         || (Optional.ofNullable(project.getTeams()).orElse(List.of()).stream()
                         .flatMap(team -> Optional.ofNullable(team.getTeamMembers()).orElse(List.of()).stream())
-                        .anyMatch(teamMember -> teamMember.getUserId().equals(userId)))); // Пользователь - участник команды
+                        .anyMatch(teamMember -> teamMember.getUserId().equals(userId))));
     }
 }

@@ -22,5 +22,5 @@ public interface ProjectMapper {
 
     ProjectResponse toProjectResponse(Project project);
 
-    void updateProjectFromDTO(UpdateProjectRequest updateProjectRequest, @MappingTarget Project project);
+    void updateProjectFromDto(UpdateProjectRequest updateProjectRequest, @MappingTarget Project project);
 }
