@@ -7,7 +7,7 @@ import faang.school.projectservice.dto.project.ProjectResponse;
 import faang.school.projectservice.dto.project.UpdateProjectRequest;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,13 +38,13 @@ public class ProjectController {
     }
 
     @PostMapping("/{userId}/search")
-    public List<ProjectResponse> filterProjects(@Valid @PositiveOrZero @PathVariable Long userId,
+    public List<ProjectResponse> filterProjects(@Valid @Positive @PathVariable Long userId,
                                                 @RequestBody FilterProjectRequest filterProjectRequest) {
         return projectService.filterProjects(userId, filterProjectRequest);
     }
 
     @GetMapping("/{userId}/all")
-    public List<ProjectResponse> getProjects(@Valid @PositiveOrZero @PathVariable Long userId) {
+    public List<ProjectResponse> getProjects(@Valid @Positive @PathVariable Long userId) {
         return projectService.getAllProjects(userId);
     }
 
