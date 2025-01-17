@@ -46,7 +46,7 @@ public class VacancyService {
 
     public List<VacancyDto> filterByName(String str) {
         return vacancyRepository.findAll().stream()
-                .filter(vacancy -> vacancy.getName().contains(str))
+                .filter(vacancy -> vacancy.getName().toLowerCase().contains(str.toLowerCase()))
                 .map(mapper::toDto)
                 .toList();
     }
