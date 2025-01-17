@@ -46,13 +46,14 @@ public class VacancyServiceTest {
     public void createVacancy_Success() {
         VacancyDto vacancy = new VacancyDto(1L, TeamRole.DESIGNER, 2, 13L);
 
-        TeamMember creator = new TeamMember(
-                13L,
-                13L,
-                "Bob",
-                List.of(TeamRole.OWNER, TeamRole.DEVELOPER, TeamRole.ANALYST),
-                new Team(),
-                Collections.emptyList());
+        TeamMember creator = TeamMember.builder()
+                .id(13L)
+                .userId(13L)
+                .nickname("Bob")
+                .roles(List.of(TeamRole.OWNER, TeamRole.DEVELOPER, TeamRole.ANALYST))
+                .team(new Team())
+                .stages(Collections.emptyList())
+                .build();
 
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(creator));
 
