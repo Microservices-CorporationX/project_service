@@ -46,7 +46,6 @@ public class StageService {
         Project project = projectRepository.findById(createStageRequest.projectId())
                 .orElseThrow(() -> new NotFoundException("Project with id "
                         + createStageRequest.projectId() + " not found"));
-
         Stage stage = stageMapper.toEntity(createStageRequest);
         stage.setProject(project);
         return stageMapper.toResponse(stageRepository.save(stage));
@@ -64,7 +63,6 @@ public class StageService {
                             .anyMatch(stageRole -> roles.contains(stageRole.getTeamRole().name())))
                     .collect(Collectors.toList());
         }
-
         if (taskStatus != null && !taskStatus.isBlank()) {
             try {
                 TaskStatus statusToFind = TaskStatus.valueOf(taskStatus.toUpperCase());
@@ -105,7 +103,6 @@ public class StageService {
         Stage stage = stageRepository.findById(updateStageRequest.stageId())
                 .orElseThrow(() -> new DataValidationException("Stage with id "
                         + updateStageRequest.stageId() + " not found"));
-
         stageMapper.updateFromRequest(updateStageRequest, stage);
 
         List<Long> executorIds = updateStageRequest.executorsIds();
@@ -127,12 +124,10 @@ public class StageService {
 
             if (currentCount < requiredCount) {
                 long missingCount = requiredCount - currentCount;
-
                 List<TeamMember> availableMembers = projectMembers.stream()
                         .filter(member -> member.getRoles().contains(role) && !executors.contains(member))
                         .limit(missingCount)
                         .toList();
-
                 if (availableMembers.size() < missingCount) {
                     throw new IllegalArgumentException("Not enough members with role "
                             + role + " available in project");
@@ -141,12 +136,12 @@ public class StageService {
 
                 availableMembers.forEach(member -> {
                     StageInvitationDto stageInvitationDto = new StageInvitationDto(
-                            null, // id generated automatically
-                            "Invitation to join stage: " + stage.getStageName(), // Description
-                            StageInvitationStatus.PENDING, // Status
-                            stage.getStageId(), // Stage ID
-                            updateStageRequest.authorId(), // Author ID
-                            member.getId() // Invitee ID
+                            null,
+                            "Invitation to join stage: " + stage.getStageName(),
+                            StageInvitationStatus.PENDING,
+                            stage.getStageId(),
+                            updateStageRequest.authorId(),
+                            member.getId()
                     );
                     stageInvitationService.sendStageInvitation(stageInvitationDto);
                 });
@@ -159,7 +154,6 @@ public class StageService {
     public List<StageResponse> getAllStagesByProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Project with id " + projectId + " not found"));
-
         List<Stage> stages = project.getStages();
         return stageMapper.toResponse(stages);
     }
