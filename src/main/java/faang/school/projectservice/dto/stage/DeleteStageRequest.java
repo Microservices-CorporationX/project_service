@@ -16,5 +16,4 @@ public record DeleteStageRequest(
         String deletionStrategy,
         Long targetStageId
 ) {
-
 }
