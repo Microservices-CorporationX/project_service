@@ -8,5 +8,6 @@ import lombok.Builder;
  * DTO for {@link faang.school.projectservice.model.Project}
  */
 @Builder
-public record DeleteProjectRequest(@NotNull @Positive Long id, @NotNull @Positive Long ownerId) {
+public record DeleteProjectRequest(@NotNull @Positive Long id,
+                                   @NotNull @Positive Long ownerId) {
 }
