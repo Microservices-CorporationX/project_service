@@ -22,9 +22,10 @@ public class VacancyValidator {
 
     public void validateUpdateVacancy(Vacancy vacancy, Optional<TeamMember> creator) {
         validateCreator(creator);
-        if (vacancy.getStatus().equals(VacancyStatus.CLOSED) &&
-                vacancy.getCandidates().size() != vacancy.getCount()) {
-            throw new IllegalArgumentException("Количество кандидатов у закрытой вакансии должно совпадать с количеством вакантных мест");
+        if (vacancy.getStatus().equals(VacancyStatus.CLOSED)
+                && vacancy.getCandidates().size() != vacancy.getCount()) {
+            throw new IllegalArgumentException("Количество кандидатов у закрытой вакансии " +
+                    "должно совпадать с количеством вакантных мест");
         }
     }
 
