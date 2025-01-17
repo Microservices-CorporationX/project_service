@@ -24,8 +24,8 @@ public class VacancyValidator {
         validateCreator(creator);
         if (vacancy.getStatus().equals(VacancyStatus.CLOSED)
                 && vacancy.getCandidates().size() != vacancy.getCount()) {
-            throw new IllegalArgumentException("Количество кандидатов у закрытой вакансии " +
-                    "должно совпадать с количеством вакантных мест");
+            throw new IllegalArgumentException("Количество кандидатов у закрытой вакансии "
+                    + "должно совпадать с количеством вакантных мест");
         }
     }
 
