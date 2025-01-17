@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - chimera-master-stream8
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Gradle build
+        run: ./gradlew build -x test --no-daemon
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon --continue
+
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
