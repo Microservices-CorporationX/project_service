@@ -15,16 +15,16 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StageMapper {
 
-    @Mapping(source = "stageRolesDto", target = "stageRoles", qualifiedByName = "toEntityStageRolesDto")
-    Stage toEntity(StageDto stageDto);
-
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "stageRoles", target = "stageRolesDto", qualifiedByName = "toDtoStageRoles")
     StageDto toDto(Stage stage);
 
-    List<Stage> toEntity(List<StageDto> stageDto);
-
     List<StageDto> toDto(List<Stage> stage);
+
+    @Mapping(source = "stageRolesDto", target = "stageRoles", qualifiedByName = "toEntityStageRolesDto")
+    Stage toEntity(StageDto stageDto);
+
+    List<Stage> toEntity(List<StageDto> stageDto);
 
     void update(StageDto stageDto, @MappingTarget Stage stage);
 

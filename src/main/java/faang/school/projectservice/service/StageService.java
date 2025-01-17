@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.DeleteStageRequest;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.UpdateStageRequest;
@@ -11,10 +12,12 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.enums.StrategyDelete;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class StageService {
     private final TaskRepository taskRepository;
     private final ProjectServiceImpl projectService;
     private final TeamMemberRepository teamMemberRepository;
+    private final StageInvitationService stageInvitationService;
 
 
     public StageDto create(@Valid StageDto stageDto) {
@@ -47,7 +51,6 @@ public class StageService {
         stage.setProject(project);
         return stageMapper.toDto(stageRepository.save(stage));
     }
-
 
     public List<StageDto> getStagesByProjectWithFilters(Long projectId, List<String> roles, String taskStatus) {
         Project project = projectService.getProject(projectId);
@@ -77,7 +80,6 @@ public class StageService {
 
     @Transactional
     public void deleteStageWithStrategy(DeleteStageRequest deleteStageRequest) {
-
         if (deleteStageRequest == null || deleteStageRequest.stageId() == null) {
             throw new IllegalArgumentException("StageDto and stageId cannot be null");
         }
@@ -86,50 +88,22 @@ public class StageService {
                 .orElseThrow(() -> new NotFoundException("Stage with id "
                         + deleteStageRequest.stageId() + " not found."));
 
-        String deletionStrategy = deleteStageRequest.deletionStrategy();
-        Long targetStageId = deleteStageRequest.targetStageId();
-
-        if (deletionStrategy == null || deletionStrategy.isBlank()) {
+        if (deleteStageRequest.deletionStrategy() == null || deleteStageRequest.deletionStrategy().isBlank()) {
             throw new IllegalArgumentException("Deletion strategy must not be null or blank");
         }
 
-        switch (deletionStrategy.toUpperCase()) {
-            case "CASCADE":
-                taskRepository.deleteAllByStageId(stage.getStageId());
-                stageRepository.delete(stage);
-                break;
-
-            case "CLOSE":
-                List<Task> tasksToClose = taskRepository.findAllByStage_StageId(stage.getStageId());
-                tasksToClose.forEach(Task::close);
-                taskRepository.saveAll(tasksToClose);
-                stageRepository.delete(stage);
-                break;
-
-            case "MOVE":
-                if (targetStageId == null) {
-                    throw new IllegalArgumentException(
-                            "Target stage ID is required for MOVE strategy");
-                }
-                Stage targetStage = stageRepository.findById(targetStageId)
-                        .orElseThrow(() -> new DataValidationException(
-                                "Target stage with id " + targetStageId + " not found"));
-
-                List<Task> tasksToMove = taskRepository.findAllByStage_StageId(stage.getStageId());
-                tasksToMove.forEach(task -> task.setStage(targetStage));
-                taskRepository.saveAll(tasksToMove);
-                stageRepository.delete(stage);
-                break;
-
-            default:
-                throw new IllegalArgumentException("Invalid deletion strategy: " + deletionStrategy);
+        try {
+            StrategyDelete strategy = StrategyDelete.valueOf(deleteStageRequest.deletionStrategy().toUpperCase());
+            strategy.execute(stage, deleteStageRequest.targetStageId(), stageRepository, taskRepository);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid deletion strategy: " + deleteStageRequest.deletionStrategy());
         }
     }
 
-
     public StageDto update(UpdateStageRequest updateStageRequest) {
         Stage stage = stageRepository.findById(updateStageRequest.stageId())
-                .orElseThrow(() -> new DataValidationException("Stage with id " + updateStageRequest.stageId() + " not found"));
+                .orElseThrow(() -> new DataValidationException("Stage with id "
+                        + updateStageRequest.stageId() + " not found"));
 
         stage.setStageName(updateStageRequest.stageName());
         List<Long> executorIds = updateStageRequest.executorsIds();
@@ -162,12 +136,24 @@ public class StageService {
                             "Not enough members with role " + role + " available in project");
                 }
                 executors.addAll(availableMembers);
-                availableMembers.forEach(member -> sendInvitation(member, stage));
+
+                availableMembers.forEach(member -> {
+                    StageInvitationDto stageInvitationDto = new StageInvitationDto(
+                            null, // id генерируется автоматически
+                            "Invitation to join stage: " + stage.getStageName(), // Описание приглашения
+                            StageInvitationStatus.PENDING, // Статус приглашения
+                            stage.getStageId(), // ID этапа
+                            updateStageRequest.authorId(), // ID автора
+                            member.getId() // ID приглашённого
+                    );
+                    stageInvitationService.sendStageInvitation(stageInvitationDto);
+                });
             }
         }
         Stage updatedStage = stageRepository.save(stage);
         return stageMapper.toDto(updatedStage);
     }
+
 
     public List<StageDto> getAllStagesByProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
@@ -181,10 +167,5 @@ public class StageService {
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new DataValidationException("Stage with id " + stageId + " not found"));
         return stageMapper.toDto(stage);
-    }
-
-    // Заглушка
-    private void sendInvitation(TeamMember member, Stage stage) {
-        System.out.println("Метод-заглушка, приглашения реализуются в другой задаче");
     }
 }

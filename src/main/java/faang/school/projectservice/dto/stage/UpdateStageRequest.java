@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public record UpdateStageRequest(
         Long stageId,
+        Long authorId,
         @NotBlank String stageName,
         @NotNull Long projectId,
         List<String> requiredRoles,
