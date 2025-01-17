@@ -42,6 +42,7 @@ public class StageService {
     private final TeamMemberRepository teamMemberRepository;
     private final StageInvitationService stageInvitationService;
 
+    @Transactional
     public StageResponse create(@Valid CreateStageRequest createStageRequest) {
         Project project = projectRepository.findById(createStageRequest.projectId())
                 .orElseThrow(() -> new NotFoundException("Project with id "
@@ -99,6 +100,7 @@ public class StageService {
         }
     }
 
+    @Transactional
     public StageResponse update(UpdateStageRequest updateStageRequest) {
         Stage stage = stageRepository.findById(updateStageRequest.stageId())
                 .orElseThrow(() -> new DataValidationException("Stage with id "
@@ -151,6 +153,7 @@ public class StageService {
         return stageMapper.toResponse(updatedStage);
     }
 
+    @Transactional(readOnly = true)
     public List<StageResponse> getAllStagesByProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataValidationException("Project with id " + projectId + " not found"));
@@ -158,6 +161,7 @@ public class StageService {
         return stageMapper.toResponse(stages);
     }
 
+    @Transactional(readOnly = true)
     public StageResponse getStageById(Long stageId) {
         Stage stage = stageRepository.findById(stageId)
                 .orElseThrow(() -> new DataValidationException("Stage with id " + stageId + " not found"));
