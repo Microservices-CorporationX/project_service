@@ -40,7 +40,8 @@ public class StageService {
 
     public StageDto create(@Valid StageDto stageDto) {
         Project project = projectRepository.findById(stageDto.projectId())
-                .orElseThrow(() -> new NotFoundException("Project with id" + stageDto.projectId() + "not found"));
+                .orElseThrow(() -> new NotFoundException("Project with id"
+                        + stageDto.projectId() + "not found"));
 
         Stage stage = stageMapper.toEntity(stageDto);
         stage.setProject(project);
@@ -82,7 +83,8 @@ public class StageService {
         }
 
         Stage stage = stageRepository.findById(deleteStageRequest.stageId())
-                .orElseThrow(() -> new NotFoundException("Stage with id " + deleteStageRequest.stageId() + " not found."));
+                .orElseThrow(() -> new NotFoundException("Stage with id "
+                        + deleteStageRequest.stageId() + " not found."));
 
         String deletionStrategy = deleteStageRequest.deletionStrategy();
         Long targetStageId = deleteStageRequest.targetStageId();
@@ -106,10 +108,12 @@ public class StageService {
 
             case "MOVE":
                 if (targetStageId == null) {
-                    throw new IllegalArgumentException("Target stage ID is required for MOVE strategy");
+                    throw new IllegalArgumentException(
+                            "Target stage ID is required for MOVE strategy");
                 }
                 Stage targetStage = stageRepository.findById(targetStageId)
-                        .orElseThrow(() -> new DataValidationException("Target stage with id " + targetStageId + " not found"));
+                        .orElseThrow(() -> new DataValidationException(
+                                "Target stage with id " + targetStageId + " not found"));
 
                 List<Task> tasksToMove = taskRepository.findAllByStage_StageId(stage.getStageId());
                 tasksToMove.forEach(task -> task.setStage(targetStage));

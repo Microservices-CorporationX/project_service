@@ -21,9 +21,6 @@ public class StageController {
     }
 
     public void deleteStage(@RequestBody @Valid DeleteStageRequest deleteStageRequest) {
-        Long stageId = deleteStageRequest.stageId();
-        String deletionStrategy = deleteStageRequest.deletionStrategy();
-        Long targetStageId = deleteStageRequest.targetStageId();
 
         stageService.deleteStageWithStrategy(deleteStageRequest);
     }
