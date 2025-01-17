@@ -16,8 +16,4 @@ public record UpdateStageRequest(
         List<String> requiredRoles,
         List<Long> executorsIds
 ) {
-    public UpdateStageRequest {
-        requiredRoles = requiredRoles != null ? requiredRoles : Collections.emptyList();
-        executorsIds = executorsIds != null ? executorsIds : Collections.emptyList();
-    }
 }

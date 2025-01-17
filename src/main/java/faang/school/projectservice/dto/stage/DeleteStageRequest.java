@@ -16,7 +16,5 @@ public record DeleteStageRequest(
         String deletionStrategy,
         Long targetStageId
 ) {
-    public DeleteStageRequest {
-        stageRolesDto = stageRolesDto != null ? stageRolesDto : Collections.emptyList();
-    }
+
 }

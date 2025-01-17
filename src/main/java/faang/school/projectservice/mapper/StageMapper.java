@@ -1,7 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.StageRolesDto;
+import faang.school.projectservice.dto.stage.*;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage.StageRoles;
 import org.mapstruct.Mapper;
@@ -10,6 +9,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -17,16 +17,39 @@ public interface StageMapper {
 
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "stageRoles", target = "stageRolesDto", qualifiedByName = "toDtoStageRoles")
-    StageDto toDto(Stage stage);
+    StageResponse toResponse(Stage stage);
 
-    List<StageDto> toDto(List<Stage> stage);
+    List<StageResponse> toResponse(List<Stage> stages);
 
     @Mapping(source = "stageRolesDto", target = "stageRoles", qualifiedByName = "toEntityStageRolesDto")
-    Stage toEntity(StageDto stageDto);
+    Stage toEntity(CreateStageRequest createStageRequest);
 
-    List<Stage> toEntity(List<StageDto> stageDto);
 
-    void update(StageDto stageDto, @MappingTarget Stage stage);
+    default UpdateStageRequest validateUpdateStageRequest(UpdateStageRequest request) {
+        if (request.requiredRoles() == null) {
+            request = new UpdateStageRequest(
+                    request.stageId(),
+                    request.authorId(),
+                    request.stageName(),
+                    request.projectId(),
+                    Collections.emptyList(),
+                    request.executorsIds()
+            );
+        }
+        if (request.executorsIds() == null) {
+            request = new UpdateStageRequest(
+                    request.stageId(),
+                    request.authorId(),
+                    request.stageName(),
+                    request.projectId(),
+                    request.requiredRoles(),
+                    Collections.emptyList()
+            );
+        }
+        return request;
+    }
+
+    void updateFromRequest(UpdateStageRequest updateStageRequest, @MappingTarget Stage stage);
 
     @Named("toDtoStageRoles")
     default StageRolesDto toDtoStageRoles(StageRoles stageRoles) {

@@ -1,43 +1,43 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.stage.DeleteStageRequest;
-import faang.school.projectservice.dto.stage.StageDto;
-import faang.school.projectservice.dto.stage.UpdateStageRequest;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
+import faang.school.projectservice.dto.stage.*;
 import faang.school.projectservice.service.StageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/stages")
 @RequiredArgsConstructor
 public class StageController {
     private final StageService stageService;
 
-    public StageDto giveStage(@RequestBody @Valid StageDto stage) {
-        return stageService.create(stage);
+    public StageResponse createStage(@RequestBody @Valid CreateStageRequest createStageRequest) {
+        return stageService.create(createStageRequest);
     }
 
     public void deleteStage(@RequestBody @Valid DeleteStageRequest deleteStageRequest) {
-
         stageService.deleteStageWithStrategy(deleteStageRequest);
     }
 
-    public StageDto updateStage(@RequestBody @Valid UpdateStageRequest stage) {
-        return stageService.update(stage);
+    public StageResponse updateStage(@RequestBody @Valid UpdateStageRequest updateStageRequest) {
+        return stageService.update(updateStageRequest);
     }
 
-    public List<StageDto> getStagesByProject(Long projectId, List<String> roles, String taskStatus) {
+    public List<StageResponse> getStagesByProject(@PathVariable Long projectId,
+                                                  @RequestParam(required = false) List<String> roles,
+                                                  @RequestParam(required = false) String taskStatus) {
         return stageService.getStagesByProjectWithFilters(projectId, roles, taskStatus);
     }
 
-    public List<StageDto> getAllStagesByProject(Long projectId) {
+    public List<StageResponse> getAllStagesByProject(@PathVariable Long projectId) {
         return stageService.getAllStagesByProject(projectId);
     }
 
-    public StageDto getStageById(Long stageId) {
+    public StageResponse getStageById(@PathVariable Long stageId) {
         return stageService.getStageById(stageId);
     }
 }

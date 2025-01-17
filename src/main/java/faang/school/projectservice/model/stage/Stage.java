@@ -53,5 +53,4 @@ public class Stage {
             joinColumns = @JoinColumn(name = "stage_id"),
             inverseJoinColumns = @JoinColumn(name = "executor_id"))
     private List<TeamMember> executors;
-
 }

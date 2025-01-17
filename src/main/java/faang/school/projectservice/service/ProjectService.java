@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ProjectServiceImpl {
+public class ProjectService {
     public Project getProject(long projectId) {
         return null;
     }
