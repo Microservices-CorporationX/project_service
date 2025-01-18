@@ -113,11 +113,16 @@ public class VacancyServiceTest {
     @Test
     public void filterByName_Success() {
         when(vacancyRepository.findAll()).thenReturn(List.of(
-                Vacancy.builder().id(1L).name("Junior Java dev. up to 1 year of experience").position(TeamRole.DEVELOPER).count(5).build(),
-                Vacancy.builder().id(2L).name("Analyst").position(TeamRole.ANALYST).count(4).build(),
-                Vacancy.builder().id(3L).name("Middle Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
-                Vacancy.builder().id(4L).name("Senior Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
-                Vacancy.builder().id(5L).name("Junior+ Java dev. 1-2 years of experience").position(TeamRole.DEVELOPER).count(5).build()
+                Vacancy.builder().id(1L).name("Junior Java dev. up to 1 year of experience")
+                        .position(TeamRole.DEVELOPER).count(5).build(),
+                Vacancy.builder().id(2L).name("Analyst")
+                        .position(TeamRole.ANALYST).count(4).build(),
+                Vacancy.builder().id(3L).name("Middle Java dev.")
+                        .position(TeamRole.DEVELOPER).count(4).build(),
+                Vacancy.builder().id(4L).name("Senior Java dev.")
+                        .position(TeamRole.DEVELOPER).count(4).build(),
+                Vacancy.builder().id(5L).name("Junior+ Java dev. 1-2 years of experience")
+                        .position(TeamRole.DEVELOPER).count(5).build()
         ));
 
         Assertions.assertTrue(() -> service.filterByName("Junior").size() == 2);
@@ -128,13 +133,17 @@ public class VacancyServiceTest {
     @Test
     public void filterByName_emptyList() {
         when(vacancyRepository.findAll()).thenReturn(List.of(
-                Vacancy.builder().id(1L).name("Junior Java dev. up to 1 year of experience").position(TeamRole.DEVELOPER).count(5).build(),
-                Vacancy.builder().id(2L).name("Analyst").position(TeamRole.ANALYST).count(4).build(),
-                Vacancy.builder().id(3L).name("Middle Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
-                Vacancy.builder().id(4L).name("Senior Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
-                Vacancy.builder().id(5L).name("Junior+ Java dev. 1-2 years of experience").position(TeamRole.DEVELOPER).count(5).build()
+                Vacancy.builder().id(1L).name("Junior Java dev. up to 1 year of experience")
+                        .position(TeamRole.DEVELOPER).count(5).build(),
+                Vacancy.builder().id(2L).name("Analyst")
+                        .position(TeamRole.ANALYST).count(4).build(),
+                Vacancy.builder().id(3L).name("Middle Java dev.")
+                        .position(TeamRole.DEVELOPER).count(4).build(),
+                Vacancy.builder().id(4L).name("Senior Java dev.")
+                        .position(TeamRole.DEVELOPER).count(4).build(),
+                Vacancy.builder().id(5L).name("Junior+ Java dev. 1-2 years of experience")
+                        .position(TeamRole.DEVELOPER).count(5).build()
         ));
-
         Assertions.assertTrue(() -> service.filterByName("OWNER").isEmpty());
     }
 }

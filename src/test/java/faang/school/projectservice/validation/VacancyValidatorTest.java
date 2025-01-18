@@ -22,7 +22,6 @@ public class VacancyValidatorTest {
             .status(VacancyStatus.OPEN)
             .candidates(List.of(new Candidate(), new Candidate(), new Candidate()))
             .build();
-    ;
     private final TeamMember creator = TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build();
 
     @Test
