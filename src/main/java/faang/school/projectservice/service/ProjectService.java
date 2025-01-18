@@ -1,7 +1,9 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.Project;
+
+import java.util.Optional;
 
 public interface ProjectService {
-    ProjectStatus getProjectStatus(Long id);
+    Optional<Project> getProject(Long id);
 }

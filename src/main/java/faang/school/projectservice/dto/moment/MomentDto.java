@@ -1,12 +1,16 @@
 package faang.school.projectservice.dto.moment;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public record MomentDto(
         Long id,
         String name,
         String description,
         String date,
-        List<Integer> projectIds
+        List<Long> projectIds,
+        List<Long> teamMembersIds
 ) {
 }
