@@ -21,13 +21,15 @@ public class VacancyValidatorTest {
             .count(3)
             .status(VacancyStatus.OPEN)
             .candidates(List.of(new Candidate(), new Candidate(), new Candidate()))
-            .build();;
+            .build();
+    ;
     private final TeamMember creator = TeamMember.builder().roles(List.of(TeamRole.MANAGER)).build();
 
     @Test
     public void validateCreateVacancy_Success() {
         validator.validateCreateVacancy(vacancy, Optional.of(creator));
     }
+
     @Test
     public void validateCreateAndUpdateVacancy_emptyCreator() {
         Assert.assertThrows(IllegalArgumentException.class,
@@ -35,6 +37,7 @@ public class VacancyValidatorTest {
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> validator.validateUpdateVacancy(vacancy, Optional.empty()));
     }
+
     @Test
     public void validateCreateAndUpdateVacancy_CreatorIsNotManagerOrOwner() {
         creator.setRoles(Collections.emptyList());

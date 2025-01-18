@@ -94,7 +94,7 @@ public class VacancyServiceTest {
                 Vacancy.builder().id(2L).position(TeamRole.DEVELOPER).count(2).build(),
                 Vacancy.builder().id(3L).position(TeamRole.ANALYST).count(4).build(),
                 Vacancy.builder().id(4L).position(TeamRole.DEVELOPER).count(1).build()
-                ));
+        ));
 
         Assertions.assertTrue(() -> service.filterByPosition(TeamRole.DEVELOPER).size() == 2);
         Assertions.assertTrue(() -> service.filterByPosition(TeamRole.ANALYST).size() == 1);
@@ -118,7 +118,7 @@ public class VacancyServiceTest {
                 Vacancy.builder().id(3L).name("Middle Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
                 Vacancy.builder().id(4L).name("Senior Java dev.").position(TeamRole.DEVELOPER).count(4).build(),
                 Vacancy.builder().id(5L).name("Junior+ Java dev. 1-2 years of experience").position(TeamRole.DEVELOPER).count(5).build()
-                ));
+        ));
 
         Assertions.assertTrue(() -> service.filterByName("Junior").size() == 2);
         Assertions.assertTrue(() -> service.filterByName("dev.").size() == 4);
