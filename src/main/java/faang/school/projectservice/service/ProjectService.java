@@ -6,12 +6,14 @@ import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -37,14 +39,13 @@ public class ProjectService {
         List<Project> subProjects = project.getChildren();
 
         validateSubProjectStatuses(subProjects, project.getStatus());
-        setPrivateVisibilityForSubProjects(subProjects, updateDto.getProjectVisibility());
+        applyPrivateVisibilityIfParentIsPrivate(subProjects, updateDto.getProjectVisibility());
 
-        subProjects.forEach(subProject -> {
-            if (subProject.getParentProject().getStatus() == ProjectStatus.COMPLETED) {
-                //TODO
-                // логика создания момента
-            }
-        });
+        if (isAllSubProjectsCompleted(subProjects)) {
+            List<Moment> moments = project.getMoments();
+            moments.add(getMomentByName("Выполнены все подпроекты"));
+            project.setMoments(moments);
+        }
 
         Project updatedProject = projectMapper.toUpdatedEntity(updateDto);
         updatedProject = projectRepository.save(updatedProject);
@@ -73,6 +74,14 @@ public class ProjectService {
                         + projectId + " не найден"));
     }
 
+    private Moment getMomentByName(String name) {
+        Moment probe = new Moment();
+        probe.setName(name);
+        Example<Moment> example = Example.of(probe);
+        return momentRepository.findOne(example)
+                .orElseThrow(() -> new EntityNotFoundException("Момент c названием '" + name + "' не найден"));
+    }
+
 
     private void validateSubProjectCreation(CreateSubProjectDto createDto) {
         Project parentProject = projectRepository.findById(createDto.getParentProjectId())
@@ -97,9 +106,14 @@ public class ProjectService {
         });
     }
 
-    private void setPrivateVisibilityForSubProjects(List<Project> subProjects, ProjectVisibility parentVisibility) {
+    private void applyPrivateVisibilityIfParentIsPrivate(List<Project> subProjects, ProjectVisibility parentVisibility) {
         if (parentVisibility == ProjectVisibility.PRIVATE) {
             subProjects.forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
         }
+    }
+
+    private boolean isAllSubProjectsCompleted(List<Project> subProjects) {
+        return subProjects.stream()
+                .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
     }
 }
