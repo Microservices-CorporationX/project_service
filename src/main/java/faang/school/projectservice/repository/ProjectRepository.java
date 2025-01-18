@@ -1,8 +1,11 @@
 package faang.school.projectservice.repository;
 
 import faang.school.projectservice.model.Project;
+import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query(
@@ -11,5 +14,11 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                     "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    @Query("SELECT tm.id FROM TeamMember tm " +
+            "JOIN tm.team t " +
+            "JOIN t.project p " +
+            "WHERE p.id = :projectId")
+    List<Long> findAllTeamMemberIdsByProjectId(@Param("projectId") Long projectId);
 }
 
