@@ -14,4 +14,5 @@ public interface MomentRepository extends JpaRepository<Moment, Long> {
     (select moment_id from moment_project where project_id = :projectId)
     """)
     List<Moment> findAllByProjectId(long projectId);
+
 }
