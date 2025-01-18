@@ -14,6 +14,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -50,6 +51,20 @@ public class ProjectService {
         return projectMapper.toDto(updatedProject);
     }
 
+    public List<ProjectDto> getSubProjects(long projectId) {
+        Project project = getProjectById(projectId);
+        List<Project> subProjects = project.getChildren();
+
+        List<Project> filteredSubProjects = subProjects.stream()
+                .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
+                .sorted(Comparator.comparingInt((Project subProject) -> subProject.getStatus().ordinal())
+                        .thenComparing(Project::getName))
+                .toList();
+
+        return filteredSubProjects.stream()
+                .map(projectMapper::toDto)
+                .toList();
+    }
 
 
     private Project getProjectById(Long projectId) {

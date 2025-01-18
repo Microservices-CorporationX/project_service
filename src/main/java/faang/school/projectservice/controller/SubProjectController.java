@@ -3,7 +3,6 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,8 @@ public class SubProjectController {
         return projectService.update(updateDto);
     }
 
-    public List<ProjectDto> getSubProjects(String name, ProjectStatus status) {
-        return null;
+    public List<ProjectDto> getSubProjects(long projectId) {
+        return projectService.getSubProjects(projectId);
     }
 
 }
