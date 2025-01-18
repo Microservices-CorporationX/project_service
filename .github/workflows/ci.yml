@@ -3,10 +3,10 @@ name: CI pipeline
 on:
   push:
     branches:
-      - feature/pipeline-BC-BJS2-52420
+      - cerberus-master-stream8
   pull_request:
     branches:
-      - feature/pipeline-BC-BJS2-52420
+      - cerberus-master-stream8
 
 jobs:
   build:
