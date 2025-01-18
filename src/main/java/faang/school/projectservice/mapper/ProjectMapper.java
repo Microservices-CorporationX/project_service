@@ -1,7 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.CreateSubProjectDto;
-import faang.school.projectservice.dto.ProjectDto;
+import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,4 +24,7 @@ public interface ProjectMapper {
     @Mapping(target = "projectVisibility", source = "projectVisibility")
     @Mapping(target = "createdAt", source = "createdAt")
     ProjectDto toDto(Project project);
+
+    Project toUpdatedEntity(UpdateSubProjectDto updateDto);
+
 }
