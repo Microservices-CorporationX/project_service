@@ -1,5 +1,6 @@
 package faang.school.projectservice.validator;
 
+import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.TeamMemberRepository;
@@ -13,12 +14,12 @@ public class StageInvitationValidator {
 
     public void validateStatusPendingCheck(StageInvitation stageInvitation) {
         if (stageInvitation.getStatus().equals(StageInvitationStatus.ACCEPTED)) {
-            throw new RuntimeException(String.format(
+            throw new BusinessException(String.format(
                     "Приглашение присоединиться к этапу с id: %s уже принято", stageInvitation.getId())
             );
         }
         if (stageInvitation.getStatus().equals(StageInvitationStatus.REJECTED)) {
-            throw new RuntimeException(String.format(
+            throw new BusinessException(String.format(
                     "Приглашение присоединиться к этапу с id: %s уже отклонено", stageInvitation.getId())
             );
         }
@@ -26,7 +27,7 @@ public class StageInvitationValidator {
 
     public void validateEqualsId(Long authorId, Long invitedId) {
         if (authorId.equals(invitedId)) {
-            throw new IllegalArgumentException(String.format(
+            throw new BusinessException(String.format(
                     "Автор приглашения на этап и приглашенный на этот этап не могут быть одним человеком. " +
                             "\n authorId: %d\n invitedId: %d", authorId, invitedId));
         }
@@ -37,7 +38,7 @@ public class StageInvitationValidator {
         Long invitedTeamId = teamMemberRepository.findById(invitedId).get().getTeam().getId();
 
         if (!authorTeamId.equals(invitedTeamId)) {
-            throw new RuntimeException(String.format(
+            throw new BusinessException(String.format(
                     "Автор приглашения на этап и приглашенный должны быть в одной команде." +
                             "\n authorTeamId: \n%d  invitedTeamId: %d", authorTeamId, invitedTeamId));
         }
