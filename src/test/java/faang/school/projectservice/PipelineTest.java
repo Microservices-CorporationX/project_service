@@ -9,6 +9,6 @@ public class PipelineTest {
 
     @Test
     public void testFailPipelineCase() {
-        assertTrue(true);
+        fail();
     }
 }
