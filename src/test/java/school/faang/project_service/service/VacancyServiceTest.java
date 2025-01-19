@@ -135,7 +135,7 @@ public class VacancyServiceTest {
         Long vacancyId = 1L;
         Long userId = 1L;
 
-        Mockito.when(vacancyRepository.existsById(vacancyId)).thenReturn(false);
+        Mockito.when(vacancyRepository.existsById(vacancyId)).thenReturn(true);
 
         vacancyService.removeVacancy(vacancyId, userId);
         Mockito.verify(vacancyRepository, Mockito.times(1)).deleteById(vacancyId);
