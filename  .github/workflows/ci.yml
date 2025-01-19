@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  push:
+  pull_request:
     branches:
       - BJS2-54078/test-ci-pipeline
 
