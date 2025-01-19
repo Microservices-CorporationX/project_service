@@ -108,8 +108,9 @@ public class SubProjectService {
             if (completedSubProjects.size() == existingSubProject.getChildren().size()) {
                 Moment moment = momentService.create();
                 momentService.getAllByProjectId(projectId).add(moment);
+            } else {
+                throw new ProjectNotClosableException("Cannot close the project because not all subprojects are completed");
             }
-            throw new ProjectNotClosableException("Cannot close the project because not all subprojects are completed");
         }
     }
 

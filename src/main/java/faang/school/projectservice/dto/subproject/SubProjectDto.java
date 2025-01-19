@@ -5,6 +5,7 @@ import faang.school.projectservice.model.ProjectVisibility;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +17,7 @@ public class SubProjectDto {
     @NotBlank
     String name;
     String description;
+    @NonNull
     Long parentProjectId;
     List<Long> childIds;
     LocalDateTime createdAt;
