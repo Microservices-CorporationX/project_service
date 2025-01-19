@@ -13,15 +13,14 @@ public interface ProjectMapper {
     @Mapping(target = "name", source = "name")
     @Mapping(target = "ownerId", source = "ownerId")
     @Mapping(target = "parentProject.id", source = "parentProjectId")
-    @Mapping(target = "projectVisibility", source = "projectVisibility")
-    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "visibility", source = "visibility")
     Project toEntity(CreateSubProjectDto createDto);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "ownerId", source = "ownerId")
     @Mapping(target = "parentProjectId", source = "parentProject.id")
-    @Mapping(target = "projectVisibility", source = "projectVisibility")
+    @Mapping(target = "visibility", source = "visibility")
     @Mapping(target = "createdAt", source = "createdAt")
     ProjectDto toDto(Project project);
 

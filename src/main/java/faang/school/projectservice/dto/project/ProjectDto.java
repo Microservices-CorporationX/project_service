@@ -15,7 +15,7 @@ public class ProjectDto {
     private long ownerId;
     private long parentProjectId;
     private ProjectStatus projectStatus;
-    private ProjectVisibility projectVisibility;
+    private ProjectVisibility visibility;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

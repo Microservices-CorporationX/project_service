@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 public class CreateSubProjectDto {
     @NotBlank(message = "Название подпроекта не может быть пустым")
     private String name;
-    private long ownerId;
-    private long parentProjectId;
     @NotNull
-    private ProjectVisibility projectVisibility;
+    private Long ownerId;
+    @NotNull
+    private Long parentProjectId;
+    @NotNull
+    private ProjectVisibility visibility;
 }

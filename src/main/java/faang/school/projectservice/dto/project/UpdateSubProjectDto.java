@@ -14,7 +14,6 @@ public class UpdateSubProjectDto {
     private long id;
     @NotNull
     private ProjectStatus projectStatus;
-    private ProjectVisibility projectVisibility;
-    @NotNull
+    private ProjectVisibility visibility;
     private LocalDateTime updatedAt;
 }
