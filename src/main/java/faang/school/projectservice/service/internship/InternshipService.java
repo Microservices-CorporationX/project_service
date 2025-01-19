@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.internship;
 
-import faang.school.projectservice.dto.internship.InternshipDto;
+import faang.school.projectservice.dto.internship.InternshipCreateDto;
+import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.mapper.internship.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
@@ -25,7 +26,7 @@ public class InternshipService {
     private final InternshipMapper internshipMapper;
     private final InternshipValidator internshipValidator;
 
-    public void createInternship(InternshipDto internshipDto) {
+    public void createInternship(InternshipCreateDto internshipDto) {
         internshipValidator.validateInternshipCreation(internshipDto);
         Internship internship = internshipMapper.toEntity(internshipDto);
 
@@ -36,19 +37,24 @@ public class InternshipService {
         internshipRepository.save(internship);
     }
 
-    public void updateInternship(InternshipDto internship) {
-
+    public void updateInternship(InternshipEditDto internshipDto) {
+        internshipValidator.validateInternshipUpdating(internshipDto);
+        if (internshipValidator.validateInternshipCompleted(internshipDto)) {
+            for (Long id : internshipDto.getInternsIds()) {
+//                Internship internship = internshipRepository.findById(id);
+            }
+        }
     }
 
-    public List<InternshipDto> getInternshipsByFilters() {
+    public List<InternshipCreateDto> getInternshipsByFilters() {
         return null;
     }
 
-    public List<InternshipDto> getInternships() {
+    public List<InternshipCreateDto> getInternships() {
         return null;
     }
 
-    public InternshipDto getInternshipById(long internshipId) {
+    public InternshipCreateDto getInternshipById(long internshipId) {
         return null;
     }
 

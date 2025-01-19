@@ -1,32 +1,18 @@
 package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.Data;
+import faang.school.projectservice.model.TeamRole;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-public class InternshipDto {
-    @Positive
-    @NotNull
+public class InternshipReadDto {
     private Long id;
-
-    @Positive
-    @NotNull
     private Long projectId;
-
-    @Positive
-    @NotNull
     private Long mentorId;
-
-    @NotNull
     private List<Long> internsIds;
-
+    private TeamRole targetRole;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private InternshipStatus status;
-    private LocalDateTime updatedAt;
 }
