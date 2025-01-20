@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -34,14 +35,10 @@ public class VacancyServiceTest {
     private TeamMemberRepository memberRepository;
     @Mock
     private VacancyValidator validator;
+    @Spy
+    private VacancyMapper mapper = Mappers.getMapper(VacancyMapper.class);
     @InjectMocks
     private VacancyService service;
-
-    @BeforeEach
-    public void setUp() {
-        VacancyMapper mapper = Mappers.getMapper(VacancyMapper.class);
-        service = new VacancyService(vacancyRepository, memberRepository, validator, mapper);
-    }
 
     @Test
     public void createVacancy_Success() {

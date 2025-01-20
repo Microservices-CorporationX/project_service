@@ -7,6 +7,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validation.VacancyValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,13 @@ public class VacancyService {
     private final VacancyValidator validator;
     private final VacancyMapper mapper;
 
-    public void createVacancy(VacancyDto dto) {
+    public void createVacancy(@Valid VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateCreateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
         vacancyRepository.save(vacancy);
     }
 
-    public void updateVacancy(VacancyDto dto) {
+    public void updateVacancy(@Valid VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateUpdateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
         vacancyRepository.save(vacancy);
