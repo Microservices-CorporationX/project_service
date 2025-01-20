@@ -4,10 +4,14 @@ import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.UpdateSubProjectDto;
 import faang.school.projectservice.model.Project;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
     @Mapping(target = "name", source = "name")
@@ -25,5 +29,8 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     Project toUpdatedEntity(UpdateSubProjectDto updateDto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(UpdateSubProjectDto updateDto, @MappingTarget Project project);
 
 }

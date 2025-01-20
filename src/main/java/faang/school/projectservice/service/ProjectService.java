@@ -11,7 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.validator.ProjectValidator;
+import faang.school.projectservice.service.validator.SubProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final MomentRepository momentRepository;
-    private final ProjectValidator projectValidator;
+    private final SubProjectValidator projectValidator;
 
     public ProjectDto create(CreateSubProjectDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
@@ -37,20 +37,18 @@ public class ProjectService {
 
     public ProjectDto update(UpdateSubProjectDto updateDto) {
         Project project = getProjectById(updateDto.getId());
+        projectMapper.updateEntityFromDto(updateDto, project);
         List<Project> subProjects = project.getChildren();
 
         projectValidator.validateSubProjectStatuses(subProjects, project.getStatus());
         applyPrivateVisibilityIfParentIsPrivate(subProjects, updateDto.getVisibility());
 
         if (isAllSubProjectsCompleted(subProjects)) {
-            List<Moment> moments = project.getMoments();
-            moments.add(getMomentByName("Выполнены все подпроекты"));
-            project.setMoments(moments);
+            addMomentToProject(project);
         }
 
-        Project updatedProject = projectMapper.toUpdatedEntity(updateDto);
-        updatedProject = projectRepository.save(updatedProject);
-        return projectMapper.toDto(updatedProject);
+        project = projectRepository.save(project);
+        return projectMapper.toDto(project);
     }
 
     public List<ProjectDto> getSubProjects(long projectId) {
@@ -68,7 +66,6 @@ public class ProjectService {
                 .toList();
     }
 
-
     private Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Проект с ID "
@@ -81,6 +78,12 @@ public class ProjectService {
         Example<Moment> example = Example.of(probe);
         return momentRepository.findOne(example)
                 .orElseThrow(() -> new EntityNotFoundException("Момент c названием '" + name + "' не найден"));
+    }
+
+    private void addMomentToProject(Project project) {
+        List<Moment> moments = project.getMoments();
+        moments.add(getMomentByName("Выполнены все подпроекты"));
+        project.setMoments(moments);
     }
 
     private void applyPrivateVisibilityIfParentIsPrivate(List<Project> subProjects, ProjectVisibility parentVisibility) {

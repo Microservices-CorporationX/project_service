@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ProjectValidator {
+public class SubProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateSubProjectCreation(CreateSubProjectDto createDto) {
