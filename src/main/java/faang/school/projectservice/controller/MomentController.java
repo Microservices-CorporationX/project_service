@@ -53,7 +53,7 @@ public class MomentController {
             log.error("Name of moment cannot be empty!");
             throw new IllegalArgumentException("Name of moment cannot be empty!");
         }
-        if (momentRequestDto.projectIds() == null || momentRequestDto.projectIds().isEmpty()) {
+        if (momentRequestDto.projectToAddIds() == null || momentRequestDto.projectToAddIds().isEmpty()) {
             log.error("Moment must be associated at least to one project!");
             throw new IllegalArgumentException("Moment must be associated at least to one project!");
         }

@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.MomentFilter;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -38,21 +40,24 @@ public class MomentServiceImpl implements MomentService {
     @Override
     public MomentResponseDto createMoment(MomentRequestDto momentRequestDto) {
         validateMoment(momentRequestDto);
-        Moment moment = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
-        MomentResponseDto createdMomentResponseDto = momentMapper.toMomentResponseDto(moment);
+        //Moment momentToSave = momentMapper.toMomentEntity(momentRequestDto);
+        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
+        MomentResponseDto createdMomentResponseDto = momentMapper.toMomentResponseDto(momentSaved);
         log.info("Created moment {}", createdMomentResponseDto);
         return createdMomentResponseDto;
     }
 
     @Override
     public MomentResponseDto updateMoment(MomentRequestDto momentRequestDto) {
-        if (momentRequestDto.id() != null) {
-            log.info("Updated moment : {}", momentRequestDto);
-            return createMoment(momentRequestDto);
-        } else {
-            log.error("Unable update moment, because it's Id is null {}", momentRequestDto);
-            throw new IllegalArgumentException("Unable update moment, because it's Id is null");
-        }
+        validateMomentId(momentRequestDto);
+        validateMoment(momentRequestDto);
+
+        MomentResponseDto initialMomentDto = this.getMoment(momentRequestDto.id());
+        updateMomentMembersAndProjects(momentMapper.toMomentEntity(initialMomentDto),
+                momentMapper.toMomentEntity(momentRequestDto));
+
+        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
+        return createMoment(momentRequestDto);
     }
 
     @Override
@@ -74,11 +79,19 @@ public class MomentServiceImpl implements MomentService {
         return momentMapper.toMomentResponseDto(moment);
     }
 
-    private void addProject(Moment moment, Project project) {
+    private void validateMomentId(MomentRequestDto momentRequestDto)
+    {
+        if (StringUtils.isBlank(String.valueOf(momentRequestDto.id()))) {
+            log.error("Unable update moment, because it's Id is null {}", momentRequestDto);
+            throw new IllegalArgumentException("Unable update moment, because it's Id is null");
+        }
+    }
+
+    /*private void addProject(Moment moment, Project project) {
         List<Project> projects = moment.getProjects();
         projects.add(project);
         moment.setProjects(projects);
-        List<Long> teamMemberIds = getAllTeamMemberIds(moment);
+        List<Long> teamMemberIds = getAllProjectsTeamMemberIds(moment);
         moment.setUserIds(teamMemberIds);
 
     }
@@ -89,10 +102,11 @@ public class MomentServiceImpl implements MomentService {
         moment.setUserIds(teamMemberIds);
         Project teamMemberProject = teamMember.getTeam().getProject();
         addProject(moment, teamMemberProject);
-    }
+    }*/
 
-    private List<Long> getAllTeamMemberIds(Moment moment) {
+    private List<Long> getAllProjectsTeamMemberIds(Moment moment) {
         return moment.getProjects().stream()
+                .filter(project -> project.getStatus() == ProjectStatus.IN_PROGRESS)
                 .flatMap(project -> project.getTeams().stream())
                 .flatMap(team -> team.getTeamMembers().stream())
                 .map(TeamMember::getUserId)
@@ -101,15 +115,29 @@ public class MomentServiceImpl implements MomentService {
                 .toList();
     }
 
-    private void synchronizeMomentMembersAndProjects(Moment beforeUpdateMoment, Moment afterUpdateMoment) {
-        List<Long> allTeamMembersIdsBefore = getAllTeamMemberIds(beforeUpdateMoment);
-        List<Project> allProjectsBefore = beforeUpdateMoment.getProjects();
-        List<Long> allTeamMembersIdsAfter = getAllTeamMemberIds(afterUpdateMoment);
-        List<Project> allProjectsAfter = afterUpdateMoment.getProjects();
+    private Moment updateMomentMembersAndProjects(Moment initialMoment, Moment updatedMoment) {
+        List<Long> initialAllProjectTeamMembersIds = getAllProjectsTeamMemberIds(initialMoment);
+        List<Long> addedProjectTeamMembersIds = getAllProjectsTeamMemberIds(updatedMoment);
+        List<Long> initialTeamMembersIds = initialMoment.getUserIds();
+        List<Long> addedTeamMembersIds = updatedMoment.getUserIds();
+        List<Project> initialAllProjects = initialMoment.getProjects();
+        List<Project> addedProjects = updatedMoment.getProjects();
 
-        //afterUpdateMoment.setProjects();
+        List<Long> resultTeamMemberIds = new ArrayList<>();
+        List<Project> resultProjectIds = new ArrayList<>();
 
+        resultTeamMemberIds.addAll(initialTeamMembersIds);
+        resultTeamMemberIds.addAll(initialAllProjectTeamMembersIds);
+        resultTeamMemberIds.addAll(addedProjectTeamMembersIds);
+        resultTeamMemberIds.addAll(addedTeamMembersIds);
 
+        resultProjectIds.addAll(initialAllProjects);
+        resultProjectIds.addAll(addedProjects);
+
+        updatedMoment.setUserIds(resultTeamMemberIds.stream().distinct().sorted().toList());
+        updatedMoment.setProjects(resultProjectIds.stream().distinct().sorted().toList());
+
+        return updatedMoment;
     }
 
 
@@ -128,12 +156,12 @@ public class MomentServiceImpl implements MomentService {
         }
 
 
-        List<Long> projectIds = momentRequestDto.projectIds();
-        if (projectIds == null || projectIds.isEmpty()) {
+        List<Long> projectIds = momentRequestDto.projectToAddIds();
+        if (null == projectIds || projectIds.isEmpty()) {
             log.error("Moment cannot be without projects!");
             throw new IllegalArgumentException("Moment cannot be without projects!");
         }
 
-        List<Long> teamMembersIds = momentRequestDto.teamMembersIds();
+        List<Long> teamMembersIds = momentRequestDto.teamMemberToAddIds();
     }
 }

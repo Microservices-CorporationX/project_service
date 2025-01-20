@@ -10,7 +10,7 @@ public record MomentRequestDto(
         String name,
         String description,
         String date,
-        List<Long> projectIds,
-        List<Long> teamMembersIds
+        List<Long> projectToAddIds,
+        List<Long> teamMemberToAddIds
 ) {
 }
