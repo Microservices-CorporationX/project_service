@@ -14,7 +14,6 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.project.ProjectFilter;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -54,11 +53,6 @@ class ProjectServiceTest {
 
     @InjectMocks
     private ProjectService projectService;
-
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void createProject_Success() {

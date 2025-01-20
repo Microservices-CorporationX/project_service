@@ -100,11 +100,22 @@ public class ProjectService {
     }
 
     private Stream<Project> getVisibleProjectsForUser(Stream<Project> projects, long userId) {
-        return projects
-                .filter(project -> project.getVisibility() == ProjectVisibility.PUBLIC // Оставляем публичные проекты
-                        || (project.getOwnerId().equals(userId)) // Пользователь - владелец
-                        || (Optional.ofNullable(project.getTeams()).orElse(List.of()).stream()
-                        .flatMap(team -> Optional.ofNullable(team.getTeamMembers()).orElse(List.of()).stream())
-                        .anyMatch(teamMember -> teamMember.getUserId().equals(userId))));
+        return projects.filter(project ->
+                project.getVisibility() == ProjectVisibility.PUBLIC
+                        || project.getOwnerId().equals(userId)
+                        || isUserInProjectTeams(project, userId) // Пользователь входит в команды проекта
+        );
+    }
+
+    private boolean isUserInProjectTeams(Project project, long userId) {
+        return Optional.ofNullable(project.getTeams())
+                .orElse(List.of())
+                .stream()
+                .flatMap(team ->
+                        Optional.ofNullable(team.getTeamMembers())
+                                .orElse(List.of())
+                                .stream()
+                )
+                .anyMatch(teamMember -> teamMember.getUserId().equals(userId));
     }
 }
