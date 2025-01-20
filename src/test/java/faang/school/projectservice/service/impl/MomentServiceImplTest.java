@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
@@ -31,10 +31,10 @@ class MomentServiceImplTest {
     @Spy
     MomentMapperImpl momentMapper;
 
-    MomentDto validMomentDto;
-    MomentDto savedMomentDto;
-    MomentDto emptyProjectMomentDto;
-    MomentDto incorrectDateMomentDto;
+    MomentRequestDto validMomentRequestDto;
+    MomentRequestDto savedMomentResponseDto;
+    MomentRequestDto emptyProjectMomentRequestDto;
+    MomentRequestDto incorrectDateMomentRequestDto;
     List<Long> defaultProjectsIds;
 
     List<MomentFilter> momentFilters = new ArrayList<>();
@@ -46,25 +46,25 @@ class MomentServiceImplTest {
         defaultProjectsIds = new ArrayList<>(List.of(1L, 2L, 3L));
         List<Long> emptyProjectsIds = new ArrayList<>();
 
-        validMomentDto = MomentDto.builder()
+        validMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
                 .description("some description")
                 .projectIds(defaultProjectsIds)
                 .build();
-        emptyProjectMomentDto = MomentDto.builder()
+        emptyProjectMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
                 .description("some description")
                 .projectIds(emptyProjectsIds)
                 .build();
-        incorrectDateMomentDto = MomentDto.builder()
+        incorrectDateMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .date("20.01.2025 11:11:22")
                 .description("some description")
                 .projectIds(emptyProjectsIds)
                 .build();
-        savedMomentDto = MomentDto.builder()
+        savedMomentResponseDto = MomentRequestDto.builder()
                 .id(123L)
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
@@ -85,9 +85,9 @@ class MomentServiceImplTest {
     @Test
     @DisplayName("Test Create Moment Positive")
     void createMoment() {
-        Moment moment = momentMapper.toMomentEntity(savedMomentDto);
+        Moment moment = momentMapper.toMomentEntity(savedMomentResponseDto);
         Mockito.when(momentRepositoryMock.save(moment)).thenReturn(moment);
-        momentService.createMoment(savedMomentDto);
+        momentService.createMoment(savedMomentResponseDto);
 
         Mockito.verify(momentRepositoryMock, Mockito.times(1)).save(Mockito.any(Moment.class));
     }
@@ -95,23 +95,21 @@ class MomentServiceImplTest {
     @Test
     @DisplayName("Test Create Moment without projects")
     void createMomentWithEmptyProjectIds() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentService.createMoment(emptyProjectMomentDto));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentService.createMoment(emptyProjectMomentRequestDto));
     }
 
     @Test
     @DisplayName("Test Create Moment with incorrect date")
     void createMomentWithIncorrectDate() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentService.createMoment(incorrectDateMomentDto));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentService.createMoment(incorrectDateMomentRequestDto));
     }
-
-
 
     @Test
     @DisplayName("Test Update Moment")
     void updateMoment() {
-        Moment moment = momentMapper.toMomentEntity(validMomentDto);
+        Moment moment = momentMapper.toMomentEntity(validMomentRequestDto);
         Mockito.when(momentRepositoryMock.save(moment)).thenReturn(moment);
-        momentService.createMoment(validMomentDto);
+        momentService.createMoment(validMomentRequestDto);
 
         Mockito.verify(momentRepositoryMock, Mockito.times(1)).save(Mockito.any(Moment.class));
     }
@@ -133,7 +131,7 @@ class MomentServiceImplTest {
     @Test
     @DisplayName("Test Get Moment")
     void getMoment() {
-        Moment moment = momentMapper.toMomentEntity(savedMomentDto);
+        Moment moment = momentMapper.toMomentEntity(savedMomentResponseDto);
         Mockito.when(momentRepositoryMock.findById(1L)).thenReturn(Optional.ofNullable(moment));
         momentService.getMoment(1L);
 

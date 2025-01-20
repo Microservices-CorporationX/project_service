@@ -1,20 +1,22 @@
 package faang.school.projectservice.service;
 
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 
 import java.util.List;
 
 public interface MomentService {
 
-    MomentDto createMoment(MomentDto momentDto);
+    MomentResponseDto createMoment(MomentRequestDto momentRequestDto);
 
-    MomentDto updateMoment(MomentDto momentDto);
+    MomentResponseDto updateMoment(MomentRequestDto momentRequestDto);
 
-    List<MomentDto> getMoments(MomentFilterDto filter);
+    List<MomentResponseDto> getMoments(MomentFilterDto filter);
 
-    List<MomentDto> getAllMoments();
+    List<MomentResponseDto> getAllMoments();
 
-    MomentDto getMoment(Long momentId);
+    MomentResponseDto getMoment(Long momentId);
+
 }

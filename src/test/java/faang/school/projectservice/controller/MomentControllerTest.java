@@ -1,6 +1,6 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.service.impl.MomentServiceImpl;
 import org.junit.Assert;
@@ -25,16 +25,15 @@ class MomentControllerTest {
 
     @InjectMocks
     MomentController momentController;
-    MomentDto validMomentDto;
+    MomentRequestDto validMomentRequestDto;
     List<Long> defaultProjectsIds;
-
     MomentFilterDto momentFilterDto;
 
     @BeforeEach
     void init() {
         defaultProjectsIds = new ArrayList<>(List.of(1L, 2L, 3L));
 
-        validMomentDto = MomentDto.builder()
+        validMomentRequestDto = MomentRequestDto.builder()
                 .id(123L)
                 .name("Cool moment")
                 .date("2025/01/20 11:11:22")
@@ -52,57 +51,57 @@ class MomentControllerTest {
     @Test
     @DisplayName("Test moment creation")
     void testCreate() {
-        momentController.create(validMomentDto);
-        Mockito.verify(momentService, Mockito.times(1)).createMoment(validMomentDto);
+        momentController.create(validMomentRequestDto);
+        Mockito.verify(momentService, Mockito.times(1)).createMoment(validMomentRequestDto);
     }
 
     @Test
     @DisplayName("Test not valid name moment")
     void testNotValidMomentName() {
-        MomentDto notValidMomentDto1;
-        MomentDto notValidMomentDto2;
+        MomentRequestDto notValidMomentRequestDto1;
+        MomentRequestDto notValidMomentRequestDto2;
 
-        notValidMomentDto1 = MomentDto.builder()
+        notValidMomentRequestDto1 = MomentRequestDto.builder()
                 .id(123L)
                 .projectIds(defaultProjectsIds)
                 .build();
 
-        notValidMomentDto2 = MomentDto.builder()
+        notValidMomentRequestDto2 = MomentRequestDto.builder()
                 .id(123L)
                 .name("")
                 .projectIds(defaultProjectsIds)
                 .build();
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentDto1));
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentDto2));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentRequestDto1));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentRequestDto2));
     }
 
     @Test
     @DisplayName("Test not valid project ids moment")
     void testNotValidMomentProjectIds() {
-        MomentDto notValidMomentDto1;
-        MomentDto notValidMomentDto2;
+        MomentRequestDto notValidMomentRequestDto1;
+        MomentRequestDto notValidMomentRequestDto2;
 
-        notValidMomentDto1 = MomentDto.builder()
+        notValidMomentRequestDto1 = MomentRequestDto.builder()
                 .id(123L)
                 .name("Name")
                 .build();
 
-        notValidMomentDto2 = MomentDto.builder()
+        notValidMomentRequestDto2 = MomentRequestDto.builder()
                 .id(123L)
                 .name("Name")
                 .projectIds(new ArrayList<>())
                 .build();
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentDto1));
-        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentDto2));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentRequestDto1));
+        Assert.assertThrows(IllegalArgumentException.class, () -> momentController.create(notValidMomentRequestDto2));
     }
 
     @Test
     @DisplayName("Test moment update")
     void testUpdate() {
-        momentController.update(validMomentDto);
-        Mockito.verify(momentService, Mockito.times(1)).updateMoment(validMomentDto);
+        momentController.update(validMomentRequestDto);
+        Mockito.verify(momentService, Mockito.times(1)).updateMoment(validMomentRequestDto);
     }
 
     @Test

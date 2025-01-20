@@ -1,6 +1,7 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.moment.MomentDto;
+import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.model.Moment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,13 +11,22 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface MomentMapper {
     @Mapping(source = "date", target = "date", dateFormat = "dd/MM/yyyy HH:mm:ss")
-    Moment toMomentEntity(MomentDto momentDto);
+    Moment toMomentEntity(MomentResponseDto momentResponseDto);
 
-    MomentDto toMomentDto (Moment moment);
+    @Mapping(source = "date", target = "date", dateFormat = "dd/MM/yyyy HH:mm:ss")
+    Moment toMomentEntity(MomentRequestDto momentResponseDto);
 
-    List<Moment> toMomentEntities(List<MomentDto> momentDtos);
+    MomentResponseDto toMomentResponseDto (Moment moment);
 
-    List<MomentDto> toMomentDtos(List<Moment> moments);
+    MomentRequestDto toMomentRequestDto (Moment moment);
+
+    List<Moment> toMomentEntities(List<MomentResponseDto> momentResponseDtos);
+
+    //List<Moment> toMomentEntities(List<MomentRequestDto> momentRequestDtos);
+
+    List<MomentResponseDto> toMomentResponseDtos(List<Moment> moments);
+
+    List<MomentRequestDto> toMomentRequestDtos(List<Moment> moments);
 
 
 }
