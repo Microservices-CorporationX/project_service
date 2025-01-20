@@ -11,7 +11,7 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.validator.SubProjectValidator;
+import faang.school.projectservice.service.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final MomentRepository momentRepository;
-    private final SubProjectValidator projectValidator;
+    private final ProjectValidator projectValidator;
 
     public ProjectDto create(CreateSubProjectDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
@@ -41,9 +41,9 @@ public class ProjectService {
         List<Project> subProjects = project.getChildren();
 
         projectValidator.validateSubProjectStatuses(subProjects, project.getStatus());
-        applyPrivateVisibilityIfParentIsPrivate(subProjects, updateDto.getVisibility());
+        projectValidator.applyPrivateVisibilityIfParentIsPrivate(subProjects, updateDto.getVisibility());
 
-        if (isAllSubProjectsCompleted(subProjects)) {
+        if (projectValidator.isAllSubProjectsCompleted(subProjects)) {
             addMomentToProject(project);
         }
 
@@ -86,14 +86,4 @@ public class ProjectService {
         project.setMoments(moments);
     }
 
-    private void applyPrivateVisibilityIfParentIsPrivate(List<Project> subProjects, ProjectVisibility parentVisibility) {
-        if (parentVisibility == ProjectVisibility.PRIVATE) {
-            subProjects.forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
-        }
-    }
-
-    private boolean isAllSubProjectsCompleted(List<Project> subProjects) {
-        return subProjects.stream()
-                .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
-    }
 }

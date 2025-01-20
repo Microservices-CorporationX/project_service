@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class SubProjectValidator {
+public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
     public void validateSubProjectCreation(CreateSubProjectDto createDto) {
@@ -38,5 +38,16 @@ public class SubProjectValidator {
                 throw new BusinessException("Все подпроекты текущего подпроекта должны иметь одинаковый статус.");
             }
         });
+    }
+
+    public void applyPrivateVisibilityIfParentIsPrivate(List<Project> subProjects, ProjectVisibility parentVisibility) {
+        if (parentVisibility == ProjectVisibility.PRIVATE) {
+            subProjects.forEach(subProject -> subProject.setVisibility(ProjectVisibility.PRIVATE));
+        }
+    }
+
+    public boolean isAllSubProjectsCompleted(List<Project> subProjects) {
+        return subProjects.stream()
+                .allMatch(subProject -> subProject.getStatus() == ProjectStatus.COMPLETED);
     }
 }

@@ -19,10 +19,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class SubProjectValidatorTest {
+public class ProjectValidatorTest {
 
 
     private static final long ID = 1L;
@@ -30,7 +34,7 @@ public class SubProjectValidatorTest {
     private ProjectRepository projectRepository;
 
     @InjectMocks
-    private SubProjectValidator subProjectValidator;
+    private ProjectValidator projectValidator;
 
     private CreateSubProjectDto createFailingDto;
     private CreateSubProjectDto createValidDto;
@@ -52,7 +56,7 @@ public class SubProjectValidatorTest {
         Mockito.when(projectRepository.findById(createFailingDto.getParentProjectId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
-            subProjectValidator.validateSubProjectCreation(createFailingDto);
+            projectValidator.validateSubProjectCreation(createFailingDto);
         });
     }
 
@@ -63,7 +67,7 @@ public class SubProjectValidatorTest {
         Mockito.when(projectRepository.findById(createFailingDto.getParentProjectId())).thenReturn(Optional.ofNullable(parentProject));
 
         assertThrows(BusinessException.class, () -> {
-            subProjectValidator.validateSubProjectCreation(createFailingDto);
+            projectValidator.validateSubProjectCreation(createFailingDto);
         });
     }
 
@@ -74,7 +78,7 @@ public class SubProjectValidatorTest {
         Mockito.when(projectRepository.findById(createFailingDto.getParentProjectId())).thenReturn(Optional.ofNullable(parentProject));
 
         assertThrows(BusinessException.class, () -> {
-            subProjectValidator.validateSubProjectCreation(createFailingDto);
+            projectValidator.validateSubProjectCreation(createFailingDto);
         });
     }
 
@@ -84,7 +88,7 @@ public class SubProjectValidatorTest {
 
         Mockito.when(projectRepository.findById(createFailingDto.getParentProjectId())).thenReturn(Optional.ofNullable(parentProject));
 
-        assertDoesNotThrow(() -> subProjectValidator.validateSubProjectCreation(createValidDto));
+        assertDoesNotThrow(() -> projectValidator.validateSubProjectCreation(createValidDto));
     }
 
     @Test
@@ -96,7 +100,7 @@ public class SubProjectValidatorTest {
         List<Project> subProjects = List.of(subproject1, subproject2);
 
         assertThrows(BusinessException.class, () -> {
-            subProjectValidator.validateSubProjectStatuses(subProjects, parentStatus);
+            projectValidator.validateSubProjectStatuses(subProjects, parentStatus);
         });
     }
 
@@ -108,6 +112,36 @@ public class SubProjectValidatorTest {
 
         List<Project> subProjects = List.of(subproject1, subproject2);
 
-        assertDoesNotThrow(() -> subProjectValidator.validateSubProjectStatuses(subProjects, parentStatus));
+        assertDoesNotThrow(() -> projectValidator.validateSubProjectStatuses(subProjects, parentStatus));
     }
+
+    @Test
+    public void testApplyPrivateVisibilityIfParentIsPublic() {
+        Project subproject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project subproject2 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        ProjectVisibility parentVisibility = ProjectVisibility.PUBLIC;
+
+        List<Project> subProjects = List.of(subproject1, subproject2);
+
+        projectValidator.applyPrivateVisibilityIfParentIsPrivate(subProjects, parentVisibility);
+
+        assertNotSame(subproject1.getVisibility(), ProjectVisibility.PRIVATE);
+        assertNotSame(subproject2.getVisibility(), ProjectVisibility.PRIVATE);
+
+    }
+
+    @Test
+    public void testApplyPrivateVisibilityIfParentIsPrivate() {
+        Project subproject1 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        Project subproject2 = Project.builder().visibility(ProjectVisibility.PUBLIC).build();
+        ProjectVisibility parentVisibility = ProjectVisibility.PRIVATE;
+
+        List<Project> subProjects = List.of(subproject1, subproject2);
+
+        projectValidator.applyPrivateVisibilityIfParentIsPrivate(subProjects, parentVisibility);
+
+        assertEquals(subproject1.getVisibility(), ProjectVisibility.PRIVATE);
+        assertEquals(subproject2.getVisibility(), ProjectVisibility.PRIVATE);
+    }
+
 }
