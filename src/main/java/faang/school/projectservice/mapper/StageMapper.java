@@ -24,7 +24,6 @@ public interface StageMapper {
     @Mapping(source = "stageRolesDto", target = "stageRoles", qualifiedByName = "toEntityStageRolesDto")
     Stage toEntity(CreateStageRequest createStageRequest);
 
-
     default UpdateStageRequest validateUpdateStageRequest(UpdateStageRequest request) {
         if (request.requiredRoles() == null) {
             request = new UpdateStageRequest(

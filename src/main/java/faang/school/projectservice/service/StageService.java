@@ -22,7 +22,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@EnableTransactionManagement
 public class StageService {
     private final StageRepository stageRepository;
     private final StageMapper stageMapper;
@@ -44,9 +42,7 @@ public class StageService {
 
     @Transactional
     public StageResponse create(@Valid CreateStageRequest createStageRequest) {
-        Project project = projectRepository.findById(createStageRequest.projectId())
-                .orElseThrow(() -> new NotFoundException("Project with id "
-                        + createStageRequest.projectId() + " not found"));
+        Project project = findProjectById(createStageRequest.projectId());
         Stage stage = stageMapper.toEntity(createStageRequest);
         stage.setProject(project);
         return stageMapper.toResponse(stageRepository.save(stage));
@@ -84,9 +80,7 @@ public class StageService {
             throw new IllegalArgumentException("DeleteStageRequest and stageId cannot be null");
         }
 
-        Stage stage = stageRepository.findById(deleteStageRequest.stageId())
-                .orElseThrow(() -> new NotFoundException("Stage with id "
-                        + deleteStageRequest.stageId() + " not found."));
+        Stage stage = findStageById(deleteStageRequest.stageId());
 
         if (deleteStageRequest.deletionStrategy() == null || deleteStageRequest.deletionStrategy().isBlank()) {
             throw new IllegalArgumentException("Deletion strategy must not be null or blank");
@@ -102,9 +96,8 @@ public class StageService {
 
     @Transactional
     public StageResponse update(UpdateStageRequest updateStageRequest) {
-        Stage stage = stageRepository.findById(updateStageRequest.stageId())
-                .orElseThrow(() -> new DataValidationException("Stage with id "
-                        + updateStageRequest.stageId() + " not found"));
+        stageMapper.validateUpdateStageRequest(updateStageRequest);
+        Stage stage = findStageById(updateStageRequest.stageId());
         stageMapper.updateFromRequest(updateStageRequest, stage);
 
         List<Long> executorIds = updateStageRequest.executorsIds();
@@ -155,16 +148,29 @@ public class StageService {
 
     @Transactional(readOnly = true)
     public List<StageResponse> getAllStagesByProject(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataValidationException("Project with id " + projectId + " not found"));
+        Project project = findProjectById(projectId);
         List<Stage> stages = project.getStages();
         return stageMapper.toResponse(stages);
     }
 
     @Transactional(readOnly = true)
     public StageResponse getStageById(Long stageId) {
-        Stage stage = stageRepository.findById(stageId)
-                .orElseThrow(() -> new DataValidationException("Stage with id " + stageId + " not found"));
+        Stage stage = findStageById(stageId);
         return stageMapper.toResponse(stage);
     }
+
+    private Stage findStageById(Long stageId) {
+        return stageRepository.findById(stageId)
+                .orElseThrow(() -> new DataValidationException("Stage with id "
+                        + stageId + " not found"));
+    }
+
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Project with id "
+                        + projectId + " not found"));
+
+    }
 }
+
+
