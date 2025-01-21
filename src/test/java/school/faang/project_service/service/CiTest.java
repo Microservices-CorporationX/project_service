@@ -6,6 +6,7 @@ public class CiTest {
 
     @Test
     void placeholderTest() {
+
         assert true;
     }
 }
