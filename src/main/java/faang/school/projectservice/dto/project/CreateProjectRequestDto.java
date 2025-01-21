@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
 public class CreateProjectRequestDto {
     @NotBlank
     private String name;
+
     @NotBlank
     private String description;
+
     @NotNull
     private ProjectVisibility visibility;
 }
