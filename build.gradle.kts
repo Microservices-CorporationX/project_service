@@ -72,9 +72,17 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
+val exclusions = listOf(
+    "**/config",
+    "**/dto/**",
+    "**/entity/**",
+    "**/client/**",
+    "**/config/**",
+    "**/mapper/**",
+    "**/model/**",
+    "**/controller/**",
+    "**/ProjectServiceApplication.*"
+)
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
@@ -89,15 +97,7 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude("**/config")
-                exclude("**/dto/**")
-                exclude("**/entity/**")
-                exclude("**/client/**")
-                exclude("**/config/**")
-                exclude("**/mapper/**")
-                exclude("**/model/**")
-                exclude("**/controller/**")
-                exclude("**/UserServiceApplication.*")
+                exclude(exclusions)
             }
         })
     )
@@ -114,6 +114,16 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(exclusions)
+            }
+        })
+    )
+
     violationRules {
         rule {
             limit {

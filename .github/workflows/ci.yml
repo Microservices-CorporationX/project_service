@@ -20,14 +20,14 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
-      - name: Clean with Gradle
-        run: ./gradlew clean
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test --no-daemon
 
       - name: Run tests
-        run: ./gradlew test
+        run: ./gradlew test --no-daemon
 
       - name: Run Jacoco Test Coverage Verification
-        run: ./gradlew jacocoTestCoverageVerification
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
