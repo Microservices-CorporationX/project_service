@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
 }
@@ -56,13 +57,70 @@ dependencies {
     /**
      * Tests
      */
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.4")
     testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("/reports/jacoco/test/html"))
+    }
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("**/config")
+                exclude("**/dto/**")
+                exclude("**/entity/**")
+                exclude("**/client/**")
+                exclude("**/config/**")
+                exclude("**/mapper/**")
+                exclude("**/model/**")
+                exclude("**/controller/**")
+                exclude("**/UserServiceApplication.*")
+            }
+        })
+    )
+
+    doLast {
+        val reportDir = reports.html.outputLocation.get().asFile.absolutePath
+        val reportFile = File(reportDir, "index.html")
+        if (reportFile.exists()) {
+            println("Jacoco saved report to $reportFile")
+        } else {
+            println("Jacoco couldn't save report file")
+        }
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.7".toBigDecimal()
+            }
+        }
+    }
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
