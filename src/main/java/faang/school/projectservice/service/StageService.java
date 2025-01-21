@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class StageService {
     private final StageRepository stageRepository;
 
-    public Stage getStage(@NotNull Long stageId) {
+    public Stage findById(@NotNull Long stageId) {
         return stageRepository.findById(stageId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Этап c id: %d не найден", stageId)));
     }

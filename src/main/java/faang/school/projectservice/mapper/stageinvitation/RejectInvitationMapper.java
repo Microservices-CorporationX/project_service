@@ -1,4 +1,4 @@
-package faang.school.projectservice.mapper;
+package faang.school.projectservice.mapper.stageinvitation;
 
 import faang.school.projectservice.dto.stageinvitation.RejectInvitationDto;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;

@@ -3,25 +3,20 @@ package faang.school.projectservice.dto.stageinvitation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@Builder
-public class StageInvitationDto {
+@AllArgsConstructor
+public class StageInvitationUpdateDto {
+    @Positive
+    @NotNull
+    private final Long id;
 
     @NotBlank
     private String description;
 
-    @NotNull
     @Positive
+    @NotNull
     private Long stageId;
-
-    @NotNull
-    @Positive
-    private Long authorId;
-
-    @NotNull
-    @Positive
-    private Long invitedId;
 }

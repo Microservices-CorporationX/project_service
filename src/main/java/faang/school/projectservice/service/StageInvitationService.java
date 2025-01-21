@@ -1,20 +1,20 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.stageinvitation.ChangeStatusDto;
-import faang.school.projectservice.dto.stageinvitation.RejectInvitationDto;
-import faang.school.projectservice.dto.stageinvitation.StageInvitationDto;
-import faang.school.projectservice.dto.stageinvitation.StageInvitationFilterDto;
+import faang.school.projectservice.dto.stageinvitation.*;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.filter.stageinvitation.StageInvitationFilter;
-import faang.school.projectservice.mapper.ChangeStatusMapper;
-import faang.school.projectservice.mapper.RejectInvitationMapper;
-import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.mapper.stageinvitation.ChangeStatusMapper;
+import faang.school.projectservice.mapper.stageinvitation.InvitationUpdateMapper;
+import faang.school.projectservice.mapper.stageinvitation.RejectInvitationMapper;
+import faang.school.projectservice.mapper.stageinvitation.StageInvitationMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
-import faang.school.projectservice.validator.StageInvitationValidator;
+import faang.school.projectservice.validator.stageinvitation.StageInvitationValidator;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,20 +34,35 @@ public class StageInvitationService {
     private final ChangeStatusMapper changeStatusMapper;
     private final RejectInvitationMapper rejectInvitationMapper;
     private final List<StageInvitationFilter> stageInvitationFilters;
+    private final InvitationUpdateMapper invitationUpdateMapper;
+
+    public StageInvitation findById(@NotNull Long stageInvitationId) {
+        return stageInvitationRepository.findById(stageInvitationId)
+                .orElseThrow(() -> new EntityNotFoundException("Такого приглашения не существует"));
+    }
 
     public StageInvitationDto createStageInvitation(StageInvitationDto dto) {
         StageInvitation stageInvitation = stageInvitationValidator.validateStageInvitation(dto);
 
-        if (stageInvitationRepository.existsById(stageInvitation.getId())) {
-            throw new BusinessException("Такое приглашение уже существует");
-        }
-
-        stageInvitation.setStage(stageService.getStage(dto.getStageId()));
-        stageInvitation.setAuthor(teamMemberService.getTeamMember(dto.getAuthorId()));
-        stageInvitation.setInvited(teamMemberService.getTeamMember(dto.getInvitedId()));
+        stageInvitation.setStage(stageService.findById(dto.getStageId()));
+        stageInvitation.setAuthor(teamMemberService.findById(dto.getAuthorId()));
+        stageInvitation.setInvited(teamMemberService.findById(dto.getInvitedId()));
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
 
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
+    }
+
+
+    public StageInvitationUpdateDto updateStageInvitation(StageInvitationUpdateDto dto) {
+        stageInvitationValidator.validateUpdateInvitation(dto);
+
+        StageInvitation stageInvitation = findById(dto.getId());
+        stageInvitation.setStage(stageService.findById(dto.getId()));
+
+        invitationUpdateMapper.update(stageInvitation, dto);
+        stageInvitationRepository.save(stageInvitation);
+
+        return invitationUpdateMapper.toDto(stageInvitation);
     }
 
     public ChangeStatusDto acceptStageInvitation(ChangeStatusDto dto) {
@@ -55,7 +70,7 @@ public class StageInvitationService {
         StageInvitation stageInvitation = findPendingStageInvitation(dto.getId());
 
         List<Stage> stages = teamMemberService
-                .getTeamMember(dto.getInvitedId())
+                .findById(dto.getInvitedId())
                 .getStages();
 
         Stage stage = stageInvitation.getStage();
@@ -105,8 +120,7 @@ public class StageInvitationService {
     }
 
     private StageInvitation findPendingStageInvitation(Long stageInvitationId) {
-        StageInvitation stageInvitation = stageInvitationRepository.findById(stageInvitationId)
-                .orElseThrow(() -> new BusinessException("Такого приглашения не существует"));
+        StageInvitation stageInvitation = findById(stageInvitationId);
 
         if (stageInvitation.getStatus() != StageInvitationStatus.PENDING) {
             throw new BusinessException("Такое приглашение уже рассмотрено");
@@ -114,5 +128,4 @@ public class StageInvitationService {
 
         return stageInvitation;
     }
-
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class TeamMemberService {
     private final TeamMemberRepository teamMemberRepository;
 
-    public TeamMember getTeamMember(@NotNull Long teamMemberId) {
+    public TeamMember findById(@NotNull Long teamMemberId) {
         return teamMemberRepository.findById(teamMemberId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Пользователь с таким id: %d не найден", teamMemberId))
