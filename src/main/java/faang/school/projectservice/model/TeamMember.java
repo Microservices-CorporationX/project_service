@@ -48,4 +48,8 @@ public class TeamMember {
     public boolean isSameMember(Long teamMemberId) {
         return this.id.equals(teamMemberId);
     }
+
+    public boolean isUserManager(long userId) {
+        return roles.contains(TeamRole.MANAGER);
+    }
 }

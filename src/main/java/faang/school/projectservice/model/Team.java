@@ -40,4 +40,10 @@ public class Team {
         return teamMembers.stream()
                 .noneMatch(teamMember -> teamMember.getUserId().equals(userId));
     }
+
+    public boolean isUserManager(long userId) {
+        return teamMembers.stream()
+                .filter(teamMember -> teamMember.getUserId().equals(userId))
+                .anyMatch(teamMember -> teamMember.isUserManager(userId));
+    }
 }
