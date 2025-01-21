@@ -27,5 +27,11 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-cache-${{ runner.os }}
 
-      - name: Run tests
-        run: ./gradlew test
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test
+
+      - name: Build, Test, and Validate Coverage with Gradle
+        run: ./gradlew clean build test jacocoTestReport jacocoTestCoverageVerification
