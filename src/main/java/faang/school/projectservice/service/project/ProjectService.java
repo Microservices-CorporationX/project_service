@@ -1,20 +1,22 @@
 package faang.school.projectservice.service.project;
 
+import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.filter.ProjectFilterDto;
 import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
 import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.filter.ProjectFilterDto;
+import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.filters.project.ProjectFilter;
+import faang.school.projectservice.helpers.ProjectSearcher;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
-import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.exception.DataValidationException;
-import faang.school.projectservice.helpers.ProjectSearcher;
-import faang.school.projectservice.exception.StorageSizeExceededException;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.project.ProjectCreationEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.project.ProjectValidator;
@@ -24,7 +26,11 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +47,7 @@ public class ProjectService {
     private final List<ProjectFilter> filters;
     private final ProjectValidator projectValidator;
     private final MomentService momentService;
+    private final ProjectCreationEventPublisher projectCreationEventPublisher;
 
     public ProjectDto create(ProjectDto projectDto) {
         Project project = projectMapper.toEntity(projectDto);
@@ -55,6 +62,8 @@ public class ProjectService {
         project.setChildren(new ArrayList<>());
         project = projectRepository.save(project);
         log.info("User with id {} created a project {}", userContext.getUserId(), project);
+
+        projectCreationEventPublisher.publish(projectMapper.toEvent(project));
         return projectMapper.toDto(project);
     }
 
@@ -103,7 +112,7 @@ public class ProjectService {
 
     public void updateSubProjectsStatus(Project project, ProjectStatus statusToUpdate, List<Project> children) {
         projectValidator.validateProjectAlreadyCompleted(project);
-        if (statusToUpdate == ProjectStatus.COMPLETED){
+        if (statusToUpdate == ProjectStatus.COMPLETED) {
             if (projectValidator.validateAllChildProjectsCompleted(project)) {
                 MomentDto momentDto = MomentDto.builder()
                         .name(project.getName() + " completed")
@@ -154,7 +163,7 @@ public class ProjectService {
     public List<CreateSubProjectDto> getProjectsByFilters(Long projectId, ProjectFilterDto filterDto) {
         Stream<Project> children = projectRepository.getProjectById(projectId).getChildren().stream();
         return filters.stream()
-                .filter(e -> e. isApplicable(filterDto))
+                .filter(e -> e.isApplicable(filterDto))
                 .reduce(children, (stream, filter) -> filter.apply(stream, filterDto),
                         ((subStream, stream) -> stream))
                 .filter(project -> project.getVisibility().equals(ProjectVisibility.PUBLIC))
@@ -226,7 +235,7 @@ public class ProjectService {
         log.info("User with id {} updated project {}", userContext.getUserId(), project);
     }
 
-    public boolean existsById (Long projectId) {
+    public boolean existsById(Long projectId) {
         return projectRepository.existsById(projectId);
     }
 

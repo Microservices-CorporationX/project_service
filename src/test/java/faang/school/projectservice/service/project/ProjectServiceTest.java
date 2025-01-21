@@ -8,11 +8,17 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.exception.StorageSizeExceededException;
 import faang.school.projectservice.filters.project.NameProjectFilter;
-import faang.school.projectservice.filters.project.StatusProjectFilter;
 import faang.school.projectservice.filters.project.ProjectFilter;
+import faang.school.projectservice.filters.project.StatusProjectFilter;
 import faang.school.projectservice.mapper.project.CreateSubProjectMapper;
 import faang.school.projectservice.mapper.project.ProjectMapperImpl;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Moment;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
+import faang.school.projectservice.model.Team;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.publisher.project.ProjectCreationEventPublisher;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.validator.project.ProjectValidator;
@@ -32,8 +38,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest {
@@ -59,11 +72,20 @@ public class ProjectServiceTest {
     private UserContext userContext;
     @Mock
     private MomentService momentService;
+    @Mock
+    private ProjectCreationEventPublisher projectCreationPublisher;
 
     @BeforeEach
     void setUp() {
         List<ProjectFilter> filters = List.of(nameProjectFilter, statusProjectFilter);
-        projectService = new ProjectService(userContext, projectMapper, createSubProjectMapper, projectRepository, filters, projectValidator, momentService);
+        projectService = new ProjectService(userContext,
+                projectMapper,
+                createSubProjectMapper,
+                projectRepository,
+                filters,
+                projectValidator,
+                momentService,
+                projectCreationPublisher);
     }
 
     @Test
@@ -86,6 +108,7 @@ public class ProjectServiceTest {
 
         ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
         verify(projectRepository).save(projectCaptor.capture());
+        verify(projectCreationPublisher).publish(any());
         Project capturedProject = projectCaptor.getValue();
         assertNotNull(capturedProject);
         assertEquals(ProjectStatus.CREATED, capturedProject.getStatus());
