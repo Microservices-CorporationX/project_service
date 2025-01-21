@@ -1,23 +1,22 @@
 package faang.school.projectservice.dto.project;
 
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Data
 @Builder
-public class ProjectResponseDto {
-    private Long id;
+public class CreateSubProjectDto {
+    @NotBlank
     private String name;
+
     private String description;
-    private Long ownerId;
+
+    @NotNull
     private Long parentProjectId;
-    private List<Long> childrenIds;
-    private ProjectStatus status;
+
+    @NotNull
     private ProjectVisibility visibility;
-    private LocalDateTime updatedAt;
 }
