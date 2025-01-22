@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class MomentFilterDto {
-    private int monthNumberPattern;
-    private long projectIdPattern;
+    private int monthNumber;
+    private long projectId;
 }

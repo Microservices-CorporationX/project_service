@@ -12,12 +12,12 @@ public class ProjectIdFilter implements MomentFilter {
 
     @Override
     public boolean isApplicable(MomentFilterDto filter) {
-        return filter.getProjectIdPattern() > 0;
+        return filter.getProjectId() > 0;
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> elements, MomentFilterDto filter) {
         return elements.filter(moment -> moment.getProjects().stream()
-                .anyMatch(project -> project.getId().equals(filter.getProjectIdPattern())));
+                .anyMatch(project -> project.getId().equals(filter.getProjectId())));
     }
 }

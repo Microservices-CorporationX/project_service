@@ -13,12 +13,12 @@ public class DateFilter implements MomentFilter {
 
     @Override
     public boolean isApplicable(MomentFilterDto filter) {
-        return filter.getMonthNumberPattern() >= Month.JANUARY.getValue()
-                && filter.getMonthNumberPattern() <= Month.DECEMBER.getValue();
+        return filter.getMonthNumber() >= Month.JANUARY.getValue()
+                && filter.getMonthNumber() <= Month.DECEMBER.getValue();
     }
 
     @Override
     public Stream<Moment> apply(Stream<Moment> elements, MomentFilterDto filter) {
-        return elements.filter(moment -> moment.getDate().getMonthValue() == filter.getMonthNumberPattern());
+        return elements.filter(moment -> moment.getDate().getMonthValue() == filter.getMonthNumber());
     }
 }
