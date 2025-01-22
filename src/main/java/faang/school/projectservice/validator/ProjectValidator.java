@@ -1,7 +1,9 @@
 package faang.school.projectservice.validator;
 
 import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ProjectValidator {
 
     public static void validateCreateSubProject(CreateSubProjectDto subProjectDto) {

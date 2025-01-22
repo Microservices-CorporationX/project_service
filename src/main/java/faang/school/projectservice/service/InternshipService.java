@@ -1,65 +1,74 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.InternshipDto;
-import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class InternshipService {
 
     private final InternshipRepository internshipRepository;
-    private final InternshipMapper internshipMapper;
 
-    public InternshipDto createInternship(InternshipDto internshipDto) {
-        validateInternshipDates(internshipDto);
-
-        Internship internship = internshipMapper.toEntity(internshipDto);
-        Internship savedInternship = internshipRepository.save(internship);
-
-        return internshipMapper.toDto(savedInternship);
+    @Transactional
+    public Internship createInternship(Internship internship) {
+        return internshipRepository.save(internship);
     }
 
-    public InternshipDto updateInternship(InternshipDto internshipDto) {
-        Internship existingInternship = internshipRepository.findById(internshipDto.getId())
+    @Transactional
+    public Internship updateInternship(Internship internship) {
+        Internship existingInternship = internshipRepository.findById(internship.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found"));
 
         if (existingInternship.getStatus() == InternshipStatus.COMPLETED) {
             throw new IllegalStateException("Cannot update a completed internship.");
         }
 
-        existingInternship.setStatus(internshipDto.getStatus());
-        Internship updatedInternship = internshipRepository.save(existingInternship);
-
-        return internshipMapper.toDto(updatedInternship);
+        existingInternship.setStatus(internship.getStatus());
+        return internshipRepository.save(existingInternship);
     }
 
-    public InternshipDto getInternshipById(Long id) {
-        Internship internship = internshipRepository.findById(id)
+    @Transactional
+    public Internship partialUpdateInternship(Long id, InternshipDto internshipDto) {
+        Internship existingInternship = internshipRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found"));
 
-        return internshipMapper.toDto(internship);
+        if (internshipDto.getName() != null) {
+            existingInternship.setName(internshipDto.getName());
+        }
+        if (internshipDto.getDescription() != null) {
+            existingInternship.setDescription(internshipDto.getDescription());
+        }
+        if (internshipDto.getStartDate() != null) {
+            existingInternship.setStartDate(internshipDto.getStartDate());
+        }
+        if (internshipDto.getEndDate() != null) {
+            existingInternship.setEndDate(internshipDto.getEndDate());
+        }
+        if (internshipDto.getStatus() != null) {
+            existingInternship.setStatus(internshipDto.getStatus());
+        }
+
+        return internshipRepository.save(existingInternship);
     }
 
-    public List<InternshipDto> getInternships(InternshipStatus status, Long roleId) {
+    @Transactional(readOnly = true)
+    public Internship getInternshipById(Long id) {
+        return internshipRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Internship not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Internship> getInternships(InternshipStatus status, Long roleId) {
         return internshipRepository.findAll().stream()
                 .filter(i -> status == null || i.getStatus() == status)
-                .map(internshipMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    private void validateInternshipDates(InternshipDto internshipDto) {
-        Duration duration = Duration.between(internshipDto.getStartDate(), internshipDto.getEndDate());
-        if (duration.toDays() > 90) {
-            throw new IllegalArgumentException("Internship cannot last longer than 3 months.");
-        }
     }
 }
