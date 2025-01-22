@@ -65,11 +65,11 @@ dependencies {
 
 jacoco {
     toolVersion = "0.8.12"
-
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 val exclusions = listOf(
@@ -91,7 +91,7 @@ tasks.jacocoTestReport {
         xml.required.set(false)
         csv.required.set(false)
         html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("/reports/jacoco/test/html"))
+        //html.outputLocation.set(layout.buildDirectory.dir("/reports/jacoco/test/html"))
     }
 
     classDirectories.setFrom(
