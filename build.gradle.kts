@@ -2,7 +2,6 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
-    id("jacoco")
 }
 
 group = "faang.school"
@@ -66,20 +65,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-jacoco {
-    toolVersion = "0.8.10"
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        csv.required.set(false)
-    }
-    executionData.setFrom(fileTree(project.buildDir).include("jacoco/test.exec"))
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }

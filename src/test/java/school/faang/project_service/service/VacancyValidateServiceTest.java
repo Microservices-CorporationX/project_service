@@ -7,7 +7,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.ValidateService;
+import faang.school.projectservice.service.VacancyValidatorService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-public class ValidateServiceTest {
+public class VacancyValidateServiceTest {
 
     @Mock
     private TeamMemberRepository teamMemberRepository;
 
     @InjectMocks
-    private ValidateService validateService;
+    private VacancyValidatorService validateService;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -39,7 +39,7 @@ public class ValidateServiceTest {
         Mockito.when(teamMemberRepository.findById(curatorId))
                 .thenReturn(Optional.of(teamMember));
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                validateService.validateCuratorRole(curatorId));
+                validateService.validateCuratorHasOwnerOrManagerRole(curatorId));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ValidateServiceTest {
         Mockito.when(projectRepository.findAllTeamMemberIdsByProjectId(projectId))
                 .thenReturn(projectMembers);
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                validateService.validateCandidatesNotInProject(candidateIds, projectId));
+                validateService.ensureCandidatesAreNotProjectMembers(candidateIds, projectId));
     }
 
     @Test
@@ -60,6 +60,6 @@ public class ValidateServiceTest {
         vacancy.getCandidates().add(new Candidate());
         VacancyStatus status = VacancyStatus.CLOSED;
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                validateService.validateVacancyClosure(vacancy, status));
+                validateService.validateVacancyCanBeClosed(vacancy, status));
     }
 }

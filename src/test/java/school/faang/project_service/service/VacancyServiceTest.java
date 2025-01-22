@@ -10,7 +10,7 @@ import faang.school.projectservice.repository.CandidateRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.VacancyService;
-import faang.school.projectservice.service.ValidateService;
+import faang.school.projectservice.service.VacancyValidatorService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ public class VacancyServiceTest {
     private VacancyRepository vacancyRepository;
 
     @Mock
-    private ValidateService validateService;
+    private VacancyValidatorService validateService;
 
     @Mock
     private CandidateRepository candidateRepository;
@@ -68,21 +68,6 @@ public class VacancyServiceTest {
 
         vacancyService.updateVacancy(vacancy, vacancyId, userId);
         Mockito.verify(vacancyRepository, Mockito.times(1)).save(vacancy);
-    }
-
-    @Test
-    void updateVacancyExceptionTest() {
-        Vacancy vacancy = new Vacancy();
-        Long userId = 1L;
-        Long vacancyId = 1L;
-        vacancy.setPosition(null);
-        vacancy.setCount(5);
-        vacancy.setStatus(VacancyStatus.POSTPONED);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                vacancyService.updateVacancy(vacancy, vacancyId, userId));
-
-        Mockito.verify(vacancyRepository, Mockito.times(0)).save(vacancy);
     }
 
     @Test

@@ -61,7 +61,8 @@ public class Vacancy {
     private Project project;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.REMOVE)
-    private List<Candidate> candidates;
+    @Builder.Default
+    private List<Candidate> candidates = new ArrayList<>();
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -96,11 +97,4 @@ public class Vacancy {
 
     @Column(name = "cover_image_key")
     private String coverImageKey;
-
-    public List<Candidate> getCandidates() {
-        if (candidates == null) {
-            candidates = new ArrayList<>();
-        }
-        return candidates;
-    }
 }

@@ -14,11 +14,11 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class ValidateService {
+public class VacancyValidatorService {
     private final TeamMemberRepository teamMemberRepository;
     private final ProjectRepository projectRepository;
 
-    public void validateCuratorRole(Long curatorId) {
+    public void validateCuratorHasOwnerOrManagerRole(Long curatorId) {
         TeamMember curator = teamMemberRepository.findById(curatorId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid curator id: " + curatorId));
 
@@ -28,7 +28,7 @@ public class ValidateService {
         }
     }
 
-    public void validateCandidatesNotInProject(List<Long> candidateIds, Long projectId) {
+    public void ensureCandidatesAreNotProjectMembers(List<Long> candidateIds, Long projectId) {
         List<Long> projectMembers = projectRepository.findAllTeamMemberIdsByProjectId(projectId);
         candidateIds.forEach(candidateId -> {
             if (projectMembers.contains(candidateId)) {
@@ -37,7 +37,7 @@ public class ValidateService {
         });
     }
 
-    public void validateVacancyClosure(Vacancy vacancy, VacancyStatus status) {
+    public void validateVacancyCanBeClosed(Vacancy vacancy, VacancyStatus status) {
         if (status == VacancyStatus.CLOSED) {
             if (vacancy.getCandidates().isEmpty()) {
                 throw new IllegalArgumentException("Vacancy has no candidates");

@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.VacancyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,29 +24,29 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/vacancy")
 @RestController
-@RequestMapping("/api/vacancy")
 public class VacancyController {
     private final VacancyService vacancyService;
     private final VacancyMapper vacancyMapper;
 
     @PostMapping("/{currentUserId}")
-    public ResponseEntity<Void> createVacancy(@RequestBody VacancyCreateDto vacancyCreateDto, @PathVariable Long currentUserId) {
+    public ResponseEntity<Vacancy> createVacancy(@Valid @RequestBody VacancyCreateDto vacancyCreateDto, @PathVariable Long currentUserId) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyCreateDto);
-        vacancyService.createVacancy(vacancy, currentUserId,vacancyCreateDto.getProjectId());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        Vacancy vacancyResponse= vacancyService.createVacancy(vacancy, currentUserId,vacancyCreateDto.getProjectId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyResponse);
     }
 
     @PutMapping("/{vacancyId}/{currentUserId}")
-    public ResponseEntity<Void> updateVacancy(@RequestBody VacancyUpdateDto vacancyUpdateDto,
+    public ResponseEntity<Vacancy> updateVacancy(@Valid @RequestBody VacancyUpdateDto vacancyUpdateDto,
                               @PathVariable Long currentUserId, @PathVariable Long vacancyId) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyUpdateDto);
-        vacancyService.updateVacancy(vacancy, vacancyId, currentUserId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        Vacancy vacancyResponse= vacancyService.updateVacancy(vacancy, vacancyId, currentUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vacancyResponse);
     }
 
     @PostMapping("/{vacancyId}/candidates/{currentUserId}")
-    public ResponseEntity<Void> addCandidate(@RequestBody CandidateAddDto candidateAddDto,
+    public ResponseEntity<Void> addCandidate(@Valid @RequestBody CandidateAddDto candidateAddDto,
                              @PathVariable Long vacancyId, @PathVariable Long currentUserId) {
         vacancyService.addCandidatesToVacancy(candidateAddDto.getCandidatesIds(),
                 candidateAddDto.getProjectId(), vacancyId, currentUserId);
