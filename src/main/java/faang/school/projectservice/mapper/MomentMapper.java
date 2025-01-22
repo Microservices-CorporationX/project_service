@@ -17,7 +17,6 @@ import java.util.List;
 public interface MomentMapper {
 
     @Mapping(target = "projects", ignore = true)
-    @Mapping(target = "id", ignore = true)
     Moment toEntity(MomentCreateDto dto);
 
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "mapToIds")
@@ -25,7 +24,8 @@ public interface MomentMapper {
 
     @Mapping(source = "projects", target = "projectIds", qualifiedByName = "mapToIds")
     MomentGetDto toGetDto(Moment entity);
-                                                                                              @Named("mapToIds")
+
+    @Named("mapToIds")
     default List<Long> map(List<Project> projectsFromEntity) {
         return projectsFromEntity.stream().map(Project::getId).toList();
     }

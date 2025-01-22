@@ -86,7 +86,6 @@ public class MomentService {
 
     private void addNewUsers(MomentUpdateDto dto, Moment entity, List<Long> currentProjectIds) {
         if (CollectionUtils.isNotEmpty(dto.getUserIds())) {
-            log.info("getUserIds isNotEmpty");
             List<Project> newProjects = new ArrayList<>();
             List<Long> newUserIds = dto.getUserIds().stream().filter(id -> isUserNotAdded(entity, id)).toList();
             List<Long> newTeamMembersIds = new ArrayList<>();
