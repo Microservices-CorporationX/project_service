@@ -41,13 +41,15 @@ public class InternshipValidator {
         validateAddingInterns(internshipDto);
     }
 
-    public boolean validateInternshipCompleted(InternshipCreateDto internshipDto) {
-        List<Task> tasks = projectRepository.findById(internshipDto.getProjectId()).get().getTasks();
+    public boolean validateInternCompletedInternship(InternshipEditDto internshipDto, long internId) {
+        List<Task> tasks = projectRepository.findById(internshipDto.getProjectId())
+                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND))
+                .getTasks();
 
         if (internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
             for (Task task : tasks) {
-                if (!task.getStatus().equals(TaskStatus.DONE)) {
-                    return false;
+                if (task.getPerformerUserId().equals(internId) && !(task.getStatus().equals(TaskStatus.DONE))) {
+                        return false;
                 }
             }
         }

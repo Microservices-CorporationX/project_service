@@ -2,7 +2,10 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
-import faang.school.projectservice.mapper.internship.InternshipMapper;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.mapper.internship.InternshipCreateMapper;
+import faang.school.projectservice.mapper.internship.InternshipEditMapper;
+import faang.school.projectservice.mapper.internship.InternshipReadMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
@@ -19,16 +22,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
+    private static final String ENTITY_NOT_FOUND = "Сущность не найдена";
+
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
     private final InternshipRepository internshipRepository;
-    private final InternshipMapper internshipMapper;
+    private final InternshipCreateMapper internshipCreateMapper;
+    private final InternshipEditMapper internshipEditMapper;
+    private final InternshipReadMapper internshipReadMapper;
     private final InternshipValidator internshipValidator;
 
     public void createInternship(InternshipCreateDto internshipDto) {
         internshipValidator.validateInternshipCreation(internshipDto);
-        Internship internship = internshipMapper.toEntity(internshipDto);
+        Internship internship = internshipCreateMapper.toEntity(internshipDto);
 
         internship.setProject(projectRepository.findById(internshipDto.getProjectId()).get());
         internship.setMentorId(teamMemberRepository.findById(internshipDto.getMentorId()).get());
@@ -39,9 +46,14 @@ public class InternshipService {
 
     public void updateInternship(InternshipEditDto internshipDto) {
         internshipValidator.validateInternshipUpdating(internshipDto);
-        if (internshipValidator.validateInternshipCompleted(internshipDto)) {
-            for (Long id : internshipDto.getInternsIds()) {
-//                Internship internship = internshipRepository.findById(id);
+        TeamMember intern;
+
+        for (Long id : internshipDto.getInternsIds()) {
+            if (internshipValidator.validateInternCompletedInternship(internshipDto, id)) {
+                intern = teamMemberRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+
+                intern.getRoles().add(internshipDto.getTargetRole());
             }
         }
     }
