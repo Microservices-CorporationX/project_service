@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
-import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.CreateStageRequest;
 import faang.school.projectservice.dto.stage.DeleteStageRequest;
 import faang.school.projectservice.dto.stage.StageResponse;
@@ -12,7 +11,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -97,54 +95,90 @@ public class StageService {
     @Transactional
     public StageResponse update(UpdateStageRequest updateStageRequest) {
         stageMapper.validateUpdateStageRequest(updateStageRequest);
+
+        Stage stage = findAndUpdateStage(updateStageRequest);
+        List<TeamMember> executors = findAndSetExecutors(updateStageRequest, stage);
+        assignRequiredRoles(updateStageRequest, stage, executors);
+
+        Stage updatedStage = stageRepository.save(stage);
+        return stageMapper.toResponse(updatedStage);
+    }
+
+    private Stage findAndUpdateStage(UpdateStageRequest updateStageRequest) {
         Stage stage = findStageById(updateStageRequest.stageId());
         stageMapper.updateFromRequest(updateStageRequest, stage);
+        return stage;
+    }
 
+    private List<TeamMember> findAndSetExecutors(UpdateStageRequest updateStageRequest, Stage stage) {
         List<Long> executorIds = updateStageRequest.executorsIds();
         List<TeamMember> executors = teamMemberRepository.findAllById(executorIds);
+
         if (executors.size() != executorIds.size()) {
             throw new IllegalArgumentException("One or more executors not found");
         }
 
         stage.setExecutors(executors);
+        return executors;
+    }
 
+    private void assignRequiredRoles(UpdateStageRequest updateStageRequest, Stage stage, List<TeamMember> executors) {
         List<String> requiredRoles = updateStageRequest.requiredRoles();
         List<TeamMember> projectMembers = teamMemberRepository.findByProjectId(updateStageRequest.projectId());
-        for (String role : requiredRoles) {
-            long currentCount = executors.stream()
-                    .filter(executor -> executor.getRoles().contains(role))
-                    .count();
 
+        for (String role : requiredRoles) {
+            long currentCount = countExecutorsWithRole(executors, role);
             long requiredCount = Collections.frequency(requiredRoles, role);
 
             if (currentCount < requiredCount) {
                 long missingCount = requiredCount - currentCount;
-                List<TeamMember> availableMembers = projectMembers.stream()
-                        .filter(member -> member.getRoles().contains(role) && !executors.contains(member))
-                        .limit(missingCount)
-                        .toList();
-                if (availableMembers.size() < missingCount) {
-                    throw new IllegalArgumentException("Not enough members with role "
-                            + role + " available in project");
-                }
-                executors.addAll(availableMembers);
+                List<TeamMember> availableMembers = findAvailableMembers(projectMembers, executors, role, missingCount);
 
-                availableMembers.forEach(member -> {
-                    StageInvitationDto stageInvitationDto = new StageInvitationDto(
-                            null,
-                            "Invitation to join stage: " + stage.getStageName(),
-                            StageInvitationStatus.PENDING,
-                            stage.getStageId(),
-                            updateStageRequest.authorId(),
-                            member.getId()
-                    );
-                    stageInvitationService.sendStageInvitation(stageInvitationDto);
-                });
+                executors.addAll(availableMembers);
+                createAndSendInvitations(availableMembers, stage, updateStageRequest);
             }
         }
-        Stage updatedStage = stageRepository.save(stage);
-        return stageMapper.toResponse(updatedStage);
     }
+
+    private long countExecutorsWithRole(List<TeamMember> executors, String role) {
+        return executors.stream()
+                .filter(executor -> executor.getRoles().contains(role))
+                .count();
+    }
+
+    private List<TeamMember> findAvailableMembers(List<TeamMember> projectMembers, List<TeamMember> executors, String role, long missingCount) {
+        List<TeamMember> availableMembers = projectMembers.stream()
+                .filter(member -> member.getRoles().contains(role) && !executors.contains(member))
+                .limit(missingCount)
+                .toList();
+
+        if (availableMembers.size() < missingCount) {
+            throw new IllegalArgumentException("Not enough members with role " + role + " available in project");
+        }
+
+        return availableMembers;
+    }
+
+    private void createAndSendInvitations(List<TeamMember> availableMembers, Stage stage, UpdateStageRequest updateStageRequest) {
+        availableMembers.forEach(member -> {
+            SendInvitationRequest sendInvitationRequest = SendInvitationRequest.builder()
+                    .stageId(stage.getStageId())
+                    .author(updateStageRequest.authorId())
+                    .invited(member.getId())
+                    .description("Invitation to join stage: " + stage.getStageName())
+                    .build();
+
+            stageInvitationService.sendStageInvitation(sendInvitationRequest);
+        });
+    }
+
+
+
+
+
+
+
+
 
     @Transactional(readOnly = true)
     public List<StageResponse> getAllStagesByProject(Long projectId) {
