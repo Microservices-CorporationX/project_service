@@ -1,0 +1,84 @@
+package faang.school.projectservice.service;
+
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+@RequiredArgsConstructor
+@Service
+public class ProjectService {
+
+    private final ProjectRepository projectRepository;
+
+    @Transactional
+    public Project createProject(Project project, Long ownerId) {
+        validateProjectNameUniqueness(ownerId, project.getName());
+        project.setOwnerId(ownerId);
+        project.setStatus(ProjectStatus.CREATED);
+        project.setCreatedAt(LocalDateTime.now());
+        project.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(project);
+    }
+
+    @Transactional
+    public Project createSubProject(Project subProject, Long ownerId) {
+        Project parentProject = findProjectById(subProject.getParentProject().getId());
+        subProject.setParentProject(parentProject);
+        subProject.setOwnerId(ownerId);
+        subProject.setStatus(ProjectStatus.CREATED);
+        subProject.setCreatedAt(LocalDateTime.now());
+        subProject.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(subProject);
+    }
+
+    @Transactional
+    public Project updateProject(Project project) {
+        Project existingProject = findProjectById(project.getId());
+        existingProject.setName(project.getName());
+        existingProject.setDescription(project.getDescription());
+        existingProject.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(existingProject);
+    }
+
+    @Transactional
+    public Project updateSubProject(Project subProject) {
+        Project existingSubProject = findProjectById(subProject.getId());
+        existingSubProject.setName(subProject.getName());
+        existingSubProject.setDescription(subProject.getDescription());
+        existingSubProject.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(existingSubProject);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Project> getProjects(String name, ProjectStatus status, Long userId, Pageable pageable) {
+        return projectRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Project> getSubProjects(Long parentProjectId, String name, ProjectStatus status, Pageable pageable) {
+        return projectRepository.findByParentProjectId(parentProjectId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Project getProjectById(Long projectId, Long userId) {
+        return findProjectById(projectId);
+    }
+
+    private void validateProjectNameUniqueness(Long ownerId, String name) {
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
+            throw new IllegalArgumentException("Project with the same name already exists");
+        }
+    }
+
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+    }
+}
