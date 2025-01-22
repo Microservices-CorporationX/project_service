@@ -59,13 +59,11 @@ dependencies {
      */
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 jacoco {
     toolVersion = "0.8.12"
-
 }
 
 tasks.withType<Test> {
@@ -76,6 +74,18 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+val exclusions = listOf(
+    "**/config",
+    "**/dto/**",
+    "**/entity/**",
+    "**/client/**",
+    "**/config/**",
+    "**/mapper/**",
+    "**/model/**",
+    "**/controller/**",
+    "**/UserServiceApplication.*"
+)
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
@@ -83,21 +93,12 @@ tasks.jacocoTestReport {
         xml.required.set(false)
         csv.required.set(false)
         html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("/reports/jacoco/test/html"))
     }
 
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
-                exclude("**/config")
-                exclude("**/dto/**")
-                exclude("**/entity/**")
-                exclude("**/client/**")
-                exclude("**/config/**")
-                exclude("**/mapper/**")
-                exclude("**/model/**")
-                exclude("**/controller/**")
-                exclude("**/UserServiceApplication.*")
+                exclude(exclusions)
             }
         })
     )
@@ -114,10 +115,18 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(exclusions)
+            }
+        })
+    )
+
     violationRules {
         rule {
             limit {
-                minimum = "0.7".toBigDecimal()
+                minimum = 0.7.toBigDecimal()
             }
         }
     }
