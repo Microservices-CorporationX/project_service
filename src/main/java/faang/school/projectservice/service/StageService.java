@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.invitation.SendInvitationRequest;
+import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.CreateStageRequest;
 import faang.school.projectservice.dto.stage.DeleteStageRequest;
 import faang.school.projectservice.dto.stage.StageResponse;
@@ -11,7 +12,9 @@ import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
+import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -23,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,23 +58,31 @@ public class StageService {
 
         List<Stage> stages = project.getStages();
 
+        // Фильтрация по ролям
         if (roles != null && !roles.isEmpty()) {
             stages = stages.stream()
                     .filter(stage -> stage.getStageRoles().stream()
                             .anyMatch(stageRole -> roles.contains(stageRole.getTeamRole().name())))
                     .collect(Collectors.toList());
         }
+
+        // Фильтрация по статусу задачи (обработка недопустимого статуса)
         if (taskStatus != null && !taskStatus.isBlank()) {
-            try {
-                TaskStatus statusToFind = TaskStatus.valueOf(taskStatus.toUpperCase());
-                stages = stages.stream()
-                        .filter(stage -> stage.getTasks().stream()
-                                .anyMatch(task -> task.getStatus() == statusToFind))
-                        .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                return Collections.emptyList();
+            List<TaskStatus> statusesToFind = new ArrayList<>();
+            for (String status : taskStatus.split(",")) {
+                try {
+                    statusesToFind.add(TaskStatus.valueOf(status.toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    return Collections.emptyList();
+                }
             }
+
+            stages = stages.stream()
+                    .filter(stage -> stage.getTasks().stream()
+                            .anyMatch(task -> statusesToFind.contains(task.getStatus())))
+                    .collect(Collectors.toList());
         }
+
         return stageMapper.toResponse(stages);
     }
 
@@ -96,87 +109,56 @@ public class StageService {
     @Transactional
     public StageResponse update(UpdateStageRequest updateStageRequest) {
         stageMapper.validateUpdateStageRequest(updateStageRequest);
-
-        Stage stage = findAndUpdateStage(updateStageRequest);
-        List<TeamMember> executors = findAndSetExecutors(updateStageRequest, stage);
-        assignRequiredRoles(updateStageRequest, stage, executors);
-
-        Stage updatedStage = stageRepository.save(stage);
-        return stageMapper.toResponse(updatedStage);
-    }
-
-    Stage findAndUpdateStage(UpdateStageRequest updateStageRequest) {
         Stage stage = findStageById(updateStageRequest.stageId());
         stageMapper.updateFromRequest(updateStageRequest, stage);
-        return stage;
-    }
 
-    List<TeamMember> findAndSetExecutors(UpdateStageRequest updateStageRequest, Stage stage) {
         List<Long> executorIds = updateStageRequest.executorsIds();
         List<TeamMember> executors = teamMemberRepository.findAllById(executorIds);
-
         if (executors.size() != executorIds.size()) {
             throw new IllegalArgumentException("One or more executors not found");
         }
 
         stage.setExecutors(executors);
-        return executors;
-    }
 
-    private void assignRequiredRoles(UpdateStageRequest updateStageRequest, Stage stage, List<TeamMember> executors) {
         List<String> requiredRoles = updateStageRequest.requiredRoles();
         List<TeamMember> projectMembers = teamMemberRepository.findByProjectId(updateStageRequest.projectId());
 
         for (String role : requiredRoles) {
-            long currentCount = countExecutorsWithRole(executors, role);
+            TeamRole teamRole = TeamRole.valueOf(role);
+            long currentCount = executors.stream()
+                    .filter(executor -> executor.getRoles().contains(teamRole)) // Сравниваем с TeamRole
+                    .count();
+
             long requiredCount = Collections.frequency(requiredRoles, role);
 
             if (currentCount < requiredCount) {
                 long missingCount = requiredCount - currentCount;
-                List<TeamMember> availableMembers = findAvailableMembers(projectMembers,
-                        executors, role, missingCount);
+                List<TeamMember> availableMembers = projectMembers.stream()
+                        .filter(member -> member.getRoles().contains(teamRole) && !executors.contains(member))
+                        .limit(missingCount)
+                        .toList();
 
+                if (availableMembers.size() < missingCount) {
+                    throw new IllegalArgumentException("Not enough members with role "
+                            + role + " available in project");
+                }
                 executors.addAll(availableMembers);
-                createAndSendInvitations(availableMembers, stage, updateStageRequest);
+
+                availableMembers.forEach(member -> {
+                    SendInvitationRequest sendInvitationRequest = SendInvitationRequest.builder()
+                            .stageId(stage.getStageId())
+                            .author(updateStageRequest.authorId())
+                            .invited(member.getId())
+                            .description("Invitation to join stage: " + stage.getStageName())
+                            .build();
+
+                    stageInvitationService.sendStageInvitation(sendInvitationRequest);
+                });
             }
         }
+        Stage updatedStage = stageRepository.save(stage);
+        return stageMapper.toResponse(updatedStage);
     }
-
-    private long countExecutorsWithRole(List<TeamMember> executors, String role) {
-        return executors.stream()
-                .filter(executor -> executor.getRoles().contains(role))
-                .count();
-    }
-
-    private List<TeamMember> findAvailableMembers(List<TeamMember> projectMembers,
-                                                  List<TeamMember> executors,
-                                                  String role, long missingCount) {
-        List<TeamMember> availableMembers = projectMembers.stream()
-                .filter(member -> member.getRoles().contains(role) && !executors.contains(member))
-                .limit(missingCount)
-                .toList();
-
-        if (availableMembers.size() < missingCount) {
-            throw new IllegalArgumentException("Not enough members with role " + role + " available in project");
-        }
-
-        return availableMembers;
-    }
-
-    private void createAndSendInvitations(List<TeamMember> availableMembers,
-                                          Stage stage, UpdateStageRequest updateStageRequest) {
-        availableMembers.forEach(member -> {
-            SendInvitationRequest sendInvitationRequest = SendInvitationRequest.builder()
-                    .stageId(stage.getStageId())
-                    .author(updateStageRequest.authorId())
-                    .invited(member.getId())
-                    .description("Invitation to join stage: " + stage.getStageName())
-                    .build();
-
-            stageInvitationService.sendStageInvitation(sendInvitationRequest);
-        });
-    }
-
 
     @Transactional(readOnly = true)
     public List<StageResponse> getAllStagesByProject(Long projectId) {
@@ -204,5 +186,3 @@ public class StageService {
 
     }
 }
-
-
