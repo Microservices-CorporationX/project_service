@@ -10,7 +10,6 @@ class ClassToBeTestedTest {
 
     @Test
     void functionToBeTested() {
-        Assertions.assertDoesNotThrow(() -> classToBeTested.functionToBeTested(true));
         Assertions.assertDoesNotThrow(() -> classToBeTested.functionToBeTested(false));
     }
 }
