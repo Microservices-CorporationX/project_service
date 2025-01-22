@@ -53,7 +53,7 @@ public class Moment {
     @ElementCollection
     @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
     @Column(name = "team_member_id")
-    private List<Long> userIds;
+    private List<Long> teamMemberIds;
 
     @Column(name = "image_id")
     private String imageId;
