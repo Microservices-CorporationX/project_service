@@ -1,13 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.invitation.StageInvitationDto;
+
+import faang.school.projectservice.dto.invitation.SendInvitationRequest;
+import faang.school.projectservice.dto.invitation.SendInvitationResponse;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StageInvitationService {
 
-    public StageInvitationDto sendStageInvitation(StageInvitationDto stageInvitationDto) {
-        //заглушка
-        return stageInvitationDto;
+    public SendInvitationResponse sendStageInvitation(SendInvitationRequest request) {
+        // заглушка.
+        return null;
     }
 }

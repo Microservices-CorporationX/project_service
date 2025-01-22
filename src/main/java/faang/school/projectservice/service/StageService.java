@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
+import faang.school.projectservice.dto.invitation.SendInvitationRequest;
 import faang.school.projectservice.dto.stage.CreateStageRequest;
 import faang.school.projectservice.dto.stage.DeleteStageRequest;
 import faang.school.projectservice.dto.stage.StageResponse;
@@ -104,13 +105,13 @@ public class StageService {
         return stageMapper.toResponse(updatedStage);
     }
 
-    private Stage findAndUpdateStage(UpdateStageRequest updateStageRequest) {
+    Stage findAndUpdateStage(UpdateStageRequest updateStageRequest) {
         Stage stage = findStageById(updateStageRequest.stageId());
         stageMapper.updateFromRequest(updateStageRequest, stage);
         return stage;
     }
 
-    private List<TeamMember> findAndSetExecutors(UpdateStageRequest updateStageRequest, Stage stage) {
+    List<TeamMember> findAndSetExecutors(UpdateStageRequest updateStageRequest, Stage stage) {
         List<Long> executorIds = updateStageRequest.executorsIds();
         List<TeamMember> executors = teamMemberRepository.findAllById(executorIds);
 
@@ -132,7 +133,8 @@ public class StageService {
 
             if (currentCount < requiredCount) {
                 long missingCount = requiredCount - currentCount;
-                List<TeamMember> availableMembers = findAvailableMembers(projectMembers, executors, role, missingCount);
+                List<TeamMember> availableMembers = findAvailableMembers(projectMembers,
+                        executors, role, missingCount);
 
                 executors.addAll(availableMembers);
                 createAndSendInvitations(availableMembers, stage, updateStageRequest);
@@ -146,7 +148,9 @@ public class StageService {
                 .count();
     }
 
-    private List<TeamMember> findAvailableMembers(List<TeamMember> projectMembers, List<TeamMember> executors, String role, long missingCount) {
+    private List<TeamMember> findAvailableMembers(List<TeamMember> projectMembers,
+                                                  List<TeamMember> executors,
+                                                  String role, long missingCount) {
         List<TeamMember> availableMembers = projectMembers.stream()
                 .filter(member -> member.getRoles().contains(role) && !executors.contains(member))
                 .limit(missingCount)
@@ -159,7 +163,8 @@ public class StageService {
         return availableMembers;
     }
 
-    private void createAndSendInvitations(List<TeamMember> availableMembers, Stage stage, UpdateStageRequest updateStageRequest) {
+    private void createAndSendInvitations(List<TeamMember> availableMembers,
+                                          Stage stage, UpdateStageRequest updateStageRequest) {
         availableMembers.forEach(member -> {
             SendInvitationRequest sendInvitationRequest = SendInvitationRequest.builder()
                     .stageId(stage.getStageId())
@@ -171,13 +176,6 @@ public class StageService {
             stageInvitationService.sendStageInvitation(sendInvitationRequest);
         });
     }
-
-
-
-
-
-
-
 
 
     @Transactional(readOnly = true)
