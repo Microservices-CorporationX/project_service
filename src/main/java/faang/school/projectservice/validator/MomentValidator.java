@@ -37,7 +37,7 @@ public class MomentValidator {
     public void validateMomentUpdateDto(MomentUpdateDto dto) {
         boolean isProjectIdsExist = CollectionUtils.isNotEmpty(dto.getProjectIds());
         boolean isUserIdsExist = CollectionUtils.isNotEmpty(dto.getUserIds());
-        if (!isProjectIdsExist || !isUserIdsExist) {
+        if (!isProjectIdsExist && !isUserIdsExist) {
             throw new BusinessException("userIds или projectIds должны быть заполнены");
         }
 
