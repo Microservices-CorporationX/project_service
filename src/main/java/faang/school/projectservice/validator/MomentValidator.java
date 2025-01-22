@@ -29,7 +29,7 @@ public class MomentValidator {
     }
 
     public void isUserIdsExist(List<Long> userIds) {
-        if (userIds != null && !userIds.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             teamMemberService.areTeamMembersExist(userIds);
         }
     }
