@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.validator;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.SubProjectCreateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
@@ -36,16 +36,16 @@ public class ProjectValidatorTest {
     @InjectMocks
     private ProjectValidator projectValidator;
 
-    private CreateSubProjectDto createFailingDto;
-    private CreateSubProjectDto createValidDto;
+    private SubProjectCreateDto createFailingDto;
+    private SubProjectCreateDto createValidDto;
 
     @BeforeEach
     public void beforeEach() {
-        createFailingDto = new CreateSubProjectDto();
+        createFailingDto = new SubProjectCreateDto();
         createFailingDto.setParentProjectId(ID);
         createFailingDto.setVisibility(ProjectVisibility.PUBLIC);
 
-        createValidDto = new CreateSubProjectDto();
+        createValidDto = new SubProjectCreateDto();
         createValidDto.setParentProjectId(ID);
         createValidDto.setVisibility(ProjectVisibility.PUBLIC);
 

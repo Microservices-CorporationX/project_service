@@ -1,22 +1,20 @@
 package faang.school.projectservice.dto.project;
 
-import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
-public class UpdateSubProjectDto {
+public class SubProjectCreateDto {
+    @NotBlank(message = "Название подпроекта не может быть пустым")
+    private String name;
     @NotNull
-    @Positive
-    private Long id;
+    private Long ownerId;
     @NotNull
-    private ProjectStatus projectStatus;
+    private Long parentProjectId;
+    @NotNull
     private ProjectVisibility visibility;
-    private LocalDateTime updatedAt;
 }

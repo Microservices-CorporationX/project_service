@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class ProjectDto {
+public class ProjectReadDto {
     private long id;
     private String name;
     private long ownerId;

@@ -1,8 +1,8 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.dto.project.SubProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.SubProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -18,7 +18,7 @@ public interface ProjectMapper {
     @Mapping(target = "ownerId", source = "ownerId")
     @Mapping(target = "parentProject.id", source = "parentProjectId")
     @Mapping(target = "visibility", source = "visibility")
-    Project toEntity(CreateSubProjectDto createDto);
+    Project toEntity(SubProjectCreateDto createDto);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
@@ -26,11 +26,11 @@ public interface ProjectMapper {
     @Mapping(target = "parentProjectId", source = "parentProject.id")
     @Mapping(target = "visibility", source = "visibility")
     @Mapping(target = "createdAt", source = "createdAt")
-    ProjectDto toDto(Project project);
+    ProjectReadDto toDto(Project project);
 
-    Project toUpdatedEntity(UpdateSubProjectDto updateDto);
+    Project toUpdatedEntity(SubProjectUpdateDto updateDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(UpdateSubProjectDto updateDto, @MappingTarget Project project);
+    void updateEntityFromDto(SubProjectUpdateDto updateDto, @MappingTarget Project project);
 
 }

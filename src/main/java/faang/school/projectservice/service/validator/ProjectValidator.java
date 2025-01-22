@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.validator;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
+import faang.school.projectservice.dto.project.SubProjectCreateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
@@ -17,7 +17,7 @@ import java.util.List;
 public class ProjectValidator {
     private final ProjectRepository projectRepository;
 
-    public void validateSubProjectCreation(CreateSubProjectDto createDto) {
+    public void validateSubProjectCreation(SubProjectCreateDto createDto) {
         Project parentProject = projectRepository.findById(createDto.getParentProjectId())
                 .orElseThrow(() -> new EntityNotFoundException("Проект с ID "
                         + createDto.getParentProjectId() + " не найден"));

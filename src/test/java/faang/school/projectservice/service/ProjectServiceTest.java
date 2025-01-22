@@ -1,8 +1,11 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.dto.project.SubProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.SubProjectFilterDto;
+import faang.school.projectservice.dto.project.SubProjectUpdateDto;
+import faang.school.projectservice.filter.Filter;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
@@ -40,15 +43,15 @@ public class ProjectServiceTest {
     @Mock
     private ProjectValidator projectValidator;
 
+    @Mock
+    private List<SubProjectFilter> subProjectFilter;
+
     @InjectMocks
     private ProjectService projectService;
 
     private Project parentProject;
     private Project publicSubProject1;
     private Project publicSubProject2;
-    private Project publicSubProject3;
-    private Project privateSubProject;
-
 
     @BeforeEach
     public void beforeEach() {
@@ -67,23 +70,12 @@ public class ProjectServiceTest {
         publicSubProject2.setName("B Project");
         publicSubProject2.setStatus(ProjectStatus.IN_PROGRESS);
 
-        publicSubProject3 = new Project();
-        publicSubProject3.setId(4L);
-        publicSubProject3.setVisibility(ProjectVisibility.PUBLIC);
-        publicSubProject3.setName("C Project");
-        publicSubProject3.setStatus(ProjectStatus.CREATED);
-
-        privateSubProject = new Project();
-        privateSubProject.setId(5L);
-        privateSubProject.setVisibility(ProjectVisibility.PRIVATE);
-        privateSubProject.setName("Private Project");
-
-        parentProject.setChildren(Arrays.asList(publicSubProject1, publicSubProject2, privateSubProject, publicSubProject3));
+        parentProject.setChildren(Arrays.asList(publicSubProject1, publicSubProject2));
     }
 
     @Test
     public void testCreate() {
-        CreateSubProjectDto createDto = new CreateSubProjectDto();
+        SubProjectCreateDto createDto = new SubProjectCreateDto();
         Project subProject = projectMapper.toEntity(createDto);
 
         projectService.create(createDto);
@@ -93,7 +85,7 @@ public class ProjectServiceTest {
     @Test
     public void testUpdate() {
         Project project = Project.builder().id(1L).build();
-        UpdateSubProjectDto updateDto = new UpdateSubProjectDto();
+        SubProjectUpdateDto updateDto = new SubProjectUpdateDto();
         updateDto.setId(1L);
 
         Mockito.when(projectRepository.findById(updateDto.getId())).thenReturn(Optional.of(project));
@@ -105,14 +97,11 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetSubProjects() {
+        SubProjectFilterDto filterDto = new SubProjectFilterDto();
         Mockito.when(projectRepository.findById(1L)).thenReturn(Optional.of(parentProject));
 
-        List<ProjectDto> subProjects = projectService.getSubProjects(1L);
+        List<ProjectReadDto> subProjects = projectService.getSubProjects(1L, filterDto);
 
-        assertEquals(3, subProjects.size());
-
-        assertEquals("C Project", subProjects.get(0).getName());
-        assertEquals("B Project", subProjects.get(1).getName());
-        assertEquals("A Project", subProjects.get(2).getName());
+        assertEquals(0, subProjects.size());
     }
 }

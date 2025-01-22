@@ -1,14 +1,14 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.CreateSubProjectDto;
-import faang.school.projectservice.dto.project.ProjectDto;
-import faang.school.projectservice.dto.project.UpdateSubProjectDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.SubProjectCreateDto;
+import faang.school.projectservice.dto.project.SubProjectFilterDto;
+import faang.school.projectservice.dto.project.SubProjectUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.validator.ProjectValidator;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -26,8 +25,9 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final MomentRepository momentRepository;
     private final ProjectValidator projectValidator;
+    private final List<SubProjectFilter> subProjectFilters;
 
-    public ProjectDto create(CreateSubProjectDto createDto) {
+    public ProjectReadDto create(SubProjectCreateDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
 
         Project subProject = projectMapper.toEntity(createDto);
@@ -35,7 +35,7 @@ public class ProjectService {
         return projectMapper.toDto(subProject);
     }
 
-    public ProjectDto update(UpdateSubProjectDto updateDto) {
+    public ProjectReadDto update(SubProjectUpdateDto updateDto) {
         Project project = getProjectById(updateDto.getId());
         projectMapper.updateEntityFromDto(updateDto, project);
         List<Project> subProjects = project.getChildren();
@@ -51,17 +51,13 @@ public class ProjectService {
         return projectMapper.toDto(project);
     }
 
-    public List<ProjectDto> getSubProjects(long projectId) {
+    public List<ProjectReadDto> getSubProjects(long projectId, SubProjectFilterDto filterDto) {
         Project project = getProjectById(projectId);
         List<Project> subProjects = project.getChildren();
 
-        List<Project> filteredSubProjects = subProjects.stream()
-                .filter(subProject -> subProject.getVisibility() == ProjectVisibility.PUBLIC)
-                .sorted(Comparator.comparingInt((Project subProject) -> subProject.getStatus().ordinal())
-                        .thenComparing(Project::getName))
-                .toList();
-
-        return filteredSubProjects.stream()
+        return subProjects.stream()
+                .filter(subProject -> subProjectFilters.stream().filter(filter -> filter.isApplicable(filterDto))
+                        .anyMatch(filter -> filter.filterEntity(subProject, filterDto)))
                 .map(projectMapper::toDto)
                 .toList();
     }
