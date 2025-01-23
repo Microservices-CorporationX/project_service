@@ -12,9 +12,11 @@ import faang.school.projectservice.dto.invitation.SendInvitationRequest;
 import faang.school.projectservice.dto.invitation.SendInvitationResponse;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
+import faang.school.projectservice.repository.StageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +31,19 @@ public class StageInvitationService {
     private final StageInvitationRepository repository;
     private final StageInvitationController controller;
     private final StageInvitationMapper mapper;
+    private final StageRepository stageRepository;
 
     @Transactional
     public SendInvitationResponse sendInvitation(SendInvitationRequest request) {
+        Stage stage = stageRepository.findById(request.stageId())
+                .orElseThrow(() -> new IllegalArgumentException("Stage not found"));
+
+        boolean alreadyExecutor = stage.getExecutors().stream()
+                .anyMatch(member -> member.getUserId().equals(request.invited()));
+        if(alreadyExecutor){
+            throw  new IllegalArgumentException("User is already an executor of this stage");
+        }
+
         StageInvitation stageInvitation = mapper.toStageInvitation(request);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
         return mapper.toSendInvitationResponse(stageInvitation);
