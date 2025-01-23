@@ -34,7 +34,7 @@ public class StageInvitation {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "rejectReason")
+    @Column(name = "reject_reason")
     private String rejectionReason;
 
     @Column(name = "status")

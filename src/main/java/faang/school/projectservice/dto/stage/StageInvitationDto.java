@@ -1,31 +1,28 @@
 package faang.school.projectservice.dto.stage;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class StageInvitationDto {
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
-    private Long id;
+    private long id;
 
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
-    private Long authorId;
+    private long authorId;
 
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
-    private Long invitedId;
+    private long invitedId;
 
-    @NotNull
     @Positive(message = "Id должно быть больше нуля")
-    private Long stageId;
+    private long stageId;
 
     @NotBlank(message = "Описание не должно быть пустым")
     private String description;

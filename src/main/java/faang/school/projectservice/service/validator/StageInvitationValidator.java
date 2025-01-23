@@ -1,11 +1,15 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.service.validator;
 
 import faang.school.projectservice.exception.BusinessException;
+import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,22 +29,32 @@ public class StageInvitationValidator {
         }
     }
 
-    public void validateEqualsId(Long authorId, Long invitedId) {
-        if (authorId.equals(invitedId)) {
+    public void validateEqualsId(long authorId, long invitedId) {
+        if (authorId == invitedId) {
             throw new BusinessException(String.format(
                     "Автор приглашения на этап и приглашенный на этот этап не могут быть одним человеком. " +
                             "\n authorId: %d\n invitedId: %d", authorId, invitedId));
         }
     }
 
-    public void validateInvitedMemberTeam(Long authorId, Long invitedId) {
-        Long authorTeamId = teamMemberRepository.findById(authorId).get().getTeam().getId();
-        Long invitedTeamId = teamMemberRepository.findById(invitedId).get().getTeam().getId();
+    public void validateInvitedMemberTeam(long authorId, long invitedId) {
+        Optional<TeamMember> authorTeamMemberOpt = teamMemberRepository.findById(authorId);
+        Optional<TeamMember> invitedTeamMemberOpt = teamMemberRepository.findById(invitedId);
+
+        if (authorTeamMemberOpt.isEmpty()) {
+            throw new EntityNotFoundException("Автор не найден в базе данных.");
+        }
+        if (invitedTeamMemberOpt.isEmpty()) {
+            throw new EntityNotFoundException("Приглашенный не найден в базе данных.");
+        }
+
+        Long authorTeamId = authorTeamMemberOpt.get().getTeam().getId();
+        Long invitedTeamId = invitedTeamMemberOpt.get().getTeam().getId();
 
         if (!authorTeamId.equals(invitedTeamId)) {
             throw new BusinessException(String.format(
-                    "Автор приглашения на этап и приглашенный должны быть в одной команде." +
-                            "\n authorTeamId: \n%d  invitedTeamId: %d", authorTeamId, invitedTeamId));
+                    "Автор приглашения и приглашенный должны быть в одной команде." +
+                            "\nauthorTeamId: %d invitedTeamId: %d", authorTeamId, invitedTeamId));
         }
     }
 }
