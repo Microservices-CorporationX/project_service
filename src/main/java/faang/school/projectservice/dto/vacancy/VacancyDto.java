@@ -18,17 +18,17 @@ import java.util.List;
 public record VacancyDto(
         Long id,
 
-        @NotBlank
+        @NotBlank(message = "name must be not empty")
         String name,
 
-        @NotBlank
+        @NotBlank(message = "description must be not empty")
         String description,
 
-        @NotNull
+        @NotNull(message = "position must be not null")
         TeamRole position,
 
-        @NotNull
-        @Min(0)
+        @NotNull(message = "projectId must be not null")
+        @Min(value = 0, message = "projectId must be minimum 0")
         Long projectId,
 
         List<Long> candidatesId,
@@ -37,8 +37,8 @@ public record VacancyDto(
 
         LocalDateTime updatedAt,
 
-        @NotNull
-        @Min(0)
+        @NotNull(message = "createBy must be not null")
+        @Min(value = 0, message = "createBy must be minimum 0")
         Long createdBy,
 
         VacancyStatus status,
@@ -46,11 +46,11 @@ public record VacancyDto(
         Double salary,
 
         @Enumerated(EnumType.STRING)
-        @NotNull
+        @NotNull(message = "workSchedule must be not null")
         WorkSchedule workSchedule,
 
-        @Min(1)
-        @NotNull
+        @NotNull(message = "count must be not null")
+        @Min(value = 1, message = "count must be minimum 1")
         Integer count,
 
         @ElementCollection
