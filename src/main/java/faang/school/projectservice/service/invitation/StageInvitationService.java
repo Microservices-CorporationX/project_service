@@ -1,4 +1,4 @@
-package faang.school.projectservice.service;
+package faang.school.projectservice.service.invitation;
 
 import faang.school.projectservice.controller.StageInvitationController;
 import faang.school.projectservice.dto.invitation.AcceptInvitationRequest;
@@ -17,13 +17,13 @@ import faang.school.projectservice.model.stage_invitation.StageInvitation;
 import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.StageInvitationRepository;
 import faang.school.projectservice.repository.StageRepository;
+import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +32,7 @@ public class StageInvitationService {
     private final StageInvitationController controller;
     private final StageInvitationMapper mapper;
     private final StageRepository stageRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
     public SendInvitationResponse sendInvitation(SendInvitationRequest request) {
@@ -40,8 +41,8 @@ public class StageInvitationService {
 
         boolean alreadyExecutor = stage.getExecutors().stream()
                 .anyMatch(member -> member.getUserId().equals(request.invited()));
-        if(alreadyExecutor){
-            throw  new IllegalArgumentException("User is already an executor of this stage");
+        if (alreadyExecutor) {
+            throw new IllegalArgumentException("User is already an executor of this stage");
         }
 
         StageInvitation stageInvitation = mapper.toStageInvitation(request);
@@ -49,29 +50,27 @@ public class StageInvitationService {
         return mapper.toSendInvitationResponse(stageInvitation);
     }
 
+    @Transactional
     public AcceptInvitationResponse acceptInvitation(AcceptInvitationRequest request) {
-        StageInvitation stageInvitation = repository.findById(request.id())
-                .orElseThrow(() -> new DataValidationException("Invitation not found"));
-
-        if (!StageInvitationStatus.PENDING.equals(stageInvitation.getStatus())) {
-            throw new IllegalArgumentException("Only pending invitations can be accepted");
-        }
+        StageInvitation stageInvitation = validatePendingInvitation(request.id());
 
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
+        Stage stage = stageInvitation.getStage();
+        stage.getExecutors().add(stageInvitation.getInvited());
+
+        repository.save(stageInvitation);
+        stageRepository.save(stage);
+
         return AcceptInvitationResponse.builder()
                 .id(stageInvitation.getId())
-                .status(String.valueOf(stageInvitation.getStatus()))
+                .status(stageInvitation.getStatus().toString())
                 .build();
     }
 
     @Transactional
     public DeclineInvitationResponse declineInvitation(DeclineInvitationRequest request) {
-        StageInvitation stageInvitation = repository.findById(request.id())
-                .orElseThrow(() -> new IllegalArgumentException("Invitation not found"));
+        StageInvitation stageInvitation = validatePendingInvitation(request.id());
 
-        if (!StageInvitationStatus.PENDING.equals(stageInvitation.getStatus())) {
-            throw new IllegalStateException("Only pending invitations can be accepted");
-        }
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(request.description());
 
@@ -96,5 +95,13 @@ public class StageInvitationService {
                 .build();
     }
 
+    private StageInvitation validatePendingInvitation(Long invitationId){
+        StageInvitation stageInvitation = repository.findById(invitationId)
+                .orElseThrow(()-> new DataValidationException("Invitation not found"));
 
+        if (!StageInvitationStatus.PENDING.equals(stageInvitation.getStatus())) {
+            throw new IllegalStateException("Only pending invitations can be accepted or rejected");
+        }
+        return stageInvitation;
+    }
 }
