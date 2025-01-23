@@ -1,26 +1,32 @@
 package faang.school.projectservice.service.vacancy;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.project.ProjectService;
-import faang.school.projectservice.service.teamMember.TeamMemberService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
@@ -29,7 +35,7 @@ class VacancyServiceTest {
     @Mock
     private ProjectService projectService;
     @Mock
-    private TeamMemberService teamMemberService;
+    private VacancyValidator vacancyValidator;
     @InjectMocks
     private VacancyService vacancyService;
 
@@ -70,64 +76,81 @@ class VacancyServiceTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        Mockito.when(projectService.getProjectById(1L)).thenReturn(Project.builder().id(1L).build());
-        Mockito.when(vacancyRepository.save(Mockito.any(Vacancy.class))).thenReturn(excepted);
+        when(projectService.getProjectById(1L)).thenReturn(Project.builder().id(1L).build());
+        when(vacancyRepository.save(any(Vacancy.class))).thenReturn(excepted);
+        doNothing().when(vacancyValidator).validateTutorRole(1L, 1L);
 
-        Mockito.when(teamMemberService.getTeamMemberByIdAndProjectId(1L, 1L))
-                .thenReturn(TeamMember.builder()
-                        .id(1L)
-                        .userId(1L)
-                        .team(Team.builder()
-                                .id(1L)
-                                .project(Project.builder()
-                                        .id(1L)
-                                        .build())
-                                .build())
-                        .roles(List.of(TeamRole.MANAGER))
-                        .build()
-                );
-
-        Vacancy actual = vacancyService.createVacancy(sourceVacancy);
-        Mockito.verify(vacancyRepository, Mockito.times(1)).save(sourceVacancy);
+        Vacancy actual = vacancyService.createVacancy(sourceVacancy, 1L);
+        verify(vacancyRepository, times(1)).save(sourceVacancy);
         Assertions.assertEquals(excepted, actual);
     }
 
+
     @Test
-    void createVacancyWithNOtRole() {
+    void closeVacancy() {
+        List<Candidate> candidates = IntStream.rangeClosed(2, 6)
+                .boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                })
+                .toList();
+
         Vacancy sourceVacancy = Vacancy.builder()
+                .id(1L)
                 .name("vacancy")
                 .description("description")
                 .position(TeamRole.ANALYST)
                 .project(Project.builder()
                         .id(1L)
+                        .name("project")
                         .build())
-                .candidates(List.of())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
                 .createdBy(1L)
-                .status(VacancyStatus.CLOSED)
+                .status(VacancyStatus.OPEN)
                 .salary(3000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(5)
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        Mockito.when(projectService.getProjectById(1L)).thenReturn(Project.builder().id(1L).build());
-
-        Mockito.when(teamMemberService.getTeamMemberByIdAndProjectId(1L, 1L))
-                .thenReturn(TeamMember.builder()
+        when(vacancyRepository.findById(anyLong())).thenReturn(Optional.of(sourceVacancy));
+        Vacancy targetVacancy = Vacancy.builder()
+                .id(1L)
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
                         .id(1L)
-                        .userId(1L)
-                        .team(Team.builder()
-                                .id(1L)
-                                .project(Project.builder()
-                                        .id(1L)
-                                        .build())
-                                .build())
-                        .roles(List.of(TeamRole.DESIGNER, TeamRole.DEVELOPER))
-                        .build()
-                );
+                        .name("project")
+                        .build())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(1L)
+                .status(VacancyStatus.CLOSED)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .updatedAt(LocalDateTime.of(2025, 1, 21, 14, 30))
+                .updatedBy(1L)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
 
-        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.createVacancy(sourceVacancy),
-                "1 user does not have permission to add a vacancy");
-        Mockito.verify(vacancyRepository, Mockito.times(0)).save(sourceVacancy);
+        when(vacancyRepository.save(any(Vacancy.class))).thenReturn(targetVacancy);
+        doNothing().when(vacancyValidator).validateVacancyStatus(any(Vacancy.class));
+        doNothing().when(vacancyValidator).validateTutorRole(anyLong(), anyLong());
+        doNothing().when(vacancyValidator).validateCandidatesCount(any(Vacancy.class));
+
+        Vacancy actual = vacancyService.closeVacancy(1L, 1L);
+        Assertions.assertEquals(targetVacancy, actual);
+
+        verify(vacancyRepository, times(1)).save(any(Vacancy.class));
+        verify(vacancyValidator, times(1)).validateTutorRole(anyLong(), anyLong());
+        verify(vacancyValidator, times(1)).validateCandidatesCount(any(Vacancy.class));
+        verify(vacancyValidator, times(1)).validateVacancyStatus(any(Vacancy.class));
+        verify(vacancyRepository, times(1)).findById(anyLong());
     }
+
 }

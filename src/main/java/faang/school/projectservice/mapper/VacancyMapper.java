@@ -23,6 +23,10 @@ public interface VacancyMapper {
 
     @Named("mapCandidatesIdsToCandidates")
     default List<Candidate> mapCandidatesIdsToCandidates(List<Long> candidatesIds) {
+        if (candidatesIds == null) {
+            return List.of();
+        }
+
         return candidatesIds.stream()
                 .map(id -> {
                     Candidate candidate = new Candidate();
@@ -33,6 +37,9 @@ public interface VacancyMapper {
 
     @Named("mapCandidatesToCandidatesIds")
     default List<Long> mapCandidatesToCandidatesIds(List<Candidate> candidates) {
+        if (candidates == null) {
+            return List.of();
+        }
         return candidates.stream()
                 .map(Candidate::getId)
                 .toList();
