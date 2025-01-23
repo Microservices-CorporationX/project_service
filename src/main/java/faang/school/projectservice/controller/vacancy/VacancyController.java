@@ -34,17 +34,19 @@ public class VacancyController {
     }
 
     @PostMapping("close/{id}")
-    public ResponseEntity<Vacancy> closeVacancy(@PathVariable("id") Long vacancyId) {
-        return ResponseEntity.ok(vacancyService.closeVacancy(vacancyId, userContext.getUserId()));
+    public ResponseEntity<VacancyDto> closeVacancy(@PathVariable("id") Long vacancyId) {
+        Vacancy vacancy = vacancyService.closeVacancy(vacancyId, userContext.getUserId());
+        VacancyDto vacancyDto = vacancyMapper.toDto(vacancy);
+        return ResponseEntity.ok(vacancyDto);
     }
 
     @PatchMapping("update/{id}")
-    public ResponseEntity<Vacancy> updateVacancy(@PathVariable("id") Long vacancyId,
+    public ResponseEntity<VacancyDto> updateVacancy(@PathVariable("id") Long vacancyId,
                                                  @RequestBody VacancyDto vacancyDto) {
         vacancyDtoValidator.validate(vacancyDto);
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Long userId = userContext.getUserId();
-
-        return null;
+        VacancyDto result = vacancyMapper.toDto(vacancyService.updateVacancy(vacancyId, vacancy, userId));
+        return ResponseEntity.ok(result);
     }
 }

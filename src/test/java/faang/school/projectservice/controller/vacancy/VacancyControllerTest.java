@@ -118,6 +118,84 @@ class VacancyControllerTest {
     @Test
     void closeVacancy() {
         when(userContext.getUserId()).thenReturn(11L);
+        VacancyDto expectedDto = VacancyDto.builder()
+                .id(1L)
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .projectId(1L)
+                .candidatesId(List.of())
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(11L)
+                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
+                .status(VacancyStatus.CLOSED)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
+        Vacancy vacancy = Vacancy.builder().id(1L)
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .build())
+                .candidates(List.of())
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(11L)
+                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
+                .status(VacancyStatus.CLOSED)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
+        when(vacancyService.closeVacancy(1L, 11L)).thenReturn(vacancy);
+        when(vacancyMapper.toDto(vacancy)).thenReturn(expectedDto);
+
+        ResponseEntity<VacancyDto> actual = vacancyController.closeVacancy(1L);
+        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(expectedDto);
+
+        Assertions.assertEquals(expected, actual);
+        verify(userContext, times(1)).getUserId();
+        verify(vacancyService, times(1)).closeVacancy(1L, 11L);
+    }
+
+    @Test
+    void updateVacancy() {
+        when(userContext.getUserId()).thenReturn(1L);
+        VacancyDto sourceVacancyDto = VacancyDto.builder()
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .projectId(1L)
+                .candidatesId(List.of())
+                .status(VacancyStatus.OPEN)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
+        Vacancy newVacancy = Vacancy.builder()
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .name("project")
+                        .build())
+                .candidates(List.of())
+                .status(VacancyStatus.OPEN)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
         Vacancy exceptedVacancy = Vacancy.builder()
                 .id(1L)
                 .name("vacancy")
@@ -130,18 +208,45 @@ class VacancyControllerTest {
                 .candidates(List.of())
                 .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
                 .createdBy(11L)
-                .status(VacancyStatus.CLOSED)
+                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
+                .updatedBy(1L)
+                .status(VacancyStatus.OPEN)
                 .salary(3000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(5)
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
-        when(vacancyService.closeVacancy(1L, 11L)).thenReturn(exceptedVacancy);
-        Vacancy actual = vacancyService.closeVacancy(1L, userContext.getUserId());
 
-        Assertions.assertEquals(exceptedVacancy, actual);
+        VacancyDto expectedDto = VacancyDto.builder()
+                .id(1L)
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .projectId(1L)
+                .candidatesId(List.of())
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(11L)
+                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
+                .status(VacancyStatus.OPEN)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
+        when(vacancyMapper.toEntity(sourceVacancyDto)).thenReturn(newVacancy);
+        when(userContext.getUserId()).thenReturn(1L);
+        when(vacancyService.updateVacancy(1L, newVacancy, 1L)).thenReturn(exceptedVacancy);
+        when(vacancyMapper.toDto(exceptedVacancy)).thenReturn(expectedDto);
+
+        ResponseEntity<VacancyDto> actual = vacancyController.updateVacancy(1L, sourceVacancyDto);
+        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(expectedDto);
+        Assertions.assertEquals(expected, actual);
+
         verify(userContext, times(1)).getUserId();
-        verify(vacancyService, times(1)).closeVacancy(1L, 11L);
+        verify(vacancyService, times(1)).updateVacancy(1L, newVacancy, 1L);
+        verify(vacancyMapper, times(1)).toDto(exceptedVacancy);
+        verify(vacancyMapper, times(1)).toEntity(sourceVacancyDto);
     }
 
 }

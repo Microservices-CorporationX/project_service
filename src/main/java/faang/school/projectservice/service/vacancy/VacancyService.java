@@ -55,4 +55,58 @@ public class VacancyService {
         log.info("Vacancy close: " + vacancy);
         return vacancyRepository.save(vacancy);
     }
+
+    public Vacancy updateVacancy(Long vacancyId, Vacancy newVacancy, Long tutorId) {
+        if (vacancyId == null || newVacancy == null || tutorId == null) {
+            throw new DataValidationException("vacancyId, newVacancy or tutorId is null");
+        }
+        Vacancy sourceVacancy = vacancyRepository.findById(vacancyId).orElseThrow(() ->
+                new DataValidationException("vacancy %d not found".formatted(vacancyId)));
+
+        vacancyValidator.validateTutorRole(tutorId, newVacancy.getProject().getId());
+        vacancyValidator.validateVacancyStatus(sourceVacancy);
+        Vacancy targetVacancy = Vacancy.builder()
+                .id(vacancyId)
+                .createdAt(sourceVacancy.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .createdBy(sourceVacancy.getCreatedBy())
+                .updatedBy(tutorId)
+                .build();
+
+        if (newVacancy.getName() != null) {
+            targetVacancy.setName(newVacancy.getName());
+        }
+        if (newVacancy.getDescription() != null) {
+            targetVacancy.setDescription(newVacancy.getDescription());
+        }
+        if (newVacancy.getPosition() != null) {
+            targetVacancy.setPosition(newVacancy.getPosition());
+        }
+        if (newVacancy.getProject() != null) {
+            targetVacancy.setProject(newVacancy.getProject());
+        }
+        if (!newVacancy.getCandidates().isEmpty()) {
+            targetVacancy.setCandidates(newVacancy.getCandidates());
+        }
+        if (newVacancy.getStatus() != null) {
+            targetVacancy.setStatus(newVacancy.getStatus());
+        }
+        if (newVacancy.getSalary() != null) {
+            targetVacancy.setSalary(newVacancy.getSalary());
+        }
+        if (newVacancy.getWorkSchedule() != null) {
+            targetVacancy.setWorkSchedule(newVacancy.getWorkSchedule());
+        }
+        if (newVacancy.getCount() != null) {
+            targetVacancy.setCount(newVacancy.getCount());
+        }
+        if (!newVacancy.getRequiredSkillIds().isEmpty()) {
+            targetVacancy.setRequiredSkillIds(newVacancy.getRequiredSkillIds());
+        }
+        if (newVacancy.getCoverImageKey() != null) {
+            targetVacancy.setCoverImageKey(newVacancy.getCoverImageKey());
+        }
+
+        return vacancyRepository.save(targetVacancy);
+    }
 }

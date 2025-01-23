@@ -153,4 +153,87 @@ class VacancyServiceTest {
         verify(vacancyRepository, times(1)).findById(anyLong());
     }
 
+    @Test
+    void updateVacancy() {
+        List<Candidate> candidates = IntStream.rangeClosed(2, 6)
+                .boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                })
+                .toList();
+
+        Vacancy sourceVacancy = Vacancy.builder()
+                .id(1L)
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .name("project")
+                        .build())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+
+        Vacancy newVacancy = Vacancy.builder()
+                .name("newVacancy")
+                .description("newDescription")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .name("project")
+                        .build())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(4000.0)
+                .workSchedule(WorkSchedule.FLEXIBLE)
+                .count(4)
+                .requiredSkillIds(List.of(1L, 2L, 3L, 4L))
+                .build();
+
+        Vacancy targetVacancy = Vacancy.builder()
+                .id(1L)
+                .name("newVacancy")
+                .description("newDescription")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .name("project")
+                        .build())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(1L)
+                .updatedAt(LocalDateTime.of(2025, 1, 21, 14, 30))
+                .updatedBy(2L)
+                .status(VacancyStatus.OPEN)
+                .salary(4000.0)
+                .workSchedule(WorkSchedule.FLEXIBLE)
+                .count(4)
+                .requiredSkillIds(List.of(1L, 2L, 3L, 4L))
+                .build();
+
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(sourceVacancy));
+        when(vacancyRepository.save(any(Vacancy.class))).thenReturn(targetVacancy);
+        doNothing().when(vacancyValidator).validateTutorRole(anyLong(), anyLong());
+        doNothing().when(vacancyValidator).validateVacancyStatus(any(Vacancy.class));
+
+        Vacancy actual = vacancyService.updateVacancy(1L, newVacancy, 2L);
+
+        Assertions.assertEquals(targetVacancy, actual);
+        verify(vacancyRepository, times(1)).save(any(Vacancy.class));
+        verify(vacancyValidator, times(1)).validateTutorRole(anyLong(), anyLong());
+        verify(vacancyValidator, times(1)).validateVacancyStatus(any(Vacancy.class));
+        verify(vacancyRepository, times(1)).findById(anyLong());
+    }
+
 }
