@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -247,6 +248,16 @@ class VacancyControllerTest {
         verify(vacancyService, times(1)).updateVacancy(1L, newVacancy, 1L);
         verify(vacancyMapper, times(1)).toDto(exceptedVacancy);
         verify(vacancyMapper, times(1)).toEntity(sourceVacancyDto);
+    }
+
+    @Test
+    void deleteVacancy() {
+        when(userContext.getUserId()).thenReturn(1L);
+        doNothing().when(vacancyService).deleteVacancy(1L, 1L);
+
+        Assertions.assertDoesNotThrow(() -> vacancyController.deleteVacancy(1L));
+        verify(vacancyService, times(1)).deleteVacancy(1L, 1L);
+        verify(userContext, times(1)).getUserId();
     }
 
 }

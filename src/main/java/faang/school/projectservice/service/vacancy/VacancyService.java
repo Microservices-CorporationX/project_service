@@ -5,6 +5,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.candidate.CandidateService;
 import faang.school.projectservice.service.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final ProjectService projectService;
     private final VacancyValidator vacancyValidator;
+    private final CandidateService candidateService;
 
     public Vacancy createVacancy(Vacancy vacancy, Long userId) {
         Project project = projectService.getProjectById(vacancy.getProject().getId());
@@ -108,5 +110,18 @@ public class VacancyService {
         }
 
         return vacancyRepository.save(targetVacancy);
+    }
+
+    public void deleteVacancy(Long vacancyId, Long tutorId) {
+        if (vacancyId == null || tutorId == null) {
+            throw new DataValidationException("vacancyId or tutorId is null");
+        }
+
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() ->
+                new DataValidationException("vacancy %d not found".formatted(vacancyId)));
+
+        vacancyValidator.validateTutorRole(tutorId, vacancy.getProject().getId());
+        candidateService.deleteCandidatesByVacancyId(vacancyId);
+        vacancyRepository.deleteById(vacancyId);
     }
 }

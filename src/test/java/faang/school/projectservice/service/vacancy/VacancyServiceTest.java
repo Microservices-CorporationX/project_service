@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -7,6 +8,7 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.candidate.CandidateService;
 import faang.school.projectservice.service.project.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,8 @@ class VacancyServiceTest {
     private ProjectService projectService;
     @Mock
     private VacancyValidator vacancyValidator;
+    @Mock
+    private CandidateService candidateService;
     @InjectMocks
     private VacancyService vacancyService;
 
@@ -234,6 +238,44 @@ class VacancyServiceTest {
         verify(vacancyValidator, times(1)).validateTutorRole(anyLong(), anyLong());
         verify(vacancyValidator, times(1)).validateVacancyStatus(any(Vacancy.class));
         verify(vacancyRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void deleteVacancy() {
+        Vacancy vacancy = Vacancy.builder()
+                .id(1L)
+                .project(Project.builder()
+                        .id(1L)
+                        .build())
+                .build();
+
+        doNothing().when(candidateService).deleteCandidatesByVacancyId(anyLong());
+        doNothing().when(vacancyRepository).deleteById(anyLong());
+        doNothing().when(vacancyValidator).validateTutorRole(anyLong(), anyLong());
+        when(vacancyRepository.findById(anyLong())).thenReturn(Optional.of(vacancy));
+
+        Assertions.assertDoesNotThrow(() -> vacancyService.deleteVacancy(1L, 1L));
+        verify(vacancyRepository, times(1)).deleteById(anyLong());
+        verify(candidateService, times(1)).deleteCandidatesByVacancyId(anyLong());
+    }
+
+    @Test
+    void deleteVacancyNotFound() {
+        when(vacancyRepository.findById(anyLong())).thenReturn(Optional.empty());
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.deleteVacancy(1L, 1L),
+                "vacancy 1 not found");
+    }
+
+    @Test
+    void deleteVacancyIdIsNull() {
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.deleteVacancy(null, 1L),
+                "vacancyId or tutorId is null");
+    }
+
+    @Test
+    void deleteVacancyTutorIdIsNull() {
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.deleteVacancy(1L, null),
+                "vacancyId or tutorId is null");
     }
 
 }
