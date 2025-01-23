@@ -51,7 +51,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto acceptStageInvitation(Long invitationId) {
+    public StageInvitationDto acceptStageInvitation(long invitationId) {
         StageInvitation stageInvitation = stageInvitationRepository.getReferenceById(invitationId);
         TeamMember invited = stageInvitation.getInvited();
         stageInvitationValidator.validateStatusPendingCheck(stageInvitation);
@@ -64,7 +64,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public StageInvitationDto rejectStageInvitation(Long id, String rejectionReason) {
+    public StageInvitationDto rejectStageInvitation(long id, String rejectionReason) {
         StageInvitation stageInvitation = stageInvitationRepository.getReferenceById(id);
         TeamMember invited = stageInvitation.getInvited();
         stageInvitationValidator.validateStatusPendingCheck(stageInvitation);
@@ -79,7 +79,7 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitation);
     }
 
-    public List<StageInvitationDto> getAllInvitationsForOneParticipant(Long participantId,
+    public List<StageInvitationDto> getAllInvitationsForOneParticipant(long participantId,
                                                                        StageInvitationFilterDto filter) {
         Stream<StageInvitation> stageInvitationsFiltered = stageInvitationRepository.findAll().stream()
                 .filter(stageInvitation -> stageInvitation

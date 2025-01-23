@@ -77,7 +77,7 @@ public class StageInvitationControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isCreated());
         } catch (Exception e) {
             fail(e);
         }
@@ -141,7 +141,7 @@ public class StageInvitationControllerTest {
         try {
             mockMvc.perform(put("/stage-invitation/accept/{stageInvitationId}", testId))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isAccepted());
         } catch (Exception e) {
             fail(e);
         }
@@ -168,7 +168,7 @@ public class StageInvitationControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(REJECT)))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isAccepted());
         } catch (Exception e) {
             fail(e);
         }
@@ -197,7 +197,7 @@ public class StageInvitationControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(filterDto)))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(testList)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isFound());
         } catch (Exception e) {
             fail(e);
         }
