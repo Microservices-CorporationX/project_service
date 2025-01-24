@@ -24,6 +24,7 @@ public interface InternshipMapper {
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
     Internship toEntity(InternshipDto dto);
 
+    @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
     void update(InternshipDto dto, @MappingTarget Internship internship);
 
     @Named("internsMap")
@@ -48,4 +49,5 @@ public interface InternshipMapper {
         return mentor;
     }
 }
+
 
