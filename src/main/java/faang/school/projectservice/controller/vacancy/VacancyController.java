@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.vacancy.VacancyService;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("vacancy")
@@ -63,5 +66,12 @@ public class VacancyController {
         Long userId = userContext.getUserId();
         vacancyService.deleteVacancy(vacancyId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("withFilter")
+    public ResponseEntity<List<VacancyDto>> getVacanciesByFilters(@RequestBody VacancyFilterDto filterDto) {
+        List<Vacancy> vacancies = vacancyService.getVacancies(filterDto);
+        List<VacancyDto> vacancyDtos = vacancyMapper.toDtoList(vacancies);
+        return ResponseEntity.ok(vacancyDtos);
     }
 }

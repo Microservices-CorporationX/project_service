@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
@@ -10,14 +11,15 @@ import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.candidate.CandidateService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -32,16 +34,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class VacancyServiceTest {
-    @Mock
-    private VacancyRepository vacancyRepository;
-    @Mock
-    private ProjectService projectService;
-    @Mock
-    private VacancyValidator vacancyValidator;
-    @Mock
-    private CandidateService candidateService;
-    @InjectMocks
-    private VacancyService vacancyService;
+
+    private final VacancyRepository vacancyRepository = Mockito.mock(VacancyRepository.class);
+    private final ProjectService projectService = Mockito.mock(ProjectService.class);
+    private final VacancyValidator vacancyValidator = Mockito.mock(VacancyValidator.class);
+    private final CandidateService candidateService = Mockito.mock(CandidateService.class);
+    private final List<VacancyFilter> vacancyFilters = new ArrayList<>();
+    private final VacancyService vacancyService = new VacancyService(vacancyRepository, projectService, vacancyValidator,
+            candidateService, vacancyFilters);
 
     @Test
     void createVacancy() {
@@ -299,5 +299,111 @@ class VacancyServiceTest {
         when(vacancyRepository.findById(1L)).thenReturn(Optional.empty());
         Assertions.assertThrows(DataValidationException.class, () -> vacancyService.getVacancy(1L),
                 "vacancy 1 not found");
+    }
+
+    @Test
+    void getVacancies() {
+        VacancyFilter nameFilter = Mockito.mock(VacancyFilter.class);
+        VacancyFilter positionFilter = Mockito.mock(VacancyFilter.class);
+        vacancyFilters.add(positionFilter);
+        vacancyFilters.add(nameFilter);
+
+        VacancyFilterDto vacancyFilterDto = VacancyFilterDto.builder()
+                .name("test")
+                .position(TeamRole.DEVELOPER)
+                .build();
+
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .name("test")
+                        .position(TeamRole.DEVELOPER)
+                        .build(),
+                Vacancy.builder()
+                        .id(2L)
+                        .name("vacancy")
+                        .position(TeamRole.DEVELOPER)
+                        .build(),
+                Vacancy.builder()
+                        .id(3L)
+                        .name("vacancy-test_2")
+                        .position(TeamRole.INTERN)
+                        .build(),
+                Vacancy.builder()
+                        .id(5L)
+                        .build()
+        );
+
+        List<Vacancy> vacanciesAfterPositionFilter = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .name("test")
+                        .position(TeamRole.DEVELOPER)
+                        .build(),
+                Vacancy.builder()
+                        .id(2L)
+                        .name("vacancy")
+                        .position(TeamRole.DEVELOPER)
+                        .build()
+        );
+
+        List<Vacancy> vacanciesAfterNameFilter = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .name("test")
+                        .position(TeamRole.DEVELOPER)
+                        .build()
+        );
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        when(nameFilter.isApplicable(vacancyFilterDto)).thenReturn(true);
+        when(positionFilter.isApplicable(vacancyFilterDto)).thenReturn(true);
+        when(nameFilter.apply(any(), any())).thenReturn(vacanciesAfterNameFilter.stream());
+        when(positionFilter.apply(any(), any())).thenReturn(vacanciesAfterPositionFilter.stream());
+
+        List<Vacancy> actual = vacancyService.getVacancies(vacancyFilterDto);
+        List<Vacancy> expectedVacancies = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .name("test")
+                        .position(TeamRole.DEVELOPER)
+                        .build()
+        );
+
+        Assertions.assertEquals(expectedVacancies, actual);
+        verify(vacancyRepository, times(1)).findAll();
+        verify(nameFilter, times(1)).isApplicable(vacancyFilterDto);
+        verify(positionFilter, times(1)).isApplicable(vacancyFilterDto);
+        verify(nameFilter, times(1)).apply(any(), any());
+        verify(positionFilter, times(1)).apply(any(), any());
+    }
+
+    @Test
+    void getVacanciesIsFilterNull() {
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .name("test")
+                        .position(TeamRole.DEVELOPER)
+                        .build(),
+                Vacancy.builder()
+                        .id(2L)
+                        .name("vacancy")
+                        .position(TeamRole.DEVELOPER)
+                        .build(),
+                Vacancy.builder()
+                        .id(3L)
+                        .name("vacancy-test_2")
+                        .position(TeamRole.INTERN)
+                        .build(),
+                Vacancy.builder()
+                        .id(5L)
+                        .build()
+        );
+
+        when(vacancyRepository.findAll()).thenReturn(vacancies);
+        List<Vacancy> actual = vacancyService.getVacancies(null);
+        Assertions.assertEquals(vacancies, actual);
+        verify(vacancyRepository, times(1)).findAll();
     }
 }

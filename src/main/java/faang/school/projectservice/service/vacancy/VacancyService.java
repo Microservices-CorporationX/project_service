@@ -1,5 +1,6 @@
 package faang.school.projectservice.service.vacancy;
 
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
@@ -7,12 +8,14 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.service.candidate.CandidateService;
 import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class VacancyService {
     private final ProjectService projectService;
     private final VacancyValidator vacancyValidator;
     private final CandidateService candidateService;
+    private final List<VacancyFilter> filters;
 
     public Vacancy createVacancy(Vacancy vacancy, Long userId) {
         Project project = projectService.getProjectById(vacancy.getProject().getId());
@@ -132,5 +136,20 @@ public class VacancyService {
 
         return vacancyRepository.findById(vacancyId).orElseThrow(() ->
                 new DataValidationException("vacancy %s not found".formatted(vacancyId)));
+    }
+
+    public List<Vacancy> getVacancies(VacancyFilterDto filterDto) {
+        Stream<Vacancy> allVacancies = vacancyRepository.findAll().stream();
+
+        if (filterDto == null) {
+            return allVacancies.toList();
+        }
+
+        return filters.stream()
+                .filter(filter -> filter.isApplicable(filterDto))
+                .reduce(allVacancies,
+                (stream, filter) -> filter.apply(stream, filterDto),
+                (s1, s2) -> s1)
+                .toList();
     }
 }

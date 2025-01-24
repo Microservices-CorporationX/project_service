@@ -2,6 +2,7 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -278,6 +279,50 @@ class VacancyControllerTest {
         Assertions.assertEquals(expected, actual);
         verify(vacancyService, times(1)).getVacancy(1L);
         verify(vacancyMapper, times(1)).toDto(vacancy);
+    }
+
+    @Test
+    void getVacanciesByFilters() {
+        VacancyFilterDto vacancyFilterDto = VacancyFilterDto.builder()
+                .position(TeamRole.ANALYST)
+                .name("test")
+                .build();
+
+        List<Vacancy> vacancies = List.of(
+                Vacancy.builder()
+                        .id(1L)
+                        .position(TeamRole.ANALYST)
+                        .name("test")
+                        .build(),
+                Vacancy.builder()
+                        .id(2L)
+                        .position(TeamRole.ANALYST)
+                        .name("test-vacancy")
+                        .build()
+        );
+
+        List<VacancyDto> vacanciesDto = List.of(
+                VacancyDto.builder()
+                        .id(1L)
+                        .position(TeamRole.ANALYST)
+                        .name("test")
+                        .build(),
+                VacancyDto.builder()
+                        .id(2L)
+                        .position(TeamRole.ANALYST)
+                        .name("test-vacancy")
+                        .build()
+        );
+
+        when(vacancyService.getVacancies(vacancyFilterDto)).thenReturn(vacancies);
+        when(vacancyMapper.toDtoList(vacancies)).thenReturn(vacanciesDto);
+
+        ResponseEntity<List<VacancyDto>> actual = vacancyController.getVacanciesByFilters(vacancyFilterDto);
+        ResponseEntity<List<VacancyDto>> expected = ResponseEntity.ok(vacanciesDto);
+
+        Assertions.assertEquals(expected, actual);
+        verify(vacancyService, times(1)).getVacancies(vacancyFilterDto);
+        verify(vacancyMapper, times(1)).toDtoList(vacancies);
     }
 
 }

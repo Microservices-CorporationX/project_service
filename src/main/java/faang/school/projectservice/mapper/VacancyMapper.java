@@ -21,6 +21,8 @@ public interface VacancyMapper {
     @Mapping(target = "candidatesId", source = "candidates", qualifiedByName = "mapCandidatesToCandidatesIds")
     VacancyDto toDto(Vacancy vacancy);
 
+    List<VacancyDto> toDtoList(List<Vacancy> vacancies);
+
     @Named("mapCandidatesIdsToCandidates")
     default List<Candidate> mapCandidatesIdsToCandidates(List<Long> candidatesIds) {
         if (candidatesIds == null) {
