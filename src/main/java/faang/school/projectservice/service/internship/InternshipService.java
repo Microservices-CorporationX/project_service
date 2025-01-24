@@ -33,19 +33,26 @@ public class InternshipService {
     private final InternshipReadMapper internshipReadMapper;
     private final InternshipValidator internshipValidator;
 
-    public void createInternship(InternshipCreateDto internshipDto) {
+    public InternshipCreateDto createInternship(InternshipCreateDto internshipDto) {
         internshipValidator.validateInternshipCreation(internshipDto);
         Internship internship = internshipCreateMapper.toEntity(internshipDto);
 
-        internship.setProject(projectRepository.findById(internshipDto.getProjectId()).get());
+        internship.setProject(projectRepository.findById(internshipDto.getProjectId())
+                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND)));
         internship.setMentorId(teamMemberRepository.findById(internshipDto.getMentorId()).get());
         internship.setInterns(getInternsById(internshipDto.getInternsIds()));
 
         internshipRepository.save(internship);
+
+        return internshipCreateMapper.toDto(internship);
     }
 
-    public void updateInternship(InternshipEditDto internshipDto) {
+    public InternshipEditDto updateInternship(InternshipEditDto internshipDto) {
         internshipValidator.validateInternshipUpdating(internshipDto);
+
+        Internship internship = internshipRepository.findById(internshipDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+        List<TeamMember> interns = new ArrayList<>();
         TeamMember intern;
 
         for (Long id : internshipDto.getInternsIds()) {
@@ -54,8 +61,14 @@ public class InternshipService {
                         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
 
                 intern.getRoles().add(internshipDto.getTargetRole());
+                interns.add(intern);
             }
         }
+
+        internship.setInterns(interns);
+        internshipRepository.save(internship);
+
+        return internshipDto;
     }
 
     public List<InternshipCreateDto> getInternshipsByFilters() {

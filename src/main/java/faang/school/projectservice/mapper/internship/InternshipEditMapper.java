@@ -29,11 +29,6 @@ public interface InternshipEditMapper {
         return interns.stream().map(TeamMember::getId).toList();
     }
 
-//    @Named("mapToInterns")
-//    default List<TeamMember> mapToInterns(List<Long> internsIds) {
-//        return internsIds.stream().map()
-//    }
-
     @Mapping(source = "projectId", target = "project.id")
     @Mapping(source = "mentorId", target = "mentorId.id")
     @Mapping(source = "internsIds", target = "interns")
