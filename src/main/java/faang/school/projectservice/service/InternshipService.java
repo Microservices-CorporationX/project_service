@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -40,21 +41,11 @@ public class InternshipService {
         Internship existingInternship = internshipRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Internship not found"));
 
-        if (internshipDto.getName() != null) {
-            existingInternship.setName(internshipDto.getName());
-        }
-        if (internshipDto.getDescription() != null) {
-            existingInternship.setDescription(internshipDto.getDescription());
-        }
-        if (internshipDto.getStartDate() != null) {
-            existingInternship.setStartDate(internshipDto.getStartDate());
-        }
-        if (internshipDto.getEndDate() != null) {
-            existingInternship.setEndDate(internshipDto.getEndDate());
-        }
-        if (internshipDto.getStatus() != null) {
-            existingInternship.setStatus(internshipDto.getStatus());
-        }
+        Optional.ofNullable(internshipDto.getName()).ifPresent(existingInternship::setName);
+        Optional.ofNullable(internshipDto.getDescription()).ifPresent(existingInternship::setDescription);
+        Optional.ofNullable(internshipDto.getStartDate()).ifPresent(existingInternship::setStartDate);
+        Optional.ofNullable(internshipDto.getEndDate()).ifPresent(existingInternship::setEndDate);
+        Optional.ofNullable(internshipDto.getStatus()).ifPresent(existingInternship::setStatus);
 
         return internshipRepository.save(existingInternship);
     }
