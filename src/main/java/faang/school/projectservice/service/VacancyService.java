@@ -7,7 +7,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validation.VacancyValidator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +20,16 @@ public class VacancyService {
     private final VacancyValidator validator;
     private final VacancyMapper mapper;
 
-    public void createVacancy(@Valid VacancyDto dto) {
+    public Vacancy createVacancy(VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateCreateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
-        vacancyRepository.save(vacancy);
+        return vacancyRepository.save(vacancy);
     }
 
-    public void updateVacancy(@Valid VacancyDto dto) {
+    public Vacancy updateVacancy(VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateUpdateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
-        vacancyRepository.save(vacancy);
+        return vacancyRepository.save(vacancy);
     }
 
     public void removeVacancy(Long id) {
@@ -45,9 +44,9 @@ public class VacancyService {
                 .toList();
     }
 
-    public List<VacancyDto> filterByName(String str) {
+    public List<VacancyDto> filterByName(String name) {
         return vacancyRepository.findAll().stream()
-                .filter(vacancy -> vacancy.getName().toLowerCase().contains(str.toLowerCase()))
+                .filter(vacancy -> vacancy.getName().toLowerCase().contains(name.toLowerCase()))
                 .map(mapper::toDto)
                 .toList();
     }

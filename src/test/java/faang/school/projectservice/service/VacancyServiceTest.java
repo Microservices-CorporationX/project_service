@@ -10,10 +10,10 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.VacancyRepository;
 import faang.school.projectservice.validation.VacancyValidator;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -42,7 +42,7 @@ public class VacancyServiceTest {
 
     @Test
     public void createVacancy_Success() {
-        VacancyDto vacancy = new VacancyDto(1L, TeamRole.DESIGNER, 2, 13L);
+        VacancyDto dto = new VacancyDto(1L, TeamRole.DESIGNER, 2, 13L);
 
         TeamMember creator = TeamMember.builder()
                 .id(13L)
@@ -55,13 +55,23 @@ public class VacancyServiceTest {
 
         when(memberRepository.findById(any())).thenReturn(Optional.of(creator));
 
-        service.createVacancy(vacancy);
-        verify(vacancyRepository).save(any(Vacancy.class));
+        service.createVacancy(dto);
+
+        ArgumentCaptor<Vacancy> argumentCaptor = ArgumentCaptor.forClass(Vacancy.class);
+        verify(vacancyRepository).save(argumentCaptor.capture());
+        Vacancy vacancy = argumentCaptor.getValue();
+
+        verify(validator).validateCreateVacancy(vacancy, Optional.of(creator));
+
+        Assertions.assertTrue(vacancy.getId() == dto.id());
+        Assertions.assertTrue(vacancy.getPosition() == dto.position());
+        Assertions.assertTrue(vacancy.getCount() == dto.count());
+        Assertions.assertTrue(vacancy.getCreatedBy() == dto.creatorId());
     }
 
     @Test
     public void updateVacancy_Success() {
-        VacancyDto vacancy = new VacancyDto(1L, TeamRole.DESIGNER, 2, 13L);
+        VacancyDto dto = new VacancyDto(1L, TeamRole.DESIGNER, 2, 13L);
 
         TeamMember creator = TeamMember.builder()
                 .id(13L)
@@ -74,8 +84,18 @@ public class VacancyServiceTest {
 
         when(memberRepository.findById(any())).thenReturn(Optional.of(creator));
 
-        service.updateVacancy(vacancy);
-        verify(vacancyRepository).save(any(Vacancy.class));
+        service.updateVacancy(dto);
+
+        ArgumentCaptor<Vacancy> argumentCaptor = ArgumentCaptor.forClass(Vacancy.class);
+        verify(vacancyRepository).save(argumentCaptor.capture());
+        Vacancy vacancy = argumentCaptor.getValue();
+
+        verify(validator).validateUpdateVacancy(vacancy, Optional.of(creator));
+
+        Assertions.assertTrue(vacancy.getId() == dto.id());
+        Assertions.assertTrue(vacancy.getPosition() == dto.position());
+        Assertions.assertTrue(vacancy.getCount() == dto.count());
+        Assertions.assertTrue(vacancy.getCreatedBy() == dto.creatorId());
     }
 
     @Test
