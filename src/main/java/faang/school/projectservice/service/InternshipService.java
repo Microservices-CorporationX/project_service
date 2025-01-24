@@ -33,13 +33,12 @@ public class InternshipService {
 
     public void updateInternship(InternshipDto dto) {
         validateInternship(dto);
-        if(dto.getEndDate().isBefore(LocalDateTime.now())){
+        if (dto.getEndDate().isBefore(LocalDateTime.now())) {
             Internship updateInternship = internshipRepository.getById(dto.getId());
             List<TeamMember> teamInterns = updateInternship.getInterns();
             teamInterns.stream()
                     .forEach(intern -> intern.setRoles(List.of(dto.getRole())));
-        }
-        else {
+        } else {
             Internship internship = internshipRepository.findById(dto.getId())
                     .orElseThrow(() -> new NoSuchElementException(
                             "Element with id" + dto.getId() + "dose not exist"));
@@ -74,17 +73,17 @@ public class InternshipService {
                 .orElseThrow(() -> new NoSuchElementException("Element with id" + internshipId + "dose not exist")));
     }
 
-    public void removeInternFromInternship(List<Long> internIds, long internshipId){
-        removeOrFinishAheadInternshipData(internIds,internshipId, false);
+    public void removeInternFromInternship(List<Long> internIds, long internshipId) {
+        removeOrFinishAheadInternshipData(internIds, internshipId, false);
     }
 
-    public void finishTheInternshipAheadOfScheduleFor (List<Long> internIds, long internshipId){
-        removeOrFinishAheadInternshipData(internIds,internshipId, true);
+    public void finishTheInternshipAheadOfScheduleFor(List<Long> internIds, long internshipId) {
+        removeOrFinishAheadInternshipData(internIds, internshipId, true);
     }
 
-    private void removeOrFinishAheadInternshipData (List<Long> internIds, long internshipId, boolean finishInternshipAhead) {
+    private void removeOrFinishAheadInternshipData(List<Long> internIds, long internshipId, boolean finishInternshipAhead) {
         Internship internship = internshipRepository.getById(internshipId);
-        if(finishInternshipAhead){
+        if (finishInternshipAhead) {
             internship.getInterns().stream()
                     .forEach(intern -> intern.setRoles(List.of(internship.getRole())));
         }
@@ -96,11 +95,11 @@ public class InternshipService {
     }
 
     private void validateInternship(InternshipDto dto) {
-        if(dto.getStartDate().isAfter(dto.getEndDate())){
+        if (dto.getStartDate().isAfter(dto.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
         long monthsBetween = ChronoUnit.MONTHS.between(dto.getStartDate().toLocalDate(), dto.getEndDate().toLocalDate());
-        if(monthsBetween > 3){
+        if (monthsBetween > 3) {
             throw new IllegalArgumentException("Internship duration cannot exceed 3 months");
         }
         long mentorId = dto.getMentorId();
@@ -108,7 +107,7 @@ public class InternshipService {
         boolean isInternshipMentorInProjectTeam = project.getTeams().stream()
                 .flatMap(team -> team.getTeamMembers().stream())
                 .anyMatch(teamMember -> teamMember.getId().equals(mentorId));
-        if(!isInternshipMentorInProjectTeam){
+        if (!isInternshipMentorInProjectTeam) {
             throw new IllegalArgumentException("Mentor must be from project team");
         }
     }
