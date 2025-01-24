@@ -81,7 +81,9 @@ public class InternshipService {
         removeOrFinishAheadInternshipData(internIds, internshipId, true);
     }
 
-    private void removeOrFinishAheadInternshipData(List<Long> internIds, long internshipId, boolean finishInternshipAhead) {
+    private void removeOrFinishAheadInternshipData(List<Long> internIds,
+                                                   long internshipId,
+                                                   boolean finishInternshipAhead) {
         Internship internship = internshipRepository.getById(internshipId);
         if (finishInternshipAhead) {
             internship.getInterns().stream()
@@ -98,7 +100,9 @@ public class InternshipService {
         if (dto.getStartDate().isAfter(dto.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
-        long monthsBetween = ChronoUnit.MONTHS.between(dto.getStartDate().toLocalDate(), dto.getEndDate().toLocalDate());
+        long monthsBetween = ChronoUnit.MONTHS.between(
+                dto.getStartDate().toLocalDate(),
+                dto.getEndDate().toLocalDate());
         if (monthsBetween > 3) {
             throw new IllegalArgumentException("Internship duration cannot exceed 3 months");
         }
