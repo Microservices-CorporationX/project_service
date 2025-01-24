@@ -1,16 +1,26 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
+
+import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
 
     @Mapping(target = "status", defaultValue = "CREATED")
-    Project toEntity(ProjectDto dto);
+    Project toEntity(ProjectCreateDto dto);
 
-    ProjectDto toProjectDto(Project project);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(ProjectUpdateDto dto, @MappingTarget Project entity);
+
+    ProjectReadDto toProjectDto(Project project);
+
+    @AfterMapping
+    default void setUpdatedAt(@MappingTarget Project entity) {
+        entity.setUpdatedAt(LocalDateTime.now());
+    }
 }

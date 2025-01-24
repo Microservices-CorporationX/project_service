@@ -5,7 +5,6 @@ import faang.school.projectservice.fillters.project.ProjectFilter;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 public class ProjectNameFilter implements ProjectFilter {
@@ -15,9 +14,7 @@ public class ProjectNameFilter implements ProjectFilter {
     }
 
     @Override
-    public List<Project> apply(List<Project> projects, ProjectFilterDto filters) {
-        return projects.stream()
-                .filter(project -> project.getName().contains(filters.getNamePattern()))
-                .toList();
+    public boolean filterEntity(Project project, ProjectFilterDto filters) {
+        return project.getName().contains(filters.getNamePattern());
     }
 }

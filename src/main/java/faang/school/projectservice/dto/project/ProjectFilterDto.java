@@ -11,6 +11,5 @@ public class ProjectFilterDto {
     @NotNull
     private Long id;
     private String namePattern;
-    @NotNull
     private ProjectStatus statusPattern;
 }

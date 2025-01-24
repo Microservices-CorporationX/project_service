@@ -1,48 +1,53 @@
 package faang.school.projectservice.controller.recommendation;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectDto;
+import faang.school.projectservice.dto.project.ProjectCreateDto;
+import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.service.ProjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    public ProjectDto createProject(
-            @Valid @RequestBody ProjectDto projectDto,
-            @RequestParam @NotNull long userId) {
-        return projectService.createProject(projectDto, userId);
+    @PostMapping
+    public ProjectReadDto createProject(
+            @Valid @RequestBody ProjectCreateDto projectCreateDto) {
+        return projectService.createProject(projectCreateDto);
     }
 
-    public ProjectDto updateProject(
-            @Valid @RequestBody ProjectDto projectDto,
-            @RequestParam @NotNull long userId) {
-        return projectService.updateProject(projectDto, userId);
+    @PutMapping("/{userId}")
+    public ProjectReadDto updateProject(
+            @Valid @RequestBody ProjectUpdateDto projectUpdateDto,
+            @PathVariable @NotNull long userId) {
+        return projectService.updateProject(projectUpdateDto, userId);
     }
 
-    public List<ProjectDto> getAllProjectsWithFilters(
+    @PostMapping("/filter")
+    public List<ProjectReadDto> getAllProjectsWithFilters(
             @Valid @RequestBody ProjectFilterDto filterDto,
             @RequestParam @NotNull long userId) {
         return projectService.getAllProjectsWithFilters(filterDto, userId);
     }
 
-    public List<ProjectDto> getAllProjects(@RequestParam @NotNull long userId){
+    @GetMapping
+    public List<ProjectReadDto> getAllProjects(@RequestParam(required = true) long userId){
         return projectService.getAllProjects(userId);
     }
 
-    public ProjectDto getProjectById(
-            @RequestParam @NotNull long projectId,
-            @RequestParam @NotNull long userId){
+    @GetMapping("/{projectId}")
+    public ProjectReadDto getProjectById(
+            @PathVariable(required = true) long projectId,
+            @RequestParam(required = true) long userId){
         return projectService.getProjectById(projectId, userId);
     }
 
