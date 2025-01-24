@@ -96,7 +96,7 @@ class ProjectServiceTest {
     void getProjectById_ShouldReturnProject() {
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
 
-        Project result = projectService.getProjectById(project.getId());
+        Project result = projectService.getProjectById(project.getId(), project.getOwnerId());
 
         assertNotNull(result);
         assertEquals("Test Project", result.getName());

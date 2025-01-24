@@ -59,17 +59,17 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Project> getProjects(Pageable pageable) {
+    public Page<Project> getProjects(String name, ProjectStatus status, Long userId, Pageable pageable) {
         return projectRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<Project> getSubProjects(Long parentProjectId, Pageable pageable) {
+    public Page<Project> getSubProjects(Long parentProjectId, String name, ProjectStatus status, Pageable pageable) {
         return projectRepository.findByParentProjectId(parentProjectId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public Project getProjectById(Long projectId) {
+    public Project getProjectById(Long projectId, Long userId) {
         return findProjectById(projectId);
     }
 
