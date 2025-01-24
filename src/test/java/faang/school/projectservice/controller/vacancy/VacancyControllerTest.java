@@ -260,4 +260,24 @@ class VacancyControllerTest {
         verify(userContext, times(1)).getUserId();
     }
 
+    @Test
+    void getVacancy() {
+        Vacancy vacancy = Vacancy.builder()
+                .id(1L)
+                .build();
+        when(vacancyService.getVacancy(1L)).thenReturn(vacancy);
+        when(vacancyMapper.toDto(vacancy)).thenReturn(VacancyDto.builder()
+                .id(1L)
+                .build());
+
+        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(VacancyDto.builder()
+                .id(1L)
+                .build());
+        ResponseEntity<VacancyDto> actual = vacancyController.getVacancy(1L);
+
+        Assertions.assertEquals(expected, actual);
+        verify(vacancyService, times(1)).getVacancy(1L);
+        verify(vacancyMapper, times(1)).toDto(vacancy);
+    }
+
 }

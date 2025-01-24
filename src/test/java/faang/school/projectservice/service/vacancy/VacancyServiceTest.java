@@ -278,4 +278,26 @@ class VacancyServiceTest {
                 "vacancyId or tutorId is null");
     }
 
+    @Test
+    void getVacancy() {
+        Vacancy vacancy = Vacancy.builder()
+                .id(1L)
+                .build();
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+        Assertions.assertEquals(1, vacancyService.getVacancy(1L).getId());
+        verify(vacancyRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getVacancyIdIsNull() {
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.getVacancy(null),
+                "vacancyId is null");
+    }
+
+    @Test
+    void getVacancyNotFound() {
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.empty());
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.getVacancy(1L),
+                "vacancy 1 not found");
+    }
 }

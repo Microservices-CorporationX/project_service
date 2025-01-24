@@ -9,6 +9,7 @@ import faang.school.projectservice.utility.validator.VacancyDtoValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,12 @@ public class VacancyController {
     public ResponseEntity<VacancyDto> closeVacancy(@PathVariable("id") Long vacancyId) {
         Vacancy vacancy = vacancyService.closeVacancy(vacancyId, userContext.getUserId());
         VacancyDto vacancyDto = vacancyMapper.toDto(vacancy);
+        return ResponseEntity.ok(vacancyDto);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<VacancyDto> getVacancy(@PathVariable("id") Long vacancyId) {
+        VacancyDto vacancyDto = vacancyMapper.toDto(vacancyService.getVacancy(vacancyId));
         return ResponseEntity.ok(vacancyDto);
     }
 

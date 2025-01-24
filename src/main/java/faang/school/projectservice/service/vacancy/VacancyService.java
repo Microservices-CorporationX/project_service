@@ -124,4 +124,13 @@ public class VacancyService {
         candidateService.deleteCandidatesByVacancyId(vacancyId);
         vacancyRepository.deleteById(vacancyId);
     }
+
+    public Vacancy getVacancy(Long vacancyId) {
+        if (vacancyId == null) {
+            throw new DataValidationException("vacancyId is null");
+        }
+
+        return vacancyRepository.findById(vacancyId).orElseThrow(() ->
+                new DataValidationException("vacancy %s not found".formatted(vacancyId)));
+    }
 }
