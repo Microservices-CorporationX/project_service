@@ -1,6 +1,5 @@
 package faang.school.projectservice.service.moment;
 
-import faang.school.projectservice.dto.moment.MomentDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.filter.moment.MomentFilter;
@@ -86,7 +85,7 @@ public class MomentService {
     @Transactional(readOnly = true)
     public List<Moment> getAllMomentsByProjectId(long projectId, MomentFilterDto filters) {
         Stream<Moment> moments = momentRepository.getAllByProjectId(projectId);
-        return filterMoments(moments, filters).toList();
+        return applyFilters(moments, filters).toList();
     }
 
     @Transactional(readOnly = true)
@@ -95,7 +94,7 @@ public class MomentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Not found moment by id: " + momentId));
     }
 
-    private Stream<Moment> filterMoments(Stream<Moment> moments, MomentFilterDto filters) {
+    private Stream<Moment> applyFilters(Stream<Moment> moments, MomentFilterDto filters) {
         List<MomentFilter> applicableFilters = momentFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))
                 .toList();
