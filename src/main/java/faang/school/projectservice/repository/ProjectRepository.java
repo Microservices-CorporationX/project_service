@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @Query(
@@ -14,6 +16,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                     "WHERE p.ownerId = :ownerId AND p.name = :name"
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
+
+    @Query(
+            "SELECT DISTINCT tm.userId " +
+                    "FROM TeamMember tm " +
+                    "JOIN tm.team t " +
+                    "WHERE t.project.id IN :projectIds"
+    )
+    List<Long> getUserIdsByProjectIds(List<Long> projectIds);
 
     @Query("SELECT p FROM Project p WHERE p.parentProject.id = :parentProjectId")
     Page<Project> findByParentProjectId(Long parentProjectId, Pageable pageable);
