@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exeption.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.repository.ProjectRepository;
@@ -25,8 +26,9 @@ public class ProjectService {
     private final ProjectNameFilter projectNameFilter;
     private final ProjectStatusFilter projectStatusFilter;
 
+    @Transactional
     public Project createProject(Project project) {
-        projectValidator.validateUniqueProject(project);
+        validateUniqueProject(project);
         project.setStatus(ProjectStatus.CREATED);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
@@ -63,6 +65,7 @@ public class ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
 
+    @Transactional
     public List<Project> getProjectsByFilterName(ProjectFilterDto filterDto, Long currentUserId) {
         List<Project> projects = getAllUserAvailableProjects(currentUserId);
 
@@ -76,6 +79,7 @@ public class ProjectService {
 
     }
 
+    @Transactional
     public List<Project> getProjectsByFilterStatus(ProjectFilterDto filterDto, Long currentUserId) {
         List<Project> projects = getAllUserAvailableProjects(currentUserId);
 
@@ -88,11 +92,24 @@ public class ProjectService {
         return result;
     }
 
+    @Transactional
     public List<Project> getAllUserAvailableProjects(Long currentUserId) {
 
         return projectRepository.findAll()
                 .stream()
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
+    }
+    void validateUniqueProject(Project project) {
+        Long ownerId = project.getOwnerId();
+        String name = project.getName();
+
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
+            log.error("Project '{}' with ownerId #{} already exists.", name, ownerId);
+
+            throw new NotUniqueProjectException(String.format("Project '%s' with ownerId #%d already exists.",
+                    name, ownerId));
+        }
+        log.info("Project '{}' with ownerId #{} unique and can be created.", name, ownerId);
     }
 }

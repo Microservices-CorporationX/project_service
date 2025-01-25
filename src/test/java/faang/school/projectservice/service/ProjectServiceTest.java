@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exeption.EntityNotFoundException;
-import faang.school.projectservice.mapper.ProjectMapper;
+import faang.school.projectservice.exeption.NotUniqueProjectException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,16 +45,12 @@ class ProjectServiceTest {
     private ProjectRepository projectRepository;
 
     @Mock
-    private ProjectMapper projectMapper;
-
-    @Mock
     private ProjectStatusFilter projectStatusFilter;
 
     @Mock
     private ProjectNameFilter projectNameFilter;
     private ProjectUpdateDto updateDto;
     private ProjectDto projectDto;
-
     private Project project;
 
     @BeforeEach
@@ -84,15 +81,13 @@ class ProjectServiceTest {
     @Test
     void testCreateProject() {
         when(projectRepository.save(any(Project.class))).thenReturn(project);
-
+        projectService.validateUniqueProject(project);
         Project createdProject = projectService.createProject(project);
 
         assertNotNull(createdProject);
         assertEquals("Test Project", createdProject.getName());
-        verify(projectValidator).validateUniqueProject(project);
         verify(projectRepository).save(any(Project.class));
     }
-
 
     @Test
     void testUpdateProject() {
@@ -174,5 +169,36 @@ class ProjectServiceTest {
         assertNotNull(availableProjects);
         assertEquals(1, availableProjects.size());
         verify(projectRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testValidateUniqueProjectThrowsExceptionWhenProjectExists() {
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("Test Project");
+        project.setDescription("Test Description");
+        project.setOwnerId(1L);
+
+        when(projectRepository.existsByOwnerIdAndName(1L, "Test Project")).thenReturn(true);
+
+        NotUniqueProjectException exception = assertThrows(NotUniqueProjectException.class, () -> {
+            projectService.validateUniqueProject(project);
+        });
+        assertEquals("Project 'Test Project' with ownerId #1 already exists.", exception.getMessage());
+        verify(projectRepository).existsByOwnerIdAndName(1L, "Test Project");
+    }
+
+    @Test
+    void testValidateUniqueProjectSuccessWhenProjectIsUnique() {
+        Project project = new Project();
+        project.setId(1L);
+        project.setName("Test Project");
+        project.setDescription("Test Description");
+        project.setOwnerId(1L);
+
+        when(projectRepository.existsByOwnerIdAndName(1L, "Test Project")).thenReturn(false);
+
+        assertDoesNotThrow(() -> projectService.validateUniqueProject(project));
+        verify(projectRepository).existsByOwnerIdAndName(1L, "Test Project");
     }
 }
