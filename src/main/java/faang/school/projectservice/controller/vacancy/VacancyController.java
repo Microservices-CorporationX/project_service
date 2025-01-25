@@ -1,14 +1,18 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import faang.school.projectservice.utility.validator.VacancyDtoValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,6 +32,7 @@ public class VacancyController {
     private final VacancyMapper vacancyMapper;
     private final VacancyDtoValidator vacancyDtoValidator;
     private final UserContext userContext;
+    private final CandidateMapper candidateMapper;
 
     @PostMapping
     public ResponseEntity<VacancyDto> createVacancy(@RequestBody VacancyDto vacancyDto) {
@@ -73,5 +78,14 @@ public class VacancyController {
         List<Vacancy> vacancies = vacancyService.getVacancies(filterDto);
         List<VacancyDto> vacancyDtos = vacancyMapper.toDtoList(vacancies);
         return ResponseEntity.ok(vacancyDtos);
+    }
+
+    @PatchMapping("{id}/addCandidates")
+    public ResponseEntity<VacancyDto> addCandidates(@PathVariable("id") Long vacancyId,
+                                                    @Validated @RequestBody List<CandidateDto> candidateDtos) {
+        Long userId = userContext.getUserId();
+        List<Candidate> candidates = candidateMapper.toEntityList(candidateDtos);
+        Vacancy vacancy = vacancyService.addCandidates(candidates, vacancyId, userId);
+        return ResponseEntity.ok(vacancyMapper.toDto(vacancy));
     }
 }

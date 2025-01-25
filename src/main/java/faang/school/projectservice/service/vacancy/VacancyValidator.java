@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -58,6 +59,23 @@ public class VacancyValidator {
     public void validateVacancyStatus(Vacancy vacancy) {
         if (vacancy.getStatus() == VacancyStatus.CLOSED) {
             throw new DataValidationException("vacancy id %d has already been closed".formatted(vacancy.getId()));
+        }
+    }
+
+    public void validateCandidates(Vacancy vacancy, List<Candidate> candidates) {
+        List<Long> candidatesUserIds = candidates.stream()
+                .map(Candidate::getUserId)
+                .toList();
+
+        List<Long> candidatesInProject = vacancy.getProject().getTeams().stream()
+                .flatMap(team -> team.getTeamMembers().stream()
+                        .map(TeamMember::getUserId)
+                )
+                .filter(candidatesUserIds::contains)
+                .toList();
+
+        if (!candidatesInProject.isEmpty()) {
+            throw new DataValidationException("Candidate already exists in this project: " + candidatesInProject);
         }
     }
 

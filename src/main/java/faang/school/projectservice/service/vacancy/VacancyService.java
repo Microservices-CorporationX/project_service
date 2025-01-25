@@ -2,6 +2,7 @@ package faang.school.projectservice.service.vacancy;
 
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
@@ -59,6 +60,25 @@ public class VacancyService {
         vacancy.setUpdatedAt(LocalDateTime.now());
         vacancy.setUpdatedBy(tutorId);
         log.info("Vacancy close: " + vacancy);
+        return vacancyRepository.save(vacancy);
+    }
+
+    public Vacancy addCandidates(List<Candidate> candidates, Long vacancyId, Long tutorId) {
+        if (candidates == null || candidates.isEmpty() || vacancyId == null || tutorId == null) {
+            throw new DataValidationException("candidates, tutorId or vacancyId is null");
+        }
+
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() ->
+                new DataValidationException("vacancy %d not found".formatted(vacancyId)));
+
+        vacancyValidator.validateTutorRole(tutorId, vacancy.getProject().getId());
+        vacancyValidator.validateCandidates(vacancy, candidates);
+
+        vacancy.setCandidates(Stream.concat(vacancy.getCandidates().stream(), candidates.stream())
+                .toList());
+        vacancy.setUpdatedAt(LocalDateTime.now());
+        vacancy.setUpdatedBy(tutorId);
+
         return vacancyRepository.save(vacancy);
     }
 
@@ -148,8 +168,8 @@ public class VacancyService {
         return filters.stream()
                 .filter(filter -> filter.isApplicable(filterDto))
                 .reduce(allVacancies,
-                (stream, filter) -> filter.apply(stream, filterDto),
-                (s1, s2) -> s1)
+                        (stream, filter) -> filter.apply(stream, filterDto),
+                        (s1, s2) -> s1)
                 .toList();
     }
 }

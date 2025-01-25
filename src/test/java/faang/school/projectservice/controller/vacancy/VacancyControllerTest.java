@@ -1,9 +1,12 @@
 package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
+import faang.school.projectservice.dto.candidate.CandidateDto;
 import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -19,7 +22,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,10 +35,11 @@ import static org.mockito.Mockito.when;
 class VacancyControllerTest {
     VacancyService vacancyService = mock(VacancyService.class);
     VacancyMapper vacancyMapper = mock(VacancyMapper.class);
+    CandidateMapper candidateMapper = mock(CandidateMapper.class);
     UserContext userContext = mock(UserContext.class);
     VacancyDtoValidator vacancyDtoValidator = mock(VacancyDtoValidator.class);
     VacancyController vacancyController = new VacancyController(vacancyService, vacancyMapper, vacancyDtoValidator,
-            userContext);
+            userContext, candidateMapper);
 
     @Test
     void createVacancy() {
@@ -325,4 +331,40 @@ class VacancyControllerTest {
         verify(vacancyMapper, times(1)).toDtoList(vacancies);
     }
 
+    @Test
+    void addCandidates() {
+        VacancyDto vacancyDto = VacancyDto.builder()
+                .id(2L)
+                .candidatesId(List.of(1L, 2L, 3L))
+                .build();
+        when(userContext.getUserId()).thenReturn(5L);
+
+        List<CandidateDto> candidatesDtos = IntStream.rangeClosed(1, 3).boxed()
+                .map(i ->
+                        CandidateDto.builder()
+                                .userId(Long.valueOf(i))
+                                .build()
+                ).toList();
+
+        List<Candidate> candidates = IntStream.rangeClosed(1, 3).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+
+        when(candidateMapper.toEntityList(candidatesDtos)).thenReturn(candidates);
+        when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
+        when(vacancyService.addCandidates(candidates, 2L, 5L)).thenReturn(Vacancy.builder()
+                .id(2L)
+                .build());
+
+        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(vacancyDto);
+        ResponseEntity<VacancyDto> actual = vacancyController.addCandidates(2L, candidatesDtos);
+
+        Assertions.assertEquals(expected, actual);
+        verify(vacancyService, times(1)).addCandidates(candidates, 2L, 5L);
+        verify(vacancyMapper, times(1)).toDto(any(Vacancy.class));
+        verify(candidateMapper, times(1)).toEntityList(candidatesDtos);
+    }
 }

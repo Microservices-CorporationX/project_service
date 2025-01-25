@@ -3,6 +3,7 @@ package faang.school.projectservice.service.vacancy;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.Vacancy;
@@ -273,4 +274,63 @@ class VacancyValidatorTest {
         Assertions.assertThrows(DataValidationException.class, () -> vacancyValidator.validateVacancyStatus(vacancy),
                 "vacancy id 3 has already been closed");
     }
+
+    @Test
+    void validateCandidates() {
+        List<Candidate> candidates = IntStream.rangeClosed(0, 10).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+
+        List<TeamMember> teamMembers = IntStream.rangeClosed(11, 18).boxed()
+                .map(i -> TeamMember.builder()
+                        .userId(Long.valueOf(i))
+                        .build())
+                .toList();
+
+        Vacancy vacancy = Vacancy.builder()
+                .project(Project.builder()
+                        .teams(List.of(
+                                Team.builder()
+                                        .teamMembers(teamMembers)
+                                        .build()
+                        ))
+                        .build())
+                .build();
+
+        Assertions.assertDoesNotThrow(() -> vacancyValidator.validateCandidates(vacancy, candidates));
+    }
+
+    @Test
+    void validateCandidatesInProject() {
+        List<Candidate> candidates = IntStream.rangeClosed(0, 10).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+
+        List<TeamMember> teamMembers = IntStream.rangeClosed(9, 18).boxed()
+                .map(i -> TeamMember.builder()
+                        .userId(Long.valueOf(i))
+                        .build())
+                .toList();
+
+        Vacancy vacancy = Vacancy.builder()
+                .project(Project.builder()
+                        .teams(List.of(
+                                Team.builder()
+                                        .teamMembers(teamMembers)
+                                        .build()
+                        ))
+                        .build())
+                .build();
+
+        Assertions.assertThrows(DataValidationException.class,
+                () -> vacancyValidator.validateCandidates(vacancy, candidates));
+    }
+
+
 }

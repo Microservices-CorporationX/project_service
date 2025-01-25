@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -405,5 +406,92 @@ class VacancyServiceTest {
         List<Vacancy> actual = vacancyService.getVacancies(null);
         Assertions.assertEquals(vacancies, actual);
         verify(vacancyRepository, times(1)).findAll();
+    }
+
+    @Test
+    void addCandidates() {
+        List<Candidate> candidates = IntStream.rangeClosed(11, 15).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+
+        Vacancy vacancy = Vacancy.builder()
+                .id(1L)
+                .name("test")
+                .position(TeamRole.DEVELOPER)
+                .candidates(List.of())
+                .project(Project.builder()
+                        .id(3L)
+                        .build())
+                .build();
+
+        Vacancy savedVacancy = Vacancy.builder()
+                .id(1L)
+                .name("test")
+                .position(TeamRole.DEVELOPER)
+                .project(Project.builder()
+                        .id(3L)
+                        .build())
+                .candidates(candidates)
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(4L)
+                .build();
+
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.of(vacancy));
+        doNothing().when(vacancyValidator).validateTutorRole(4L, 3L);
+        doNothing().when(vacancyValidator).validateCandidates(any(Vacancy.class), any());
+        when(vacancyRepository.save(any(Vacancy.class))).thenReturn(savedVacancy);
+
+        Assertions.assertEquals(savedVacancy, vacancyService.addCandidates(candidates, 1L, 4L));
+        verify(vacancyRepository, times(1)).findById(1L);
+        verify(vacancyRepository, times(1)).save(any(Vacancy.class));
+        verify(vacancyValidator, times(1)).validateCandidates(any(Vacancy.class), anyList());
+        verify(vacancyValidator, times(1)).validateTutorRole(4L, 3L);
+    }
+
+    @Test
+    void addCandidatesWithNullCandidates() {
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.addCandidates(null,
+                1L, 4L), "candidates, tutorId or vacancyId is null");
+    }
+
+    @Test
+    void addCandidatesWithNullVacancyId() {
+        List<Candidate> candidates = IntStream.rangeClosed(11, 15).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.addCandidates(candidates,
+                null, 4L), "candidates, tutorId or vacancyId is null");
+    }
+
+    @Test
+    void addCandidatesWithNullTutorId() {
+        List<Candidate> candidates = IntStream.rangeClosed(11, 15).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.addCandidates(candidates,
+                1L, null), "candidates, tutorId or vacancyId is null");
+    }
+
+    @Test
+    void addCandidatesWithNotFoundVacancy() {
+        List<Candidate> candidates = IntStream.rangeClosed(11, 15).boxed()
+                .map(i -> {
+                    Candidate candidate = new Candidate();
+                    candidate.setUserId(Long.valueOf(i));
+                    return candidate;
+                }).toList();
+
+        when(vacancyRepository.findById(1L)).thenReturn(Optional.empty());
+        Assertions.assertThrows(DataValidationException.class, () -> vacancyService.addCandidates(candidates,
+                1L, 4L), "vacancy 1 not found");
     }
 }
