@@ -24,10 +24,10 @@ public class InternshipEditDto {
     private Long mentorId;
 
     @NotNull
-    private List<Long> internsIds;
+    private TeamRole role;
 
     @NotNull
-    private TeamRole targetRole;
+    private List<Long> internsIds;
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;

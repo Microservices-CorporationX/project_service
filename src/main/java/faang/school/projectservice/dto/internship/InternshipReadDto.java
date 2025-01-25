@@ -10,8 +10,8 @@ public class InternshipReadDto {
     private Long id;
     private Long projectId;
     private Long mentorId;
+    private TeamRole role;
     private List<Long> internsIds;
-    private TeamRole targetRole;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private InternshipStatus status;

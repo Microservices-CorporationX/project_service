@@ -2,7 +2,10 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
+import faang.school.projectservice.dto.internship.InternshipReadDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
+import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipCreateMapper;
 import faang.school.projectservice.mapper.internship.InternshipEditMapper;
 import faang.school.projectservice.mapper.internship.InternshipReadMapper;
@@ -11,7 +14,6 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.repository.TeamRepository;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,12 +28,12 @@ public class InternshipService {
 
     private final ProjectRepository projectRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamRepository teamRepository;
     private final InternshipRepository internshipRepository;
     private final InternshipCreateMapper internshipCreateMapper;
     private final InternshipEditMapper internshipEditMapper;
     private final InternshipReadMapper internshipReadMapper;
     private final InternshipValidator internshipValidator;
+    private final List<InternshipFilter> filters;
 
     public InternshipCreateDto createInternship(InternshipCreateDto internshipDto) {
         internshipValidator.validateInternshipCreation(internshipDto);
@@ -50,8 +52,7 @@ public class InternshipService {
     public InternshipEditDto updateInternship(InternshipEditDto internshipDto) {
         internshipValidator.validateInternshipUpdating(internshipDto);
 
-        Internship internship = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+        Internship internship = findInternshipById(internshipDto.getId());
         List<TeamMember> interns = new ArrayList<>();
         TeamMember intern;
 
@@ -60,27 +61,52 @@ public class InternshipService {
                 intern = teamMemberRepository.findById(id)
                         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
 
-                intern.getRoles().add(internshipDto.getTargetRole());
+                intern.getRoles().add(internshipDto.getRole());
                 interns.add(intern);
             }
         }
 
         internship.setInterns(interns);
-        internshipRepository.save(internship);
+        Internship updatedInternship = internshipRepository.save(internship);
 
-        return internshipDto;
+        return internshipEditMapper.toDto(updatedInternship);
     }
 
-    public List<InternshipCreateDto> getInternshipsByFilters() {
-        return null;
+    public List<InternshipReadDto> getInternshipsByFilters(InternshipFilterDto internshipDto) {
+        List<Internship> internships = findInternships();
+        List<InternshipFilter> applicableFilters = filters.stream()
+                .filter(internshipFilter -> internshipFilter.isApplicable(internshipDto))
+                .toList();
+
+        if (applicableFilters.isEmpty()) {
+            return List.of();
+        }
+
+        return applicableFilters.stream()
+                .reduce(internships.stream(),
+                        (internshipStream, internshipFilter) -> internshipFilter.apply(internshipStream, internshipDto),
+                        (list1, list2) -> list1)
+                .map(internshipReadMapper::toDto)
+                .toList();
     }
 
-    public List<InternshipCreateDto> getInternships() {
-        return null;
+    public List<Internship> findInternships() {
+        return internshipRepository.findAll();
     }
 
-    public InternshipCreateDto getInternshipById(long internshipId) {
-        return null;
+    public List<InternshipReadDto> getInternships() {
+        return findInternships().stream()
+                .map(internshipReadMapper::toDto)
+                .toList();
+    }
+
+    public Internship findInternshipById(long internshipId) {
+        return internshipRepository.findById(internshipId)
+                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+    }
+
+    public InternshipReadDto getInternshipById(long internshipId) {
+        return internshipReadMapper.toDto(findInternshipById(internshipId));
     }
 
     private List<TeamMember> getInternsById(List<Long> internsIds) {

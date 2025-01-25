@@ -43,6 +43,9 @@ public class Internship {
     @NotNull
     private TeamMember mentorId;
 
+    @NotNull
+    private TeamRole role;
+
     @ManyToMany
     @JoinTable(
             name = "internship_interns",
