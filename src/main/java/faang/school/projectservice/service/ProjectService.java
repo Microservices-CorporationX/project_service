@@ -1,33 +1,25 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectCreateRequestDto;
-import faang.school.projectservice.dto.project.ProjectDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
+import faang.school.projectservice.dto.project.ProjectRequestDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.dto.project.ProjectUpdateRequestDto;
 import faang.school.projectservice.filter.project.ProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
-import faang.school.projectservice.model.Meet;
-import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.Resource;
-import faang.school.projectservice.model.Schedule;
-import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.Team;
-import faang.school.projectservice.model.Vacancy;
-import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.retriever.project.create_request.ProjectCreateRetriever;
+import faang.school.projectservice.retriever.project.request.ProjectRetriever;
+import faang.school.projectservice.retriever.project.update_request.ProjectUpdateRetriever;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-
-import static faang.school.projectservice.utill.ObjectsFromIds.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,20 +28,18 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final List<ProjectFilter> projectFilters;
 
-    private final TaskService taskService;
-    private final ResourceService resourceService;
-    private final TeamService teamService;
-    private final ScheduleService scheduleService;
-    private final StageService stageService;
-    private final VacancyService vacancyService;
-    private final MomentService momentService;
-    private final MeetService meetService;
+    private final List<ProjectCreateRetriever> projectCreateRetrievers;
+    private final List<ProjectUpdateRetriever> projectUpdateRetrievers;
+    private final List<ProjectRetriever> projectRetrievers;
 
     @Transactional
     public ProjectResponseDto createProject(ProjectCreateRequestDto projectCreateRequestDto) {
         Project project = projectMapper.toProject(projectCreateRequestDto);
-        fillProjectWithData(project, projectCreateRequestDto);
-        project.setCreatedAt(LocalDateTime.now());
+
+        retrieveDataByUniversalRetrievers(project, projectCreateRequestDto);
+        projectCreateRetrievers.forEach(projectRetriever ->
+                                projectRetriever.retrieveData(project, projectCreateRequestDto));
+
         project.setStatus(ProjectStatus.CREATED);
         Project savedProject = projectRepository.save(project);
         return projectMapper.toResponseDto(savedProject);
@@ -60,8 +50,11 @@ public class ProjectService {
         Project project = projectRepository.findById(projectUpdateRequestDto.getId())
                 .orElseThrow(NoSuchElementException::new);
         projectMapper.update(project, projectUpdateRequestDto);
-        fillProjectWithData(project, projectUpdateRequestDto);
-        project.setUpdatedAt(LocalDateTime.now());
+
+        retrieveDataByUniversalRetrievers(project, projectUpdateRequestDto);
+        projectUpdateRetrievers.forEach(projectRetriever ->
+                projectRetriever.retrieveData(project, projectUpdateRequestDto));
+
         Project savedProject = projectRepository.save(project);
         return projectMapper.toResponseDto(savedProject);
     }
@@ -69,7 +62,7 @@ public class ProjectService {
     public List<ProjectResponseDto> getAllProjects(ProjectFilterDto filters) {
         Stream<Project> projectStream = projectRepository.findAll()
                 .stream();
-        if (filters != null) {
+        if (filters != null && projectFilters != null && !projectFilters.isEmpty()) {
             for (ProjectFilter projectFilter : projectFilters) {
                 if (projectFilter.isApplicable(filters)) {
                     projectStream = projectFilter.apply(projectStream, filters);
@@ -98,42 +91,8 @@ public class ProjectService {
         return projectRepository.findAllById(projectIds);
     }
 
-    private void fillProjectWithData(Project project, ProjectDto projectDto) {
-        project.setParentProject(getObject(project.getParentProject(),
-                projectDto.getParentProjectId(),
-                Project::getId,
-                this::getProjectById));
-        project.setTasks(getObjects(project.getTasks(),
-                projectDto.getTasksIds(),
-                Task::getId,
-                taskService::findTasksByIds));
-        project.setResources(getObjects(project.getResources(),
-                projectDto.getResourcesIds(),
-                Resource::getId,
-                resourceService::getResourcesByIds));
-        project.setTeams(getObjects(project.getTeams(),
-                projectDto.getTeamsIds(),
-                Team::getId,
-                teamService::getTeamsByIds));
-        project.setSchedule(getObject(project.getSchedule(),
-                projectDto.getScheduleId(),
-                Schedule::getId,
-                scheduleService::getScheduleById));
-        project.setStages(getObjects(project.getStages(),
-                projectDto.getStagesIds(),
-                Stage::getStageId,
-                stageService::getStagesByIds));
-        project.setVacancies(getObjects(project.getVacancies(),
-                projectDto.getVacanciesIds(),
-                Vacancy::getId,
-                vacancyService::getVacanciesByIds));
-        project.setMoments(getObjects(project.getMoments(),
-                projectDto.getMomentsIds(),
-                Moment::getId,
-                momentService::getMomentsByIds));
-        project.setMeets(getObjects(project.getMeets(),
-                projectDto.getMeetsIds(),
-                Meet::getId,
-                meetService::getMeetsByIds));
+    private void retrieveDataByUniversalRetrievers(Project project, ProjectRequestDto projectRequestDto) {
+        projectRetrievers.forEach(projectRetriever ->
+                projectRetriever.retrieveData(project, projectRequestDto));
     }
 }

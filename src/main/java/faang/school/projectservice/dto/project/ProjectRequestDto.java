@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ProjectDto {
+public class ProjectRequestDto {
     @NotBlank
     protected String name;
     @NotBlank

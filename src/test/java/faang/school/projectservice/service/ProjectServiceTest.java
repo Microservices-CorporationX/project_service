@@ -2,13 +2,12 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.*;
 import faang.school.projectservice.filter.project.ProjectFilter;
-import faang.school.projectservice.filter.project.ProjectNameFilter;
-import faang.school.projectservice.filter.project.ProjectStatusFilter;
-import faang.school.projectservice.filter.project.ProjectVisibilityFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.BeforeEach;
+import faang.school.projectservice.retriever.project.create_request.ProjectCreateRetriever;
+import faang.school.projectservice.retriever.project.request.ProjectRetriever;
+import faang.school.projectservice.retriever.project.update_request.ProjectUpdateRetriever;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -29,36 +28,19 @@ class ProjectServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
-    @Mock
-    private TaskService taskService;
-    @Mock
-    private ResourceService resourceService;
-    @Mock
-    private TeamService teamService;
-    @Mock
-    private ScheduleService scheduleService;
-    @Mock
-    private StageService stageService;
-    @Mock
-    private VacancyService vacancyService;
-    @Mock
-    private MomentService momentService;
-    @Mock
-    private MeetService meetService;
+
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
     @Spy
-    private List<ProjectFilter> projectFilters = new ArrayList<>();
+    private List<ProjectFilter> projectFilters = List.of();
+    @Spy
+    private List<ProjectCreateRetriever> projectCreateRetrievers = List.of();
+    @Spy
+    private List<ProjectUpdateRetriever> projectUpdateRetrievers = List.of();
+    @Spy
+    private List<ProjectRetriever> projectRetrievers = List.of();
     @InjectMocks
     private ProjectService projectService;
-
-    @BeforeEach
-    public void setUp() {
-        projectFilters.clear();
-        projectFilters.add(new ProjectNameFilter());
-        projectFilters.add(new ProjectStatusFilter());
-        projectFilters.add(new ProjectVisibilityFilter());
-    }
 
     @Test
     void testCreateProject_Success() {

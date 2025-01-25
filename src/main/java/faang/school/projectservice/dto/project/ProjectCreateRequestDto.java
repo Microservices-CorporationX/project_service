@@ -5,5 +5,5 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ProjectCreateRequestDto extends ProjectDto {
+public class ProjectCreateRequestDto extends ProjectRequestDto {
 }

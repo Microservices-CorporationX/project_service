@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ProjectUpdateRequestDto extends ProjectDto {
+public class ProjectUpdateRequestDto extends ProjectRequestDto {
     @Positive
     private Long id;
     @NotNull
