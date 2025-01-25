@@ -1,4 +1,4 @@
-package school.faang.project_service.service.subproject;
+package faang.school.projectservice.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.exeption.ProjectNotClosableException;
