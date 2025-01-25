@@ -47,8 +47,8 @@ class ResourceServiceTest {
 
     @Test
     void testGetResourcesByIds_EmptyList() {
-        List<Long> resourceIds = Arrays.asList();
-        when(resourceRepository.findAllById(resourceIds)).thenReturn(Arrays.asList());
+        List<Long> resourceIds = List.of();
+        when(resourceRepository.findAllById(resourceIds)).thenReturn(List.of());
 
         List<Resource> result = resourceService.getResourcesByIds(resourceIds);
 
@@ -59,8 +59,8 @@ class ResourceServiceTest {
 
     @Test
     void testGetResourcesByIds_ResourceNotFound() {
-        List<Long> resourceIds = Arrays.asList(3L);
-        when(resourceRepository.findAllById(resourceIds)).thenReturn(Arrays.asList());
+        List<Long> resourceIds = List.of(3L);
+        when(resourceRepository.findAllById(resourceIds)).thenReturn(List.of());
 
         List<Resource> result = resourceService.getResourcesByIds(resourceIds);
 

@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.Meet;
-import faang.school.projectservice.model.MeetStatus;
 import faang.school.projectservice.repository.MeetRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,9 +55,9 @@ public class MeetServiceTest {
 
     @Test
     public void testGetMeetsByIds_EmptyList() {
-        List<Long> meetIds = Arrays.asList();
+        List<Long> meetIds = List.of();
 
-        when(meetRepository.findAllById(meetIds)).thenReturn(Arrays.asList());
+        when(meetRepository.findAllById(meetIds)).thenReturn(List.of());
 
         List<Meet> result = meetService.getMeetsByIds(meetIds);
 
@@ -71,7 +70,7 @@ public class MeetServiceTest {
     public void testGetMeetsByIds_NoMatches() {
         List<Long> meetIds = Arrays.asList(3L, 4L);
 
-        when(meetRepository.findAllById(meetIds)).thenReturn(Arrays.asList());
+        when(meetRepository.findAllById(meetIds)).thenReturn(List.of());
 
         List<Meet> result = meetService.getMeetsByIds(meetIds);
 

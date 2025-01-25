@@ -53,9 +53,9 @@ public class MomentServiceTest {
 
     @Test
     public void testGetMomentsByIds_EmptyList() {
-        List<Long> momentIds = Arrays.asList();
+        List<Long> momentIds = List.of();
 
-        when(momentRepository.findAllById(momentIds)).thenReturn(Arrays.asList());
+        when(momentRepository.findAllById(momentIds)).thenReturn(List.of());
 
         List<Moment> result = momentService.getMomentsByIds(momentIds);
 
@@ -68,7 +68,7 @@ public class MomentServiceTest {
     public void testGetMomentsByIds_NoMatches() {
         List<Long> momentIds = Arrays.asList(3L, 4L);
 
-        when(momentRepository.findAllById(momentIds)).thenReturn(Arrays.asList());
+        when(momentRepository.findAllById(momentIds)).thenReturn(List.of());
 
         List<Moment> result = momentService.getMomentsByIds(momentIds);
 
