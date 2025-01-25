@@ -20,16 +20,16 @@ public class VacancyService {
     private final VacancyValidator validator;
     private final VacancyMapper mapper;
 
-    public Vacancy createVacancy(VacancyDto dto) {
+    public VacancyDto createVacancy(VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateCreateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
-        return vacancyRepository.save(vacancy);
+        return mapper.toDto(vacancyRepository.save(vacancy));
     }
 
-    public Vacancy updateVacancy(VacancyDto dto) {
+    public VacancyDto updateVacancy(VacancyDto dto) {
         Vacancy vacancy = mapper.toEntity(dto);
         validator.validateUpdateVacancy(vacancy, memberRepository.findById(vacancy.getCreatedBy()));
-        return vacancyRepository.save(vacancy);
+        return mapper.toDto(vacancyRepository.save(vacancy));
     }
 
     public void removeVacancy(Long id) {
