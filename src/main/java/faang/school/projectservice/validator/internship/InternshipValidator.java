@@ -12,8 +12,6 @@ import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.service.internship.InternshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +23,8 @@ import java.util.List;
 public class InternshipValidator {
     private static final String ENTITY_NOT_FOUND = "Сущность не найдена";
 
-    private final InternshipService internshipService;
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
-    private final TeamMemberRepository teamMemberRepository;
 
     public void validateInternshipCreation(InternshipCreateDto internshipDto) {
         validateProjectExists(internshipDto);

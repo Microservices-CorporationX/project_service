@@ -2,10 +2,12 @@ package faang.school.projectservice.dto.internship;
 
 import faang.school.projectservice.model.InternshipStatus;
 import faang.school.projectservice.model.TeamRole;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class InternshipReadDto {
     private Long id;
     private Long projectId;

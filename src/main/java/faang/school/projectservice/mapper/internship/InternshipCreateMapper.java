@@ -14,8 +14,8 @@ public interface InternshipCreateMapper extends InternshipMapper {
     @Mapping(source = "interns", target = "internsIds", qualifiedByName = "mapToIds")
     InternshipCreateDto toDto(Internship internship);
 
-    @Mapping(target = "projectId", ignore = true)
+    @Mapping(target = "project", ignore = true)
     @Mapping(target = "mentorId", ignore = true)
-    @Mapping(target = "internsIds", ignore = true)
+    @Mapping(target = "interns", ignore = true)
     Internship toEntity(InternshipCreateDto internshipDto);
 }
