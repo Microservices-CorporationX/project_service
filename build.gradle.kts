@@ -58,11 +58,9 @@ dependencies {
     /**
      * Tests
      */
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.mockito:mockito-inline:5.2.0")
 }
 
 jacoco {
@@ -83,6 +81,7 @@ val exclusions = listOf(
     "**/mapper/**",
     "**/model/**",
     "**/controller/**",
+    "**/retriever/**",
     "**/ProjectServiceApplication.*"
 )
 
@@ -107,7 +106,7 @@ tasks.jacocoTestReport {
         val reportDir = reports.html.outputLocation.get().asFile.absolutePath
         val reportFile = File(reportDir, "index.html")
         if (reportFile.exists()) {
-            println("Jacoco saved report to $reportFile")
+            println("Jacoco saved report to file://$reportFile")
         } else {
             println("Jacoco couldn't save report file")
         }
