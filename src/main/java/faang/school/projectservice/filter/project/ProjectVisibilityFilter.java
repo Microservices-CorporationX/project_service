@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class ProjectVisibilityFilter implements ProjectFilter{
+public class ProjectVisibilityFilter implements ProjectFilter {
     @Override
     public boolean isApplicable(ProjectFilterDto filters) {
         return filters.getProjectVisibility() != null;
