@@ -89,51 +89,48 @@ public class VacancyService {
         Vacancy sourceVacancy = vacancyRepository.findById(vacancyId).orElseThrow(() ->
                 new DataValidationException("vacancy %d not found".formatted(vacancyId)));
 
-        vacancyValidator.validateTutorRole(tutorId, newVacancy.getProject().getId());
         vacancyValidator.validateVacancyStatus(sourceVacancy);
-        Vacancy targetVacancy = Vacancy.builder()
-                .id(vacancyId)
-                .createdAt(sourceVacancy.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
-                .createdBy(sourceVacancy.getCreatedBy())
-                .updatedBy(tutorId)
-                .build();
+        sourceVacancy.setUpdatedAt(LocalDateTime.now());
+        sourceVacancy.setUpdatedBy(tutorId);
+
+
+        if (newVacancy.getProject() != null) {
+            sourceVacancy.setProject(newVacancy.getProject());
+        }
+        vacancyValidator.validateTutorRole(tutorId, sourceVacancy.getProject().getId());
 
         if (newVacancy.getName() != null) {
-            targetVacancy.setName(newVacancy.getName());
+            sourceVacancy.setName(newVacancy.getName());
         }
         if (newVacancy.getDescription() != null) {
-            targetVacancy.setDescription(newVacancy.getDescription());
+            sourceVacancy.setDescription(newVacancy.getDescription());
         }
         if (newVacancy.getPosition() != null) {
-            targetVacancy.setPosition(newVacancy.getPosition());
+            sourceVacancy.setPosition(newVacancy.getPosition());
         }
-        if (newVacancy.getProject() != null) {
-            targetVacancy.setProject(newVacancy.getProject());
-        }
-        if (!newVacancy.getCandidates().isEmpty()) {
-            targetVacancy.setCandidates(newVacancy.getCandidates());
+        if (newVacancy.getCandidates() != null && !newVacancy.getCandidates().isEmpty()) {
+            sourceVacancy.setCandidates(newVacancy.getCandidates());
         }
         if (newVacancy.getStatus() != null) {
-            targetVacancy.setStatus(newVacancy.getStatus());
+            sourceVacancy.setStatus(newVacancy.getStatus());
         }
         if (newVacancy.getSalary() != null) {
-            targetVacancy.setSalary(newVacancy.getSalary());
+            sourceVacancy.setSalary(newVacancy.getSalary());
         }
         if (newVacancy.getWorkSchedule() != null) {
-            targetVacancy.setWorkSchedule(newVacancy.getWorkSchedule());
+            sourceVacancy.setWorkSchedule(newVacancy.getWorkSchedule());
         }
         if (newVacancy.getCount() != null) {
-            targetVacancy.setCount(newVacancy.getCount());
+            sourceVacancy.setCount(newVacancy.getCount());
         }
-        if (!newVacancy.getRequiredSkillIds().isEmpty()) {
-            targetVacancy.setRequiredSkillIds(newVacancy.getRequiredSkillIds());
+        if (newVacancy.getRequiredSkillIds() != null && !newVacancy.getRequiredSkillIds().isEmpty()) {
+            sourceVacancy.setRequiredSkillIds(newVacancy.getRequiredSkillIds());
         }
         if (newVacancy.getCoverImageKey() != null) {
-            targetVacancy.setCoverImageKey(newVacancy.getCoverImageKey());
+            sourceVacancy.setCoverImageKey(newVacancy.getCoverImageKey());
         }
 
-        return vacancyRepository.save(targetVacancy);
+        return vacancyRepository.save(sourceVacancy);
     }
 
     public void deleteVacancy(Long vacancyId, Long tutorId) {
