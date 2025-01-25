@@ -28,6 +28,7 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("redis.clients:jedis:4.3.2")
     runtimeOnly("org.postgresql:postgresql")
+    implementation("com.h2database:h2:2.1.214")
 
     /**
      * Amazon S3
@@ -59,6 +60,17 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+sourceSets {
+    named("test") {
+        java.srcDirs("src/test/java")
+        resources.srcDirs("src/test/resources")
+    }
+}
+
+tasks.processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<Test> {
