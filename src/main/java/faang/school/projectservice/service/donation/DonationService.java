@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -80,9 +81,10 @@ public class DonationService {
                 .toList();
 
         return donations.filter(donation ->
-                applicableFilters.stream()
-                        .allMatch(donationFilter ->
-                                donationFilter.apply(donation, dtoFilters)));
+                        applicableFilters.stream()
+                                .allMatch(donationFilter ->
+                                        donationFilter.apply(donation, dtoFilters)))
+                .sorted(Comparator.comparing(Donation::getDonationTime).reversed());
     }
 
     private long getUserId() {
