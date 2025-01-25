@@ -1,80 +1,84 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.project.CreateProjectRequestDto;
-import faang.school.projectservice.dto.project.ProjectResponseDto;
-import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
 
-    public ProjectResponseDto createProject(CreateProjectRequestDto projectRequestDto, Long ownerId) {
-        if (projectRepository.existsByOwnerIdAndName(ownerId, projectRequestDto.getName())) {
-            throw new IllegalArgumentException("Project with the same name already exists for this owner");
-        }
-
-        Project project = projectMapper.toEntity(projectRequestDto);
+    @Transactional
+    public Project createProject(Project project, Long ownerId) {
+        validateProjectNameUniqueness(ownerId, project.getName());
         project.setOwnerId(ownerId);
         project.setStatus(ProjectStatus.CREATED);
         project.setCreatedAt(LocalDateTime.now());
         project.setUpdatedAt(LocalDateTime.now());
-
-        Project savedProject = projectRepository.save(project);
-        return projectMapper.toResponseDto(savedProject);
+        return projectRepository.save(project);
     }
 
-    public ProjectResponseDto updateProject(Long projectId, CreateProjectRequestDto projectRequestDto) {
-        Project existingProject = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+    @Transactional
+    public Project createSubProject(Project subProject, Long ownerId) {
+        Project parentProject = findProjectById(subProject.getParentProject().getId());
+        subProject.setParentProject(parentProject);
+        subProject.setOwnerId(ownerId);
+        subProject.setStatus(ProjectStatus.CREATED);
+        subProject.setCreatedAt(LocalDateTime.now());
+        subProject.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(subProject);
+    }
 
-        existingProject.setDescription(projectRequestDto.getDescription());
-        existingProject.setName(projectRequestDto.getName());
-        existingProject.setVisibility(projectRequestDto.getVisibility());
+    @Transactional
+    public Project updateProject(Project project) {
+        Project existingProject = findProjectById(project.getId());
+        existingProject.setName(project.getName());
+        existingProject.setDescription(project.getDescription());
         existingProject.setUpdatedAt(LocalDateTime.now());
-
-        Project updatedProject = projectRepository.save(existingProject);
-        return projectMapper.toResponseDto(updatedProject);
+        return projectRepository.save(existingProject);
     }
 
-    public List<ProjectResponseDto> getProjects(String name, ProjectStatus status, Long userId) {
-        return projectRepository.findAll().stream()
-                .filter(project -> (name == null || (project.getName() != null && project.getName().contains(name))))
-                .filter(project -> (status == null || project.getStatus() == status))
-                .filter(project -> isProjectVisible(project, userId))
-                .map(projectMapper::toResponseDto)
-                .toList();
+    @Transactional
+    public Project updateSubProject(Project subProject) {
+        Project existingSubProject = findProjectById(subProject.getId());
+        existingSubProject.setName(subProject.getName());
+        existingSubProject.setDescription(subProject.getDescription());
+        existingSubProject.setUpdatedAt(LocalDateTime.now());
+        return projectRepository.save(existingSubProject);
     }
 
-    public List<ProjectResponseDto> getAllProjects() {
-        return projectRepository.findAll().stream()
-                .map(projectMapper::toResponseDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<Project> getProjects(String name, ProjectStatus status, Long userId, Pageable pageable) {
+        return projectRepository.findAll(pageable);
     }
 
-    public ProjectResponseDto getProjectById(Long projectId, Long userId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+    @Transactional(readOnly = true)
+    public Page<Project> getSubProjects(Long parentProjectId, String name, ProjectStatus status, Pageable pageable) {
+        return projectRepository.findByParentProjectId(parentProjectId, pageable);
+    }
 
-        if (!isProjectVisible(project, userId)) {
-            throw new IllegalArgumentException("You don't have access to this project");
+    @Transactional(readOnly = true)
+    public Project getProjectById(Long projectId, Long userId) {
+        return findProjectById(projectId);
+    }
+
+    private void validateProjectNameUniqueness(Long ownerId, String name) {
+        if (projectRepository.existsByOwnerIdAndName(ownerId, name)) {
+            throw new IllegalArgumentException("Project with the same name already exists");
         }
-
-        return projectMapper.toResponseDto(project);
     }
 
-    private boolean isProjectVisible(Project project, Long userId) {
-        return project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId);
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
     }
 }
