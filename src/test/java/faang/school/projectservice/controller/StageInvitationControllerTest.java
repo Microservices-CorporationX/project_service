@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,8 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ContextConfiguration(classes = {StageInvitationController.class, StageInvitationService.class})
 public class StageInvitationControllerTest {
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private final static String REJECT = "rejection reason";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String REJECT = "rejection reason";
 
     @Autowired
     private MockMvc mockMvc;
@@ -193,11 +192,11 @@ public class StageInvitationControllerTest {
                 .getAllInvitationsForOneParticipant(anyLong(), any(StageInvitationFilterDto.class)))
                 .thenReturn(testList);
         try {
-            mockMvc.perform(get("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
+            mockMvc.perform(post("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(filterDto)))
-                    .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(testList)))
-                    .andExpect(status().isFound());
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(testList)));
         } catch (Exception e) {
             fail(e);
         }
@@ -209,9 +208,9 @@ public class StageInvitationControllerTest {
                 .getAllInvitationsForOneParticipant(anyLong(), any(StageInvitationFilterDto.class)))
                 .thenReturn(testList);
         try {
-            mockMvc.perform(get("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
+            mockMvc.perform(post("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(OBJECT_MAPPER.writeValueAsString("")))
+                            .content(OBJECT_MAPPER.writeValueAsString(" ")))
                     .andExpect(status().isBadRequest());
         } catch (Exception e) {
             fail(e);

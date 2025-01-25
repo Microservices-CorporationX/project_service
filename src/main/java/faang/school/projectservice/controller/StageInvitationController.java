@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -46,8 +45,8 @@ public class StageInvitationController {
         return stageInvitationService.rejectStageInvitation(participantId, rejectionReason);
     }
 
-    @GetMapping("/getAllForOneParticipant/{participantId}")
-    @ResponseStatus(HttpStatus.FOUND)
+    @PostMapping("/getAllForOneParticipant/{participantId}")
+    @ResponseStatus(HttpStatus.OK)
     public List<StageInvitationDto> getAllInvitationsForOneParticipant(@PathVariable @Min(1) long participantId,
                                                                        @RequestBody StageInvitationFilterDto filter) {
         return stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);
