@@ -13,11 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,65 +30,65 @@ class ProjectServiceTest {
     @Spy
     private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
     @Spy
-    private List<ProjectFilter> projectFilters = List.of();
+    private List<ProjectFilter> projectFilters = new ArrayList<>();
     @Spy
-    private List<ProjectCreateRetriever> projectCreateRetrievers = List.of();
+    private List<ProjectCreateRetriever> projectCreateRetrievers = new ArrayList<>();
     @Spy
-    private List<ProjectUpdateRetriever> projectUpdateRetrievers = List.of();
+    private List<ProjectUpdateRetriever> projectUpdateRetrievers = new ArrayList<>();
     @Spy
-    private List<ProjectRetriever> projectRetrievers = List.of();
+    private List<ProjectRetriever> projectRetrievers = new ArrayList<>();
     @InjectMocks
     private ProjectService projectService;
 
     @Test
     void testCreateProject_Success() {
-        try (MockedStatic<LocalDateTime> mockedStatic = mockStatic(LocalDateTime.class)) {
-            LocalDateTime fixedTime = LocalDateTime.of(2025, 1, 1, 12, 0);
-            mockedStatic.when(LocalDateTime::now).thenReturn(fixedTime);
+        Project projectToRepository = new Project();
+        projectToRepository.setStatus(ProjectStatus.CREATED);
 
-            ProjectCreateRequestDto input = new ProjectCreateRequestDto();
-            Project expectedProject = new Project();
-            expectedProject.setId(1L);
-            expectedProject.setCreatedAt(fixedTime);
-            expectedProject.setStatus(ProjectStatus.CREATED);
-            when(projectRepository.save(any(Project.class))).thenReturn(expectedProject);
+        Project expectedProject = new Project();
+        expectedProject.setId(1L);
+        expectedProject.setStatus(ProjectStatus.CREATED);
+        when(projectRepository.save(projectToRepository)).thenReturn(expectedProject);
+        ProjectCreateRequestDto input = new ProjectCreateRequestDto();
 
-            ProjectResponseDto result = projectService.createProject(input);
+        ProjectResponseDto result = projectService.createProject(input);
 
-            verify(projectRepository, times(1)).save(any(Project.class));
-            assertEquals(projectMapper.toResponseDto(expectedProject), result);
-        }
+        verify(projectRepository, times(1)).save(projectToRepository);
+        assertEquals(projectMapper.toResponseDto(expectedProject), result);
     }
 
     @Test
     void testUpdateProject_Success() {
-        try (MockedStatic<LocalDateTime> mockedStatic = mockStatic(LocalDateTime.class)) {
-            LocalDateTime fixedTime = LocalDateTime.of(2025, 1, 1, 12, 0);
-            mockedStatic.when(LocalDateTime::now).thenReturn(fixedTime);
+        Project existingProject = new Project();
+        existingProject.setId(1L);
+        existingProject.setName("testName");
+        existingProject.setDescription("testDescription");
+        existingProject.setStatus(ProjectStatus.CREATED);
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(existingProject));
 
-            Project existingProject = new Project();
-            existingProject.setId(1L);
-            existingProject.setName("testName");
-            existingProject.setDescription("testDescription");
-            existingProject.setStatus(ProjectStatus.CREATED);
-            when(projectRepository.findById(1L)).thenReturn(Optional.of(existingProject));
+        ProjectUpdateRequestDto input = new ProjectUpdateRequestDto();
+        input.setId(1L);
+        input.setName("testName1");
+        input.setDescription("testDescription1");
+        input.setStatus(ProjectStatus.CREATED);
 
-            ProjectUpdateRequestDto input = new ProjectUpdateRequestDto();
-            input.setId(1L);
-            input.setName("testName1");
-            input.setDescription("testDescription1");
+        Project projectToRepository = new Project();
+        projectToRepository.setId(1L);
+        projectToRepository.setName("testName1");
+        projectToRepository.setDescription("testDescription1");
+        projectToRepository.setStatus(ProjectStatus.CREATED);
 
-            Project expectedProject = new Project();
-            expectedProject.setId(1L);
-            expectedProject.setUpdatedAt(fixedTime);
-            expectedProject.setStatus(ProjectStatus.CREATED);
-            when(projectRepository.save(any(Project.class))).thenReturn(expectedProject);
+        Project expectedProject = new Project();
+        expectedProject.setId(1L);
+        expectedProject.setName("testName1");
+        expectedProject.setDescription("testDescription1");
+        expectedProject.setStatus(ProjectStatus.CREATED);
+        when(projectRepository.save(projectToRepository)).thenReturn(expectedProject);
 
-            ProjectResponseDto result = projectService.updateProject(input);
+        ProjectResponseDto result = projectService.updateProject(input);
 
-            verify(projectRepository, times(1)).save(any(Project.class));
-            assertEquals(projectMapper.toResponseDto(expectedProject), result);
-        }
+        verify(projectRepository, times(1)).save(projectToRepository);
+        assertEquals(projectMapper.toResponseDto(expectedProject), result);
     }
 
     @Test
@@ -114,6 +112,29 @@ class ProjectServiceTest {
 
         assertEquals(2, result.size());
         verify(projectMapper, times(2)).toResponseDto(any());
+    }
+
+    @Test
+    void testGetAllProjects_NoFilters() {
+        List<Project> projects = Arrays.asList(new Project(), new Project());
+        when(projectRepository.findAll()).thenReturn(projects);
+
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+
+        List<ProjectResponseDto> result = projectService.getAllProjects(filterDto);
+
+        assertEquals(2, result.size());
+        verify(projectMapper, times(2)).toResponseDto(any());
+    }
+
+    @Test
+    void testGetAllProjects_NoProjectsFound() {
+        when(projectRepository.findAll()).thenReturn(Collections.emptyList());
+        ProjectFilterDto filterDto = new ProjectFilterDto();
+
+        List<ProjectResponseDto> result = projectService.getAllProjects(filterDto);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
