@@ -201,7 +201,6 @@ public class TaskServiceTest {
     @Test
     public void updateTask_UsersAreNotInSystem() {
         Long userId = userDto1.id();
-        UpdateTaskDto updateTaskDto;
         TeamMember teamMember = TeamMember.builder()
                 .id(1L)
                 .userId(userId)
@@ -218,7 +217,7 @@ public class TaskServiceTest {
         Mockito.when(client.getUsersByIds(Mockito.anyList()))
                 .thenReturn(new ArrayList<>(Arrays.asList(userDto1, null)));
 
-        updateTaskDto = UpdateTaskDto.builder()
+        UpdateTaskDto updateTaskDto = updateTaskDto = UpdateTaskDto.builder()
                 .description("oops")
                 .status(TaskStatus.TESTING)
                 .build();
@@ -228,7 +227,6 @@ public class TaskServiceTest {
 
     @Test
     public void getTasksFilter_SuccessFilter() {
-        TaskGettingDto taskGettingDto;
         Task taskTest = Task.builder()
                 .id(1L)
                 .name("something")
@@ -251,7 +249,7 @@ public class TaskServiceTest {
                 .thenReturn(Optional.ofNullable(project));
 
 
-        taskGettingDto = TaskGettingDto.builder()
+        TaskGettingDto taskGettingDto = TaskGettingDto.builder()
                 .word("something")
                 .status(TaskStatus.TESTING)
                 .build();
