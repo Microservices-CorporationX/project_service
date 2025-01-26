@@ -1,8 +1,10 @@
 package faang.school.projectservice.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -58,8 +60,9 @@ public class Vacancy {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany(mappedBy = "vacancy")
-    private List<Candidate> candidates;
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.REMOVE)
+    @Builder.Default
+    private List<Candidate> candidates = new ArrayList<>();
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
