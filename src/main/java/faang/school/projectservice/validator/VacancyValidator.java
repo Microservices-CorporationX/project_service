@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class VacancyValidator {
     private final TeamMemberRepository teamMemberRepository;
 
-    public void validateVacancy(Vacancy vacancy) {
-        if (!checkCuratorRole(vacancy)) {
+    public void validateNewVacancy(Vacancy vacancy) {
+        if (!checkRoleOfCreatedBy(vacancy)) {
             throw new DataValidationException("Curator is not owner or manager");
         }
 
@@ -26,28 +26,55 @@ public class VacancyValidator {
         }
     }
 
+    public void validateUpdatedVacancy(Vacancy vacancy) {
+        // проверить что пользователь из updated_by, имеет роль owner или manager
+
+        // если статус вакансии хотят изменить на CLOSED, надо проверить:
+        // - количество кандидатов на вакансию равно заявленной квоте
+    }
+
     public void validateClosingVacancy(Vacancy vacancy) {
         if (!checkCountOfCandidates(vacancy)) {
             throw new DataValidationException("There is not enough number of candidates");
         }
     }
 
-    private boolean checkCuratorRole(Vacancy vacancy) {
-        TeamMember curator = teamMemberRepository.findByUserIdAndProjectId(vacancy.getCreatedBy(), vacancy.getProject().getId());
+    private boolean checkRoleOfCreatedBy(Vacancy vacancy) {
+        TeamMember curator = teamMemberRepository.findByUserIdAndProjectId(
+                vacancy.getCreatedBy(),
+                vacancy.getProject().getId());
 
-        AtomicBoolean IsOwnerOrManager = new AtomicBoolean(false);
-
+        AtomicBoolean isOwnerOrManager = new AtomicBoolean(false);
         curator.getRoles().forEach(r -> {
-            if (r == TeamRole.OWNER || r == TeamRole.MANAGER)
-                IsOwnerOrManager.set(true);
+            if (r == TeamRole.OWNER || r == TeamRole.MANAGER) {
+                isOwnerOrManager.set(true);
+            }
         });
+        return isOwnerOrManager.get();
+    }
 
-        return IsOwnerOrManager.get();
+    private boolean checkRoleOfUpdatedBy(Vacancy vacancy) {
+        TeamMember curator = teamMemberRepository.findByUserIdAndProjectId(
+                vacancy.getUpdatedBy(),
+                vacancy.getProject().getId());
+
+        AtomicBoolean isOwnerOrManager = new AtomicBoolean(false);
+        curator.getRoles().forEach(r -> {
+            if (r == TeamRole.OWNER || r == TeamRole.MANAGER) {
+                isOwnerOrManager.set(true);
+            }
+        });
+        return isOwnerOrManager.get();
     }
 
     private boolean checkCandidatesAreNotTeamMember(Vacancy vacancy) {
         for (Candidate candidate : vacancy.getCandidates()) {
-            if (teamMemberRepository.findByUserIdAndProjectId(candidate.getUserId(), vacancy.getProject().getId()) != null) {
+            TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(
+                    candidate.getUserId(),
+                    vacancy.getProject().getId()
+            );
+
+            if (teamMember != null) {
                 return false;
             }
         }

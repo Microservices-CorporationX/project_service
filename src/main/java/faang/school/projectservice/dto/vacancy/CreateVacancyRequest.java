@@ -15,9 +15,9 @@ public class CreateVacancyRequest {
     private Long projectId;
     private Long createdBy;
     private Long updatedBy;
-    private VacancyStatus status;
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
     private List<Long> requiredSkillIds;
+    private String coverImageKey;
 }
