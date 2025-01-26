@@ -75,7 +75,7 @@ class MomentServiceTest {
 
     private MomentService momentService;
 
-    List<MomentFilter> filters;
+    private List<MomentFilter> filters;
 
     @BeforeEach
     void setUp() {
