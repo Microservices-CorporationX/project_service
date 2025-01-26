@@ -19,5 +19,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run tests
-        run: ./gradlew test
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-cache-${{ runner.os }}
+
+      - name: Build, Test, and Validate Coverage with Gradle
+        run: ./gradlew clean build test jacocoTestReport jacocoTestCoverageVerification
+
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test
+
