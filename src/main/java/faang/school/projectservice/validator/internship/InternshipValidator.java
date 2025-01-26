@@ -39,7 +39,9 @@ public class InternshipValidator {
 
     public boolean validateInternCompletedInternship(InternshipEditDto internshipDto, long internId) {
         List<Task> tasks = projectRepository.findById(internshipDto.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Проект с ID %d не найден", internshipDto.getProjectId())
+                ))
                 .getTasks();
 
         if (internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
@@ -74,8 +76,7 @@ public class InternshipValidator {
         }
 
         if (!flag) {
-            String message = "Список стажирующихся не может быть пустым!";
-            throw new DataValidationException(message);
+            throw new DataValidationException("Список стажирующихся не может быть пустым!");
         }
     }
 
@@ -84,15 +85,16 @@ public class InternshipValidator {
         LocalDateTime endDate = internshipDto.getEndDate();
 
         if (startDate.plusMonths(3).isBefore(endDate)) {
-            String message = "Стажировка не может длиться дольше 3 месяцев!";
-            throw new DataValidationException(message);
+            throw new DataValidationException("Стажировка не может длиться дольше 3 месяцев!");
         }
     }
 
     private void validateMentorBelongsProject(InternshipCreateDto internshipDto) {
         Long mentorId = internshipDto.getMentorId();
         Project project = projectRepository.findById(internshipDto.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Проект с ID %d не найден", internshipDto.getProjectId())
+                ));
         List<Team> team = project.getTeams();
         boolean flag = false;
 
@@ -111,7 +113,9 @@ public class InternshipValidator {
 
     private void validateAddingInterns(InternshipEditDto internshipDto) {
         List<TeamMember> interns = internshipRepository.findById(internshipDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Стажировка с ID %d не найдена", internshipDto.getId())
+                ))
                 .getInterns();
 
         List<Long> internsIds = internshipDto.getInternsIds();
@@ -124,8 +128,7 @@ public class InternshipValidator {
             internsIds.retainAll(currentIds);
 
             if (!internsIds.isEmpty()) {
-                String message = "Нельзя добавлять стажеров после начала стажировки!";
-                throw new DataValidationException(message);
+                throw new DataValidationException("Нельзя добавлять стажеров после начала стажировки!");
             }
         }
     }

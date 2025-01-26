@@ -14,6 +14,8 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
+import faang.school.projectservice.service.project.ProjectService;
+import faang.school.projectservice.service.team_member.TeamMemberService;
 import faang.school.projectservice.validator.internship.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,32 +26,29 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InternshipService {
-    private static final String ENTITY_NOT_FOUND = "Сущность не найдена";
-
-    private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
+    private final TeamMemberService teamMemberService;
     private final TeamMemberRepository teamMemberRepository;
     private final InternshipRepository internshipRepository;
     private final InternshipCreateMapper internshipCreateMapper;
-    private final InternshipEditMapper internshipEditMapper;
     private final InternshipReadMapper internshipReadMapper;
     private final InternshipValidator internshipValidator;
     private final List<InternshipFilter> filters;
 
-    public InternshipCreateDto createInternship(InternshipCreateDto internshipDto) {
+    public InternshipReadDto createInternship(InternshipCreateDto internshipDto) {
         internshipValidator.validateInternshipCreation(internshipDto);
         Internship internship = internshipCreateMapper.toEntity(internshipDto);
 
-        internship.setProject(projectRepository.findById(internshipDto.getProjectId())
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND)));
-        internship.setMentorId(teamMemberRepository.findById(internshipDto.getMentorId()).get());
+        internship.setProject(projectService.findById(internshipDto.getProjectId()));
+        internship.setMentorId(teamMemberService.findById(internshipDto.getMentorId()));
         internship.setInterns(getInternsById(internshipDto.getInternsIds()));
 
         internshipRepository.save(internship);
 
-        return internshipCreateMapper.toDto(internship);
+        return internshipReadMapper.toDto(internship);
     }
 
-    public InternshipEditDto updateInternship(InternshipEditDto internshipDto) {
+    public InternshipReadDto updateInternship(InternshipEditDto internshipDto) {
         internshipValidator.validateInternshipUpdating(internshipDto);
 
         Internship internship = findInternshipById(internshipDto.getId());
@@ -58,18 +57,20 @@ public class InternshipService {
 
         for (Long id : internshipDto.getInternsIds()) {
             if (internshipValidator.validateInternCompletedInternship(internshipDto, id)) {
-                intern = teamMemberRepository.findById(id)
-                        .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+                intern = teamMemberService.findById(id);
 
                 intern.getRoles().add(internshipDto.getRole());
                 interns.add(intern);
             }
         }
 
-        internship.setInterns(interns);
+        if (!interns.isEmpty()) {
+            internship.setInterns(interns);
+        }
+
         Internship updatedInternship = internshipRepository.save(internship);
 
-        return internshipEditMapper.toDto(updatedInternship);
+        return internshipReadMapper.toDto(updatedInternship);
     }
 
     public List<InternshipReadDto> getInternshipsByFilters(InternshipFilterDto internshipDto) {
@@ -102,7 +103,9 @@ public class InternshipService {
 
     public Internship findInternshipById(long internshipId) {
         return internshipRepository.findById(internshipId)
-                .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Стажировка с ID %d не найдена", internshipId)
+                ));
     }
 
     public InternshipReadDto getInternshipById(long internshipId) {
@@ -110,12 +113,6 @@ public class InternshipService {
     }
 
     private List<TeamMember> getInternsById(List<Long> internsIds) {
-        List<TeamMember> interns = new ArrayList<>();
-
-        for (Long id : internsIds) {
-            interns.add(teamMemberRepository.findById(id).get());
-        }
-
-        return interns;
+        return teamMemberRepository.findAllById(internsIds);
     }
 }

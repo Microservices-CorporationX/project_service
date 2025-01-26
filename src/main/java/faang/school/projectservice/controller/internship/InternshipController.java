@@ -15,11 +15,11 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    public InternshipCreateDto createInternship(InternshipCreateDto internship) {
+    public InternshipReadDto createInternship(InternshipCreateDto internship) {
         return internshipService.createInternship(internship);
     }
 
-    public InternshipEditDto updateInternship(InternshipEditDto internship) {
+    public InternshipReadDto updateInternship(InternshipEditDto internship) {
         return internshipService.updateInternship(internship);
     }
 
