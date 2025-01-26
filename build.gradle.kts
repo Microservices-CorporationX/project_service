@@ -87,6 +87,7 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging.showStandardStreams = true
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
