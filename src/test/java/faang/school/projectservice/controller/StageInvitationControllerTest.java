@@ -72,7 +72,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.createStageInvitation(any(StageInvitationDto.class)))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(post("/stage-invitation/create")
+            mockMvc.perform(post("/api/v1/invitations/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
@@ -124,7 +124,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.createStageInvitation(any(StageInvitationDto.class)))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(post("/stage-invitation/create")
+            mockMvc.perform(post("/api/v1/invitations/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
                     .andExpect(status().isBadRequest());
@@ -138,7 +138,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.acceptStageInvitation(anyLong()))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(put("/stage-invitation/accept/{stageInvitationId}", testId))
+            mockMvc.perform(put("/api/v1/invitations/accept/{stageInvitationId}", testId))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
                     .andExpect(status().isAccepted());
         } catch (Exception e) {
@@ -151,7 +151,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.acceptStageInvitation(anyLong()))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(put("/stage-invitation/accept/{stageInvitationId}", "6L"))
+            mockMvc.perform(put("/api/v1/invitations/accept/{stageInvitationId}", "text"))
                     .andExpect(status().isBadRequest());
         } catch (Exception e) {
             fail(e);
@@ -163,7 +163,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.rejectStageInvitation(anyLong(), anyString()))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(put("/stage-invitation/reject/{participantId}", testId)
+            mockMvc.perform(put("/api/v1/invitations/reject/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(REJECT)))
                     .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(stageInvitationDto)))
@@ -178,7 +178,7 @@ public class StageInvitationControllerTest {
         when(stageInvitationService.rejectStageInvitation(anyLong(), anyString()))
                 .thenReturn(stageInvitationDto);
         try {
-            mockMvc.perform(put("/stage-invitation/reject/{participantId}", testId)
+            mockMvc.perform(put("/api/v1/invitations/reject/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest());
         } catch (Exception e) {
@@ -192,7 +192,7 @@ public class StageInvitationControllerTest {
                 .getAllInvitationsForOneParticipant(anyLong(), any(StageInvitationFilterDto.class)))
                 .thenReturn(testList);
         try {
-            mockMvc.perform(post("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
+            mockMvc.perform(post("/api/v1/invitations/participant/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(filterDto)))
                     .andExpect(status().isOk())
@@ -208,7 +208,7 @@ public class StageInvitationControllerTest {
                 .getAllInvitationsForOneParticipant(anyLong(), any(StageInvitationFilterDto.class)))
                 .thenReturn(testList);
         try {
-            mockMvc.perform(post("/stage-invitation/getAllForOneParticipant/{participantId}", testId)
+            mockMvc.perform(post("/api/v1/invitations/participant/{participantId}", testId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(OBJECT_MAPPER.writeValueAsString(" ")))
                     .andExpect(status().isBadRequest());

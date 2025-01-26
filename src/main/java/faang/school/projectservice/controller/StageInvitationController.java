@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/stage-invitation")
+@RequestMapping("/api/v1/invitations")
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
@@ -45,7 +45,7 @@ public class StageInvitationController {
         return stageInvitationService.rejectStageInvitation(participantId, rejectionReason);
     }
 
-    @PostMapping("/getAllForOneParticipant/{participantId}")
+    @PostMapping("/participant/{participantId}")
     @ResponseStatus(HttpStatus.OK)
     public List<StageInvitationDto> getAllInvitationsForOneParticipant(@PathVariable @Min(1) long participantId,
                                                                        @RequestBody StageInvitationFilterDto filter) {
