@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.subproject;
+package school.faang.project_service.service.subproject;
 
 import faang.school.projectservice.dto.subproject.SubProjectFilterDto;
 import faang.school.projectservice.exeption.ProjectNotClosableException;
@@ -9,6 +9,8 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filters.subproject.SubProjectFilter;
+import faang.school.projectservice.service.moment.MomentService;
+import faang.school.projectservice.service.subproject.SubProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,10 @@ import static org.mockito.Mockito.when;
 public class SubProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private MomentService momentService;
+
     @Mock
     private List<SubProjectFilter> subProjectFilters;
     @InjectMocks
@@ -153,7 +159,9 @@ public class SubProjectServiceTest {
 
         when(projectRepository.findById(3L)).thenReturn(Optional.of(thirdProject));
 
-        assertThrows(ProjectNotClosableException.class, () -> subProjectService.updateSubProject(3L, thirdProject));
+        assertThrows(ProjectNotClosableException.class, () -> {
+            subProjectService.updateSubProject(3L, thirdProject);
+        });
     }
 
     @Test
@@ -163,7 +171,7 @@ public class SubProjectServiceTest {
 
         List<Project> mockSubProjects = List.of(new Project());
         when(projectRepository.findByParentId(parentProjectId)).thenReturn(mockSubProjects);
-        when(subProjectFilters.stream()).thenReturn(Stream.of());
+
         List<Project> filteredSubProjects = subProjectService.getSubProjectsByProjectId(parentProjectId, filters);
 
         assertEquals(mockSubProjects, filteredSubProjects);

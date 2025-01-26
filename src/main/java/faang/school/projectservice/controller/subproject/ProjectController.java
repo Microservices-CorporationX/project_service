@@ -8,6 +8,8 @@ import faang.school.projectservice.mapper.UpdateProjectMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validator.ProjectValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "main-methods")
 @Validated
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +38,11 @@ public class ProjectController {
     private final ProjectValidator projectValidator;
     private final ProjectService projectService;
 
+    @Operation(
+            summary = "Creates a project",
+            description = "Accepts Dto map into an entity and creates a project"
+
+    )
     @PostMapping("/project")
     public ResponseEntity<ProjectDto> createProject(@Valid @RequestBody ProjectDto dto) {
         log.info("Creating project '{}' by UserId #{}.", dto.getName(), dto.getOwnerId());
@@ -43,6 +51,10 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createProjectDto);
     }
 
+    @Operation(
+            summary = "Updates the project",
+            description = "Accepts Dto map into an entity and update a project"
+    )
     @PatchMapping("/project")
     public ResponseEntity<ProjectUpdateDto> updateProject(@Valid @RequestBody ProjectUpdateDto dto) {
         log.info("Updating project {} by userId {} .", dto.getName(), dto.getOwnerId());
