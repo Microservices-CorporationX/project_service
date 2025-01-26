@@ -66,14 +66,6 @@ class MeetServiceTest {
 
     @Test
     void createMeet_Success() {
-        MeetCreateRequest request = MeetCreateRequest.builder()
-                .creatorId(1L)
-                .title("title")
-                .description("description")
-                .projectId(10L)
-                .userIds(List.of(2L, 3L))
-                .build();
-
         Meet savedMeet = new Meet();
         savedMeet.setId(100L);
         savedMeet.setCreatorId(1L);
@@ -84,15 +76,21 @@ class MeetServiceTest {
         willDoNothing().given(projectValidator).validateProject(10L);
         when(meetRepository.save(any(Meet.class))).thenReturn(savedMeet);
 
-        MeetResponse response = meetService.createMeet(request);
+        MeetCreateRequest request = MeetCreateRequest.builder()
+                .creatorId(1L)
+                .title("title")
+                .description("description")
+                .projectId(10L)
+                .userIds(List.of(2L, 3L))
+                .build();
 
+        MeetResponse response = meetService.createMeet(request);
         verify(meetRepository).save(meetCaptor.capture());
         assertEquals(100L, response.id());
 
         Meet captured = meetCaptor.getValue();
         assertEquals(1L, captured.getCreatorId());
         assertEquals(10L, captured.getProject().getId());
-        assertEquals(100L, response.id());
     }
 
     @Test
@@ -118,13 +116,6 @@ class MeetServiceTest {
 
     @Test
     void updateMeet_Success() {
-        MeetUpdateRequest request = MeetUpdateRequest.builder()
-                .meetId(100L)
-                .title("new title")
-                .description("new description")
-                .userId(1L)
-                .build();
-
         Meet existingMeet = new Meet();
         existingMeet.setId(100L);
         existingMeet.setCreatorId(1L);
@@ -134,6 +125,13 @@ class MeetServiceTest {
 
         when(userServiceClient.getUser(1L)).thenReturn(userDto);
         when(meetRepository.findById(100L)).thenReturn(Optional.of(existingMeet));
+
+        MeetUpdateRequest request = MeetUpdateRequest.builder()
+                .meetId(100L)
+                .title("new title")
+                .description("new description")
+                .userId(1L)
+                .build();
 
         MeetResponse response = meetService.updateMeet(request);
 
