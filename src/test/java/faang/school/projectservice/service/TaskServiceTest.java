@@ -217,7 +217,7 @@ public class TaskServiceTest {
         Mockito.when(client.getUsersByIds(Mockito.anyList()))
                 .thenReturn(new ArrayList<>(Arrays.asList(userDto1, null)));
 
-        UpdateTaskDto updateTaskDto = updateTaskDto = UpdateTaskDto.builder()
+        UpdateTaskDto updateTaskDto = UpdateTaskDto.builder()
                 .description("oops")
                 .status(TaskStatus.TESTING)
                 .build();
