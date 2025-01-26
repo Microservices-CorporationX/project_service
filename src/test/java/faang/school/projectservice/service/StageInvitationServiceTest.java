@@ -77,7 +77,7 @@ class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.findById(Mockito.anyLong()))
                 .thenReturn(optional);
 
-        Assertions.assertEquals(stageInvitation, stageInvitationService.findById(1L));
+        Assertions.assertEquals(stageInvitationService.findById(1L), stageInvitation);
 
         Mockito.verify(stageInvitationRepository, Mockito.times(1)).findById(1L);
     }
@@ -112,7 +112,7 @@ class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.save(stageInvitation))
                 .thenReturn(stageInvitation);
 
-        Assertions.assertEquals(dto, stageInvitationService.createStageInvitation(dto));
+        Assertions.assertEquals(stageInvitationService.createStageInvitation(dto), dto);
 
         Mockito.verify(stageInvitationValidator, Mockito.times(1)).validateStageInvitation(dto);
         Mockito.verify(stageService, Mockito.times(1)).findById(id);
@@ -155,8 +155,8 @@ class StageInvitationServiceTest {
                 .thenReturn(Optional.of(result));
         Mockito.when(stageInvitationRepository.save(result)).thenReturn(result);
 
-        Assertions.assertEquals(stageInvitationService.updateStageInvitation(
-                invitationUpdateMapper.toDto(result)), dto);
+        Assertions.assertEquals(dto, stageInvitationService.updateStageInvitation(
+                invitationUpdateMapper.toDto(result)));
 
         Mockito.verify(stageInvitationValidator, Mockito.times(1)).validateUpdateInvitation(dto);
         Mockito.verify(stageService, Mockito.times(1)).findById(id);
@@ -167,7 +167,6 @@ class StageInvitationServiceTest {
     @Test
     public void shouldThrowStatusNotPending() {
         Long id = 5L;
-        StageInvitationService test = Mockito.mock(StageInvitationService.class);
 
         StageInvitation stageInvitation = StageInvitation.builder()
                 .id(id)
@@ -247,7 +246,7 @@ class StageInvitationServiceTest {
                 .thenReturn(Optional.of(stageInvitation));
         Mockito.when(teamMemberService.findById(id)).thenReturn(invited);
 
-        Assertions.assertEquals(stageInvitationService.acceptStageInvitation(dto), changeStatusMapper.toDto(result));
+        Assertions.assertEquals(changeStatusMapper.toDto(result), stageInvitationService.acceptStageInvitation(dto));
 
         Mockito.verify(teamMemberService, Mockito.times(1)).findById(id);
         Mockito.verify(stageInvitationRepository, Mockito.times(1)).findById(id);
@@ -281,26 +280,27 @@ class StageInvitationServiceTest {
         Mockito.when(stageInvitationRepository.findById(id))
                 .thenReturn(Optional.of(stageInvitation));
 
-        Assertions.assertEquals(stageInvitationService.rejectStageInvitation(dto),
-                rejectInvitationMapper.toDto(result));
+        Assertions.assertEquals(rejectInvitationMapper.toDto(result),
+                stageInvitationService.rejectStageInvitation(dto));
 
         Mockito.verify(stageInvitationRepository, Mockito.times(1)).findById(id);
     }
 
     @Test
     public void shouldGetStageInvitationForTeamMember() {
+        Long id = 5L;
 
         StageInvitation stageInvitation = StageInvitation.builder()
-                .id(5L)
-                .invited(TeamMember.builder().id(5L).build())
+                .id(id)
+                .invited(TeamMember.builder().id(id).build())
                 .build();
 
         List<StageInvitation> stageInvitations = List.of(stageInvitation);
 
         Mockito.when(stageInvitationRepository.findAll()).thenReturn(List.of(stageInvitation));
 
-        Assertions.assertEquals(stageInvitationService.getStageInvitationForTeamMember(5L), stageInvitations.stream()
-                .map(stageInvitationMapper::toDto).toList());
+        Assertions.assertEquals(stageInvitations.stream().map(stageInvitationMapper::toDto).toList(),
+                stageInvitationService.getStageInvitationForTeamMember(id));
 
         Mockito.verify(stageInvitationRepository, Mockito.times(1)).findAll();
     }
