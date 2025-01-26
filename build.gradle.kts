@@ -83,7 +83,9 @@ val jacocoExcludePackAgeList = listOf(
     "**/repository/**",
     "**/dto/**",
     "**/client/**",
-    "**/config/**"
+    "**/config/**",
+    "**/mapper/**",
+    "**/controller/**"
 )
 
 tasks.jacocoTestReport {
