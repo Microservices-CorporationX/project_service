@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public class NameFilter implements TaskGetting {
     @Override
     public Stream<Task> filter(Stream<Task> stream, TaskGettingDto request) {
-        return stream.filter(task -> task.getDescription().contains(request.word()));
+        return stream.filter(task -> task.getName().contains(request.word()));
     }
 
     @Override
