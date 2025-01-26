@@ -52,7 +52,6 @@ public class StageInvitationService {
         return stageInvitationMapper.toDto(stageInvitationRepository.save(stageInvitation));
     }
 
-
     public StageInvitationUpdateDto updateStageInvitation(StageInvitationUpdateDto dto) {
         stageInvitationValidator.validateUpdateInvitation(dto);
 
