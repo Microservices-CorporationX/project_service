@@ -57,7 +57,7 @@ public class PaymentServiceTest {
         PaymentFailedException exception = assertThrows(PaymentFailedException.class,
                 () -> paymentService.makePayment(testAmount, testCurrency));
 
-        assertEquals("Payment failed", exception.getMessage());
+        assertEquals("Payment failed for amount 100.5 USD", exception.getMessage());
         verify(paymentServiceClient, times(1))
                 .sendPayment(any(PaymentRequest.class));
     }
