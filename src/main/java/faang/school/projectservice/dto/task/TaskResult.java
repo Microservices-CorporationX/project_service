@@ -1,6 +1,9 @@
 package faang.school.projectservice.dto.task;
 
-public record CreateTaskResult(
+import lombok.Builder;
+
+@Builder
+public record TaskResult(
         Long id
 ) {
 }
