@@ -1,16 +1,42 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;NON_KEYWORDS=key
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: user
+    password: password
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
-      hibernate.dialect: org.hibernate.dialect.H2Dialect
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:
       mode: never
   liquibase:
     enabled: false
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      channels:
+        calculations_channel:
+          name: calculations_channel
+
+  server:
+    port: 8082
+
+services:
+  payment-service:
+    host: http://localhost
+    port: 9080
+  user-service:
+    host: http://localhost
+    port: 8080
+
+  logging:
+    level:
+      root: info
+
+  calculations_messages_processing:
+    enabled: true
