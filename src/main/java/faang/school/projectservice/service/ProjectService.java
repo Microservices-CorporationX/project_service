@@ -10,6 +10,7 @@ import faang.school.projectservice.dto.project.UpdateProjectRequest;
 import faang.school.projectservice.exception.ProjectAlreadyExistsException;
 import faang.school.projectservice.mapper.ProjectMapper;
 import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.filter.project.ProjectFilter;
@@ -35,9 +36,10 @@ public class ProjectService {
     public ProjectResponse createProject(CreateProjectRequest createProjectRequest) {
         validUser(createProjectRequest.ownerId());
         Project project = projectMapper.toEntity(createProjectRequest);
+        project.setStatus(ProjectStatus.CREATED);
 
         if (projectRepository.existsByOwnerIdAndName(createProjectRequest.ownerId(), project.getName())) {
-            throw new ProjectAlreadyExistsException("Проект с именем: " + project.getName() + " уже существует");
+            throw new ProjectAlreadyExistsException("Проект с именем " + project.getName() + " уже существует");
         }
 
         project = projectRepository.save(project);
