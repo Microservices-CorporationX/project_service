@@ -12,7 +12,6 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -65,21 +64,8 @@ class MeetServiceTest {
     @Captor
     private ArgumentCaptor<Meet> meetCaptor;
 
-    @BeforeEach
-    void setUp() {
-
-    }
-
     @Test
     void createMeet_Success() {
-        MeetCreateRequest request = MeetCreateRequest.builder()
-                .creatorId(1L)
-                .title("title")
-                .description("description")
-                .projectId(10L)
-                .userIds(List.of(2L, 3L))
-                .build();
-
         Meet savedMeet = new Meet();
         savedMeet.setId(100L);
         savedMeet.setCreatorId(1L);
@@ -90,13 +76,21 @@ class MeetServiceTest {
         willDoNothing().given(projectValidator).validateProject(10L);
         when(meetRepository.save(any(Meet.class))).thenReturn(savedMeet);
 
-        MeetResponse response = meetService.createMeet(request);
+        MeetCreateRequest request = MeetCreateRequest.builder()
+                .creatorId(1L)
+                .title("title")
+                .description("description")
+                .projectId(10L)
+                .userIds(List.of(2L, 3L))
+                .build();
 
+        MeetResponse response = meetService.createMeet(request);
         verify(meetRepository).save(meetCaptor.capture());
+        assertEquals(100L, response.id());
+
         Meet captured = meetCaptor.getValue();
         assertEquals(1L, captured.getCreatorId());
         assertEquals(10L, captured.getProject().getId());
-        assertEquals(100L, response.id());
     }
 
     @Test
@@ -122,13 +116,6 @@ class MeetServiceTest {
 
     @Test
     void updateMeet_Success() {
-        MeetUpdateRequest request = MeetUpdateRequest.builder()
-                .meetId(100L)
-                .title("new title")
-                .description("new description")
-                .userId(1L)
-                .build();
-
         Meet existingMeet = new Meet();
         existingMeet.setId(100L);
         existingMeet.setCreatorId(1L);
@@ -139,6 +126,13 @@ class MeetServiceTest {
         when(userServiceClient.getUser(1L)).thenReturn(userDto);
         when(meetRepository.findById(100L)).thenReturn(Optional.of(existingMeet));
 
+        MeetUpdateRequest request = MeetUpdateRequest.builder()
+                .meetId(100L)
+                .title("new title")
+                .description("new description")
+                .userId(1L)
+                .build();
+
         MeetResponse response = meetService.updateMeet(request);
 
         assertEquals("new title", response.title());
@@ -147,13 +141,6 @@ class MeetServiceTest {
 
     @Test
     void updateMeet_NotOwnerThrowsException() {
-        MeetUpdateRequest request = MeetUpdateRequest.builder()
-                .meetId(100L)
-                .title("new title")
-                .description("new description")
-                .userId(2L)
-                .build();
-
         Meet existingMeet = new Meet();
         existingMeet.setId(100L);
         existingMeet.setCreatorId(1L);
@@ -162,6 +149,13 @@ class MeetServiceTest {
 
         when(meetRepository.findById(100L)).thenReturn(Optional.of(existingMeet));
         when(userServiceClient.getUser(2L)).thenReturn(userDto);
+
+        MeetUpdateRequest request = MeetUpdateRequest.builder()
+                .meetId(100L)
+                .title("new title")
+                .description("new description")
+                .userId(2L)
+                .build();
 
         assertThrows(IllegalArgumentException.class, () -> meetService.updateMeet(request));
     }
@@ -215,8 +209,6 @@ class MeetServiceTest {
 
     @Test
     void getMeetsByFilter() {
-        MeetFilterRequest filterRequest = new MeetFilterRequest(null, 10L, null);
-
         Meet meet1 = new Meet();
         meet1.setId(1L);
         meet1.setProject(Project.builder().id(10L).build());
@@ -228,6 +220,8 @@ class MeetServiceTest {
         when(meetRepository.findByProjectId(10L))
                 .thenReturn(Stream.of(meet1, meet2));
 
+        MeetFilterRequest filterRequest = new MeetFilterRequest(null, 10L, null);
+
         List<MeetResponse> responses = meetService.getMeetsByFilter(filterRequest);
 
         assertEquals(2, responses.size());
@@ -237,8 +231,6 @@ class MeetServiceTest {
 
     @Test
     void testGetMeetsByFilterWithFilters() {
-        MeetFilterRequest filterRequest = MeetFilterRequest.builder().projectId(10L).title("Тема").build();
-
         Meet meet1 = new Meet();
         meet1.setId(1L);
         meet1.setProject(Project.builder().id(10L).build());
@@ -252,6 +244,8 @@ class MeetServiceTest {
         when(meetRepository.findByProjectId(10L))
                 .thenReturn(Stream.of(meet1, meet2));
 
+        MeetFilterRequest filterRequest = MeetFilterRequest.builder().projectId(10L).title("Тема").build();
+
         // Допустим, у нас есть один мок-фильтр, который пропускает только meet1
         MeetFilter filterMock = mock(MeetFilter.class);
         when(filterMock.filter(any(Stream.class), eq(filterRequest)))
@@ -261,6 +255,7 @@ class MeetServiceTest {
                 });
         List<MeetFilter> filters = new ArrayList<>();
         filters.add(filterMock);
+
 
         when(meetFilters.iterator()).thenReturn(filters.iterator());
 
