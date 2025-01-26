@@ -92,6 +92,28 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(false)
+        html.required.set(true)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            element = "PACKAGE"
+            includes = listOf("faang.school.prjectservice.service")
+
+            limit {
+                minimum = BigDecimal.valueOf(0.7)
+            }
+        }
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
