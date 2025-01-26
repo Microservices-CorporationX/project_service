@@ -1,7 +1,7 @@
 package faang.school.projectservice.exception.handler;
 
 import faang.school.projectservice.exception.BusinessException;
-import faang.school.projectservice.exception.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

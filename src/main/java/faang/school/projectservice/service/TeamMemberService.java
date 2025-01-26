@@ -1,8 +1,8 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.TeamMemberRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class TeamMemberService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Пользователь с таким id: %d не найден", teamMemberId))
                 );
-        }
+    }
 
     public void areTeamMembersExist(List<Long> userIds) {
         userIds.forEach(id -> {

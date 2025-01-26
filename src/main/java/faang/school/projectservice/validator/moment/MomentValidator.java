@@ -1,4 +1,4 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.validator.moment;
 
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
