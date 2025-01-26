@@ -8,6 +8,8 @@ import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.service.filters.subproject.SubProjectFilter;
+import faang.school.projectservice.service.moment.MomentService;
 import faang.school.projectservice.service.subproject.SubProjectService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,11 @@ public class SubProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private MomentService momentService;
+
+    @Mock
+    private List<SubProjectFilter> subProjectFilters;
     @InjectMocks
     private SubProjectService subProjectService;
 
