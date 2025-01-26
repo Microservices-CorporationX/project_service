@@ -2,7 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.moment.MomentCreateDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.dto.moment.MomentGetDto;
+import faang.school.projectservice.dto.moment.MomentReadDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.MomentFilter;
@@ -12,6 +12,7 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
+import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.validator.MomentValidator;
 import lombok.RequiredArgsConstructor;
@@ -30,49 +31,56 @@ public class MomentService {
     private final MomentMapper momentMapper;
     private final MomentRepository momentRepository;
     private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
     private final MomentValidator momentValidator;
     private final TeamMemberRepository teamMemberRepository;
     private final List<MomentFilter> momentFilters;
 
-    public MomentCreateDto create(MomentCreateDto dto) {
+    public MomentReadDto create(MomentCreateDto dto) {
         momentValidator.validateThatProjectsAreActive(dto.getProjectIds());
 
-        List<Project> projects = projectService.getProjects(dto.getProjectIds());
+        List<Project> projects = projectRepository.findAllById(dto.getProjectIds());
         Moment entity = momentMapper.toEntity(dto);
         entity.setProjects(projects);
         momentRepository.save(entity);
-        return momentMapper.toDto(entity);
+
+        return momentMapper.toReadDto(entity);
     }
 
-    public MomentUpdateDto update(MomentUpdateDto dto) {
+    public MomentReadDto update(MomentUpdateDto dto) {
         momentValidator.validateMomentUpdateDto(dto);
 
         Moment entity = getMomentById(dto.getMomentId());
-        List<Long> currentProjectIds = entity.getProjects().stream().map(Project::getId).toList();
-        addNewProjects(dto, entity, currentProjectIds);
-        addNewUsers(dto, entity, currentProjectIds);
-        momentRepository.save(entity);
+        addNewProjects(dto, entity);
+        addNewUsers(dto, entity);
+        Moment updatedEntity = momentRepository.save(entity);
 
-        return dto;
+        return momentMapper.toReadDto(updatedEntity);
     }
 
-    public List<MomentGetDto> getFilteredMoments(MomentFilterDto filters) {
+    public List<MomentReadDto> getFilteredMoments(MomentFilterDto filters) {
         Stream<Moment> moments = getAllMoments().stream();
 
-        return momentFilters.stream().filter(filter -> filter.isApplicable(filters))
+        List<MomentFilter> applicableMomentFilters = momentFilters.stream()
+                .filter(filter -> filter.isApplicable(filters)).toList();
+        if (applicableMomentFilters.isEmpty()) {
+            return List.of();
+        }
+
+        return applicableMomentFilters.stream()
                 .reduce(moments,
                         (momentStream, momentFilter) -> momentFilter.apply(momentStream, filters),
                         (list1, list2) -> list1)
-                .map(momentMapper::toGetDto)
+                .map(momentMapper::toReadDto)
                 .toList();
     }
 
-    public List<MomentGetDto> getMoments() {
-        return getAllMoments().stream().map(momentMapper::toGetDto).toList();
+    public List<MomentReadDto> getMoments() {
+        return getAllMoments().stream().map(momentMapper::toReadDto).toList();
     }
 
-    public MomentGetDto getMoment(long id) {
-        return momentMapper.toGetDto(getMomentById(id));
+    public MomentReadDto getMoment(long id) {
+        return momentMapper.toReadDto(getMomentById(id));
     }
 
     public Moment getMomentById(long id) {
@@ -84,44 +92,54 @@ public class MomentService {
         return momentRepository.findAll();
     }
 
-    private void addNewUsers(MomentUpdateDto dto, Moment entity, List<Long> currentProjectIds) {
+    private void addNewUsers(MomentUpdateDto dto, Moment entity) {
         if (CollectionUtils.isNotEmpty(dto.getUserIds())) {
+            List<Long> currentProjectIds = entity.getProjects().stream().map(Project::getId).toList();
             List<Project> newProjects = new ArrayList<>();
-            List<Long> newUserIds = dto.getUserIds().stream().filter(id -> isUserNotAdded(entity, id)).toList();
+            List<Long> newUserIds = dto.getUserIds();
             List<Long> newTeamMembersIds = new ArrayList<>();
             newUserIds.forEach(id -> {
-                List<TeamMember> newTeamMembers = teamMemberRepository.findByUserId(id);
+                List<TeamMember> newTeamMembers = teamMemberRepository.findByUserId(id)
+                        .stream().filter(teamMember -> isTeamMemberNotAdded(entity, teamMember.getId())).toList();
                 newTeamMembersIds.addAll(newTeamMembers.stream().map(TeamMember::getId).toList());
                 List<Team> newTeams = newTeamMembers.stream().map(TeamMember::getTeam).toList();
                 List<Project> newProjectsByUser = newTeams.stream().map(Team::getProject)
                         .filter(newProject -> isProjectNotAdded(currentProjectIds, newProject.getId())).toList();
                 newProjects.addAll(newProjectsByUser);
             });
-
-            entity.getProjects().addAll(newProjects);
-            entity.getTeamMemberIds().addAll(newTeamMembersIds.stream().distinct().toList());
+            if (!newProjects.isEmpty()) {
+                entity.getProjects().addAll(newProjects);
+            }
+            if (!newTeamMembersIds.stream().distinct().toList().isEmpty()) {
+                entity.getTeamMemberIds().addAll(newTeamMembersIds.stream().distinct().toList());
+            }
         }
     }
 
-    private void addNewProjects(MomentUpdateDto dto, Moment entity, List<Long> currentProjectIds) {
+    private void addNewProjects(MomentUpdateDto dto, Moment entity) {
         if (CollectionUtils.isNotEmpty(dto.getProjectIds())) {
-            List<Project> projectsFromDto = projectService.getProjects(dto.getProjectIds());
+            List<Long> currentProjectIds = entity.getProjects().stream().map(Project::getId).toList();
+            List<Long> newProjectIdsFromDto = dto.getProjectIds().stream()
+                    .filter(newProjectId -> isProjectNotAdded(currentProjectIds, newProjectId)).toList();
+            List<Project> newProjects = projectRepository.findAllById(newProjectIdsFromDto);
             List<Long> teamMemberIds = entity.getTeamMemberIds();
-            List<Project> newProjects = projectsFromDto.stream()
-                    .filter(newProject -> isProjectNotAdded(currentProjectIds, newProject.getId())).toList();
             List<Team> newTeams = newProjects.stream().flatMap(project -> project.getTeams().stream()).toList();
             List<Long> newTeamMemberIds = newTeams.stream().flatMap(
                             team -> team.getTeamMembers().stream()
                                     .map(TeamMember::getId).
                                     filter(id -> !teamMemberIds.contains(id)))
                     .toList();
-            entity.getProjects().addAll(newProjects);
-            entity.getTeamMemberIds().addAll(newTeamMemberIds);
+            if (!newProjects.isEmpty()) {
+                entity.getProjects().addAll(newProjects);
+            }
+            if (!newTeamMemberIds.isEmpty()) {
+                entity.getTeamMemberIds().addAll(newTeamMemberIds);
+            }
         }
     }
 
-    private static boolean isUserNotAdded(Moment entity, Long newUserId) {
-        return !entity.getTeamMemberIds().contains(newUserId);
+    private static boolean isTeamMemberNotAdded(Moment entity, Long newTeamMemberId) {
+        return !entity.getTeamMemberIds().contains(newTeamMemberId);
     }
 
     private static boolean isProjectNotAdded(List<Long> currentProjectIds, Long newProjectId) {

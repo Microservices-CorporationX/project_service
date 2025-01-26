@@ -6,8 +6,6 @@ import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -15,10 +13,6 @@ public class ProjectService {
 
     public Project getProject(Long id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Проект с id=" + id + "не найден!"));
-    }
-
-    public List<Project> getProjects(List<Long> projectIds) {
-        return projectRepository.findAllById(projectIds);
+                .orElseThrow(() -> new EntityNotFoundException("Проект с id=" + id + " не найден"));
     }
 }

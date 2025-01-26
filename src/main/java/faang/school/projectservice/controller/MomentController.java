@@ -2,7 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.moment.MomentCreateDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
-import faang.school.projectservice.dto.moment.MomentGetDto;
+import faang.school.projectservice.dto.moment.MomentReadDto;
 import faang.school.projectservice.dto.moment.MomentUpdateDto;
 import faang.school.projectservice.service.MomentService;
 import jakarta.validation.Valid;
@@ -19,23 +19,23 @@ import java.util.List;
 public class MomentController {
     private final MomentService momentService;
 
-    public MomentCreateDto createMoment(@Valid @RequestBody MomentCreateDto momentDto) {
+    public MomentReadDto createMoment(@Valid @RequestBody MomentCreateDto momentDto) {
         return momentService.create(momentDto);
     }
 
-    public MomentUpdateDto updateMoment(@Valid @RequestBody MomentUpdateDto momentDto) {
+    public MomentReadDto updateMoment(@Valid @RequestBody MomentUpdateDto momentDto) {
         return momentService.update(momentDto);
     }
 
-    public List<MomentGetDto> getFilteredMoments(@RequestBody MomentFilterDto filters) {
+    public List<MomentReadDto> getFilteredMoments(@Valid @RequestBody MomentFilterDto filters) {
         return momentService.getFilteredMoments(filters);
     }
 
-    public List<MomentGetDto> getAllMoments() {
+    public List<MomentReadDto> getAllMoments() {
         return momentService.getMoments();
     }
 
-    public MomentGetDto getMoment(@Valid @PathVariable @Positive long id) {
+    public MomentReadDto getMoment(@Valid @PathVariable @Positive long id) {
         return momentService.getMoment(id);
     }
 }
