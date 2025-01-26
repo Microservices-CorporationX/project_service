@@ -201,10 +201,7 @@ public class TaskServiceTest {
     @Test
     public void updateTask_UsersAreNotInSystem() {
         Long userId = userDto1.id();
-        UpdateTaskDto updateTaskDto = UpdateTaskDto.builder()
-                .description("oops")
-                .status(TaskStatus.TESTING)
-                .build();
+        UpdateTaskDto updateTaskDto;
         TeamMember teamMember = TeamMember.builder()
                 .id(1L)
                 .userId(userId)
@@ -221,16 +218,17 @@ public class TaskServiceTest {
         Mockito.when(client.getUsersByIds(Mockito.anyList()))
                 .thenReturn(new ArrayList<>(Arrays.asList(userDto1, null)));
 
+        updateTaskDto = UpdateTaskDto.builder()
+                .description("oops")
+                .status(TaskStatus.TESTING)
+                .build();
         Assertions.assertThrows(UserWasNotFoundException.class, () ->
                 taskService.updateTask(updateTaskDto, task.getId(), userId));
     }
 
     @Test
     public void getTasksFilter_SuccessFilter() {
-        TaskGettingDto taskGettingDto = TaskGettingDto.builder()
-                .word("something")
-                .status(TaskStatus.TESTING)
-                .build();
+        TaskGettingDto taskGettingDto;
         Task taskTest = Task.builder()
                 .id(1L)
                 .name("something")
@@ -252,6 +250,11 @@ public class TaskServiceTest {
         Mockito.when(projectRepository.findById(project.getId()))
                 .thenReturn(Optional.ofNullable(project));
 
+
+        taskGettingDto = TaskGettingDto.builder()
+                .word("something")
+                .status(TaskStatus.TESTING)
+                .build();
         taskService.getTasksFilter(taskGettingDto, userDto1.id(), project.getId());
     }
 }
