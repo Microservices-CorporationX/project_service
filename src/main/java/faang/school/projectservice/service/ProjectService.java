@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+
 import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.CreateProjectRequest;
@@ -31,6 +32,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final List<ProjectFilter> projectFilters;
+
+    public Project getProject(long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found"));
+    }
 
     public ProjectResponse createProject(CreateProjectRequest createProjectRequest) {
         validUser(createProjectRequest.ownerId());
