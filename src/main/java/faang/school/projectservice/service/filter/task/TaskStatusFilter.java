@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class NameFilter implements TaskGetting {
+public class TaskStatusFilter implements TaskGetting {
     @Override
     public Stream<Task> filter(Stream<Task> stream, TaskGettingDto request) {
-        return stream.filter(task -> task.getName().contains(request.word()));
+        return stream.filter(task -> task.getStatus().equals(request.status()));
     }
 
     @Override
     public boolean isApplicable(TaskGettingDto request) {
-        return request.word() != null;
+        return request.status() != null;
     }
 }

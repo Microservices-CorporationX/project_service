@@ -3,7 +3,7 @@ package faang.school.projectservice.service.filter;
 import faang.school.projectservice.dto.task.TaskGettingDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
-import faang.school.projectservice.service.filter.task.NameFilter;
+import faang.school.projectservice.service.filter.task.TaskStatusFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class NameFilterTest {
-    private NameFilter nameFilter;
+public class TaskStatusFilterTest {
+    private TaskStatusFilter taskStatusFilter;
     private TaskGettingDto taskGettingDto;
     private static Task task1;
     private static Task task2;
@@ -31,7 +31,7 @@ public class NameFilterTest {
                 .name("Another Task")
                 .status(TaskStatus.CANCELLED)
                 .build();
-        nameFilter = new NameFilter();
+        taskStatusFilter = new TaskStatusFilter();
         taskGettingDto = TaskGettingDto.builder()
                 .word("Task 1")
                 .status(TaskStatus.TESTING)
@@ -39,50 +39,53 @@ public class NameFilterTest {
     }
 
     @Test
-    void testFilter_WithMatchingName() {
+    void testFilter_WithMatchingStatus() {
         Stream<Task> tasks = Stream.of(task1, task2);
 
-        Stream<Task> filtered = nameFilter.filter(tasks, taskGettingDto);
+        Stream<Task> filtered = taskStatusFilter.filter(tasks, taskGettingDto);
 
-        assertTrue(filtered.anyMatch(task -> task.getName().equals(task1.getName())));
+        assertTrue(filtered.anyMatch(task -> task.getStatus().equals(task1.getStatus())));
     }
 
     @Test
-    void testFilter_WithNoMatchingName() {
+    void testFilter_WithNoMatchingStatus() {
         Stream<Task> tasks = Stream.of(task1, task2);
         task1 = Task.builder()
                 .name("What?")
+                .status(TaskStatus.DONE)
                 .build();
 
-        Stream<Task> filtered = nameFilter.filter(tasks, taskGettingDto);
+        Stream<Task> filtered = taskStatusFilter.filter(tasks, taskGettingDto);
 
-        assertFalse(filtered.anyMatch(task -> task.getName().equals(task1.getName())));
+        assertFalse(filtered.anyMatch(task -> task.getStatus().equals(task1.getStatus())));
     }
 
     @Test
-    void testIsApplicable_WithNullWord() {
+    void testIsApplicable_WithNullStatus() {
         task1 = Task.builder()
                 .name("Task 1")
                 .build();
         taskGettingDto = TaskGettingDto.builder()
-                .word(null)
+                .status(null)
                 .build();
 
-        boolean filtered = nameFilter.isApplicable(taskGettingDto);
+        boolean filtered = taskStatusFilter.isApplicable(taskGettingDto);
 
         assertFalse(filtered);
     }
 
     @Test
-    void testIsApplicable_WithWord() {
+    void testIsApplicable_WithStatus() {
         task1 = Task.builder()
                 .name("Task 1")
+                .status(TaskStatus.TESTING)
                 .build();
         taskGettingDto = TaskGettingDto.builder()
                 .word("Task")
+                .status(TaskStatus.TESTING)
                 .build();
 
-        boolean filtered = nameFilter.isApplicable(taskGettingDto);
+        boolean filtered = taskStatusFilter.isApplicable(taskGettingDto);
 
         assertTrue(filtered);
     }

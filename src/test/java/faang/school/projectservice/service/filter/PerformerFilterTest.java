@@ -4,7 +4,6 @@ import faang.school.projectservice.dto.task.TaskGettingDto;
 import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.service.filter.task.PerformerFilter;
-import faang.school.projectservice.service.filter.task.StatusFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

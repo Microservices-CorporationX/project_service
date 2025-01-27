@@ -12,9 +12,11 @@ import faang.school.projectservice.exception.UserWasNotFoundException;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
+import faang.school.projectservice.model.TaskStatus;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.command.TaskUpdateRegistry;
 import faang.school.projectservice.service.filter.task.TaskGetting;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,25 +34,38 @@ import java.util.Objects;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
+    private final StageRepository stageRepository;
     private final TaskMapper taskMapper;
     private final UserServiceClient userServiceClient;
-    private final TaskUpdateRegistry taskUpdateRegistry;
     private final List<TaskGetting> filters;
 
     @Transactional
     public TaskResult createTask(CreateTaskDto createTaskDto) {
         Project project = findByProjectId(createTaskDto.projectId());
         Long taskCreatorId = createTaskDto.reporterUserId();
-        areUsersInSystem(createTaskDto.performerUserId(),
-                createTaskDto.reporterUserId());
-        isItOnePerson(createTaskDto.performerUserId(),
-                createTaskDto. reporterUserId());
+        areUsersInSystem(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
+        isItOnePerson(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
         isUserInProject(project, taskCreatorId);
+
+        Task parentTask = taskRepository.findById(createTaskDto.parentTaskId())
+                .orElse(null);
+        Stage stage = stageRepository.findById(createTaskDto.stageId())
+                .orElse(null);
+        List<Task> linkedTasks = createTaskDto.linkedTaskIds() != null
+                ? createTaskDto.linkedTaskIds().stream().map(this::findTaskById).toList()
+                : List.of();
+
         Task task = Task.builder()
                 .name(createTaskDto.name())
+                .description(createTaskDto.description())
+                .status(createTaskDto.status() != null ? createTaskDto.status() : TaskStatus.TODO)
                 .performerUserId(createTaskDto.performerUserId())
-                .reporterUserId(createTaskDto.performerUserId())
+                .reporterUserId(createTaskDto.reporterUserId())
                 .project(project)
+                .parentTask(parentTask)
+                .stage(stage)
+                .linkedTasks(linkedTasks)
+                .minutesTracked(createTaskDto.minutesTracked())
                 .build();
 
         project.getTasks().add(task);
@@ -65,8 +80,8 @@ public class TaskService {
         Task task = findTaskById(taskId);
         isUserInProject(task.getProject(), userId);
         areUsersInSystem(userId);
-        taskUpdateRegistry.getCommands(updateTaskDto)
-                .forEach(command -> command.execute(task, updateTaskDto));
+
+        taskMapper.updateTaskFromDto(updateTaskDto, task);
 
         log.info("Task with id : {}, was updated by user with id: {}", taskId, userId);
         return taskMapper.toDto(task);

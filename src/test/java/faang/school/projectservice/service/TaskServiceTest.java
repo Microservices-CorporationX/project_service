@@ -12,10 +12,8 @@ import faang.school.projectservice.exception.UserWasNotFoundException;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
+import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
-import faang.school.projectservice.service.command.TaskUpdateRegistry;
-import faang.school.projectservice.service.filter.task.NameFilter;
-import faang.school.projectservice.service.filter.task.StatusFilter;
 import faang.school.projectservice.service.filter.task.TaskGetting;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,9 +41,9 @@ public class TaskServiceTest {
     @Mock
     private ProjectRepository projectRepository;
     @Mock
-    private UserServiceClient client;
+    private StageRepository stageRepository;
     @Mock
-    private TaskUpdateRegistry taskUpdateRegistry;
+    private UserServiceClient client;
     @Spy
     private List<TaskGetting> filters = new ArrayList<>();
     @Spy

@@ -1,14 +1,24 @@
 package faang.school.projectservice.dto.task;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
+import faang.school.projectservice.model.TaskStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.NonNull;
 
+import java.util.List;
+
 @Builder
 public record CreateTaskDto(
-    @NotBlank String name,
-    @NonNull @Positive Long performerUserId,
-    @NonNull @Positive Long reporterUserId,
-    @NotBlank Long projectId
+        @NotBlank String name,
+        @Size(max = 1024) String description,
+        @Enumerated(EnumType.STRING) TaskStatus status,
+        @Positive Long stageId,
+        @Positive Long parentTaskId,
+        List<@Positive Long> linkedTaskIds,
+        @PositiveOrZero Integer minutesTracked,
+        @NonNull @Positive Long performerUserId,
+        @NonNull @Positive Long reporterUserId,
+        @NonNull @Positive Long projectId
 ) {}
