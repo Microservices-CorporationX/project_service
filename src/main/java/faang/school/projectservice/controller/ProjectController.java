@@ -2,6 +2,7 @@ package faang.school.projectservice.controller;
 
 import faang.school.projectservice.dto.client.project.ProjectDto;
 import faang.school.projectservice.service.ProjectService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +16,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/{projectId}")
-    public ProjectDto getProject(@PathVariable long projectId) {
+    public ProjectDto getProject(@PathVariable @Min(value = 1L) long projectId) {
         return projectService.getProject(projectId);
     }
 }
