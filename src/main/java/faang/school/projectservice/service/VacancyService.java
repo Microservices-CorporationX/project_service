@@ -73,7 +73,7 @@ public class VacancyService {
     public GetVacancyResponse getById(long id) {
         Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
         if (vacancyOptional.isPresent()) {
-
+            return vacancyMapper.toGetResponse(vacancyOptional.get());
         } else {
             throw new DataValidationException("There is no vacancy for this ID");
         }

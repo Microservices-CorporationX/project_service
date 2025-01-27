@@ -2,6 +2,7 @@ package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.vacancy.CreateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.model.Candidate;
@@ -30,6 +31,10 @@ public interface VacancyMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
     UpdateVacancyResponse toUpdateResponse(Vacancy vacancy);
+
+    @Mapping(source = "project.id", target = "projectId")
+    @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
+    GetVacancyResponse toGetResponse(Vacancy vacancy);
 
     @Named("mapCandidatesToIds")
     default List<Long> mapCandidatesToIds(List<Candidate> candidates) {
