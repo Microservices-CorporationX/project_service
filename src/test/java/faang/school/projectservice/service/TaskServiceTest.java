@@ -65,6 +65,7 @@ public class TaskServiceTest {
                 .projectId(1L)
                 .build();
         taskResult = TaskResult.builder()
+                .description("Hello world")
                 .id(1L)
                 .build();
         project = Project.builder()
@@ -167,8 +168,7 @@ public class TaskServiceTest {
                 .id(1L)
                 .build();
         UpdateTaskDto updateTaskDto = UpdateTaskDto.builder()
-                .description("oops")
-                .status(TaskStatus.TESTING)
+                .description("Hello world")
                 .build();
 
         project.getTeams().add(team);
