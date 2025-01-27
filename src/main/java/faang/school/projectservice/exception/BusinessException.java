@@ -11,8 +11,8 @@ package faang.school.projectservice.exception;
  * которые не всегда могут быть восстановлены, и должно быть обработано на более высоком уровне в приложении.
  * </p>
  */
-
 public class BusinessException extends RuntimeException {
+
     public BusinessException(String message) {
         super(message);
     }
