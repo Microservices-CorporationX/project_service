@@ -38,7 +38,7 @@ public class InternshipController {
     }
 
     @PostMapping("/filter")
-    public List<InternshipResponse> getInternshipsByFilter (InternshipFilterRequest filterRequest) {
+    public List<InternshipResponse> getInternshipsByFilter(InternshipFilterRequest filterRequest) {
         return internshipService.getInternshipsByFilter(filterRequest);
     }
 

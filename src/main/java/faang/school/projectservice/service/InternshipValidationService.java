@@ -12,9 +12,10 @@ import java.time.temporal.ChronoUnit;
 @Service
 @RequiredArgsConstructor
 public class InternshipValidationService {
-    private  final ProjectRepository projectRepository;
-    public void validateRequest (Object request) {
-        if(request == null){
+    private final ProjectRepository projectRepository;
+
+    public void validateRequest(Object request) {
+        if (request == null) {
             throw new IllegalArgumentException("Запрос не может быть пустым");
         }
 
@@ -46,7 +47,7 @@ public class InternshipValidationService {
             if (!isInternshipMentorInProjectTeam) {
                 throw new IllegalArgumentException("Ментор должен состоять в команде проекта");
             }
-        } else if(request instanceof InternshipUpdateRequest dto){
+        } else if (request instanceof InternshipUpdateRequest dto) {
             if (dto.startDate().isAfter(dto.endDate())) {
                 throw new IllegalArgumentException("Начало стажировки должно быть раньше чем ее конец");
             }

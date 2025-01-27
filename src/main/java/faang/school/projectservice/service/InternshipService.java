@@ -49,10 +49,10 @@ public class InternshipService {
         }
     }
 
-    public List<InternshipResponse> getInternshipsByFilter (@Valid InternshipFilterRequest filterRequest) {
+    public List<InternshipResponse> getInternshipsByFilter(@Valid InternshipFilterRequest filterRequest) {
         Stream<Internship> internships = internshipRepository.findAll().stream();
 
-        for (InternshipFilter filter : internshipFilters){
+        for (InternshipFilter filter : internshipFilters) {
             internships = filter.filter(internships, filterRequest);
         }
 
