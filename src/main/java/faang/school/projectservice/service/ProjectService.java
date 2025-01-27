@@ -1,9 +1,10 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.model.Project;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ProjectService {
-    Optional<Project> getProject(Long id);
+    List<Project> getProjectsByIds (List<Long> projectIds);
 }

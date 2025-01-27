@@ -5,42 +5,41 @@ import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
-import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.MomentFilter;
 import faang.school.projectservice.service.MomentService;
-import io.micrometer.common.util.StringUtils;
+import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
-import static java.time.LocalDateTime.parse;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MomentServiceImpl implements MomentService {
-    private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
+    private static final String DATE_FORMAT = Constants.DATE_FORMAT;
 
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
+    private final ProjectService projectService;
+    private final MomentServiceValidator momentServiceValidator;
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.ENGLISH);
 
     @Override
     public MomentResponseDto createMoment(MomentRequestDto momentRequestDto) {
-        validateMoment(momentRequestDto);
-        //Moment momentToSave = momentMapper.toMomentEntity(momentRequestDto);
+        momentServiceValidator.validateMoment(momentRequestDto);
         Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
         MomentResponseDto createdMomentResponseDto = momentMapper.toMomentResponseDto(momentSaved);
         log.info("Created moment {}", createdMomentResponseDto);
@@ -49,21 +48,22 @@ public class MomentServiceImpl implements MomentService {
 
     @Override
     public MomentResponseDto updateMoment(MomentRequestDto momentRequestDto) {
-        validateMomentId(momentRequestDto);
-        validateMoment(momentRequestDto);
+        momentServiceValidator.validateMomentIdNotNull(momentRequestDto);
+        momentServiceValidator.validateMoment(momentRequestDto);
 
-        MomentResponseDto initialMomentDto = this.getMoment(momentRequestDto.id());
-        updateMomentMembersAndProjects(momentMapper.toMomentEntity(initialMomentDto),
-                momentMapper.toMomentEntity(momentRequestDto));
+        MomentResponseDto initialMomentDto = getMoment(momentRequestDto.id());
+        MomentRequestDto updatedMomentDto = updateMomentData(initialMomentDto, momentRequestDto);
 
-        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
-        return createMoment(momentRequestDto);
+        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(updatedMomentDto));
+        MomentResponseDto momentSavedDto = momentMapper.toMomentResponseDto(momentSaved);
+        log.info("Updated moment {}", momentSavedDto);
+        return momentSavedDto;
     }
 
     @Override
     public List<MomentResponseDto> getMoments(MomentFilterDto filter) {
         List<Moment> moments = momentRepository.findAll();
-        return momentMapper.toMomentResponseDtos(moments);
+        return getFilteredMoments(moments.stream(), filter);
     }
 
     @Override
@@ -79,13 +79,7 @@ public class MomentServiceImpl implements MomentService {
         return momentMapper.toMomentResponseDto(moment);
     }
 
-    private void validateMomentId(MomentRequestDto momentRequestDto)
-    {
-        if (StringUtils.isBlank(String.valueOf(momentRequestDto.id()))) {
-            log.error("Unable update moment, because it's Id is null {}", momentRequestDto);
-            throw new IllegalArgumentException("Unable update moment, because it's Id is null");
-        }
-    }
+
 
     /*private void addProject(Moment moment, Project project) {
         List<Project> projects = moment.getProjects();
@@ -115,53 +109,64 @@ public class MomentServiceImpl implements MomentService {
                 .toList();
     }
 
-    private Moment updateMomentMembersAndProjects(Moment initialMoment, Moment updatedMoment) {
-        List<Long> initialAllProjectTeamMembersIds = getAllProjectsTeamMemberIds(initialMoment);
-        List<Long> addedProjectTeamMembersIds = getAllProjectsTeamMemberIds(updatedMoment);
-        List<Long> initialTeamMembersIds = initialMoment.getUserIds();
-        List<Long> addedTeamMembersIds = updatedMoment.getUserIds();
-        List<Project> initialAllProjects = initialMoment.getProjects();
-        List<Project> addedProjects = updatedMoment.getProjects();
+    private MomentRequestDto updateMomentData(MomentResponseDto initialMomentDto, MomentRequestDto updatedMomentDto) {
+        List<Long> allTeamMembersIds = getAllMomentTeamMembersIds(initialMomentDto, updatedMomentDto);
+        List<Long> allProjectsIds = getAllMomentProjects(initialMomentDto, updatedMomentDto);
 
+        return MomentRequestDto.builder()
+                .teamMemberToAddIds(allTeamMembersIds)
+                .projectToAddIds(allProjectsIds)
+                .name(updatedMomentDto.name())
+                .description(updatedMomentDto.description())
+                .build();
+    }
+
+    private List<Long> getAllMomentTeamMembersIds(MomentResponseDto initialMomentDto,
+                                                  MomentRequestDto updatedMomentDto) {
+        List<Long> initialAllProjectTeamMembersIds
+                = getAllProjectsTeamMemberIds(momentMapper.toMomentEntity(initialMomentDto));
+        List<Long> addedProjectTeamMembersIds
+                = getAllProjectsTeamMemberIds(momentMapper.toMomentEntity(updatedMomentDto));
+        List<Long> initialTeamMembersIds = initialMomentDto.teamMembersIds();
+        List<Long> addedTeamMembersIds = updatedMomentDto.teamMemberToAddIds();
         List<Long> resultTeamMemberIds = new ArrayList<>();
-        List<Project> resultProjectIds = new ArrayList<>();
 
         resultTeamMemberIds.addAll(initialTeamMembersIds);
         resultTeamMemberIds.addAll(initialAllProjectTeamMembersIds);
         resultTeamMemberIds.addAll(addedProjectTeamMembersIds);
         resultTeamMemberIds.addAll(addedTeamMembersIds);
 
-        resultProjectIds.addAll(initialAllProjects);
-        resultProjectIds.addAll(addedProjects);
+        return resultTeamMemberIds.stream()
+                .distinct()
+                .sorted()
+                .toList();
+    }
 
-        updatedMoment.setUserIds(resultTeamMemberIds.stream().distinct().sorted().toList());
-        updatedMoment.setProjects(resultProjectIds.stream().distinct().sorted().toList());
+    private List<Long> getAllMomentProjects(MomentResponseDto initialMomentDto,
+                                            MomentRequestDto updatedMomentDto) {
+        List<Long> initialAllProjects = initialMomentDto.projectIds();
+        List<Long> addedProjects = updatedMomentDto.projectToAddIds();
+        List<Long> resultProjects = new ArrayList<>();
 
-        return updatedMoment;
+        resultProjects.addAll(initialAllProjects);
+        resultProjects.addAll(addedProjects);
+
+        return resultProjects.stream()
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
+    private List<MomentResponseDto> getFilteredMoments(Stream<Moment> moments, MomentFilterDto momentFilterDto) {
+        for (MomentFilter momentFilter : momentFilters) {
+            if (momentFilter.isApplicable(momentFilterDto)) {
+                moments = momentFilter.apply(moments, momentFilterDto);
+            }
+        }
+        return moments
+                .map(momentMapper::toMomentResponseDto)
+                .toList();
     }
 
 
-    private void validateMoment(MomentRequestDto momentRequestDto) {
-        if (StringUtils.isBlank(momentRequestDto.name())) {
-            log.error("Moment cannot be with empty name!");
-            throw new IllegalArgumentException("Moment cannot be with empty name!");
-        }
-
-        try {
-            LocalDateTime date = parse(momentRequestDto.date(), formatter);
-        } catch (Exception e) {
-            log.error("Error converting date {} using format {}", momentRequestDto.date(), DATE_FORMAT);
-            throw new IllegalArgumentException("Error converting date "
-                    + momentRequestDto.date() + " using format " + DATE_FORMAT);
-        }
-
-
-        List<Long> projectIds = momentRequestDto.projectToAddIds();
-        if (null == projectIds || projectIds.isEmpty()) {
-            log.error("Moment cannot be without projects!");
-            throw new IllegalArgumentException("Moment cannot be without projects!");
-        }
-
-        List<Long> teamMembersIds = momentRequestDto.teamMemberToAddIds();
-    }
 }

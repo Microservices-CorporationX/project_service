@@ -6,6 +6,7 @@ import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.MomentFilter;
+import faang.school.projectservice.service.ProjectService;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,10 +27,15 @@ class MomentServiceImplTest {
 
     @Mock
     MomentRepository momentRepositoryMock;
+    @Mock
+    ProjectService projectService;
     @InjectMocks
     MomentServiceImpl momentService;
     @Spy
     MomentMapperImpl momentMapper;
+    @Mock
+    MomentServiceValidator momentServiceValidator;
+
 
     MomentRequestDto validMomentRequestDto;
     MomentRequestDto savedMomentResponseDto;
@@ -50,26 +56,26 @@ class MomentServiceImplTest {
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
                 .description("some description")
-                .projectIds(defaultProjectsIds)
+                .projectToAddIds(defaultProjectsIds)
                 .build();
         emptyProjectMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
                 .description("some description")
-                .projectIds(emptyProjectsIds)
+                .projectToAddIds(emptyProjectsIds)
                 .build();
         incorrectDateMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .date("20.01.2025 11:11:22")
                 .description("some description")
-                .projectIds(emptyProjectsIds)
+                .projectToAddIds(emptyProjectsIds)
                 .build();
         savedMomentResponseDto = MomentRequestDto.builder()
                 .id(123L)
                 .name("Cool moment")
                 .date("20/01/2025 11:11:22")
                 .description("some description")
-                .projectIds(defaultProjectsIds)
+                .projectToAddIds(defaultProjectsIds)
                 .build();
         momentFilterDto = MomentFilterDto.builder()
                 .dateFrom("test")
@@ -77,9 +83,11 @@ class MomentServiceImplTest {
                 .projectsIds(defaultProjectsIds)
                 .build();
 
-
-
-        momentService = new MomentServiceImpl(momentRepositoryMock, momentMapper, momentFilters);
+        momentService = new MomentServiceImpl(momentRepositoryMock,
+                momentMapper,
+                momentFilters,
+                projectService,
+                momentServiceValidator);
     }
 
     @Test

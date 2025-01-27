@@ -5,10 +5,11 @@ import faang.school.projectservice.dto.moment.MomentResponseDto;
 import faang.school.projectservice.model.Moment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "Spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MomentMapper {
     @Mapping(source = "date", target = "date", dateFormat = "dd/MM/yyyy HH:mm:ss")
     Moment toMomentEntity(MomentResponseDto momentResponseDto);
