@@ -79,25 +79,6 @@ public class MomentServiceImpl implements MomentService {
         return momentMapper.toMomentResponseDto(moment);
     }
 
-
-
-    /*private void addProject(Moment moment, Project project) {
-        List<Project> projects = moment.getProjects();
-        projects.add(project);
-        moment.setProjects(projects);
-        List<Long> teamMemberIds = getAllProjectsTeamMemberIds(moment);
-        moment.setUserIds(teamMemberIds);
-
-    }
-
-    private void addTeamMember(Moment moment, TeamMember teamMember) {
-        List<Long> teamMemberIds = moment.getUserIds();
-        teamMemberIds.add(teamMember.getId());
-        moment.setUserIds(teamMemberIds);
-        Project teamMemberProject = teamMember.getTeam().getProject();
-        addProject(moment, teamMemberProject);
-    }*/
-
     private List<Long> getAllProjectsTeamMemberIds(Moment moment) {
         return moment.getProjects().stream()
                 .filter(project -> project.getStatus() == ProjectStatus.IN_PROGRESS)
@@ -167,6 +148,4 @@ public class MomentServiceImpl implements MomentService {
                 .map(momentMapper::toMomentResponseDto)
                 .toList();
     }
-
-
 }

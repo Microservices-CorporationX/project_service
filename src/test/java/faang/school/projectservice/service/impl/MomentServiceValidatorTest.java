@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.service.ProjectService;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,22 +12,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class MomentServiceValidatorTest {
-
     @Mock
     ProjectService projectService;
+    @Spy
+    ProjectMapperImpl projectMapper;
     @InjectMocks
     MomentServiceValidator momentServiceValidator;
 
     private MomentRequestDto validMomentRequestDto;
     private MomentRequestDto validWithIdMomentRequestDto;
     private MomentRequestDto emptyNameMomentRequestDto;
-    //private MomentRequestDto emptyProjectIdsMomentRequestDto;
     private MomentRequestDto wrongDateMomentRequestDto;
     private MomentRequestDto wrongDateFormatMomentRequestDto;
 
@@ -52,12 +55,6 @@ class MomentServiceValidatorTest {
                 .projectToAddIds(List.of(1L, 2L, 3L))
                 .teamMemberToAddIds(List.of(10L, 20L, 30L))
                 .build();
-        /*emptyProjectIdsMomentRequestDto = MomentRequestDto.builder()
-                .name("Cool moment")
-                .description("It's a very cool moment")
-                .date("25/01/2025 12:11:10")
-                .teamMemberToAddIds(List.of(10L, 20L, 30L))
-                .build();*/
         wrongDateMomentRequestDto = MomentRequestDto.builder()
                 .name("Cool moment")
                 .description("It's a very cool moment")
@@ -70,8 +67,6 @@ class MomentServiceValidatorTest {
                 .date("2025/01/25 12:11:10")
                 .teamMemberToAddIds(List.of(10L, 20L, 30L))
                 .build();
-
-        //momentServiceValidator = new MomentServiceValidator(projectService);
     }
 
     @Test
@@ -85,7 +80,10 @@ class MomentServiceValidatorTest {
     @Test
     @DisplayName("Test active and non-active projects")
     void testValidateActiveProjects() {
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(TestData.getSomeActiveProjects());
+        List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
+                .map(project -> projectMapper.toProjectResponseDto(project))
+                .toList();
+        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
         momentServiceValidator.validateMoment(validMomentRequestDto);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> momentServiceValidator.validateMoment(emptyNameMomentRequestDto));
@@ -94,10 +92,16 @@ class MomentServiceValidatorTest {
     @Test
     @DisplayName("Test name of moments")
     void testValidateName() {
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(TestData.getSomeActiveProjects());
+        List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
+                .map(project -> projectMapper.toProjectResponseDto(project))
+                .toList();
+        List<ProjectResponseDto> someInactiveProjects = TestData.getSomeNotActiveProjects().stream()
+                .map(project -> projectMapper.toProjectResponseDto(project))
+                .toList();
+        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
         momentServiceValidator.validateMoment(validMomentRequestDto);
 
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(TestData.getSomeNotActiveProjects());
+        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someInactiveProjects);
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> momentServiceValidator.validateMoment(validMomentRequestDto));
     }
@@ -105,7 +109,10 @@ class MomentServiceValidatorTest {
     @Test
     @DisplayName("Test date of moments")
     void testValidateDate() {
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(TestData.getSomeActiveProjects());
+        List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
+                .map(project -> projectMapper.toProjectResponseDto(project))
+                .toList();
+        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
         momentServiceValidator.validateMoment(validMomentRequestDto);
 
         Assert.assertThrows(IllegalArgumentException.class,

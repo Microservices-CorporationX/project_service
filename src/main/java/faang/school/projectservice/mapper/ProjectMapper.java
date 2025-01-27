@@ -11,18 +11,9 @@ import java.util.List;
 @Mapper(componentModel = "Spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     Project toProjectEntity(ProjectRequestDto projectRequestDto);
-
     Project toProjectEntity(ProjectResponseDto projectRequestDto);
-
     ProjectRequestDto toProjectRequestDto (Project project);
-
     ProjectResponseDto toProjectResponseDto (Project project);
-
-    //List<Project> toProjectEntities(List<ProjectRequestDto> projectRequestDtos);
-
-    //List<Project> toProjectEntities(List<ProjectResponseDto> projectRequestDtos);
-
     List<ProjectRequestDto> toProjectRequestDtos(List<Project> projects);
-
     List<ProjectRequestDto> toProjectResponseDtos(List<Project> projects);
 }

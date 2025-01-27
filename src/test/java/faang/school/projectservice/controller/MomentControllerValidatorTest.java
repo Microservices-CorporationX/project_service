@@ -13,7 +13,6 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class MomentControllerValidatorTest {
-
     @InjectMocks
     MomentControllerValidator momentControllerValidator;
     MomentRequestDto validMomentRequestDto;

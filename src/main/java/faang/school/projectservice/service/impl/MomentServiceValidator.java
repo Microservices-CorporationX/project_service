@@ -1,7 +1,7 @@
 package faang.school.projectservice.service.impl;
 
 import faang.school.projectservice.dto.moment.MomentRequestDto;
-import faang.school.projectservice.model.Project;
+import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.utils.Constants;
@@ -38,7 +38,6 @@ public class MomentServiceValidator {
         validateMomentName(momentRequestDto);
         validateMomentDate(momentRequestDto);
         validateMomentAddedProjectIds(momentRequestDto);
-        //List<Long> teamMembersIds = momentRequestDto.teamMemberToAddIds();
     }
 
     private void validateMomentName(MomentRequestDto momentRequestDto) {
@@ -61,16 +60,15 @@ public class MomentServiceValidator {
     private void validateMomentAddedProjectIds(MomentRequestDto momentRequestDto) {
         List<Long> projectIds = momentRequestDto.projectToAddIds();
         if (projectIds != null && !projectIds.isEmpty()) {
-            List<Project> associatedProjects = projectService.getProjectsByIds(projectIds);
-            int activeProjectsQuantityInList = associatedProjects.stream()
-                    .filter(project -> project.getStatus().equals(ProjectStatus.IN_PROGRESS))
+            List<ProjectResponseDto> associatedProjects = projectService.getProjectsByIds(projectIds);
+            int activeProjectsListSize = associatedProjects.stream()
+                    .filter(project -> ProjectStatus.IN_PROGRESS.toString().equals(project.status()))
                     .toList()
                     .size();
-            if (activeProjectsQuantityInList < 1) {
+            if (activeProjectsListSize == 0) {
                 log.error("Moment {} must have at least one active project!", momentRequestDto);
                 throw new IllegalArgumentException("Moment must have at least one active project!");
             }
         }
     }
-
 }

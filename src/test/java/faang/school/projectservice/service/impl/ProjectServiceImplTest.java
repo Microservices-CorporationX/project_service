@@ -1,43 +1,32 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.repository.ProjectRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceImplTest {
-
     @Mock
     ProjectRepository projectRepositoryMock;
+    @Spy
+    ProjectMapperImpl projectMapper;
     @InjectMocks
     ProjectServiceImpl projectService;
-    Project sampleProject;
 
-    @BeforeEach
-    void setUp() {
-        sampleProject = Project.builder()
-                .id(1L)
-                .name("Project 1")
-                .description("Desc 1")
-                .status(ProjectStatus.CREATED)
-                .build();
+    @Test
+    @DisplayName("Test get Project")
+    void testGetProjectsByIds() {
+        List<Long> projectIds = List.of(1L,2L,3L);
+        projectService.getProjectsByIds(projectIds);
+        Mockito.verify(projectRepositoryMock, Mockito.times(1)).findAllById(projectIds);
     }
-
-    //@Test
-    //@DisplayName("Test get Project")
-/*    void getProject() {
-        Optional<Project> expectedResult = Optional.ofNullable(sampleProject);
-        Mockito.when(projectRepositoryMock.findById(1L)).thenReturn(expectedResult);
-        Optional<Project> optionalProject = projectService.getProject(1L);
-        Project project = optionalProject.orElse(new Project());
-
-        Assertions.assertEquals(project, sampleProject);
-    }
-*/
-
 }
