@@ -5,7 +5,9 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
+import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.CandidateRepository;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -52,11 +55,28 @@ public class VacancyService {
     }
 
     public void delete(long id) {
+        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
+        if (vacancyOptional.isPresent()) {
+            List<Long> candidateIds = vacancyOptional.get()
+                    .getCandidates()
+                    .stream()
+                    .map(Candidate::getId)
+                    .toList();
 
+            candidateRepository.deleteAllById(candidateIds);
+            vacancyRepository.deleteById(id);
+        } else {
+            throw new DataValidationException("There is no vacancy for this ID");
+        }
     }
 
     public GetVacancyResponse getById(long id) {
+        Optional<Vacancy> vacancyOptional = vacancyRepository.findById(id);
+        if (vacancyOptional.isPresent()) {
 
+        } else {
+            throw new DataValidationException("There is no vacancy for this ID");
+        }
     }
 
     public List<GetVacancyResponse> getAll() { // с фильтрацией
