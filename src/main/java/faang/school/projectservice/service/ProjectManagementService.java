@@ -35,7 +35,6 @@ public class ProjectManagementService {
 
         Project project = projectEntityMapper.toEntity(projectCreateDto);
         projectRepository.save(project);
-        log.info("Проект с ID: {} и владельцем с ID: {} сохранен", project.getId(), project.getOwnerId());
         return projectEntityMapper.toProjectDto(project);
     }
 
@@ -48,7 +47,6 @@ public class ProjectManagementService {
 
         projectEntityMapper.updateEntityFromDto(projectUpdateDto, project);
         projectRepository.save(project);
-        log.info("Проект с ID: {} обновлен", project.getId());
         return projectEntityMapper.toProjectDto(project);
     }
 
