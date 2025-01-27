@@ -6,5 +6,5 @@ import faang.school.projectservice.model.Internship;
 import java.util.stream.Stream;
 
 public interface InternshipFilter {
-    Stream<Internship> filter (Stream<Internship> stream, InternshipFilterRequest request);
+    Stream<Internship> filter(Stream<Internship> stream, InternshipFilterRequest request);
 }

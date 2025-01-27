@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record InternshipResponse (long id, long projectId, long mentorId,
-                                  List<Long> internIds, LocalDateTime startDate,
-                                  LocalDateTime endDate, InternshipStatus status, TeamRole role) {
+public record InternshipResponse(long id, long projectId, long mentorId,
+                                 List<Long> internIds, LocalDateTime startDate,
+                                 LocalDateTime endDate, InternshipStatus status, TeamRole role) {
 
 }

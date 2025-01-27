@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 @Component
-public class RoleFilter implements InternshipFilter{
+public class RoleFilter implements InternshipFilter {
     @Override
-    public Stream<Internship> filter (Stream<Internship> stream, InternshipFilterRequest request){
+    public Stream<Internship> filter(Stream<Internship> stream, InternshipFilterRequest request) {
         return request.roles() == null
                 ? stream
                 : stream.filter(internship -> request.roles().stream()

@@ -7,6 +7,6 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record InternshipFilterRequest (List<TeamRole> roles, InternshipStatus status) {
+public record InternshipFilterRequest(List<TeamRole> roles, InternshipStatus status) {
 
 }
