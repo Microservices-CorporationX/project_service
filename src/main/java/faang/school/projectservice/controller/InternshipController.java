@@ -1,12 +1,10 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.client.InternshipDto;
+
 import faang.school.projectservice.dto.client.internship.InternshipCreateRequest;
 import faang.school.projectservice.dto.client.internship.InternshipFilterRequest;
 import faang.school.projectservice.dto.client.internship.InternshipResponse;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateRequest;
-import faang.school.projectservice.model.InternshipStatus;
-import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.service.InternshipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

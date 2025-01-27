@@ -1,6 +1,5 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.InternshipDto;
 import faang.school.projectservice.dto.client.internship.InternshipCreateRequest;
 import faang.school.projectservice.dto.client.internship.InternshipResponse;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateRequest;
