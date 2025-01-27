@@ -5,7 +5,7 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
-import feign.FeignException;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,13 +47,13 @@ class ProjectServiceTest {
     }
 
     @Test
-    void getProject_WhenProjectDoesNotExist_ThrowsFeignExceptionNotFound() {
+    void getProject_WhenProjectDoesNotExist_ThrowsEntityNotFoundException() {
         long projectId = 1L;
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
-        FeignException.NotFound exception = assertThrows(
-                FeignException.NotFound.class,
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
                 () -> projectService.getProject(projectId)
         );
 
