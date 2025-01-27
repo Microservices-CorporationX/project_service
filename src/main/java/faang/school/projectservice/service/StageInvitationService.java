@@ -2,8 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDto;
-import faang.school.projectservice.exception.BusinessException;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.stage.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
@@ -14,13 +12,11 @@ import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.validator.StageInvitationValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StageInvitationService {
@@ -39,14 +35,8 @@ public class StageInvitationService {
                 .validateInvitedMemberTeam(stageInvitationDto.getAuthorId(), stageInvitationDto.getInvitedId());
 
         StageInvitation stageInvitation;
-        try {
-            stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto, teamMemberRepository, stageRepository);
-        } catch (EntityNotFoundException e) {
-            log.error("Сущность не найдена в базе данных {}", e.getMessage());
-            throw e;
-        }
-        saveStageInvitation(stageInvitation);
-        log.info("Было создано новое приглашение с id: {}", stageInvitation.getId());
+        stageInvitation = stageInvitationMapper.toEntity(stageInvitationDto, teamMemberRepository, stageRepository);
+        stageInvitationRepository.save(stageInvitation);
 
         return stageInvitationMapper.toDto(stageInvitation);
     }
@@ -58,8 +48,7 @@ public class StageInvitationService {
 
         invited.getStages().add(stageInvitation.getStage());
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
-        saveStageInvitation(stageInvitation);
-        log.info("Приглашение присоединиться к этапу с id: {} было принято.", stageInvitation.getId());
+        stageInvitationRepository.save(stageInvitation);
 
         return stageInvitationMapper.toDto(stageInvitation);
     }
@@ -72,9 +61,7 @@ public class StageInvitationService {
         invited.getStages().remove(stageInvitation.getStage());
         stageInvitation.setRejectionReason(rejectionReason);
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
-        saveStageInvitation(stageInvitation);
-        log.info("Приглашение присоединиться к этапу с id: {} было отклонено. \nПричина: {}",
-                stageInvitation.getId(), rejectionReason);
+        stageInvitationRepository.save(stageInvitation);
 
         return stageInvitationMapper.toDto(stageInvitation);
     }
@@ -92,14 +79,5 @@ public class StageInvitationService {
                 .flatMap(stageInvitationFilter -> stageInvitationFilter.apply(stageInvitationsFiltered, filter))
                 .map(stageInvitationMapper::toDto)
                 .toList();
-    }
-
-    private void saveStageInvitation(StageInvitation stageInvitation) {
-        try {
-            stageInvitationRepository.save(stageInvitation);
-        } catch (BusinessException e) {
-            log.error("Ошибка при сохранении приглашения на этап в базу данных {}", e.getMessage());
-            throw e;
-        }
     }
 }

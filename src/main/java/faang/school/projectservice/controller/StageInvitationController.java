@@ -22,31 +22,28 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/invitations")
+@RequestMapping("/v1/invitations")
 public class StageInvitationController {
     private final StageInvitationService stageInvitationService;
 
-    @PostMapping("/create")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public StageInvitationDto createStageInvitation(@Valid @RequestBody StageInvitationDto stageInvitationDto) {
         return stageInvitationService.createStageInvitation(stageInvitationDto);
     }
 
-    @PutMapping("/accept/{stageInvitationId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/acceptance/{stageInvitationId}")
     public StageInvitationDto acceptStageInvitation(@PathVariable @Min(1) long stageInvitationId) {
         return stageInvitationService.acceptStageInvitation(stageInvitationId);
     }
 
-    @PutMapping("/reject/{participantId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/rejection/{participantId}")
     public StageInvitationDto rejectStageInvitation(@PathVariable @Min(1) long participantId,
                                                     @NotBlank @RequestBody String rejectionReason) {
         return stageInvitationService.rejectStageInvitation(participantId, rejectionReason);
     }
 
     @PostMapping("/participant/{participantId}")
-    @ResponseStatus(HttpStatus.OK)
     public List<StageInvitationDto> getAllInvitationsForOneParticipant(@PathVariable @Min(1) long participantId,
                                                                        @RequestBody StageInvitationFilterDto filter) {
         return stageInvitationService.getAllInvitationsForOneParticipant(participantId, filter);

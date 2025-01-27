@@ -9,8 +9,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class StageInvitationValidator {
@@ -38,18 +36,16 @@ public class StageInvitationValidator {
     }
 
     public void validateInvitedMemberTeam(long authorId, long invitedId) {
-        Optional<TeamMember> authorTeamMemberOpt = teamMemberRepository.findById(authorId);
-        Optional<TeamMember> invitedTeamMemberOpt = teamMemberRepository.findById(invitedId);
+        TeamMember authorTeamMember = teamMemberRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format(
+                        "Автор с id: %s не найден в базе данных.", authorId)));
 
-        if (authorTeamMemberOpt.isEmpty()) {
-            throw new EntityNotFoundException("Автор не найден в базе данных.");
-        }
-        if (invitedTeamMemberOpt.isEmpty()) {
-            throw new EntityNotFoundException("Приглашенный не найден в базе данных.");
-        }
+        TeamMember invitedTeamMember = teamMemberRepository.findById(invitedId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format(
+                        "Приглашенный с id: %s не найден в базе данных.", invitedId)));
 
-        Long authorTeamId = authorTeamMemberOpt.get().getTeam().getId();
-        Long invitedTeamId = invitedTeamMemberOpt.get().getTeam().getId();
+        Long authorTeamId = authorTeamMember.getTeam().getId();
+        Long invitedTeamId = invitedTeamMember.getTeam().getId();
 
         if (!authorTeamId.equals(invitedTeamId)) {
             throw new BusinessException(String.format(

@@ -19,6 +19,6 @@ public class StageInvitationFilterDto {
     private StageInvitationStatus status;
 
     @NotNull
-    @Positive(message = "Id должно быть больше нуля")
+    @Positive(message = "Id автора должен быть больше нуля")
     private Long authorId;
 }
