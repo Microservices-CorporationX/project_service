@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 public class MomentService {
     private final MomentMapper momentMapper;
     private final MomentRepository momentRepository;
-    private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final MomentValidator momentValidator;
     private final TeamMemberRepository teamMemberRepository;

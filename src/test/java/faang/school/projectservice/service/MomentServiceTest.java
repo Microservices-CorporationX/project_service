@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,9 +58,6 @@ class MomentServiceTest {
     private MomentRepository momentRepository;
 
     @Mock
-    private ProjectService projectService;
-
-    @Mock
     private ProjectRepository projectRepository;
 
     @Mock
@@ -82,7 +78,6 @@ class MomentServiceTest {
         filters = List.of(dateFilter);
         momentService = new MomentService(momentMapper,
                 momentRepository,
-                projectService,
                 projectRepository,
                 momentValidator,
                 teamMemberRepository,
