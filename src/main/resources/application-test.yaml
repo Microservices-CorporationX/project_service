@@ -1,2 +1,18 @@
 calculations_messages_processing:
   enabled: false
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: sa
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
+  logging:
+    level:
+      liquibase: DEBUG

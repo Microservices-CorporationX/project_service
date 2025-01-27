@@ -1,6 +1,9 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.client.InternshipDto;
+import faang.school.projectservice.dto.client.internship.InternshipCreateRequest;
+import faang.school.projectservice.dto.client.internship.InternshipResponse;
+import faang.school.projectservice.dto.client.internship.InternshipUpdateRequest;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
@@ -17,15 +20,15 @@ public interface InternshipMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "interns", target = "internIds", qualifiedByName = "internsMap")
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "mentorToLong")
-    InternshipDto toDto(Internship internship);
+    InternshipResponse toDto(Internship internship);
 
     @Mapping(target = "project", ignore = true)
     @Mapping(target = "interns", ignore = true)
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
-    Internship toEntity(InternshipDto dto);
+    Internship toEntity(InternshipCreateRequest dto);
 
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
-    void update(InternshipDto dto, @MappingTarget Internship internship);
+    void update(InternshipUpdateRequest dto, @MappingTarget Internship internship);
 
     @Named("internsMap")
     default List<Long> internsMap(List<TeamMember> interns) {
