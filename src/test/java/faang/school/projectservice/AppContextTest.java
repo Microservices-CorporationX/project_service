@@ -5,29 +5,32 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest
+@Testcontainers
 public class AppContextTest {
     @Autowired
-    private ProjectServiceApplication projectServiceApplication;
+    private ApplicationContext applicationContext;
 
     @Autowired
-    private DataSource dataSource;
+    private JdbcTemplate jdbcTemplate;
 
+    @Container
     private static final PostgreSQLContainer<?> postgresContainer;
 
     static {
         postgresContainer = new PostgreSQLContainer<>(DockerImageName.parse("postgres:13.3"))
-                .withCreateContainerCmdModifier(cmd -> cmd.withName("testDb"))
+                .withDatabaseName("testdb")
                 .withUsername("user")
                 .withPassword("password")
                 .waitingFor(Wait.forListeningPort());
@@ -40,13 +43,14 @@ public class AppContextTest {
 
     @Test
     public void contextLoads() {
-        assertNotNull(projectServiceApplication);
+        assertNotNull(applicationContext);
 
-        try (Connection connection = dataSource.getConnection()) {
-            assertNotNull(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        jdbcTemplate.execute("SELECT 1");
+
+        assertTrue(postgresContainer.isRunning());
+
+        String result = jdbcTemplate.queryForObject("SELECT current_database()", String.class);
+        assertNotNull(result);
     }
 
     @AfterAll
