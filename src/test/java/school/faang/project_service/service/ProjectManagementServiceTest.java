@@ -2,7 +2,7 @@ package school.faang.project_service.service;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.ProjectInfoDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
@@ -10,10 +10,10 @@ import faang.school.projectservice.exception.NoAccessException;
 import faang.school.projectservice.fillters.project.ProjectFilter;
 import faang.school.projectservice.fillters.project.impl.ProjectNameFilter;
 import faang.school.projectservice.fillters.project.impl.ProjectStatusFilter;
-import faang.school.projectservice.mapper.ProjectMapperImpl;
+import faang.school.projectservice.mapper.ProjectEntityMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectService;
+import faang.school.projectservice.service.ProjectManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,13 +31,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProjectServiceTest {
+public class ProjectManagementServiceTest {
     private static final long OWNER_ID = 2L;
     private static final long PROJECT_ID = 1L;
 
     private ProjectRepository projectRepository;
-    private ProjectMapperImpl projectMapper;
-    private ProjectService projectService;
+    private ProjectEntityMapperImpl projectMapper;
+    private ProjectManagementService projectManagementService;
     private List<ProjectFilter> projectFilters;
     @Captor
     private ArgumentCaptor<Project> projectCaptor;
@@ -64,9 +64,9 @@ public class ProjectServiceTest {
         filterDto.setStatusPattern(ProjectStatus.CREATED);
 
         projectRepository = mock(ProjectRepository.class);
-        projectMapper = spy(ProjectMapperImpl.class);
+        projectMapper = spy(ProjectEntityMapperImpl.class);
         projectFilters = List.of(mock(ProjectNameFilter.class), mock(ProjectStatusFilter.class));
-        projectService = new ProjectService(projectRepository, projectMapper, projectFilters);
+        projectManagementService = new ProjectManagementService(projectRepository, projectMapper, projectFilters);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ProjectServiceTest {
 
         BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> projectService.createProject(createDto)
+                () -> projectManagementService.createProject(createDto)
         );
 
         assertEquals("Проект с таким названием уже существует для этого владельца", exception.getMessage());
@@ -86,7 +86,7 @@ public class ProjectServiceTest {
     void createProjectShouldSaveProjectSuccessfully() {
         mockExistByOwnerIdAndName(false);
 
-        projectService.createProject(createDto);
+        projectManagementService.createProject(createDto);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project project = projectCaptor.getValue();
         assertEquals(createDto.getName(), project.getName());
@@ -100,7 +100,7 @@ public class ProjectServiceTest {
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> projectService.updateProject(updateDto, OWNER_ID)
+                () -> projectManagementService.updateProject(updateDto, OWNER_ID)
         );
 
         assertEquals("Не существует проекта с ID: " + updateDto.getId(), exception.getMessage());
@@ -115,7 +115,7 @@ public class ProjectServiceTest {
 
         mockFindProjectById(existingProject);
 
-        projectService.updateProject(updateDto, OWNER_ID);
+        projectManagementService.updateProject(updateDto, OWNER_ID);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project updatedProject = projectCaptor.getValue();
 
@@ -138,7 +138,7 @@ public class ProjectServiceTest {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
         mockProjectFiltersReturnStream(Stream.of(project1));
 
-        List<ProjectReadDto> filteredProjects = projectService.getAllProjectsWithFilters(filterDto, OWNER_ID);
+        List<ProjectInfoDto> filteredProjects = projectManagementService.getAllProjectsWithFilters(filterDto, OWNER_ID);
 
         assertEquals(1, filteredProjects.size());
         assertEquals("Test Project 1", filteredProjects.get(0).getName());
@@ -158,7 +158,7 @@ public class ProjectServiceTest {
 
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
 
-        List<ProjectReadDto> projects = projectService.getAllProjects(OWNER_ID);
+        List<ProjectInfoDto> projects = projectManagementService.getAllProjects(OWNER_ID);
 
         assertEquals(2, projects.size());
         assertEquals(1L, projects.get(0).getId());
@@ -179,7 +179,7 @@ public class ProjectServiceTest {
 
         NoAccessException exception = assertThrows(
                 NoAccessException.class,
-                () -> projectService.getProjectById(PROJECT_ID, OWNER_ID)
+                () -> projectManagementService.getProjectById(PROJECT_ID, OWNER_ID)
         );
 
         assertEquals("У вас нет доступа к проекту с id: " + PROJECT_ID, exception.getMessage());
@@ -194,7 +194,7 @@ public class ProjectServiceTest {
 
         mockFindProjectById(project);
 
-        ProjectReadDto result = projectService.getProjectById(PROJECT_ID, OWNER_ID);
+        ProjectInfoDto result = projectManagementService.getProjectById(PROJECT_ID, OWNER_ID);
 
         assertNotNull(result);
         assertEquals(PROJECT_ID, result.getId());

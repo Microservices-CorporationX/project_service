@@ -1,7 +1,7 @@
 package faang.school.projectservice.mapper;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
-import faang.school.projectservice.dto.project.ProjectReadDto;
+import faang.school.projectservice.dto.project.ProjectInfoDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.*;
@@ -9,7 +9,7 @@ import org.mapstruct.*;
 import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ProjectMapper {
+public interface ProjectEntityMapper {
 
     @Mapping(target = "status", defaultValue = "CREATED")
     Project toEntity(ProjectCreateDto dto);
@@ -17,7 +17,7 @@ public interface ProjectMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(ProjectUpdateDto dto, @MappingTarget Project entity);
 
-    ProjectReadDto toProjectDto(Project project);
+    ProjectInfoDto toProjectDto(Project project);
 
     @AfterMapping
     default void setUpdatedAt(@MappingTarget Project entity) {
