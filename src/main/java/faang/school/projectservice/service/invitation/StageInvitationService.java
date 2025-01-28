@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.invitation.InvitationDto;
 import faang.school.projectservice.dto.invitation.SendInvitationRequest;
 import faang.school.projectservice.dto.invitation.SendInvitationResponse;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.model.stage_invitation.StageInvitation;
@@ -36,17 +37,16 @@ public class StageInvitationService {
     @Transactional
     public SendInvitationResponse sendInvitation(SendInvitationRequest request) {
         Stage stage = stageRepository.findById(request.stageId())
-                .orElseThrow(() -> new IllegalArgumentException("Stage not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Stage not found"));
 
         boolean alreadyExecutor = stage.getExecutors().stream()
                 .anyMatch(member -> member.getUserId().equals(request.invited()));
         if (alreadyExecutor) {
-            throw new IllegalArgumentException("User is already an executor of this stage");
+            throw new EntityNotFoundException("User is already an executor of this stage");
         }
 
         StageInvitation stageInvitation = mapper.toStageInvitation(request);
         stageInvitation.setStatus(StageInvitationStatus.PENDING);
-        repository.save(stageInvitation);
         return mapper.toSendInvitationResponse(stageInvitation);
     }
 
@@ -57,9 +57,6 @@ public class StageInvitationService {
         stageInvitation.setStatus(StageInvitationStatus.ACCEPTED);
         Stage stage = stageInvitation.getStage();
         stage.getExecutors().add(stageInvitation.getInvited());
-
-        repository.save(stageInvitation);
-        stageRepository.save(stage);
 
         return AcceptInvitationResponse.builder()
                 .id(stageInvitation.getId())
@@ -73,7 +70,6 @@ public class StageInvitationService {
 
         stageInvitation.setStatus(StageInvitationStatus.REJECTED);
         stageInvitation.setDescription(request.description());
-        repository.save(stageInvitation);
 
         return DeclineInvitationResponse.builder()
                 .id(stageInvitation.getId())
@@ -88,8 +84,8 @@ public class StageInvitationService {
 
         for (InvitationFilter filterHandler : filters) {
             if (filterHandler.isApplicable(filter)) {
+                invitationsStream = filterHandler.apply(invitationsStream, filter);
             }
-            invitationsStream = filterHandler.apply(invitationsStream, filter);
         }
 
         return invitationsStream
@@ -98,12 +94,18 @@ public class StageInvitationService {
     }
 
     private StageInvitation validatePendingInvitation(Long invitationId) {
-        StageInvitation stageInvitation = repository.findById(invitationId)
-                .orElseThrow(() -> new DataValidationException("Invitation not found"));
+        StageInvitation stageInvitation = findEntityById(invitationId);
 
         if (!StageInvitationStatus.PENDING.equals(stageInvitation.getStatus())) {
             throw new IllegalStateException("Only pending invitations can be accepted or rejected");
         }
+        return stageInvitation;
+    }
+
+    private StageInvitation findEntityById(Long invitationId) {
+        StageInvitation stageInvitation = repository.findById(invitationId)
+                .orElseThrow(() -> new DataValidationException("Invitation not found"));
+
         return stageInvitation;
     }
 }
