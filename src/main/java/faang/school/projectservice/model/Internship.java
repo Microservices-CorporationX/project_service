@@ -89,7 +89,6 @@ public class Internship {
     private Schedule schedule;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
     @Column(name = "role")
     private TeamRole role;
 }
