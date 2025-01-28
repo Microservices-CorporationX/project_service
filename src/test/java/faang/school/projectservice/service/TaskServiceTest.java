@@ -11,6 +11,7 @@ import faang.school.projectservice.exception.UserIsNotInThatProjectException;
 import faang.school.projectservice.exception.UserWasNotFoundException;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
@@ -55,6 +56,7 @@ public class TaskServiceTest {
     private static Project project;
     private static UserDto userDto1;
     private static UserDto userDto2;
+    private static Stage stage;
 
     @BeforeEach
     public void catchUp() {
@@ -75,6 +77,9 @@ public class TaskServiceTest {
                 .description("idk what to write!")
                 .tasks(new ArrayList<>())
                 .teams(new ArrayList<>())
+                .build();
+        stage = Stage.builder()
+                .stageId(1L)
                 .build();
         task = Task.builder()
                 .id(1L)
@@ -108,6 +113,8 @@ public class TaskServiceTest {
         project.getTeams().get(0).getTeamMembers().add(teamMember);
 
         Mockito.when(projectRepository.findById(project.getId())).thenReturn(Optional.ofNullable(project));
+        Mockito.when(stageRepository.findById(Mockito.any())).thenReturn(Optional.of(stage));
+        Mockito.when(taskRepository.findById(Mockito.any())).thenReturn(Optional.of(task));
         Mockito.when(client.getUsersByIds(List.of(createTaskDto.performerUserId(), createTaskDto.reporterUserId())))
                 .thenReturn(List.of(userDto1, userDto2));
         Mockito.when(taskRepository.save(Mockito.any(Task.class))).thenReturn(task);
