@@ -23,7 +23,7 @@ public interface InternshipMapper {
     InternshipResponse toDto(Internship internship);
 
     @Mapping(target = "interns", ignore = true)
-    @Mapping(source = "projectId",target = "project", qualifiedByName = "longToProject")
+    @Mapping(source = "projectId", target = "project", qualifiedByName = "longToProject")
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
     Internship toEntity(InternshipCreateRequest dto);
 
@@ -53,8 +53,8 @@ public interface InternshipMapper {
     }
 
     @Named("longToProject")
-    default Project longToProject (Long projectId){
-        if(projectId == null){
+    default Project longToProject(Long projectId) {
+        if (projectId == null) {
             return null;
         }
         Project project = new Project();
