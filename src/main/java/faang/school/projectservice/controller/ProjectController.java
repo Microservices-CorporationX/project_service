@@ -26,17 +26,17 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("/")
+    @PostMapping
     public ProjectResponseDto createProject(@Valid @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
         return projectService.createProject(projectCreateRequestDto);
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ProjectResponseDto updateProject(@Valid @RequestBody ProjectUpdateRequestDto projectUpdateRequestDto) {
         return projectService.updateProject(projectUpdateRequestDto);
     }
 
-    @GetMapping("/")
+    @GetMapping
     public List<ProjectResponseDto> getAllProjects(@RequestParam (required = false) ProjectFilterDto filters) {
         return projectService.getAllProjects(filters);
     }
