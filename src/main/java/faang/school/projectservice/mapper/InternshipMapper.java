@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.client.internship.InternshipCreateRequest
 import faang.school.projectservice.dto.client.internship.InternshipResponse;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateRequest;
 import faang.school.projectservice.model.Internship;
+import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamMember;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,8 +22,8 @@ public interface InternshipMapper {
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "mentorToLong")
     InternshipResponse toDto(Internship internship);
 
-    @Mapping(target = "project", ignore = true)
     @Mapping(target = "interns", ignore = true)
+    @Mapping(source = "projectId",target = "project", qualifiedByName = "longToProject")
     @Mapping(source = "mentorId", target = "mentorId", qualifiedByName = "longToMentor")
     Internship toEntity(InternshipCreateRequest dto);
 
@@ -49,6 +50,16 @@ public interface InternshipMapper {
         TeamMember mentor = new TeamMember();
         mentor.setId(mentorId);
         return mentor;
+    }
+
+    @Named("longToProject")
+    default Project longToProject (Long projectId){
+        if(projectId == null){
+            return null;
+        }
+        Project project = new Project();
+        project.setId(projectId);
+        return project;
     }
 }
 

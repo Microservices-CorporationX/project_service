@@ -38,6 +38,7 @@ public class InternshipService {
             List<TeamMember> teamInterns = updateInternship.getInterns();
             teamInterns.stream()
                     .forEach(intern -> intern.setRoles(List.of(dto.role())));
+            internshipRepository.save(updateInternship);
         } else {
             Internship internship = internshipRepository.findById(dto.id())
                     .orElseThrow(() -> new NoSuchElementException(

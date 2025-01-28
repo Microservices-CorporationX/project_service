@@ -30,7 +30,7 @@ public class InternshipController {
         internshipService.createInternship(dto);
     }
 
-    @PostMapping()
+    @PutMapping("/update")
     public void updateInternship(@RequestBody InternshipUpdateRequest dto) {
         internshipService.updateInternship(dto);
     }
@@ -40,12 +40,12 @@ public class InternshipController {
         return internshipService.getInternshipsByFilter(filterRequest);
     }
 
-    @GetMapping("/internships")
+    @GetMapping("/all")
     public List<InternshipResponse> getAllInternships() {
         return internshipService.getAllInternships();
     }
 
-    @GetMapping("/{internshipId}/internship")
+    @GetMapping("/{internshipId}")
     public InternshipResponse getInternshipById(@RequestParam long internshipId) {
         return internshipService.getInternshipById(internshipId);
     }
