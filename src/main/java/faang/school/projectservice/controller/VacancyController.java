@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class VacancyController {
         return vacancyService.getById(id);
     }
 
-    public List<GetVacancyResponse> getAllVacancy() { // с фильтрацией
-        return vacancyService.getAll();
+    public List<GetVacancyResponse> getAllVacancy(VacancyFilterDto filters) { // с фильтрацией
+        return vacancyService.getAll(filters);
     }
 }

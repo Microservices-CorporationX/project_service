@@ -3,10 +3,12 @@ package faang.school.projectservice.dto.vacancy;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class GetVacancyResponse {
     private Long id;
     private String name;

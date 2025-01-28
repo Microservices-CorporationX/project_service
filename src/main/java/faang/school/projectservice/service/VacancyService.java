@@ -5,7 +5,9 @@ import faang.school.projectservice.dto.vacancy.CreateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final ProjectRepository projectRepository;
     private final CandidateRepository candidateRepository;
+    private final List<VacancyFilter> vacancyFilters;
 
     private final VacancyMapper vacancyMapper;
 
@@ -79,7 +83,12 @@ public class VacancyService {
         }
     }
 
-    public List<GetVacancyResponse> getAll() { // с фильтрацией
+    public List<GetVacancyResponse> getAll(VacancyFilterDto filters) { // с фильтрацией
+        Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
+        vacancyFilters.stream()
+                .filter(filter -> filter.isApplicable(filters))
+                .forEach(filter -> filter.apply(vacancies, filters));
 
+        return vacancies.map(vacancyMapper::toGetResponse).toList();
     }
 }
