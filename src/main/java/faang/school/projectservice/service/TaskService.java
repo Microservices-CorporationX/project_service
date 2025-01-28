@@ -153,6 +153,7 @@ public class TaskService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Stage findStageById(Long stageId) {
         return stageRepository.findById(stageId)
                 .orElseThrow(() -> new StageWasNotFoundException("Stage was not found -> id : " + stageId));
