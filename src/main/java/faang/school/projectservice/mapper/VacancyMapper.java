@@ -29,7 +29,6 @@ public interface VacancyMapper {
     CreateVacancyResponse toCreateResponse(Vacancy vacancy);
 
     @Mapping(source = "project.id", target = "projectId")
-    @Mapping(source = "candidates", target = "candidateIds", qualifiedByName = "mapCandidatesToIds")
     UpdateVacancyResponse toUpdateResponse(Vacancy vacancy);
 
     @Mapping(source = "project.id", target = "projectId")

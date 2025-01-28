@@ -50,7 +50,6 @@ public class VacancyService {
     public UpdateVacancyResponse update(UpdateVacancyRequest updateRequest) {
         Vacancy vacancy = vacancyMapper.fromUpdateRequest(updateRequest);
         vacancy.setProject(projectRepository.getReferenceById(updateRequest.getProjectId()));
-        vacancy.setCandidates(candidateRepository.findAllById(updateRequest.getCandidateIds()));
         vacancyValidator.validateUpdatedVacancy(vacancy);
 
         Vacancy updatedVacancy = vacancyRepository.save(vacancy);
