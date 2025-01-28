@@ -7,6 +7,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,10 +46,10 @@ public class TeamMember {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> roles;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
 
-    @ManyToMany(mappedBy = "executors")
+    @ManyToMany(mappedBy = "executors", fetch = FetchType.LAZY)
     private List<Stage> stages;
 }
