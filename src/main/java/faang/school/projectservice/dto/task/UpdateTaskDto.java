@@ -6,25 +6,21 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 
+import java.util.Collections;
 import java.util.List;
 
 @Builder
 public record UpdateTaskDto(
         @NotEmpty String name,
-        String description, //
-        TaskStatus status, //
-        @Positive Long performerUserId, //
+        String description,
+        TaskStatus status,
+        @Positive Long performerUserId,
         @PositiveOrZero Integer minutesTracked,
-        @Positive Long parentTaskId, //
-        List<Long> linkedTaskIds, //
+        @Positive Long parentTaskId,
+        List<Long> linkedTaskIds,
         @Positive Long stageId
-) {}
-
-//@Builder
-//public record UpdateTaskDto(
-//        @NotEmpty String description,
-//        TaskStatus status,
-//        @Positive Long performerUserId,
-//        @Positive Long parentTaskId,
-//        List<Long> linkedTaskIds
-//) {}
+) {
+    public UpdateTaskDto {
+        linkedTaskIds = linkedTaskIds != null ? linkedTaskIds : Collections.emptyList();
+    }
+}
