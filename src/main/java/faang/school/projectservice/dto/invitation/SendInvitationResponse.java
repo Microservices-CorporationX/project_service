@@ -10,6 +10,7 @@ public record SendInvitationResponse(
         @NotNull Long stageId,
         @NotNull Long author,
         @NotNull Long invited,
-        String description,
+        @Size(max = 255) String description,
         @Size(max = 20) String status
 ) {}
+
