@@ -1,5 +1,8 @@
 package faang.school.projectservice.dto.stage;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,12 +17,15 @@ import java.util.List;
 @AllArgsConstructor
 public class StageDto {
     private Long stageId;
-    @NotNull(message = "The stageName field cannot be null!")
+    @NotBlank(message = "The stageName field must not be null or blank!")
     private String stageName;
     @NotNull(message = "The projectId field cannot be null!")
-    private Long projectId;
+    @Min(value = 1, message = "The projectId cannot be less than or equal to zero!")
+    private long projectId;
     @NotNull(message = "The userId field cannot be null!")
-    private Long userId;
+    @Min(value = 1, message = "The userId cannot be less than or equal to zero!")
+    private long userId;
     @NotNull(message = "The stageRoles field cannot be null!")
+    @NotEmpty(message = "The stageRoles field cannot be empty!")
     private List<StageRolesDto> stageRoles;
 }

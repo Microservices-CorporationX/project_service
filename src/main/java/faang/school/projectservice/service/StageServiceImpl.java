@@ -4,6 +4,7 @@ import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
 import faang.school.projectservice.mapper.StageMapper;
+import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.TaskStatus;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -29,6 +31,7 @@ public class StageServiceImpl implements StageService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final StageMapper stageMapper;
+    private final StageRolesMapper stageRolesMapper;
 
     @Override
     public StageDto createStage(StageDto stageDto) {
@@ -46,14 +49,9 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public List<StageDto> getAllStagesByFilter(StageFilterDto filter) {
-        if (null != filter.getRole() && !isValidStatus(filter.getRole())) {
-            throw new DataValidationException("Invalid role" + filter.getRole());
-        }
-        if (null != filter.getStatus() && !isValidStatus(filter.getStatus())) {
-            throw new DataValidationException("Invalid status" + filter.getStatus());
-        }
-        List<Stage> stages = stageRepository.getAllStagesByFilter(filter.getRole(), filter.getStatus());
-        return stages.stream().map(stageMapper::toDto).toList();
+        validateRole(filter);
+        validateStatus(filter);
+        return  getStagesByFilter(filter);
     }
 
     @Override
@@ -77,12 +75,26 @@ public class StageServiceImpl implements StageService {
         return stageMapper.toDto(stage);
     }
 
+    private void validateRole(StageFilterDto filter) {
+        if (null != filter.getRole() && !filter.getRole().isEmpty() && !isValidateRole(filter.getRole())) {
+            throw new DataValidationException("Invalid role" + filter.getRole());
+        }
+    }
+
+    private void validateStatus(StageFilterDto filter) {
+        if (null != filter.getStatus() && !filter.getStatus().isEmpty() && !isValidStatus(filter.getStatus())) {
+            throw new DataValidationException("Invalid status" + filter.getStatus());
+        }
+    }
+
     private StageDto saveValidStage(StageDto stageDto) {
         Project project = validateProject(stageDto);
         if (projectRepository.existsByOwnerIdAndName(stageDto.getUserId(), project.getName())) {
             Stage stage = stageMapper.toEntity(stageDto);
             stage.setProject(project);
-            stage.setStageRoles(getStageRolesByIds(stageDto));
+            List<StageRoles> stageRoles = stageDto.getStageRoles().stream().map(stageRolesMapper::toEntity).collect(Collectors.toList());
+            stageRoles.forEach(stageRole -> stageRole.setStage(stage));
+            stage.setStageRoles(stageRoles);
             Stage savedStage = stageRepository.save(stage);
             return stageMapper.toDto(savedStage);
         }
@@ -111,5 +123,13 @@ public class StageServiceImpl implements StageService {
             throw new DataValidationException("Project with id " + stageDto.getProjectId() + " is in an invalid status: " + project.getStatus());
         }
         return project;
+    }
+    private List<StageDto> getStagesByFilter(StageFilterDto filter) {
+        return stageRepository.findAll().stream()
+                .filter(stage -> (null == filter.getRole() || filter.getRole().isEmpty()
+                        || stage.getStageRoles().stream().anyMatch(role -> role.getTeamRole().name().equalsIgnoreCase(filter.getRole())))
+                        && (null == filter.getStatus() || filter.getStatus().isEmpty()
+                        || stage.getTasks().stream().anyMatch(task -> task.getStatus().name().equalsIgnoreCase(filter.getStatus()))))
+                .map(stageMapper::toDto).toList();
     }
 }
