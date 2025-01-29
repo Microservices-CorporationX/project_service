@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class MomentDto {
     @Size(max = 255, message = "Name cannot exceed 255 characters")
     private String name;
 
-    private List<Long> projectIds;
+    private List<Long> projectIds = Collections.emptyList();
 
     private String description;
 

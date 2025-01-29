@@ -5,6 +5,9 @@ import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.Project;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,7 +20,8 @@ public class MomentProjectIdsFilter extends MomentFilter {
 
     @Override
     public boolean apply(Moment moment, MomentFilterDto filters) {
-        Set<Long> projectIds = moment.getProjects().stream()
+        List<Project> projects = Objects.requireNonNullElse(moment.getProjects(), Collections.emptyList());
+        Set<Long> projectIds = projects.stream()
                 .map(Project::getId)
                 .collect(Collectors.toSet());
 

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,19 +35,14 @@ public class MomentController {
 
         Moment momentRequest = momentMapper.toEntity(momentDtoRequest);
 
-        Moment momentResponse = momentService.createMoment(
-                userId,
-                projectId,
-                momentRequest,
-                momentDtoRequest.getProjectIds()
-        );
+        Moment momentResponse = momentService.createMoment(userId, projectId, momentRequest, momentDtoRequest.getProjectIds());
 
         MomentDto momentDtoResponse = momentMapper.toDto(momentResponse);
 
         return ResponseEntity.ok(momentDtoResponse);
     }
 
-    @PutMapping("moment/update/{userId}/{momentId}")
+    @PatchMapping("moment/update/{userId}/{momentId}")
     public ResponseEntity<MomentDto> updateMoment(
             @PathVariable long userId,
             @PathVariable long momentId,
@@ -54,12 +50,7 @@ public class MomentController {
 
         Moment momentRequest = momentMapper.toEntity(momentDtoRequest);
 
-        Moment updatedMoment = momentService.updateMoment(
-                userId,
-                momentId,
-                momentRequest,
-                momentDtoRequest.getProjectIds()
-        );
+        Moment updatedMoment = momentService.updateMoment(userId, momentId, momentRequest, momentDtoRequest.getProjectIds());
 
         MomentDto momentDtoResponse = momentMapper.toDto(updatedMoment);
 

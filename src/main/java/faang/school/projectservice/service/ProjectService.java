@@ -79,11 +79,13 @@ public class ProjectService {
         }
     }
 
+    @Transactional(readOnly = true)
     private Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
     }
 
+    @Transactional(readOnly = true)
     public Project getProjectById(long projectId, long userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
@@ -95,6 +97,7 @@ public class ProjectService {
         return project;
     }
 
+    @Transactional(readOnly = true)
     public List<Project> getProjectsByIds(List<Long> projectIds, long userId) {
         List<Project> projects = projectRepository.findAllById(projectIds);
 
@@ -107,6 +110,7 @@ public class ProjectService {
         return projects;
     }
 
+    @Transactional(readOnly = true)
     public List<Long> getUserIdsByProjectIds(List<Long> projectIds) {
         return projectRepository.getUserIdsByProjectIds(projectIds);
     }

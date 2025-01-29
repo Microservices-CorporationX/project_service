@@ -24,22 +24,12 @@ public class MomentService {
     private final List<MomentFilter> momentFilters;
 
     @Transactional
-    public Moment createMoment(
-            long userId,
-            long projectId,
-            Moment momentRequest,
-            List<Long> projectIds) {
-
+    public Moment createMoment(long userId, long projectId, Moment momentRequest, List<Long> projectIds) {
         projectService.getProjectById(projectId, userId);
+        projectIds.add(projectId);
 
-        List<Long> allProjectIds = new ArrayList<>();
-        allProjectIds.add(projectId);
-        if (projectIds != null) {
-            allProjectIds.addAll(projectIds);
-        }
-
-        List<Project> projects = projectService.getProjectsByIds(allProjectIds, userId);
-        List<Long> userIds = projectService.getUserIdsByProjectIds(allProjectIds);
+        List<Project> projects = projectService.getProjectsByIds(projectIds, userId);
+        List<Long> userIds = projectService.getUserIdsByProjectIds(projectIds);
 
         momentRequest.setProjects(projects);
         momentRequest.setUserIds(userIds);
@@ -50,27 +40,17 @@ public class MomentService {
     }
 
     @Transactional
-    public Moment updateMoment(
-            long userId,
-            long momentId,
-            Moment momentRequest,
-            List<Long> newProjectIds) {
+    public Moment updateMoment(long userId, long momentId, Moment momentRequest, List<Long> newProjectIds) {
 
         Moment existingMoment = momentRepository.findById(momentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found moment by id: " + momentId));
 
-        List<Project> projects;
-        List<Long> userIds;
-        if (newProjectIds != null) {
-            projects = projectService.getProjectsByIds(newProjectIds, userId);
-            if (projects.isEmpty()) {
-                throw new IllegalArgumentException("Moment must have at least one project");
-            }
-            userIds = projectService.getUserIdsByProjectIds(newProjectIds);
-        } else {
-            projects = existingMoment.getProjects();
-            userIds = existingMoment.getUserIds();
+        List<Project> projects = projectService.getProjectsByIds(newProjectIds, userId);
+        if (projects.isEmpty()) {
+            throw new IllegalArgumentException("Moment must have at least one project");
         }
+
+        List<Long> userIds = projectService.getUserIdsByProjectIds(newProjectIds);
 
         existingMoment.setName(momentRequest.getName());
         existingMoment.setDescription(momentRequest.getDescription());
