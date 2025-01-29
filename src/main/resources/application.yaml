@@ -35,8 +35,8 @@ logging:
 calculations_messages_processing:
   enabled: true
 
-project-service:
-  api-version: /api/v1
+domain:
+  base-path: /api/v1
 
 services:
   s3:

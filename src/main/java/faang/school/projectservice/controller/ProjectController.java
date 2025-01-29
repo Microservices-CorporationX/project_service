@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${project-service.api-version}/project")
+@RequestMapping("${domain.base-path}/project")
 public class ProjectController {
     private final ProjectService projectService;
 
