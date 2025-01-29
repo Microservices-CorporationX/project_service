@@ -63,13 +63,9 @@ public class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
-
-    private List<VacancyFilter> vacancyFilters;
-
     @BeforeEach
     void init() {
-
-        vacancyFilters = new ArrayList<>();
+        List<VacancyFilter> vacancyFilters = new ArrayList<>();
         vacancyFilters.add(mock(VacancyFilter.class));
         vacancyFilters.add(mock(VacancyFilter.class));
 
