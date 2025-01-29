@@ -23,5 +23,6 @@ public class CreateVacancyResponse {
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
+    private List<Long> requiredSkillIds;
     private String coverImageKey;
 }

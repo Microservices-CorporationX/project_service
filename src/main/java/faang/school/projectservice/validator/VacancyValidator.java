@@ -1,6 +1,6 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.VacancyException;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.CandidateStatus;
 import faang.school.projectservice.model.TeamMember;
@@ -11,8 +11,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Component
 @RequiredArgsConstructor
 public class VacancyValidator {
@@ -20,75 +18,79 @@ public class VacancyValidator {
 
     public void validateCreatedVacancy(Vacancy vacancy) {
         if (!checkRoleOfCreatedBy(vacancy)) {
-            throw new DataValidationException("Only user with owner or manager role can create vacancy");
-        }
-
-        if (!checkCandidatesAreNotTeamMember(vacancy)) {
-            throw new DataValidationException("Candidate is team member");
+            throw new VacancyException("Only user with owner or manager role can create vacancy");
         }
     }
 
     public void validateUpdatedVacancy(Vacancy vacancy) {
         if (!checkRoleOfUpdatedBy(vacancy)) {
-            throw new DataValidationException("Only user with owner or manager role can update vacancy");
+            throw new VacancyException("Only user with owner or manager role can update vacancy");
+        }
+
+        if (!checkCandidatesAreNotTeamMember(vacancy)) {
+            throw new VacancyException("Candidate is team member");
         }
 
         if (vacancy.getStatus() == VacancyStatus.CLOSED) {
-            if (!checkCountOfCandidates(vacancy)) {
-                throw new DataValidationException("There is not enough number of candidates");
+            if (!checkCountOfAcceptedCandidates(vacancy)) {
+                throw new VacancyException("There is not enough number of candidates");
+            }
+
+            if (!checkCountOfWaitingCandidates(vacancy)) {
+                throw new VacancyException("There are candidates  waiting for response. You should accept or reject them");
             }
         }
     }
 
     private boolean checkRoleOfCreatedBy(Vacancy vacancy) {
-        TeamMember curator = teamMemberRepository.findByUserIdAndProjectId(
+        TeamMember createdBy = teamMemberRepository.findByUserIdAndProjectId(
                 vacancy.getCreatedBy(),
                 vacancy.getProject().getId());
 
-        AtomicBoolean isOwnerOrManager = new AtomicBoolean(false);
-        curator.getRoles().forEach(r -> {
-            if (r == TeamRole.OWNER || r == TeamRole.MANAGER) {
-                isOwnerOrManager.set(true);
+        for (TeamRole teamRole : createdBy.getRoles()) {
+            if (teamRole == TeamRole.OWNER || teamRole == TeamRole.MANAGER) {
+                return true;
             }
-        });
-        return isOwnerOrManager.get();
+        }
+
+        return false;
     }
 
     private boolean checkRoleOfUpdatedBy(Vacancy vacancy) {
-        TeamMember curator = teamMemberRepository.findByUserIdAndProjectId(
+        TeamMember updatedBy = teamMemberRepository.findByUserIdAndProjectId(
                 vacancy.getUpdatedBy(),
                 vacancy.getProject().getId());
 
-        AtomicBoolean isOwnerOrManager = new AtomicBoolean(false);
-        curator.getRoles().forEach(r -> {
-            if (r == TeamRole.OWNER || r == TeamRole.MANAGER) {
-                isOwnerOrManager.set(true);
+        for (TeamRole teamRole : updatedBy.getRoles()) {
+            if (teamRole == TeamRole.OWNER || teamRole == TeamRole.MANAGER) {
+                return true;
             }
-        });
-        return isOwnerOrManager.get();
+        }
+
+        return false;
     }
 
     private boolean checkCandidatesAreNotTeamMember(Vacancy vacancy) {
         for (Candidate candidate : vacancy.getCandidates()) {
-            TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(
-                    candidate.getUserId(),
-                    vacancy.getProject().getId()
-            );
-
-            if (teamMember != null) {
+            if (teamMemberRepository.findByUserIdAndProjectId(
+                    candidate.getUserId(), vacancy.getProject().getId()) != null) {
                 return false;
             }
         }
+
         return true;
     }
 
-    private boolean checkCountOfCandidates(Vacancy vacancy) {
-        long countOfAccepted = vacancy.getCandidates().stream().filter(candidate ->
-                candidate.getCandidateStatus() == CandidateStatus.ACCEPTED).count();
+    private boolean checkCountOfAcceptedCandidates(Vacancy vacancy) {
+        return vacancy.getCandidates()
+                .stream()
+                .filter(candidate -> candidate.getCandidateStatus() == CandidateStatus.ACCEPTED)
+                .count() == vacancy.getCount();
+    }
 
-        long countOfWaitingResponse = vacancy.getCandidates().stream().filter(candidate ->
-                candidate.getCandidateStatus() == CandidateStatus.WAITING_RESPONSE).count();
-
-        return countOfAccepted == vacancy.getCount() && countOfWaitingResponse == 0;
+    private boolean checkCountOfWaitingCandidates(Vacancy vacancy) {
+        return vacancy.getCandidates()
+                .stream()
+                .noneMatch(candidate -> candidate.getCandidateStatus() == CandidateStatus.WAITING_RESPONSE);
     }
 }

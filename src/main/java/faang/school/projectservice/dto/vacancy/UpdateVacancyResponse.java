@@ -15,6 +15,7 @@ public class UpdateVacancyResponse {
     private String description;
     private TeamRole position;
     private Long projectId;
+    private List<Long> candidateIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long createdBy;
@@ -23,5 +24,6 @@ public class UpdateVacancyResponse {
     private Double salary;
     private WorkSchedule workSchedule;
     private Integer count;
+    private List<Long> requiredSkillIds;
     private String coverImageKey;
 }

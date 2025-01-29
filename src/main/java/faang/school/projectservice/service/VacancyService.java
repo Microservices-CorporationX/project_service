@@ -6,7 +6,7 @@ import faang.school.projectservice.dto.vacancy.GetVacancyResponse;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyRequest;
 import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
-import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.VacancyException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -50,6 +50,7 @@ public class VacancyService {
     public UpdateVacancyResponse update(UpdateVacancyRequest updateRequest) {
         Vacancy vacancy = vacancyMapper.fromUpdateRequest(updateRequest);
         vacancy.setProject(projectRepository.getReferenceById(updateRequest.getProjectId()));
+        vacancy.setCandidates(candidateRepository.findAllById(updateRequest.getCandidateIds()));
         vacancyValidator.validateUpdatedVacancy(vacancy);
 
         Vacancy updatedVacancy = vacancyRepository.save(vacancy);
@@ -69,7 +70,7 @@ public class VacancyService {
             candidateRepository.deleteAllById(candidateIds);
             vacancyRepository.deleteById(id);
         } else {
-            throw new DataValidationException("There is no vacancy for this ID");
+            throw new VacancyException("There is no vacancy for this ID");
         }
     }
 
@@ -78,7 +79,7 @@ public class VacancyService {
         if (vacancyOptional.isPresent()) {
             return vacancyMapper.toGetResponse(vacancyOptional.get());
         } else {
-            throw new DataValidationException("There is no vacancy for this ID");
+            throw new VacancyException("There is no vacancy for this ID");
         }
     }
 
