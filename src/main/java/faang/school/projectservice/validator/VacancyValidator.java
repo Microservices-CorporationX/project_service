@@ -37,7 +37,7 @@ public class VacancyValidator {
             }
 
             if (!checkCountOfWaitingCandidates(vacancy)) {
-                throw new VacancyException("There are candidates  waiting for response. You should accept or reject them");
+                throw new VacancyException("There are candidates waiting for response. You should accept or reject them");
             }
         }
     }
@@ -57,11 +57,11 @@ public class VacancyValidator {
     }
 
     private boolean checkRoleOfUpdatedBy(Vacancy vacancy) {
-        TeamMember updatedBy = teamMemberRepository.findByUserIdAndProjectId(
+        TeamMember teamMemberUpdatedBy = teamMemberRepository.findByUserIdAndProjectId(
                 vacancy.getUpdatedBy(),
                 vacancy.getProject().getId());
 
-        for (TeamRole teamRole : updatedBy.getRoles()) {
+        for (TeamRole teamRole : teamMemberUpdatedBy.getRoles()) {
             if (teamRole == TeamRole.OWNER || teamRole == TeamRole.MANAGER) {
                 return true;
             }
