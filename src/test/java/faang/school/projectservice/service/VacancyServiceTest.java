@@ -66,7 +66,13 @@ public class VacancyServiceTest {
 
     @BeforeEach
     void init() {
-        vacancyService = new VacancyService(vacancyRepository, projectRepository, candidateRepository, vacancyFilters, vacancyMapper, vacancyValidator);
+        vacancyService = new VacancyService(
+                vacancyRepository,
+                projectRepository,
+                candidateRepository,
+                vacancyFilters,
+                vacancyMapper,
+                vacancyValidator);
     }
 
     @Test
@@ -84,7 +90,8 @@ public class VacancyServiceTest {
                 .coverImageKey("image")
                 .build();
 
-        when(projectRepository.getReferenceById(createRequest.getProjectId())).thenReturn(Project.builder().id(515L).build());
+        when(projectRepository.getReferenceById(createRequest.getProjectId()))
+                .thenReturn(Project.builder().id(515L).build());
 
         Vacancy createdVacancy = Vacancy.builder()
                 .id(234L)
@@ -106,14 +113,16 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(createdVacancy);
 
-        CreateVacancyResponse createResponse = vacancyService.create(createRequest);
+        final CreateVacancyResponse createResponse = vacancyService.create(createRequest);
 
         verify(vacancyMapper, times(1)).fromCreateRequest(createRequest);
-        verify(vacancyValidator, times(1)).validateCreatedVacancy(vacancyArgumentCaptor.capture());
+        verify(vacancyValidator, times(1))
+                .validateCreatedVacancy(vacancyArgumentCaptor.capture());
         verify(vacancyMapper, times(1)).toCreateResponse(createdVacancy);
 
         assertEquals("Backend-разработчик", createResponse.getName());
-        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года", createResponse.getDescription());
+        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года",
+                createResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, createResponse.getPosition());
         assertEquals(515L, createResponse.getProjectId());
         assertEquals(123L, createResponse.getCreatedBy());
@@ -122,7 +131,8 @@ public class VacancyServiceTest {
         assertEquals(150000.0, createResponse.getSalary());
         assertEquals(WorkSchedule.FULL_TIME, createResponse.getWorkSchedule());
         assertEquals(1, createResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L, 103L).toArray(), createResponse.getRequiredSkillIds().toArray(new Long[0]));
+        assertArrayEquals(List.of(101L, 102L, 103L).toArray(),
+                createResponse.getRequiredSkillIds().toArray(new Long[0]));
         assertEquals("image", createResponse.getCoverImageKey());
     }
 
@@ -144,7 +154,8 @@ public class VacancyServiceTest {
                 .coverImageKey("new_image")
                 .build();
 
-        when(projectRepository.getReferenceById(updateRequest.getProjectId())).thenReturn(Project.builder().id(515L).build());
+        when(projectRepository.getReferenceById(updateRequest.getProjectId()))
+                .thenReturn(Project.builder().id(515L).build());
 
         List<Candidate> candidates = List.of(new Candidate(), new Candidate(), new Candidate(), new Candidate());
         candidates.get(0).setId(167L);
@@ -173,25 +184,29 @@ public class VacancyServiceTest {
 
         when(vacancyRepository.save(vacancyArgumentCaptor.capture())).thenReturn(updatedVacancy);
 
-        UpdateVacancyResponse updateResponse = vacancyService.update(updateRequest);
+        final UpdateVacancyResponse updateResponse = vacancyService.update(updateRequest);
 
         verify(vacancyMapper, times(1)).fromUpdateRequest(updateRequest);
-        verify(vacancyValidator, times(1)).validateUpdatedVacancy(vacancyArgumentCaptor.capture());
+        verify(vacancyValidator, times(1))
+                .validateUpdatedVacancy(vacancyArgumentCaptor.capture());
         verify(vacancyMapper, times(1)).toUpdateResponse(updatedVacancy);
 
         assertEquals(234L, updatedVacancy.getId());
         assertEquals("Backend-разработчик", updateResponse.getName());
-        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года", updateResponse.getDescription());
+        assertEquals("Ищем в команду backend-разработчика на Java с опытом работы от 1 года",
+                updateResponse.getDescription());
         assertEquals(TeamRole.DEVELOPER, updateResponse.getPosition());
         assertEquals(515L, updateResponse.getProjectId());
-        assertArrayEquals(List.of(167L, 180L, 188L, 153L).toArray(), updateResponse.getCandidateIds().toArray(new Long[0]));
+        assertArrayEquals(List.of(167L, 180L, 188L, 153L).toArray(),
+                updateResponse.getCandidateIds().toArray(new Long[0]));
         assertEquals(123L, updateResponse.getCreatedBy());
         assertEquals(123L, updateResponse.getUpdatedBy());
         assertEquals(VacancyStatus.OPEN, updateResponse.getStatus());
         assertEquals(150000.0, updateResponse.getSalary());
         assertEquals(WorkSchedule.FULL_TIME, updateResponse.getWorkSchedule());
         assertEquals(1, updateResponse.getCount());
-        assertArrayEquals(List.of(101L, 102L, 103L).toArray(), updateResponse.getRequiredSkillIds().toArray(new Long[0]));
+        assertArrayEquals(List.of(101L, 102L, 103L).toArray(),
+                updateResponse.getRequiredSkillIds().toArray(new Long[0]));
         assertEquals("new_image", updateResponse.getCoverImageKey());
     }
 
@@ -228,7 +243,8 @@ public class VacancyServiceTest {
     public void getById_ShouldReturnVacancySuccessfully() {
         long id = 333L;
 
-        when(vacancyRepository.findById(id)).thenReturn(Optional.of(Vacancy.builder().candidates(new ArrayList<>()).build()));
+        when(vacancyRepository.findById(id))
+                .thenReturn(Optional.of(Vacancy.builder().candidates(new ArrayList<>()).build()));
 
         vacancyService.getById(id);
 

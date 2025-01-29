@@ -37,7 +37,8 @@ public class VacancyValidator {
             }
 
             if (!checkCountOfWaitingCandidates(vacancy)) {
-                throw new VacancyException("There are candidates waiting for response. You should accept or reject them");
+                throw new VacancyException("There are candidates waiting for response. " +
+                        "You should accept or reject them");
             }
         }
     }

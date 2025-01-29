@@ -83,7 +83,7 @@ public class VacancyService {
         }
     }
 
-    public List<GetVacancyResponse> getAll(VacancyFilterDto filters) { // с фильтрацией
+    public List<GetVacancyResponse> getAll(VacancyFilterDto filters) {
         Stream<Vacancy> vacancies = vacancyRepository.findAll().stream();
         vacancyFilters.stream()
                 .filter(filter -> filter.isApplicable(filters))

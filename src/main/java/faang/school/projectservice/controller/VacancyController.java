@@ -33,7 +33,7 @@ public class VacancyController {
         return vacancyService.getById(id);
     }
 
-    public List<GetVacancyResponse> getAllVacancy(VacancyFilterDto filters) { // с фильтрацией
+    public List<GetVacancyResponse> getAllVacancy(VacancyFilterDto filters) {
         return vacancyService.getAll(filters);
     }
 }
