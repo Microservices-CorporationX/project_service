@@ -53,8 +53,6 @@ public class VacancyServiceTest {
     private CandidateRepository candidateRepository;
     @Mock
     private VacancyValidator vacancyValidator;
-    @Mock
-    private VacancyFilter vacancyFilter = Mockito.mock(VacancyFilter.class);
 
     @Spy
     private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
@@ -62,10 +60,11 @@ public class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
-    private final List<VacancyFilter> vacancyFilters = List.of(vacancyFilter);
-
     @BeforeEach
     void init() {
+        VacancyFilter filterMock = Mockito.mock(VacancyFilter.class);
+        List<VacancyFilter> vacancyFilters = List.of(filterMock);
+
         vacancyService = new VacancyService(
                 vacancyRepository,
                 projectRepository,
