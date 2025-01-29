@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import faang.school.projectservice.dto.invitation.SendInvitationRequest;
-import faang.school.projectservice.dto.invitation.StageInvitationDto;
 import faang.school.projectservice.dto.stage.CreateStageRequest;
 import faang.school.projectservice.dto.stage.DeleteStageRequest;
 import faang.school.projectservice.dto.stage.StageResponse;
@@ -14,12 +13,12 @@ import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.model.stage.Stage;
-import faang.school.projectservice.model.stage_invitation.StageInvitationStatus;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.enums.StrategyDelete;
+import faang.school.projectservice.service.invitation.StageInvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,7 +151,7 @@ public class StageService {
                             .description("Invitation to join stage: " + stage.getStageName())
                             .build();
 
-                    stageInvitationService.sendStageInvitation(sendInvitationRequest);
+                    stageInvitationService.sendInvitation(sendInvitationRequest);
                 });
             }
         }

@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Component
-public class StatusFilter implements InvitationFilter {
+public class StatusInvitationFilter implements InvitationFilter {
 
     @Override
     public boolean isApplicable(InvitationDto filter) {
