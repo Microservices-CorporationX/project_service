@@ -38,6 +38,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,10 +63,15 @@ public class VacancyServiceTest {
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
+
+    private List<VacancyFilter> vacancyFilters;
+
     @BeforeEach
     void init() {
-        VacancyFilter filterMock = Mockito.mock(VacancyFilter.class);
-        List<VacancyFilter> vacancyFilters = List.of(filterMock);
+
+        vacancyFilters = new ArrayList<>();
+        vacancyFilters.add(mock(VacancyFilter.class));
+        vacancyFilters.add(mock(VacancyFilter.class));
 
         vacancyService = new VacancyService(
                 vacancyRepository,
