@@ -5,9 +5,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record SendInvitationRequest(
-        @NotNull Long stageId,
-        @NotNull Long author,
-        @NotNull Long invited,
+public record DeclineInvitationResponse(
+        @NotNull Long id,
+        @Size(max = 20) String status,
         @Size(max = 255) String description
-) {}
+) {
+}
