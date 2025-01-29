@@ -1,15 +1,14 @@
 package faang.school.projectservice.dto.project;
 
 import faang.school.projectservice.model.ProjectStatus;
-import faang.school.projectservice.model.ProjectVisibility;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
-public class ProjectResponseDto {
+public class ProjectUpdateResponseDto {
     private Long id;
     private ProjectStatus status;
-    private String name;
     private String description;
-    private Long ownerId;
-    private ProjectVisibility visibility;
+    private LocalDateTime updatedAt;
 }

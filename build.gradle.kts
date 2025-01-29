@@ -81,7 +81,6 @@ val exclusions = listOf(
     "**/mapper/**",
     "**/model/**",
     "**/controller/**",
-    "**/retriever/**",
     "**/ProjectServiceApplication.*"
 )
 
