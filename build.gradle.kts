@@ -46,6 +46,11 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
     /**
+     * Jira
+     */
+    compileOnly("com.atlassian.jira:jira-api:10.4.0-m0001")
+    compileOnly("io.atlassian.fugue:fugue:6.1.0")
+    /**
      * Test containers
      */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))

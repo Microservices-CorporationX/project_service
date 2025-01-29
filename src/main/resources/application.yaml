@@ -35,6 +35,12 @@ logging:
 calculations_messages_processing:
   enabled: true
 
+jira:
+  config:
+    jira-url: http://localhost:8099
+    username: admin
+    password: password
+
 services:
   s3:
     endpoint: http://localhost:9000
