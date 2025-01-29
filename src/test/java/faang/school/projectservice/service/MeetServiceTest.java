@@ -6,6 +6,7 @@ import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
 import faang.school.projectservice.dto.meet.MeetUpdateRequest;
+import faang.school.projectservice.exception.MeetingOwnershipRequiredException;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.model.Project;
@@ -157,7 +158,7 @@ class MeetServiceTest {
                 .userId(2L)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> meetService.updateMeet(request));
+        assertThrows(MeetingOwnershipRequiredException.class, () -> meetService.updateMeet(request));
     }
 
     @Test
@@ -183,7 +184,7 @@ class MeetServiceTest {
         when(meetRepository.existsById(100L)).thenReturn(true);
         when(meetRepository.isUserOwnerMeet(100L, 1L)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> meetService.deleteMeet(100L, 1L));
+        assertThrows(MeetingOwnershipRequiredException.class, () -> meetService.deleteMeet(100L, 1L));
         verify(meetRepository, never()).deleteById(any());
     }
 

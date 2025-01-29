@@ -77,7 +77,7 @@ public class MeetService {
     }
 
     @Transactional(readOnly = true)
-    public MeetResponse getMeetById(long meetId) {
+    public MeetResponse getMeetById(Long meetId) {
         return meetMapper.toMeetResponse(getMeet(meetId));
     }
 
@@ -93,7 +93,7 @@ public class MeetService {
         return meets.map(meetMapper::toMeetResponse).toList();
     }
 
-    public List<MeetResponse> getMeetsByProjectId(long projectId) {
+    public List<MeetResponse> getMeetsByProjectId(Long projectId) {
         projectValidator.validateProject(projectId);
         Stream<Meet> meets = meetRepository.findByProjectId(projectId);
 
