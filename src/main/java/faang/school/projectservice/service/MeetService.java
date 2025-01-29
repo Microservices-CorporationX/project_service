@@ -6,13 +6,13 @@ import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
 import faang.school.projectservice.dto.meet.MeetUpdateRequest;
+import faang.school.projectservice.exception.MeetingOwnershipRequiredException;
 import faang.school.projectservice.mapper.MeetMapper;
 import faang.school.projectservice.model.Meet;
 import faang.school.projectservice.repository.MeetRepository;
 import faang.school.projectservice.service.filter.meet.MeetFilter;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,6 @@ public class MeetService {
         }
 
         Meet meet = meetMapper.toEntity(meetCreateRequest);
-
         return meetMapper.toMeetResponse(meetRepository.save(meet));
     }
 
@@ -52,7 +51,7 @@ public class MeetService {
         UserDto userDto = userServiceClient.getUser(meetUpdateRequest.userId());
         Meet meet = getMeet(meetUpdateRequest.meetId());
         if (!Objects.equals(userDto.id(), meet.getCreatorId())) {
-            throw new IllegalArgumentException("Изменять встречу может только владелец");
+            throw new MeetingOwnershipRequiredException("Изменять встречу может только владелец");
         }
 
         meetMapper.updateMeet(meetUpdateRequest, meet);
@@ -71,14 +70,14 @@ public class MeetService {
             throw new EntityNotFoundException("Meet not found");
         }
         if (!meetRepository.isUserOwnerMeet(meetId, userId)) {
-            throw new IllegalArgumentException("Удалять встречу может только владелец");
+            throw new MeetingOwnershipRequiredException("Удалять встречу может только владелец");
         }
 
         meetRepository.deleteById(meetId);
     }
 
     @Transactional(readOnly = true)
-    public MeetResponse getMeetById(@Valid @NotNull Long meetId) {
+    public MeetResponse getMeetById(long meetId) {
         return meetMapper.toMeetResponse(getMeet(meetId));
     }
 
@@ -94,7 +93,7 @@ public class MeetService {
         return meets.map(meetMapper::toMeetResponse).toList();
     }
 
-    public List<MeetResponse> getMeetsByProjectId(@Valid @NotNull Long projectId) {
+    public List<MeetResponse> getMeetsByProjectId(long projectId) {
         projectValidator.validateProject(projectId);
         Stream<Meet> meets = meetRepository.findByProjectId(projectId);
 

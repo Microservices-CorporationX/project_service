@@ -6,7 +6,6 @@ import faang.school.projectservice.dto.meet.MeetResponse;
 import faang.school.projectservice.dto.meet.MeetUpdateRequest;
 import faang.school.projectservice.service.MeetService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,22 +37,22 @@ public class MeetController {
     }
 
     @DeleteMapping()
-    public void deleteMeet(@Valid @NotNull @RequestParam Long meetId,
-                           @Valid @NotNull @RequestParam Long userId) {
+    public void deleteMeet(@RequestParam long meetId,
+                           @RequestParam long userId) {
         meetService.deleteMeet(meetId, userId);
     }
 
     @GetMapping("{meetId}")
-    public MeetResponse getMeet(@Valid @NotNull @PathVariable Long meetId) {
+    public MeetResponse getMeet(@PathVariable long meetId) {
         return meetService.getMeetById(meetId);
     }
 
     @GetMapping("/{projectId}")
-    public List<MeetResponse> getMeetsByProject(@Valid @NotNull @PathVariable Long projectId) {
+    public List<MeetResponse> getMeetsByProject(@PathVariable long projectId) {
         return meetService.getMeetsByProjectId(projectId);
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<MeetResponse> getMeetsByFilter(@Valid @RequestBody MeetFilterRequest filterRequest) {
         return meetService.getMeetsByFilter(filterRequest);
     }
