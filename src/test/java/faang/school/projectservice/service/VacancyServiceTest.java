@@ -8,6 +8,7 @@ import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.VacancyException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
+import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.TeamRole;
@@ -39,33 +40,34 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
-    @InjectMocks
     private VacancyService vacancyService;
-
-    @Mock
     private VacancyRepository vacancyRepository;
-    @Mock
     private ProjectRepository projectRepository;
-    @Mock
     private CandidateRepository candidateRepository;
-    @Mock
     private VacancyValidator vacancyValidator;
-
-    @Spy
-    private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
-
+    private VacancyMapper vacancyMapper;
+    private List<VacancyFilter> vacancyFilters;
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
     @BeforeEach
     void init() {
-        List<VacancyFilter> vacancyFilters = new ArrayList<>();
+        vacancyRepository = mock(VacancyRepository.class);
+        projectRepository = mock(ProjectRepository.class);
+        candidateRepository = mock(CandidateRepository.class);
+
+        vacancyValidator = mock(VacancyValidator.class);
+
+        vacancyMapper = spy(VacancyMapperImpl.class);
+
+        vacancyFilters = new ArrayList<>();
         vacancyFilters.add(mock(VacancyFilter.class));
         vacancyFilters.add(mock(VacancyFilter.class));
 
