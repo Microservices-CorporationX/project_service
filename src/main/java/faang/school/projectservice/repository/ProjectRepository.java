@@ -20,6 +20,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     )
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 
+    @Query(
+            "SELECT DISTINCT tm.userId " +
+                    "FROM TeamMember tm " +
+                    "JOIN tm.team t " +
+                    "WHERE t.project.id IN :projectIds"
+    )
+    List<Long> getUserIdsByProjectIds(List<Long> projectIds);
+
     @Query("SELECT tm.id FROM TeamMember tm " +
             "JOIN tm.team t " +
             "JOIN t.project p " +

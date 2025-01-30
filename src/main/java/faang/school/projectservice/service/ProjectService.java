@@ -2,6 +2,7 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
+import faang.school.projectservice.model.ProjectVisibility;
 import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -77,8 +79,43 @@ public class ProjectService {
         }
     }
 
+    @Transactional(readOnly = true)
     private Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Project getProjectById(long projectId, long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+
+        if (!isProjectVisible(project, userId)) {
+            throw new IllegalArgumentException("You don't have access to this project");
+        }
+
+        return project;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Project> getProjectsByIds(List<Long> projectIds, long userId) {
+        List<Project> projects = projectRepository.findAllById(projectIds);
+
+        projects.forEach(project -> {
+            if (!isProjectVisible(project, userId)) {
+                throw new IllegalArgumentException("You don't have access to project by id " + project.getId());
+            }
+        });
+
+        return projects;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getUserIdsByProjectIds(List<Long> projectIds) {
+        return projectRepository.getUserIdsByProjectIds(projectIds);
+    }
+
+    private boolean isProjectVisible(Project project, Long userId) {
+        return project.getVisibility() == ProjectVisibility.PUBLIC || project.getOwnerId().equals(userId);
     }
 }
