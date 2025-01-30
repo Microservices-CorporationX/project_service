@@ -20,7 +20,6 @@ import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.validator.ProjectValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -80,8 +79,7 @@ public class ProjectService {
 
     public ProjectReadDto generateProjectPresentation(long projectId) {
         Project project = getProjectById(projectId);
-//        UserDto owner = userServiceClient.getUser(project.getOwnerId());
-        UserDto owner = new UserDto(1L, "Dima", "usetr@");
+        UserDto owner = userServiceClient.getUser(project.getOwnerId());
 
         ProjectPresentationDto dto = new ProjectPresentationDto(
                 project.getName(),
@@ -104,7 +102,7 @@ public class ProjectService {
 
     public String getPresentationFileKey(long projectId) {
         Project project = getProjectById(projectId);
-        return s3Properties.getEndpoint() + "/" +s3Properties.getBucketName() + "/" +
+        return s3Properties.getEndpoint() + "/" + s3Properties.getBucketName() + "/" +
                 project.getPresentationFileKey();
     }
 

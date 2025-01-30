@@ -59,7 +59,7 @@ public class PdfService {
         String createdDateFormated = dto.getCreatedDate()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String participantsCount = String.valueOf(dto.getTeams().stream()
-                .mapToInt(team -> team.size())
+                .mapToInt(java.util.List::size)
                 .sum());
         String completedTasksCount = String.valueOf(dto.getCompletedTasks().size());
 
@@ -84,7 +84,7 @@ public class PdfService {
         Paragraph achievementTitle = createTitle("Achievements");
         List achievementsList = new List()
                 .setSymbolIndent(12)
-                .setListSymbol("\u2022");
+                .setListSymbol("•");
         achievements.forEach(achievementsList::add);
         document.add(achievementTitle);
         document.add(achievementsList);
