@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.client.internship.InternshipCreateRequest;
+import faang.school.projectservice.dto.client.internship.InternshipResponse;
 import faang.school.projectservice.dto.client.internship.InternshipUpdateRequest;
 import faang.school.projectservice.mapper.InternshipMapper;
 import faang.school.projectservice.model.Internship;
@@ -17,6 +18,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -27,7 +29,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -114,14 +115,153 @@ public class InternshipServiceTest {
 
     @Test
     public void updateInternshipWithNewData() {
-        InternshipUpdateRequest dto = new InternshipUpdateRequest(
-                1L, 2L, 3L, List.of(1L,2L,3L),
-                LocalDateTime.of(2025,5,1,23,00),
-                LocalDateTime.of(2025,6,1,23,00),
+        InternshipUpdateRequest internshipUpdateRequest = new InternshipUpdateRequest(
+                1L, 2L, 3L, List.of(1L, 2L, 3L),
+                LocalDateTime.of(2025, 5, 1, 23, 00),
+                LocalDateTime.of(2025, 6, 1, 23, 00),
+                "changed description",
+                "changed name",
+                TeamRole.DEVELOPER
+        );
+        InternshipCreateRequest internshipCreateDto = new InternshipCreateRequest(
+                1L, 2L, 3L, List.of(1L, 2L, 3L),
+                LocalDateTime.of(2025, 5, 1, 23, 00),
+                LocalDateTime.of(2025, 6, 1, 23, 00),
                 "some description",
                 "some name",
                 TeamRole.DEVELOPER
         );
+        Internship internshipThatShouldBeUpdated = internshipMapper.toEntity(internshipCreateDto);
+        when(internshipRepository.getById(internshipUpdateRequest.getId())).thenReturn(internshipThatShouldBeUpdated);
 
+
+        internshipService.updateInternship(internshipUpdateRequest);
+
+
+        verify(internshipRepository, times(1))
+                .save(internshipThatShouldBeUpdated);
+        verify(internshipMapper, times(1))
+                .update(internshipUpdateRequest, internshipThatShouldBeUpdated);
+        assertEquals(internshipThatShouldBeUpdated.getProject().getId(), internshipUpdateRequest.getProjectId());
+        assertEquals(internshipThatShouldBeUpdated.getId(), internshipUpdateRequest.getId());
+        assertEquals(internshipThatShouldBeUpdated.getMentorId().getId(), internshipUpdateRequest.getMentorId());
+        assertEquals(internshipThatShouldBeUpdated.getStartDate(), internshipUpdateRequest.getStartDate());
+        assertEquals(internshipThatShouldBeUpdated.getEndDate(), internshipUpdateRequest.getEndDate());
+        assertEquals(internshipThatShouldBeUpdated.getDescription(), internshipUpdateRequest.getDescription());
+        assertEquals(internshipThatShouldBeUpdated.getName(), internshipUpdateRequest.getName());
+        assertEquals(internshipThatShouldBeUpdated.getRole(), internshipUpdateRequest.getRole());
     }
+
+    @Test
+    void getAllInternships_ReturnsList() {
+        TeamMember teamLead1 = new TeamMember();
+        teamLead1.setId(100L);
+        TeamMember teamLead2 = new TeamMember();
+        teamLead2.setId(200L);
+        Internship internship1 = new Internship();
+        internship1.setId(1L);
+        internship1.setInterns(new ArrayList<>());
+        internship1.setMentorId(teamLead1);
+
+        Internship internship2 = new Internship();
+        internship2.setId(2L);
+        internship2.setInterns(new ArrayList<>());
+        internship2.setMentorId(teamLead2);
+
+        when(internshipRepository.findAll()).thenReturn(List.of(internship1, internship2));
+
+        List<InternshipResponse> result = internshipService.getAllInternships();
+
+        assertEquals(2, result.size());
+        verify(internshipMapper, times(2)).toDto(any(Internship.class));
+    }
+
+
+    @Test
+    void getInternshipById_Found_ReturnsResponse() {
+        long internshipId = 1L;
+        TeamMember teamLead = new TeamMember();
+        teamLead.setId(100L);
+        Internship internship = new Internship();
+        internship.setId(internshipId);
+        internship.setName("Test Internship");
+        internship.setInterns(new ArrayList<>());
+        internship.setMentorId(teamLead);
+
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.of(internship));
+
+        InternshipResponse response = internshipService.getInternshipById(internshipId);
+
+        assertEquals("Test Internship", response.name());
+        verify(internshipMapper, times(1)).toDto(internship);
+    }
+
+    @Test
+    void getInternshipById_NotFound_ThrowsException() {
+        long internshipId = 999L;
+        when(internshipRepository.findById(internshipId)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> internshipService.getInternshipById(internshipId));
+    }
+
+    @Test
+    void removeInternFromInternship_Success() {
+        long internshipId = 1L;
+        List<Long> internIdsToRemove = List.of(1L, 2L);
+
+        TeamMember intern1 = new TeamMember();
+        intern1.setId(1L);
+        TeamMember intern2 = new TeamMember();
+        intern2.setId(2L);
+        TeamMember intern3 = new TeamMember();
+        intern3.setId(3L);
+
+        Internship internship = new Internship();
+        internship.setId(internshipId);
+        internship.setInterns(List.of(intern1, intern2, intern3));
+
+        when(internshipRepository.getById(internshipId)).thenReturn(internship);
+
+        internshipService.removeInternFromInternship(internIdsToRemove, internshipId);
+
+        verify(internshipRepository, times(1)).save(argThat(savedInternship ->
+                savedInternship.getInterns().size() == 1 &&
+                        savedInternship.getInterns().get(0).getId() == 3L
+        ));
+    }
+
+    @Test
+    void finishTheInternshipAheadOfScheduleFor_Success() {
+        long internshipId = 1L;
+        List<Long> internIdsToFinish = List.of(1L, 2L);
+
+        TeamMember intern1 = new TeamMember();
+        intern1.setId(1L);
+        intern1.setRoles(new ArrayList<>());
+
+        TeamMember intern2 = new TeamMember();
+        intern2.setId(2L);
+        intern2.setRoles(new ArrayList<>());
+
+        TeamMember intern3 = new TeamMember();
+        intern3.setId(3L);
+        intern3.setRoles(new ArrayList<>());
+
+        Internship internship = new Internship();
+        internship.setId(internshipId);
+        internship.setRole(TeamRole.DEVELOPER);
+        internship.setInterns(List.of(intern1, intern2, intern3));
+
+        when(internshipRepository.getById(internshipId)).thenReturn(internship);
+
+        internshipService.finishTheInternshipAheadOfScheduleFor(internIdsToFinish, internshipId);
+
+        verify(internshipRepository, times(1)).save(argThat(savedInternship ->
+                savedInternship.getInterns().size() == 1 &&
+                        savedInternship.getInterns().get(0).getId() == 3L &&
+                        intern1.getRoles().contains(TeamRole.DEVELOPER) &&
+                        intern2.getRoles().contains(TeamRole.DEVELOPER)
+        ));
+    }
+
 }

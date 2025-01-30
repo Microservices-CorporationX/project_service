@@ -9,6 +9,7 @@ import java.util.List;
 
 @Builder
 public record InternshipResponse(long id, long projectId, long mentorId,
+                                 String name,
                                  List<Long> internIds, LocalDateTime startDate,
                                  LocalDateTime endDate, InternshipStatus status, TeamRole role) {
 

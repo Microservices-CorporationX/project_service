@@ -34,9 +34,6 @@ public class InternshipService {
 
     public void updateInternship(InternshipUpdateRequest dto) {
         internshipValidationService.validateRequest(dto);
-//        Internship internship = internshipRepository.findById(dto.getId())
-//                .orElseThrow(() -> new NoSuchElementException(
-//                        "Element with id" + dto.getId() + "dose not exist"));
         Internship internship = internshipRepository.getById(dto.getId());
         if (dto.getEndDate().isBefore(LocalDateTime.now())) {
             List<TeamMember> teamInterns = internship.getInterns();
