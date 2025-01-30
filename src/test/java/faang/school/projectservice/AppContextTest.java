@@ -1,6 +1,5 @@
 package faang.school.projectservice;
 
-import faang.school.projectservice.service.ProjectService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,7 +20,7 @@ import org.testcontainers.utility.DockerImageName;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = {ProjectService.class})
+@SpringBootTest(classes = {ProjectServiceApplication.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
