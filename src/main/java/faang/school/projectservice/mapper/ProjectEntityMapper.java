@@ -4,23 +4,30 @@ import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectInfoDto;
 import faang.school.projectservice.dto.project.ProjectUpdateDto;
 import faang.school.projectservice.model.Project;
-import org.mapstruct.*;
-
-import java.time.LocalDateTime;
+import io.micrometer.common.util.StringUtils;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Condition;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectEntityMapper {
 
-    @Mapping(target = "status", defaultValue = "CREATED")
     Project toEntity(ProjectCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "description", conditionQualifiedByName = "isNotBlank")
     void updateEntityFromDto(ProjectUpdateDto dto, @MappingTarget Project entity);
 
     ProjectInfoDto toProjectDto(Project project);
 
-    @AfterMapping
-    default void setUpdatedAt(@MappingTarget Project entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+    @Condition
+    @Named("isNotBlank")
+    default boolean isNotBlank(String value) {
+        return StringUtils.isNotBlank(value);
     }
 }

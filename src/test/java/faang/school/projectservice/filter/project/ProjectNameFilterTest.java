@@ -1,9 +1,8 @@
-package school.faang.project_service.filters.project;
+package faang.school.projectservice.filter.project;
 
 import faang.school.projectservice.dto.project.ProjectFilterDto;
-import faang.school.projectservice.fillters.project.impl.ProjectStatusFilter;
+import faang.school.projectservice.fillters.project.impl.ProjectNameFilter;
 import faang.school.projectservice.model.Project;
-import faang.school.projectservice.model.ProjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +11,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ProjectStatusFilterTest {
-    private final ProjectStatusFilter filter = new ProjectStatusFilter();
+public class ProjectNameFilterTest {
+    private final ProjectNameFilter filter = new ProjectNameFilter();
     private ProjectFilterDto filterDto;
 
     private Project project1;
@@ -25,15 +24,15 @@ public class ProjectStatusFilterTest {
     public void init() {
         filterDto = new ProjectFilterDto();
 
-        project1 = Project.builder().status(ProjectStatus.CREATED).build();
-        project2 = Project.builder().status(ProjectStatus.IN_PROGRESS).build();
+        project1 = Project.builder().name("Test Project 1").build();
+        project2 = Project.builder().name("Another Project").build();
 
         stream = Stream.of(project1, project2);
     }
 
     @Test
     public void testApplySuccessCase() {
-        filterDto.setStatusPattern(ProjectStatus.CREATED);
+        filterDto.setNamePattern("Test");
 
         List<Project> actual = filter.apply(stream, filterDto).toList();
 
@@ -42,28 +41,37 @@ public class ProjectStatusFilterTest {
     }
 
     @Test
-    public void testApplyWithNonMatchingStatus() {
-        filterDto.setStatusPattern(ProjectStatus.COMPLETED);
+    public void testApplyCaseWithNotFullString() {
+        filterDto.setNamePattern("Pro");
 
-        List<Project> actual = filter.apply(stream, filterDto).toList();
-
-        assertEquals(0, actual.size());
-    }
-
-    @Test
-    public void testApplyWithStatusPatternNull() {
         List<Project> actual = filter.apply(stream, filterDto).toList();
 
         assertEquals(2, actual.size());
     }
 
     @Test
-    public void testApplyWithDifferentStatus() {
-        filterDto.setStatusPattern(ProjectStatus.IN_PROGRESS);
+    public void testApplyWithNamePatternNull() {
+        List<Project> actual = filter.apply(stream, filterDto).toList();
+
+        assertEquals(2, actual.size());
+    }
+
+    @Test
+    public void testApplyWithBlankString() {
+        filterDto.setNamePattern("");
 
         List<Project> actual = filter.apply(stream, filterDto).toList();
 
-        assertEquals(1, actual.size());
-        assertEquals(project2, actual.get(0));
+        assertEquals(2, actual.size());
+    }
+
+    @Test
+    public void testApplyWithNoMatch() {
+        filterDto.setNamePattern("Nonexistent");
+
+        List<Project> actual = filter.apply(stream, filterDto).toList();
+
+        assertEquals(0, actual.size());
     }
 }
+

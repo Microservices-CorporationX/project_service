@@ -1,4 +1,4 @@
-package school.faang.project_service.service;
+package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.project.ProjectCreateDto;
 import faang.school.projectservice.dto.project.ProjectFilterDto;
@@ -13,7 +13,6 @@ import faang.school.projectservice.fillters.project.impl.ProjectStatusFilter;
 import faang.school.projectservice.mapper.ProjectEntityMapperImpl;
 import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.ProjectRepository;
-import faang.school.projectservice.service.ProjectManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,13 +48,10 @@ public class ProjectManagementServiceTest {
     @BeforeEach
     public void init(){
         createDto = new ProjectCreateDto();
-        createDto.setId(1L);
         createDto.setName("Test Project");
         createDto.setDescription("Test Description");
-        createDto.setOwnerId(OWNER_ID);
 
         updateDto = new ProjectUpdateDto();
-        updateDto.setId(1L);
         updateDto.setDescription("Updated Description");
         updateDto.setStatus(ProjectStatus.IN_PROGRESS);
 
@@ -75,7 +71,7 @@ public class ProjectManagementServiceTest {
 
         BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> projectManagementService.createProject(createDto)
+                () -> projectManagementService.createProject(createDto, OWNER_ID)
         );
 
         assertEquals("Проект с таким названием уже существует для этого владельца", exception.getMessage());
@@ -86,7 +82,7 @@ public class ProjectManagementServiceTest {
     void createProjectShouldSaveProjectSuccessfully() {
         mockExistByOwnerIdAndName(false);
 
-        projectManagementService.createProject(createDto);
+        projectManagementService.createProject(createDto, OWNER_ID);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project project = projectCaptor.getValue();
         assertEquals(createDto.getName(), project.getName());
@@ -96,26 +92,26 @@ public class ProjectManagementServiceTest {
 
     @Test
     void updateProjectShouldThrowExceptionIfNotFound() {
-        when(projectRepository.findById(updateDto.getId())).thenReturn(java.util.Optional.empty());
+        when(projectRepository.findById(PROJECT_ID)).thenReturn(java.util.Optional.empty());
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> projectManagementService.updateProject(updateDto, OWNER_ID)
+                () -> projectManagementService.updateProject(updateDto, PROJECT_ID, OWNER_ID)
         );
 
-        assertEquals("Не существует проекта с ID: " + updateDto.getId(), exception.getMessage());
+        assertEquals("Не существует проекта с ID: " + PROJECT_ID, exception.getMessage());
     }
 
     @Test
     void updateProjectShouldUpdateSuccessfully() {
         Project existingProject = new Project();
-        existingProject.setId(updateDto.getId());
+        existingProject.setId(PROJECT_ID);
         existingProject.setDescription("Description");
         existingProject.setStatus(ProjectStatus.CREATED);
 
         mockFindProjectById(existingProject);
 
-        projectManagementService.updateProject(updateDto, OWNER_ID);
+        projectManagementService.updateProject(updateDto, PROJECT_ID, OWNER_ID);
         verify(projectRepository, times(1)).save(projectCaptor.capture());
         Project updatedProject = projectCaptor.getValue();
 
@@ -138,31 +134,10 @@ public class ProjectManagementServiceTest {
         when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
         mockProjectFiltersReturnStream(Stream.of(project1));
 
-        List<ProjectInfoDto> filteredProjects = projectManagementService.getAllProjectsWithFilters(filterDto, OWNER_ID);
+        List<ProjectInfoDto> filteredProjects = projectManagementService.getAllProjects(filterDto, OWNER_ID);
 
         assertEquals(1, filteredProjects.size());
         assertEquals("Test Project 1", filteredProjects.get(0).getName());
-    }
-
-    @Test
-    void getAllProjectsShouldReturnVisibleProjects() {
-        Project project1 = new Project();
-        project1.setId(1L);
-        project1.setOwnerId(OWNER_ID);
-        project1.setVisibility(ProjectVisibility.PUBLIC);
-
-        Project project2 = new Project();
-        project2.setId(2L);
-        project2.setOwnerId(OWNER_ID);
-        project2.setVisibility(ProjectVisibility.PRIVATE);
-
-        when(projectRepository.findAll()).thenReturn(List.of(project1, project2));
-
-        List<ProjectInfoDto> projects = projectManagementService.getAllProjects(OWNER_ID);
-
-        assertEquals(2, projects.size());
-        assertEquals(1L, projects.get(0).getId());
-        assertEquals(2L, projects.get(1).getId());
     }
 
 
@@ -201,7 +176,7 @@ public class ProjectManagementServiceTest {
     }
 
     private void mockExistByOwnerIdAndName(boolean t) {
-        when(projectRepository.existsByOwnerIdAndName(createDto.getOwnerId(), createDto.getName())).thenReturn(t);
+        when(projectRepository.existsByOwnerIdAndName(OWNER_ID, createDto.getName())).thenReturn(t);
     }
 
     private void mockFindProjectById(Project project) {
@@ -210,8 +185,8 @@ public class ProjectManagementServiceTest {
 
     private void mockProjectFiltersReturnStream(Stream<Project> stream) {
         projectFilters.forEach(projectFilter -> {
-            when(projectFilter.isApplicable(any())).thenReturn(true);
-            when(projectFilter.apply(any(), any())).thenReturn(stream);
+            lenient().when(projectFilter.isApplicable(any())).thenReturn(true);
+            lenient().when(projectFilter.apply(any(), any())).thenReturn(stream);
         });
     }
 
