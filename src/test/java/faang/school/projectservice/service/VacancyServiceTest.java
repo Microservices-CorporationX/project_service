@@ -71,8 +71,8 @@ public class VacancyServiceTest {
     @BeforeEach
     void init() {
         List<VacancyFilter> vacancyFilters = new ArrayList<>();
-        vacancyFilters.add(new VacancyNameFilter());
-        vacancyFilters.add(new VacancyPositionFilter());
+        vacancyFilters.add(mock(VacancyFilter.class));
+        vacancyFilters.add(mock(VacancyFilter.class));
 
         vacancyService = new VacancyService(
                 vacancyRepository,
