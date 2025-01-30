@@ -15,7 +15,7 @@ public class VacancyServiceImpl implements VacancyService{
     @Override
     public void addCover(Long vacancyId, MultipartFile file) {
         Vacancy vacancy = vacancyRepositoryAdapter.findById(vacancyId);
-        vacancy.setCoverImageKey();
+//        vacancy.setCoverImageKey();
 
 
     }
