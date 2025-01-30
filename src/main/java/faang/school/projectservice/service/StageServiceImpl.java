@@ -3,6 +3,7 @@ package faang.school.projectservice.service;
 import faang.school.projectservice.dto.stage.StageDto;
 import faang.school.projectservice.dto.stage.StageFilterDto;
 import faang.school.projectservice.exception.DataValidationException;
+import faang.school.projectservice.exception.ResourceNotFoundException;
 import faang.school.projectservice.mapper.StageMapper;
 import faang.school.projectservice.mapper.StageRolesMapper;
 import faang.school.projectservice.model.Project;
@@ -71,7 +72,7 @@ public class StageServiceImpl implements StageService {
     @Override
     public StageDto getStageById(long stageId) {
         Stage stage = stageRepository.findById(stageId)
-                .orElseThrow(() -> new DataValidationException("Stage with id " + stageId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Stage with id " + stageId + " not found"));
         return stageMapper.toDto(stage);
     }
 
