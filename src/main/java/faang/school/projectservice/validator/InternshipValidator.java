@@ -43,7 +43,7 @@ public class InternshipValidator {
             throw new IllegalArgumentException("Стажирока окончена!!!");
         }
         if (internship.getStartDate().isBefore(LocalDateTime.now())
-                || isInternsListNotEqualNotEmpty(internship, updateDto)) {
+                && isInternsListNotEqualNotEmpty(internship, updateDto)) {
             throw new BusinessException("После начала стажировки нельзя менять список стажеров");
         }
     }

@@ -8,36 +8,31 @@ import faang.school.projectservice.validator.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InternshipValidatorTest {
 
+    private static final long MAX_DURATION = 92;
     @Spy
     private InternshipValidator internshipValidator;
     private Internship internship;
     private InternshipCreateDto internshipCreateDto;
     private InternshipUpdateDto internshipUpdateDto;
     private Project project;
-    private Team team ;
+    private Team team;
     private TeamMember mentor;
     private TeamMember intern;
     private List<TeamMember> interns;
     private LocalDateTime startDate = LocalDateTime.now();
     private LocalDateTime endDate = LocalDateTime.now().plusDays(MAX_DURATION);
-    private static final long MAX_DURATION = 92;
 
     @BeforeEach
     void setUp() {
@@ -83,7 +78,7 @@ public class InternshipValidatorTest {
         internship.setRole(TeamRole.DEVELOPER);
     }
 
-   @Test
+    @Test
     public void InternshipCreateValidatorWrongMentorTest() {
         Project wrongProject = new Project();
         mentor = TeamMember.builder()
@@ -94,7 +89,7 @@ public class InternshipValidatorTest {
         internship.setMentor(mentor);
         BusinessException ex = assertThrows(BusinessException.class, () -> internshipValidator.internshipCreateValidate(internship));
         assertEquals(ex.getMessage(), "Ментор с id:" + mentor.getId() + " не участвует в проекте!!!");
-   }
+    }
 
     @Test
     public void InternshipCreateValidatorWrongInternTest() {
@@ -115,5 +110,32 @@ public class InternshipValidatorTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto));
         assertEquals(ex.getMessage(), "Стажирока окончена!!!");
+    }
+
+    @Test
+    public void completedInternshipValidatorInternsUpdateTest() {
+        internship.setStartDate(LocalDateTime.now().minusDays(1));
+        internshipUpdateDto.setInternsId(List.of(2L, 3L));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto));
+        assertEquals(ex.getMessage(), "После начала стажировки нельзя менять список стажеров");
+    }
+
+    @Test
+    public void durationInternshipDateValidatorTest() {
+        internship.setEndDate(startDate.plusDays(MAX_DURATION + 1));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> internshipValidator.internshipDateValidation(internship.getStartDate(), internship.getEndDate()));
+        assertEquals(ex.getMessage(), "Стажировка длится слишком долго!!!.\nМаксимальное кол-во дней " + MAX_DURATION);
+    }
+
+    @Test
+    public void startEqualsEndInternshipDateValidatorTest() {
+        internship.setEndDate(startDate);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> internshipValidator.internshipDateValidation(internship.getStartDate(), internship.getEndDate()));
+        assertEquals(ex.getMessage(), "Дата окончания не может быть раньше или равна дате начала!!!");
     }
 }
