@@ -1,7 +1,6 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
@@ -128,9 +127,6 @@ class MeetServiceTest {
         existingMeet.setCreatorId(userId);
         existingMeet.setTitle(oldDesc);
 
-        UserDto userDto = UserDto.builder().id(userId).build();
-
-        when(userServiceClient.getUser(userId)).thenReturn(userDto);
         when(meetRepository.findById(meetId)).thenReturn(Optional.of(existingMeet));
 
         String newDesc = "new desc";
@@ -156,12 +152,9 @@ class MeetServiceTest {
         existingMeet.setId(meetId);
         existingMeet.setCreatorId(creatorId);
 
-        long userId = 2;
-        UserDto userDto = UserDto.builder().id(userId).build();
-
         when(meetRepository.findById(meetId)).thenReturn(Optional.of(existingMeet));
-        when(userServiceClient.getUser(userId)).thenReturn(userDto);
 
+        long userId = 2;
         MeetUpdateRequest request = MeetUpdateRequest.builder()
                 .meetId(meetId)
                 .title("new title")
