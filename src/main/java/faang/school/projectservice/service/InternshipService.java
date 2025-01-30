@@ -15,6 +15,7 @@ import faang.school.projectservice.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ public class InternshipService {
     private final AuditorAwareImpl auditor;
     private final List<InternshipFilter> filters;
 
+    @Transactional
     public InternshipCreateDto create(InternshipCreateDto internshipCreateDto) {
         Internship internship = mapper.toEntity(internshipCreateDto);
 
@@ -46,6 +48,7 @@ public class InternshipService {
         return mapper.toDto(internship);
     }
 
+    @Transactional
     public InternshipCreateDto updateInternship(InternshipUpdateDto internshipUpdateDto) {
         Internship internship = mapper.toEntity(getInternship(internshipUpdateDto.getId()));
         validator.internshipUpdateValidation(internship, internshipUpdateDto);
