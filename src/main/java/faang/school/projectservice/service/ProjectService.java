@@ -1,6 +1,7 @@
 package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.config.audit.AuditorAwareImpl;
 import faang.school.projectservice.config.s3.S3Properties;
 import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.project.ProjectPresentationDto;
@@ -9,6 +10,8 @@ import faang.school.projectservice.dto.project.SubProjectCreateDto;
 import faang.school.projectservice.dto.project.SubProjectFilterDto;
 import faang.school.projectservice.dto.project.SubProjectUpdateDto;
 import faang.school.projectservice.dto.project.TeamMemberDto;
+import faang.school.projectservice.exception.AuthenticationException;
+import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.subproject.SubProjectFilter;
 import faang.school.projectservice.mapper.ProjectMapper;
@@ -41,6 +44,7 @@ public class ProjectService {
     private final S3Properties s3Properties;
     private final PdfService pdfService;
     private final UserServiceClient userServiceClient;
+    private final AuditorAwareImpl auditorAware;
 
     public ProjectReadDto create(SubProjectCreateDto createDto) {
         projectValidator.validateSubProjectCreation(createDto);
@@ -78,8 +82,14 @@ public class ProjectService {
     }
 
     public ProjectReadDto generateProjectPresentation(long projectId) {
+        long userId = auditorAware.getCurrentAuditor().orElseThrow(
+                () -> new AuthenticationException("Аунтефикация необходима")
+        );
         Project project = getProjectById(projectId);
-        UserDto owner = userServiceClient.getUser(project.getOwnerId());
+        if (userId != project.getOwnerId()) {
+            throw new BusinessException("Вы не являетесь владельцем проекта");
+        }
+        UserDto owner = userServiceClient.getUser(userId);
 
         ProjectPresentationDto dto = new ProjectPresentationDto(
                 project.getName(),
