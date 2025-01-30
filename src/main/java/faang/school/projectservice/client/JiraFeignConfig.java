@@ -11,10 +11,10 @@ import java.util.Base64;
 @Configuration
 public class JiraFeignConfig {
 
-    @Value("${jira.config.username}")
+    @Value("${jira.username}")
     private String username;
 
-    @Value("${jira.config.password}")
+    @Value("${jira.password}")
     private String password;
 
     @Bean
