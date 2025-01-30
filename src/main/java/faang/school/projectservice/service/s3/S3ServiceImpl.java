@@ -22,15 +22,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 //@ConditionalOnProperty(value = "services.s3.isMocked", havingValue = "false")
 public class S3ServiceImpl implements S3Service {
-
     private final AmazonS3 s3Client;
-
     @Value("${services.s3.bucketName}")
     private String bucketName;
 
     @Override
     public Resource uploadFile(MultipartFile file, String folder) {
-
         long fileSize = file.getSize();
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(fileSize);
@@ -45,7 +42,6 @@ public class S3ServiceImpl implements S3Service {
             log.error("Error uploading file {}, error: {}", file.getOriginalFilename(), e.toString());
             throw new RuntimeException("Error uploading file" + file.getOriginalFilename() + ", error:" + e);
         }
-
         return Resource.builder()
                 .key(key)
                 .size(BigInteger.valueOf(fileSize))
@@ -55,7 +51,6 @@ public class S3ServiceImpl implements S3Service {
                 .type(ResourceType.getResourceType(file.getContentType()))
                 .name(file.getOriginalFilename())
                 .build();
-
     }
 
     @Override

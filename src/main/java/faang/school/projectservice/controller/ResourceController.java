@@ -1,6 +1,8 @@
 package faang.school.projectservice.controller;
+
 import faang.school.projectservice.dto.resource.ResourceResponseDto;
 import faang.school.projectservice.service.ResourceService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -20,23 +22,19 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @PutMapping("/{projectId}/add")
-    public ResourceResponseDto addResource(@PathVariable Long projectId, @RequestBody MultipartFile file) {
+    public ResourceResponseDto addResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                                           @NotBlank @PathVariable Long projectId,
+                                           @RequestBody MultipartFile file) {
         log.info("Uploading image {} to project {}", file.getName(), projectId);
-        return resourceService.addResource(projectId, file);
-    }
-
-    @DeleteMapping("/{resourceId}")
-    public ResponseEntity<String> deleteResource(@PathVariable Long resourceId) {
-        resourceService.deleteResource(resourceId);
-        log.info("Image with id {} was successfully deleted", resourceId);
-        return ResponseEntity.ok("Image with id " + resourceId + " was successfully deleted");
+        return resourceService.addResource(userId, projectId, file);
     }
 
     @GetMapping(path = "/{resourceId}", produces = "application/octet-stream")
-    public ResponseEntity<byte[]> downloadResource(@PathVariable Long resourceId) {
+    public ResponseEntity<byte[]> downloadResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                                                   @NotBlank @PathVariable Long resourceId) {
         byte[] imageBytes = null;
         try {
-            imageBytes = resourceService.downloadResource(resourceId).readAllBytes();
+            imageBytes = resourceService.downloadResource(userId, resourceId).readAllBytes();
         }catch(IOException e)
         {
             log.error("Error downloading file resource {}, error: {}", resourceId, e.toString());
@@ -45,5 +43,13 @@ public class ResourceController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.IMAGE_JPEG);
         return new ResponseEntity<>(imageBytes, httpHeaders, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{resourceId}")
+    public ResponseEntity<String> deleteResource(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                                                 @NotBlank @PathVariable Long resourceId) {
+        resourceService.deleteResource(userId, resourceId);
+        log.info("Image with id {} was successfully deleted", resourceId);
+        return ResponseEntity.ok("Image with id " + resourceId + " was successfully deleted");
     }
 }
