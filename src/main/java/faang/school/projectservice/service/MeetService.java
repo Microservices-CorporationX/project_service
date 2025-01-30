@@ -1,7 +1,5 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.meet.MeetCreateRequest;
 import faang.school.projectservice.dto.meet.MeetFilterRequest;
 import faang.school.projectservice.dto.meet.MeetResponse;
@@ -29,7 +27,6 @@ public class MeetService {
     private final ProjectValidator projectValidator;
     private final MeetMapper meetMapper;
     private final MeetRepository meetRepository;
-    private final UserServiceClient userServiceClient;
     private final List<MeetFilter> meetFilters;
 
     public MeetResponse createMeet(@Valid MeetCreateRequest meetCreateRequest) {
@@ -48,19 +45,14 @@ public class MeetService {
 
     @Transactional
     public MeetResponse updateMeet(@Valid MeetUpdateRequest meetUpdateRequest) {
-        UserDto userDto = userServiceClient.getUser(meetUpdateRequest.userId());
+        userValidator.validateUser(meetUpdateRequest.userId());
         Meet meet = getMeet(meetUpdateRequest.meetId());
-        if (!Objects.equals(userDto.id(), meet.getCreatorId())) {
+        if (!Objects.equals(meetUpdateRequest.userId(), meet.getCreatorId())) {
             throw new MeetingOwnershipRequiredException("Изменять встречу может только владелец");
         }
 
         meetMapper.updateMeet(meetUpdateRequest, meet);
         return meetMapper.toMeetResponse(meet);
-    }
-
-    private Meet getMeet(Long id) {
-        return meetRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Meet not found"));
     }
 
     @Transactional
@@ -98,5 +90,10 @@ public class MeetService {
         Stream<Meet> meets = meetRepository.findByProjectId(projectId);
 
         return meets.map(meetMapper::toMeetResponse).toList();
+    }
+
+    private Meet getMeet(Long id) {
+        return meetRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Meet not found"));
     }
 }
