@@ -5,11 +5,13 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import faang.school.projectservice.exception.UploadResourceException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
 import faang.school.projectservice.peroperties.S3Properties;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
     private final AmazonS3 s3Client;
-
     private final S3Properties s3Properties;
 
     @Override
@@ -41,7 +42,7 @@ public class S3ServiceImpl implements S3Service {
             putObjectRequest =
                     new PutObjectRequest(s3Properties.getBucketName(), key, file.getInputStream(), objectMetadata);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UploadResourceException("Upload resource is failed");
         }
         s3Client.putObject(putObjectRequest);
         return buildResource(file, key);
@@ -49,13 +50,14 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public InputStream downloadFile(String key) {
-        GetObjectRequest getObjectRequest = new GetObjectRequest(
-                s3Properties.getBucketName(), key
-        );
-        return s3Client.getObject(getObjectRequest).getObjectContent();
+        GetObjectRequest getObjectRequest = new GetObjectRequest(s3Properties.getBucketName(), key);
+        S3Object object = s3Client.getObject(getObjectRequest);
+        if (object == null) {
+            throw new EntityNotFoundException(String.format("Resource not found by key = %s", key));
+        }
+        return object.getObjectContent();
     }
 
-    @Transactional
     @Override
     public void deleteFile(String key) {
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(s3Properties.getBucketName(), key);

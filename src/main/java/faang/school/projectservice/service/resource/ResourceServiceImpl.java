@@ -3,14 +3,18 @@ package faang.school.projectservice.service.resource;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.resource.ResourceDto;
 import faang.school.projectservice.exception.AccessDeniedException;
+import faang.school.projectservice.exception.StorageException;
 import faang.school.projectservice.mapper.ResourceMapper;
-import faang.school.projectservice.model.*;
+import faang.school.projectservice.model.Project;
+import faang.school.projectservice.model.Resource;
+import faang.school.projectservice.model.ResourceStatus;
+import faang.school.projectservice.model.TeamMember;
+import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.ResourceRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,26 +35,17 @@ public class ResourceServiceImpl implements ResourceService {
     private final UserContext userContext;
     private final TeamMemberRepository teamMemberRepository;
 
-    @Transactional
     @Override
     public ResourceDto uploadFile(long projectId, MultipartFile file) {
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Project with id = %d not found", projectId)));
         BigInteger newStorageSize = BigInteger.valueOf(project.getStorageSize().longValue())
-                .add(BigInteger.valueOf(file.getSize()));
+                .add(BigInteger.valueOf(file.getSize() / 1024));
         if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
-            throw new IllegalArgumentException();
+            throw new StorageException("No space in storage");
         }
-        Resource resource = s3Service.uploadFile(file, project.getName());
-        resource.setSize(newStorageSize);
-        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId());
-        resource.setCreatedBy(member);
-        resource.setProject(project);
-        resourceRepository.save(resource);
-
-        project.setStorageSize(newStorageSize);
-        project.setUpdatedAt(LocalDateTime.now());
-        projectRepository.save(project);
+        Resource resource = saveResource(file, project, newStorageSize);
+        updateProject(project, newStorageSize);
 
         return resourceMapper.toDto(resource);
     }
@@ -62,34 +57,47 @@ public class ResourceServiceImpl implements ResourceService {
         return s3Service.downloadFile(key);
     }
 
-    @Transactional
     @Override
     public void deleteFile(String key) {
         Resource resource = resourceRepository.findByKey(key).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Resource with key = %s not found", key)));
-
         Project project = resource.getProject();
         long userId = userContext.getUserId();
         TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userId, project.getId());
 
         if (member.getRoles().contains(TeamRole.MANAGER) || resource.getCreatedBy().equals(member)) {
             s3Service.deleteFile(key);
-
-            BigInteger newStorageSize =
-                    BigInteger.valueOf(project.getStorageSize().longValue())
-                            .add(resource.getSize());
-            project.setStorageSize(newStorageSize);
-            project.setUpdatedAt(LocalDateTime.now());
-            projectRepository.save(project);
-
-            resource.setKey(null);
-            resource.setSize(null);
-            resource.setStatus(ResourceStatus.DELETED);
-            resource.setUpdatedAt(LocalDateTime.now());
-            resource.setUpdatedBy(member);
+            BigInteger newStorageSize = BigInteger.valueOf(project.getStorageSize().longValue()).add(resource.getSize());
+            updateProject(project, newStorageSize);
+            updateResource(resource, member);
             resourceRepository.save(resource);
         } else {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException(
+                    String.format("Access denied. User with id = %d not manager or owner", userId));
         }
+    }
+
+    private void updateResource(Resource resource, TeamMember member) {
+        resource.setKey(null);
+        resource.setSize(null);
+        resource.setStatus(ResourceStatus.DELETED);
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.setUpdatedBy(member);
+    }
+
+    private void updateProject(Project project, BigInteger newStorageSize) {
+        project.setStorageSize(newStorageSize);
+        project.setUpdatedAt(LocalDateTime.now());
+        projectRepository.save(project);
+    }
+
+    private Resource saveResource(MultipartFile file, Project project, BigInteger newStorageSize) {
+        Resource resource = s3Service.uploadFile(file, project.getName());
+        resource.setSize(newStorageSize);
+        TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId());
+        resource.setCreatedBy(member);
+        resource.setProject(project);
+        resourceRepository.save(resource);
+        return resource;
     }
 }

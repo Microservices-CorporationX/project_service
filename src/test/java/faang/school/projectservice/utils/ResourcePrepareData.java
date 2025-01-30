@@ -19,6 +19,26 @@ public class ResourcePrepareData {
         return Resource.builder()
                 .project(getProject())
                 .status(ResourceStatus.ACTIVE)
+                .createdBy(TeamMember.builder()
+                        .id(1L)
+                        .roles(List.of(TeamRole.ANALYST))
+                        .build())
+                .size(BigInteger.valueOf(4L))
+                .build();
+    }
+
+    public static Resource getDeletedResource() {
+        return Resource.builder()
+                .project(getProject())
+                .status(ResourceStatus.DELETED)
+                .createdBy(TeamMember.builder()
+                        .id(1L)
+                        .roles(List.of(TeamRole.ANALYST))
+                        .build())
+                .createdBy(TeamMember.builder()
+                        .id(1L)
+                        .roles(List.of(TeamRole.ANALYST))
+                        .build())
                 .build();
     }
 
