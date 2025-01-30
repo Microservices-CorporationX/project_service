@@ -7,6 +7,8 @@ import faang.school.projectservice.dto.vacancy.UpdateVacancyResponse;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.exception.VacancyException;
 import faang.school.projectservice.filter.vacancy.VacancyFilter;
+import faang.school.projectservice.filter.vacancy.VacancyNameFilter;
+import faang.school.projectservice.filter.vacancy.VacancyPositionFilter;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.mapper.VacancyMapperImpl;
 import faang.school.projectservice.model.Candidate;
@@ -47,29 +49,30 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class VacancyServiceTest {
+    @InjectMocks
     private VacancyService vacancyService;
+
+    @Mock
     private VacancyRepository vacancyRepository;
+    @Mock
     private ProjectRepository projectRepository;
+    @Mock
     private CandidateRepository candidateRepository;
+
+    @Mock
     private VacancyValidator vacancyValidator;
-    private VacancyMapper vacancyMapper;
-    private List<VacancyFilter> vacancyFilters;
+
+    @Spy
+    private VacancyMapper vacancyMapper = Mappers.getMapper(VacancyMapper.class);
+
     @Captor
     private ArgumentCaptor<Vacancy> vacancyArgumentCaptor;
 
     @BeforeEach
     void init() {
-        vacancyRepository = mock(VacancyRepository.class);
-        projectRepository = mock(ProjectRepository.class);
-        candidateRepository = mock(CandidateRepository.class);
-
-        vacancyValidator = mock(VacancyValidator.class);
-
-        vacancyMapper = spy(VacancyMapperImpl.class);
-
-        vacancyFilters = new ArrayList<>();
-        vacancyFilters.add(mock(VacancyFilter.class));
-        vacancyFilters.add(mock(VacancyFilter.class));
+        List<VacancyFilter> vacancyFilters = new ArrayList<>();
+        vacancyFilters.add(new VacancyNameFilter());
+        vacancyFilters.add(new VacancyPositionFilter());
 
         vacancyService = new VacancyService(
                 vacancyRepository,
