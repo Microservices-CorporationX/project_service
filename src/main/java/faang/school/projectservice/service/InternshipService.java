@@ -9,6 +9,7 @@ import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.service.filter.internship.InternshipFilter;
+import faang.school.projectservice.validation.InternshipValidationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,19 +34,18 @@ public class InternshipService {
 
     public void updateInternship(InternshipUpdateRequest dto) {
         internshipValidationService.validateRequest(dto);
-        if (dto.endDate().isBefore(LocalDateTime.now())) {
-            Internship updateInternship = internshipRepository.getById(dto.id());
-            List<TeamMember> teamInterns = updateInternship.getInterns();
+//        Internship internship = internshipRepository.findById(dto.getId())
+//                .orElseThrow(() -> new NoSuchElementException(
+//                        "Element with id" + dto.getId() + "dose not exist"));
+        Internship internship = internshipRepository.getById(dto.getId());
+        if (dto.getEndDate().isBefore(LocalDateTime.now())) {
+            List<TeamMember> teamInterns = internship.getInterns();
             teamInterns.stream()
-                    .forEach(intern -> intern.setRoles(List.of(dto.role())));
-            internshipRepository.save(updateInternship);
+                    .forEach(intern -> intern.setRoles(List.of(dto.getRole())));
         } else {
-            Internship internship = internshipRepository.findById(dto.id())
-                    .orElseThrow(() -> new NoSuchElementException(
-                            "Element with id" + dto.id() + "dose not exist"));
             internshipMapper.update(dto, internship);
-            internshipRepository.save(internship);
         }
+        internshipRepository.save(internship);
     }
 
     public List<InternshipResponse> getInternshipsByFilter(@Valid InternshipFilterRequest filterRequest) {
