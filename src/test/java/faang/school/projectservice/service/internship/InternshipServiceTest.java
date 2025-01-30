@@ -52,7 +52,7 @@ public class InternshipServiceTest {
     private TeamMember mentor;
     private TeamMember intern;
     private List<TeamMember> interns;
-    private Long createdBy;
+    private Long createdBy = 1L;
 
     @BeforeEach
     public void setUp() {
