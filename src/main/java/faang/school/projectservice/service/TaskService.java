@@ -9,13 +9,11 @@ import faang.school.projectservice.exception.*;
 import faang.school.projectservice.mapper.TaskMapper;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Task;
-import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
 import faang.school.projectservice.service.filter.task.TaskGetting;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -75,7 +73,7 @@ public class TaskService {
         taskMapper.updateTaskFromDto(updateTaskDto, task);
 
         if (!updateTaskDto.linkedTaskIds().isEmpty()) {
-            List<Task> linkedTasks = taskRepository.findAllById(updateTaskDto.linkedTaskIds());
+            List<Task> linkedTasks = findLinkedTasksByIds(updateTaskDto.linkedTaskIds());
             task.setLinkedTasks(linkedTasks);
         }
 
@@ -119,7 +117,13 @@ public class TaskService {
         return taskMapper.toDto(findTaskById(taskId));
     }
 
-    public void isItOnePerson(Long performerUserId, Long reporterUserId) {
+    @Transactional(readOnly = true)
+    private Task findTaskById(Long taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("task with was not found -> id : " + taskId));
+    }
+
+    private void isItOnePerson(Long performerUserId, Long reporterUserId) {
         if (performerUserId.equals(reporterUserId)) {
             log.error("PerformerUserId and reporterUserId is equals -> {}, {}",
                     performerUserId,
@@ -128,7 +132,7 @@ public class TaskService {
         }
     }
 
-    public void areUsersInSystem(Long... userIds) {
+    private void areUsersInSystem(Long... userIds) {
         boolean isError = userServiceClient.getUsersByIds(Arrays.asList(userIds)).stream()
                 .anyMatch(Objects::isNull);
 
@@ -138,13 +142,7 @@ public class TaskService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Task findTaskById(Long taskId) {
-        return taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("task with was not found -> id : " + taskId));
-    }
-
-    public void isUserInProject(Project project, Long userId) {
+    private void isUserInProject(Project project, Long userId) {
         boolean isUserInProject = project.getTeams().stream()
                 .anyMatch(team -> team.getTeamMembers()
                         .stream().anyMatch(teamMember -> teamMember.getUserId().equals(userId)));
@@ -154,18 +152,18 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public Stage findStageById(Long stageId) {
+    private Stage findStageById(Long stageId) {
         return stageRepository.findById(stageId)
                 .orElseThrow(() -> new StageWasNotFoundException("Stage was not found -> id : " + stageId));
     }
 
     @Transactional(readOnly = true)
-    public List<Task> findLinkedTasksByIds(List<Long> linkedTaskIds) {
+    private List<Task> findLinkedTasksByIds(List<Long> linkedTaskIds) {
         return taskRepository.findAllById(linkedTaskIds);
     }
 
     @Transactional(readOnly = true)
-    public Project findByProjectId(Long id) {
+    private Project findByProjectId(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectWasNotFoundException("Project was not found with id : " + id));
     }

@@ -15,6 +15,7 @@ import faang.school.projectservice.model.stage.Stage;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.TaskRepository;
+import faang.school.projectservice.service.factory.TestDataFactory;
 import faang.school.projectservice.service.filter.task.TaskGetting;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,42 +61,13 @@ public class TaskServiceTest {
 
     @BeforeEach
     public void catchUp() {
-        createTaskDto = CreateTaskDto.builder()
-                .name("Norair")
-                .performerUserId(1L)
-                .reporterUserId(2L)
-                .projectId(1L)
-                .build();
-        taskResult = TaskResult.builder()
-                .description("Hello world")
-                .id(1L)
-                .build();
-        project = Project.builder()
-                .id(1L)
-                .tasks(List.of())
-                .name("task1")
-                .description("idk what to write!")
-                .tasks(new ArrayList<>())
-                .teams(new ArrayList<>())
-                .build();
-        stage = Stage.builder()
-                .stageId(1L)
-                .build();
-        task = Task.builder()
-                .id(1L)
-                .description("Hello world")
-                .project(project)
-                .build();
-        userDto1 = UserDto.builder()
-                .id(1L)
-                .email("createdMock@mail.ru")
-                .username("az3l1t")
-                .build();
-        userDto2 = UserDto.builder()
-                .id(2L)
-                .email("createdMock@mail.ru")
-                .username("az3l1t")
-                .build();
+        createTaskDto = TestDataFactory.createTaskDto();
+        taskResult = TestDataFactory.taskResult();
+        project = TestDataFactory.project();
+        stage = TestDataFactory.stage();
+        task = TestDataFactory.task(project);
+        userDto1 = TestDataFactory.userDto(1L);
+        userDto2 = TestDataFactory.userDto(2L);
     }
 
     @Test
