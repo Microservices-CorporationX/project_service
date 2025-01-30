@@ -52,18 +52,6 @@ class MomentServiceTest {
     }
 
     @Test
-    void createMoment_ShouldThrowEntityNotFoundExceptionWhenResourceNotFound() {
-        CreateMomentRequest createMomentRequest = MomentDataFactory.getCreateMomentRequest();
-        Project project = MomentDataFactory.getProject(1L);
-        Mockito.when(projectService.getActiveProjectById(Mockito.anyLong()))
-                .thenReturn(project);
-        Mockito.when(resourceService.getResourceById(Mockito.anyLong()))
-                .thenThrow(EntityNotFoundException.class);
-        Assertions.assertThrows(EntityNotFoundException.class,
-                () -> momentService.createMoment(createMomentRequest));
-    }
-
-    @Test
     void createMoment_Success() {
         List<Project> projects = Arrays.asList(MomentDataFactory.getProject(1L),
                 MomentDataFactory.getProject(2L));
@@ -75,7 +63,7 @@ class MomentServiceTest {
         Resource resource = MomentDataFactory.getResource(3L);
         Mockito.when(projectService.getActiveProjectById(Mockito.anyLong()))
                 .thenReturn(project);
-        Mockito.when(resourceService.getResourceById(Mockito.anyLong()))
+        Mockito.when(resourceService.getResourceRefById(Mockito.anyLong()))
                 .thenReturn(resource);
         Moment mappedMoment = momentMapper.toEntity(createMomentRequest, projects, resources, 1L);
         Mockito.when(momentRepository.save(Mockito.any(Moment.class)))

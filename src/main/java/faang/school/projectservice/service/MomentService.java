@@ -101,7 +101,7 @@ public class MomentService {
 
     private List<Resource> getResources(List<Long> resourceIds) {
         return resourceIds.stream()
-                .map(resourceService::getResourceById)
+                .map(resourceService::getResourceRefById)
                 .toList();
     }
 }
