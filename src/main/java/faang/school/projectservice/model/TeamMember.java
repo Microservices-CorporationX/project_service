@@ -46,10 +46,10 @@ public class TeamMember {
     @Enumerated(EnumType.STRING)
     private List<TeamRole> roles;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
 
-    @ManyToMany(mappedBy = "executors", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "executors")
     private List<Stage> stages;
 }
