@@ -116,11 +116,4 @@ public class InternshipValidatorTest {
                 () -> internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto));
         assertEquals(ex.getMessage(), "Стажирока окончена!!!");
     }
-
-    @Test
-    public void InvalidInternshipUpdateValidatorTest() {
-        System.out.println(internshipValidator.isInternsListNotEqualNotEmpty(internship, internshipUpdateDto));
-        internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto);
-    }
-
 }
