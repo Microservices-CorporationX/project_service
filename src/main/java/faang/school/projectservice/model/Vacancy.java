@@ -76,6 +76,13 @@ public class Vacancy {
     @LastModifiedBy
     private Long updatedBy;
 
+    @Column(name = "curator_id", nullable = false)
+    private Long curatorId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "curator_role", nullable = false)
+    private TeamRole curatorRole;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     private VacancyStatus status;
