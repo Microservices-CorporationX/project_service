@@ -2,6 +2,9 @@ plugins {
     java
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
+    jacoco
+
+
 }
 
 group = "faang.school"
@@ -11,6 +14,21 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
     mavenCentral()
 }
+jacoco {
+    toolVersion = "0.8.12" // Задаем версию инструмента JaCoCo
+    reportsDirectory.set(layout.buildDirectory.dir("customJacocoReportDir"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        html.required.set(true)
+    }}
 
 dependencies {
     /**
@@ -59,6 +77,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
 }
 
 tasks.withType<Test> {
