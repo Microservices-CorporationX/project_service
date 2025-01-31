@@ -2,7 +2,6 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.dto.stage.StageInvitationDto;
 import faang.school.projectservice.dto.stage.StageInvitationFilterDto;
-import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.filter.stage.StageInvitationFilter;
 import faang.school.projectservice.mapper.StageInvitationMapper;
 import faang.school.projectservice.model.TeamMember;
