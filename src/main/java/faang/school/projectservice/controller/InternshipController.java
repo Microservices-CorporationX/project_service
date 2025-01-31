@@ -16,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
-    private final TeamMemberRepository teamMemberRepository;
 
     @PostMapping("/create")
     public InternshipCreateDto createInternship(@Valid @RequestBody InternshipCreateDto internshipCreateDto) {
