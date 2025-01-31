@@ -135,20 +135,20 @@ class ProjectServiceTest {
     }
 
     @Test
-    void getProjectDtoById_ShouldReturnProjectWhenExists() {
+    void getProjectById_ShouldReturnProjectWhenExists() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(crearteProject));
 
-        ProjectResponseDto result = projectService.getProjectDtoById(1L);
+        Project result = projectService.getProjectById(1L);
 
-        assertEquals(projectMapper.toResponseDto(crearteProject), result);
+        assertEquals(crearteProject, result);
     }
 
     @Test
-    void getProjectDtoById_ShouldThrowExceptionWhenNotFound() {
+    void getProjectById_ShouldThrowExceptionWhenNotFound() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         NoSuchElementException noSuchElementException = assertThrows(NoSuchElementException.class,
-                () -> projectService.getProjectDtoById(1L));
+                () -> projectService.getProjectById(1L));
         assertEquals("Project not found", noSuchElementException.getMessage());
     }
 
