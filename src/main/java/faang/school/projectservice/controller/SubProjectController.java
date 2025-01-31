@@ -7,8 +7,6 @@ import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.validation.ValidatorSubProjectController;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +19,8 @@ public class SubProjectController {
     private final ProjectService projectService;
     private final ValidatorSubProjectController validatorSubProjectController;
 
-
     @PostMapping("/create")
-    public ResponseEntity<ProjectReadDto> createSubProject(@RequestBody CreateSubProjectDto createSubProjectDto) {
+    public ProjectReadDto createSubProject(@RequestBody CreateSubProjectDto createSubProjectDto) {
 
         validatorSubProjectController.validateSubProjectName(createSubProjectDto.getName());
         validatorSubProjectController.validateParentProjectExists(createSubProjectDto.getParentProjectId());
@@ -34,11 +31,11 @@ public class SubProjectController {
 
         ProjectReadDto result = projectService.createSubProject(createSubProjectDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        return projectService.createSubProject(createSubProjectDto);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ProjectReadDto> updateSubProject(@PathVariable Long id, @RequestBody CreateSubProjectDto createSubProjectDto) {
+    public ProjectReadDto updateSubProject(@PathVariable Long id, @RequestBody CreateSubProjectDto createSubProjectDto) {
 
         validatorSubProjectController.validateSubProjectName(createSubProjectDto.getName());
         validatorSubProjectController.validateParentProjectExists(createSubProjectDto.getParentProjectId());
@@ -48,7 +45,7 @@ public class SubProjectController {
         validatorSubProjectController.validateVisibilityForSubProject(parentProject, createSubProjectDto.getVisibility());
 
         ProjectReadDto updatedProject = projectService.updateSubProject(id, createSubProjectDto);
-        return ResponseEntity.ok(updatedProject);
+        return projectService.updateSubProject(id, createSubProjectDto);
     }
 
     @GetMapping("/filter")
