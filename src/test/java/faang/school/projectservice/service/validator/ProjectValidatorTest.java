@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.validator;
 
 import faang.school.projectservice.dto.project.SubProjectCreateDto;
+import faang.school.projectservice.exception.BusinessException;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.ProjectStatus;
 import faang.school.projectservice.model.ProjectVisibility;
