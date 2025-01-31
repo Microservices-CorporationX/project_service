@@ -5,6 +5,7 @@ import faang.school.projectservice.dto.donate.DonationDto;
 import faang.school.projectservice.dto.donate.DonationFilterDto;
 import faang.school.projectservice.service.donate.DonationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +24,12 @@ public class DonationController {
     }
 
     @GetMapping("/{id}")
-    public DonationDto getDonationById(@Valid @PathVariable Long id, @Valid @RequestParam Long userId) {
+    public DonationDto getDonationById(@Valid @NotNull @PathVariable Long id, @Valid @NotNull @RequestParam Long userId) {
         return donationService.getDonationById(id, userId);
     }
 
     @GetMapping("/all")
-    public List<DonationDto> getUserDonations(@Valid @RequestParam Long userId, @RequestBody DonationFilterDto filterDto) {
+    public List<DonationDto> getUserDonations(@Valid @NotNull @RequestParam Long userId, @RequestBody DonationFilterDto filterDto) {
         return donationService.getUserDonations(userId, filterDto);
     }
 

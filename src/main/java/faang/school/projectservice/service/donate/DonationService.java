@@ -12,12 +12,13 @@ import faang.school.projectservice.dto.donate.DonationFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.exception.PaymentServiceConnectException;
-import faang.school.projectservice.filter.donation.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
 import faang.school.projectservice.service.CampaignService;
+import faang.school.projectservice.service.filter.donation.DonationFilter;
+import faang.school.projectservice.util.RandomGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -40,6 +40,7 @@ public class DonationService {
     private final PaymentServiceClient paymentServiceClient;
     private final List<DonationFilter> donationFilters;
     private final CampaignService campaignService;
+    private final RandomGenerator randomGenerator;
 
     @Transactional
     public DonationDto createDonation(DonationCreateDto donationDto) {
@@ -48,23 +49,25 @@ public class DonationService {
 
         Campaign campaign = campaignService.getCampingById(donationDto.campaignId());
 
-        PaymentResponse paymentResponse = paymentToDonate(donationDto);
-
-        if (!paymentResponse.status().equals("SUCCESS")) {
-            log.error("Payment Failed ! {}, {}", donationDto, paymentResponse);
-            throw new PaymentFailedException("Payment Failed !");
-        }
-
         Donation donation = donationMapper.toEntity(donationDto);
         donation.setDonationTime(LocalDateTime.now());
         donation.setUserId(user.id());
         donation.setCampaign(campaign);
         donation = donationRepository.save(donation);
+
+        PaymentResponse paymentResponse = paymentToDonate(donationDto);
+
+        if (!paymentResponse.status().equals("SUCCESS")) {
+            log.error("Payment Failed ! {}, {}", donationDto, paymentResponse);
+            donationRepository.delete(donation);
+            throw new PaymentFailedException("Payment Failed !");
+        }
+
         return donationMapper.toDto(donation);
     }
 
     private PaymentResponse paymentToDonate(DonationCreateDto donationDto) {
-        var paymentNumber = new Random().nextLong(MIN_PAYMENT_NUMBER, MAX_PAYMENT_NUMBER);
+        var paymentNumber = randomGenerator.getRandomNumber(MIN_PAYMENT_NUMBER, MAX_PAYMENT_NUMBER);
 
         PaymentRequest paymentRequest = new PaymentRequest(
                 paymentNumber,
@@ -76,7 +79,7 @@ public class DonationService {
         try {
             return paymentServiceClient.sendPayment(paymentRequest);
         } catch (Exception e) {
-            log.error("Payment service not working ! {}", paymentRequest);
+            log.error("Payment service not working ! {}, {}", paymentRequest, e.getMessage());
             throw new PaymentServiceConnectException("Payment service not working !");
         }
     }
