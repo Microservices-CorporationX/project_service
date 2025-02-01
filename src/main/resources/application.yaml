@@ -48,3 +48,12 @@ services:
   user-service:
     host: http://localhost
     port: 8080
+
+domain:
+  path: /api/v1
+
+jira:
+  url: https://bortsovamariia.atlassian.net/rest/api/2
+  project_name: SCRUM
+  username: ${JIRA_USERNAME}
+  token: ${JIRA_TOKEN}
