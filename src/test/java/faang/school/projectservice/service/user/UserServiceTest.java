@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.user;
 
 import faang.school.projectservice.client.UserServiceClient;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.payment.UserClientException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,28 +25,31 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    @Mock
+    private UserDto mockUserDto;
+
     private final long testUserId = 123L;
 
     @Test
-    public void userExists_ShouldReturnTrue_WhenClientReturnsTrue() {
-        when(userServiceClient.userExists(testUserId))
-                .thenReturn(new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK));
+    public void userExists_ShouldReturnDto_WhenClientReturnsDto() {
+        when(userServiceClient.getUser(testUserId))
+                .thenReturn(new ResponseEntity<>(mockUserDto, HttpStatus.OK));
 
-        boolean result = userService.userExists(testUserId);
+        UserDto userDto = userService.getUser(testUserId);
 
-        assertTrue(result);
-        verify(userServiceClient).userExists(testUserId);
+        assertEquals(mockUserDto, userDto);
+        verify(userServiceClient).getUser(testUserId);
     }
 
     @Test
     public void userExists_ShouldThrowException_WhenNonOkStatus() {
-        when(userServiceClient.userExists(testUserId))
-                .thenReturn(new ResponseEntity<>(Boolean.TRUE, HttpStatus.INTERNAL_SERVER_ERROR));
+        when(userServiceClient.getUser(testUserId))
+                .thenReturn(new ResponseEntity<>(mockUserDto, HttpStatus.INTERNAL_SERVER_ERROR));
 
         UserClientException exception = assertThrows(UserClientException.class,
-                () -> userService.userExists(testUserId));
+                () -> userService.getUser(testUserId));
 
         assertEquals("User client failed", exception.getMessage());
-        verify(userServiceClient).userExists(testUserId);
+        verify(userServiceClient).getUser(testUserId);
     }
 }

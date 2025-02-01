@@ -13,9 +13,6 @@ import java.util.List;
 @FeignClient(name = "user-service", url = "${services.user-service.host}:${services.user-service.port}")
 public interface UserServiceClient {
 
-    @GetMapping("/user/exists/{userId}")
-    ResponseEntity<Boolean> userExists(@PathVariable long userId);
-
     @GetMapping("/user/{userId}")
     ResponseEntity<UserDto> getUser(@PathVariable long userId);
 
