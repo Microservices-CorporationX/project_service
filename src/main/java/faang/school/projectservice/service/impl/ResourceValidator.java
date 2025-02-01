@@ -20,9 +20,9 @@ public class ResourceValidator {
     }
 
     void validateUserCanDownloadResource(Long userId, Long projectId) {
-        boolean isProjectPublic = projectService.isProjectPublic(projectId);
-        boolean isUserInProject = projectService.isUserInProject(userId, projectId);
-        if (!isUserInProject && !isProjectPublic) {
+        boolean isProjectNotPublic = !projectService.isProjectPublic(projectId);
+        boolean isUserNotInProject = !projectService.isUserInProject(userId, projectId);
+        if (isUserNotInProject || isProjectNotPublic) {
             throw new IllegalArgumentException("User with id "
                     + userId + " has not access to resources of project "
                     + projectId + " at this moment");
@@ -35,7 +35,6 @@ public class ResourceValidator {
             throw new RuntimeException("Limit resources of project is reached [" + maxResourcesPerProject + "]");
         }
     }
-
 
     private boolean isUserInProject(Long userId, Long projectId) {
         return projectService.isUserInProject(userId, projectId);
