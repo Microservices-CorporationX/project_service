@@ -35,11 +35,9 @@ public class ResourceController {
         byte[] imageBytes = null;
         try {
             imageBytes = resourceService.downloadResource(userId, resourceId).readAllBytes();
-        }catch(IOException e)
-        {
+        } catch (IOException e) {
             log.error("Error downloading file resource {}, error: {}", resourceId, e.toString());
         }
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.IMAGE_JPEG);
         return new ResponseEntity<>(imageBytes, httpHeaders, HttpStatus.OK);

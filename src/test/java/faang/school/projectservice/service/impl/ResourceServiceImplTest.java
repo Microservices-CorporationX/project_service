@@ -8,6 +8,7 @@ import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.s3.S3ServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,20 +24,19 @@ import java.util.Optional;
 class ResourceServiceImplTest {
 
     @Mock
-    ProjectService projectServiceMock;
+    private ProjectService projectServiceMock;
     @Mock
-    ResourceValidator resourceValidatorMock;
+    private ResourceValidator resourceValidatorMock;
     @Spy
-    ResourceMapperImpl resourceMapper;
+    private ResourceMapperImpl resourceMapper;
     @Mock
-    ResourceRepository resourceRepository;
+    private ResourceRepository resourceRepository;
     @Mock
-    S3ServiceImpl s3Service;
+    private S3ServiceImpl s3Service;
     @InjectMocks
-    ResourceServiceImpl resourceService;
-
-    MultipartFile file;
-    Resource resource;
+    private ResourceServiceImpl resourceService;
+    private MultipartFile file;
+    private Resource resource;
 
     @BeforeEach
     void setUp() {
@@ -58,11 +58,11 @@ class ResourceServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test adding resource")
     void addResource() {
         Long userId = 1L;
         Long projectId = 222L;
         Mockito.when(s3Service.uploadFile(file, "project_" + projectId)).thenReturn(resource);
-
         resourceService.addResource(userId, projectId, file);
         Mockito.verify(s3Service, Mockito.times(1))
                 .uploadFile(file, "project_" + projectId);
@@ -71,6 +71,7 @@ class ResourceServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test downloading resource")
     void downloadResource() {
         Long userId = 1L;
         Long resourceId = 10000L;
@@ -84,14 +85,13 @@ class ResourceServiceImplTest {
     }
 
     @Test
+    @DisplayName("Test deleting resource")
     void deleteResource() {
         Long userId = 1L;
         Long resourceId = 10000L;
-        //Long projectId = 222L;
+
         Mockito.when(resourceRepository.findById(resourceId)).thenReturn(Optional.ofNullable(resource));
-
         resourceService.deleteResource(userId, resourceId);
-
         Mockito.verify(resourceRepository, Mockito.times(1))
                 .deleteById(resourceId);
         Mockito.verify(s3Service, Mockito.times(1))

@@ -21,7 +21,6 @@ class ResourceValidatorTest {
     private ProjectServiceImpl projectServiceMock;
     @InjectMocks
     private ResourceValidator resourceValidator;
-
     private final List<Long> resourceIds = new ArrayList<>();
 
     @BeforeEach
@@ -58,22 +57,22 @@ class ResourceValidatorTest {
         Long privateProjectId = 223L;
         Mockito.when(projectServiceMock.isProjectPublic(publicProjectId)).thenReturn(true);
         Mockito.when(projectServiceMock.isUserInProject(userInProjectId, publicProjectId)).thenReturn(true);
-        resourceValidator.validateUserCanDownloadResource(userInProjectId, publicProjectId);
+        resourceValidator.validateUserCanDownloadFromProject(userInProjectId, publicProjectId);
 
         Mockito.when(projectServiceMock.isProjectPublic(privateProjectId)).thenReturn(false);
         Mockito.when(projectServiceMock.isUserInProject(userInProjectId, privateProjectId)).thenReturn(true);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadResource(userInProjectId, privateProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userInProjectId, privateProjectId));
 
         Mockito.when(projectServiceMock.isProjectPublic(publicProjectId)).thenReturn(true);
         Mockito.when(projectServiceMock.isUserInProject(userNotInProjectId, publicProjectId)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadResource(userNotInProjectId, publicProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, publicProjectId));
 
         Mockito.when(projectServiceMock.isProjectPublic(privateProjectId)).thenReturn(false);
         Mockito.when(projectServiceMock.isUserInProject(userNotInProjectId, privateProjectId)).thenReturn(false);
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> resourceValidator.validateUserCanDownloadResource(userNotInProjectId, privateProjectId));
+                () -> resourceValidator.validateUserCanDownloadFromProject(userNotInProjectId, privateProjectId));
     }
 
     @Test

@@ -19,7 +19,7 @@ public class ResourceValidator {
         }
     }
 
-    void validateUserCanDownloadResource(Long userId, Long projectId) {
+    void validateUserCanDownloadFromProject(Long userId, Long projectId) {
         boolean isProjectNotPublic = !projectService.isProjectPublic(projectId);
         boolean isUserNotInProject = !projectService.isUserInProject(userId, projectId);
         if (isUserNotInProject || isProjectNotPublic) {
