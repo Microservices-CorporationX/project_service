@@ -1,6 +1,6 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
 import faang.school.projectservice.mapper.MomentMapperImpl;
 import faang.school.projectservice.model.Moment;
@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,10 +34,10 @@ class MomentServiceImplTest {
     MomentMapperImpl momentMapper;
     @Mock
     MomentServiceValidator momentServiceValidator;
-    MomentRequestDto validMomentRequestDto;
-    MomentRequestDto savedMomentResponseDto;
-    MomentRequestDto emptyProjectMomentRequestDto;
-    MomentRequestDto incorrectDateMomentRequestDto;
+    MomentCreateRequestDto validMomentCreateRequestDto;
+    MomentCreateRequestDto savedMomentResponseDto;
+    MomentCreateRequestDto emptyProjectMomentCreateRequestDto;
+    MomentCreateRequestDto incorrectDateMomentCreateRequestDto;
     List<Long> defaultProjectsIds;
     List<MomentFilter> momentFilters = new ArrayList<>();
     MomentFilterDto momentFilterDto;
@@ -46,34 +47,33 @@ class MomentServiceImplTest {
         defaultProjectsIds = new ArrayList<>(List.of(1L, 2L, 3L));
         List<Long> emptyProjectsIds = new ArrayList<>();
 
-        validMomentRequestDto = MomentRequestDto.builder()
+        validMomentCreateRequestDto = MomentCreateRequestDto.builder()
                 .name("Cool moment")
-                .date("20/01/2025 11:11:22")
+                .date(LocalDateTime.now())
                 .description("some description")
-                .projectToAddIds(defaultProjectsIds)
+                .projectIds(defaultProjectsIds)
                 .build();
-        emptyProjectMomentRequestDto = MomentRequestDto.builder()
+        emptyProjectMomentCreateRequestDto = MomentCreateRequestDto.builder()
                 .name("Cool moment")
-                .date("20/01/2025 11:11:22")
+                .date(LocalDateTime.now())
                 .description("some description")
-                .projectToAddIds(emptyProjectsIds)
+                .projectIds(emptyProjectsIds)
                 .build();
-        incorrectDateMomentRequestDto = MomentRequestDto.builder()
+        incorrectDateMomentCreateRequestDto = MomentCreateRequestDto.builder()
                 .name("Cool moment")
-                .date("20.01.2025 11:11:22")
+                .date(LocalDateTime.now())
                 .description("some description")
-                .projectToAddIds(emptyProjectsIds)
+                .projectIds(emptyProjectsIds)
                 .build();
-        savedMomentResponseDto = MomentRequestDto.builder()
-                .id(123L)
+        savedMomentResponseDto = MomentCreateRequestDto.builder()
                 .name("Cool moment")
-                .date("20/01/2025 11:11:22")
+                .date(LocalDateTime.now())
                 .description("some description")
-                .projectToAddIds(defaultProjectsIds)
+                .projectIds(defaultProjectsIds)
                 .build();
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("test")
-                .dateTo("test")
+                .dateFrom(LocalDateTime.MIN)
+                .dateTo(LocalDateTime.MAX)
                 .projectsIds(defaultProjectsIds)
                 .build();
 
@@ -96,9 +96,9 @@ class MomentServiceImplTest {
     @Test
     @DisplayName("Test Update Moment")
     void updateMoment() {
-        Moment moment = momentMapper.toMomentEntity(validMomentRequestDto);
+        Moment moment = momentMapper.toMomentEntity(validMomentCreateRequestDto);
         Mockito.when(momentRepositoryMock.save(moment)).thenReturn(moment);
-        momentService.createMoment(validMomentRequestDto);
+        momentService.createMoment(validMomentCreateRequestDto);
         Mockito.verify(momentRepositoryMock, Mockito.times(1)).save(Mockito.any(Moment.class));
     }
 

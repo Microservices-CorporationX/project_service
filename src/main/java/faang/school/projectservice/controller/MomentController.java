@@ -1,8 +1,9 @@
 package faang.school.projectservice.controller;
 
-import faang.school.projectservice.dto.moment.MomentRequestDto;
-import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
 import faang.school.projectservice.service.MomentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,29 +20,27 @@ import static faang.school.projectservice.utils.Constants.API_VERSION_1;
 public class MomentController {
 
     private final MomentService momentService;
-    private final MomentControllerValidator momentControllerValidator;
 
-    @PutMapping("/create")
-    public MomentResponseDto create(@RequestBody MomentRequestDto momentRequestDto) {
-        momentControllerValidator.validateName(momentRequestDto);
-        momentControllerValidator.validateProjectIds(momentRequestDto);
-        log.info("Created moment {}", momentRequestDto);
-        return momentService.createMoment(momentRequestDto);
+    @PostMapping("/")
+    public MomentResponseDto create(@RequestBody MomentCreateRequestDto momentCreateRequestDto) {
+        log.info("Created moment {}", momentCreateRequestDto);
+        return momentService.createMoment(momentCreateRequestDto);
     }
 
-    @PostMapping("/update")
-    public MomentResponseDto update(@RequestBody MomentRequestDto momentRequestDto) {
-        momentControllerValidator.validateName(momentRequestDto);
-        log.info("Updated moment {}", momentRequestDto);
-        return momentService.updateMoment(momentRequestDto);
+    @PatchMapping("/")
+    public MomentResponseDto update(@PathVariable("id") Long momentId,
+                                    @RequestBody MomentUpdateRequestDto momentUpdateRequestDto) {
+        log.info("Updated moment {}", momentUpdateRequestDto);
+        return momentService.updateMoment(momentId, momentUpdateRequestDto);
     }
 
     @PostMapping("/filtered")
     public List<MomentResponseDto> getMoments(@RequestBody MomentFilterDto filter) {
+        //@RequestHeader(value = "X-User-Id", required = true) Long userId,
         return momentService.getMoments(filter);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/")
     public List<MomentResponseDto> getAllMoments() {
         return momentService.getAllMoments();
     }

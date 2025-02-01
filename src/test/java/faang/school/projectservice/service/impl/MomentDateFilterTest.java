@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,39 +27,34 @@ class MomentDateFilterTest {
     @DisplayName("Test applicability moment filter by Date")
     void testApplicability() {
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("31/12/2030 00:00:00")
-                .dateTo("01/01/1977 00:00:00")
+                .dateFrom(LocalDateTime.parse("2030-12-31T00:00:00"))
+                .dateTo(LocalDateTime.parse("1977-01-01T00:00:00"))
                 .build();
         assertFalse(filter.isApplicable(momentFilterDto));
 
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("01/01/1977 00:00:00")
-                .dateTo("31/12/2030 00:00:00")
+                .dateFrom(LocalDateTime.parse("1977-01-01T00:00:00"))
+                .dateTo(LocalDateTime.parse("2030-12-31T00:00:00"))
                 .build();
         assertTrue(filter.isApplicable(momentFilterDto));
 
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("01/01/1977 00:00:00")
+                .dateFrom(LocalDateTime.parse("1977-01-01T00:00:00"))
                 .build();
-        assertFalse(filter.isApplicable(momentFilterDto));
+        assertTrue(filter.isApplicable(momentFilterDto));
 
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("01/01/1977 00:00:00")
+                .dateFrom(LocalDateTime.parse("1977-01-01T00:00:00"))
                 .build();
-        assertFalse(filter.isApplicable(momentFilterDto));
-
-        momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("sdfsdfsdf")
-                .build();
-        assertFalse(filter.isApplicable(momentFilterDto));
+        assertTrue(filter.isApplicable(momentFilterDto));
     }
 
     @Test
     @DisplayName("Test applying filter")
     void testApply() {
         momentFilterDto = MomentFilterDto.builder()
-                .dateFrom("01/01/1977 00:00:00")
-                .dateTo("31/12/2030 00:00:00")
+                .dateFrom(LocalDateTime.parse("1977-01-01T00:00:00"))
+                .dateTo(LocalDateTime.parse("2030-12-31T00:00:00"))
                 .build();
         Stream<Moment> momentStream = filter.apply(allMoments.stream(), momentFilterDto);
         List<Moment> filteredMoments = momentStream.toList();

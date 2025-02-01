@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MomentProjectsFilterTest {
-
     private MomentFilterDto momentFilterDto;
     private final MomentProjectsFilter filter = new MomentProjectsFilter();
     private List<Moment> allMoments;

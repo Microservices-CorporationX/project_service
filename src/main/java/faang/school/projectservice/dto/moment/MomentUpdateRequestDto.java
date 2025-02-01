@@ -1,15 +1,15 @@
 package faang.school.projectservice.dto.moment;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.util.List;
 
 @Builder
-public record MomentRequestDto(
-        Long id,
+public record MomentUpdateRequestDto(
+        @NotBlank
         String name,
         String description,
-        String date,
         List<Long> projectToAddIds,
         List<Long> teamMemberToAddIds
 ) {

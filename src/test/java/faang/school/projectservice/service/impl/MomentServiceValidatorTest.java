@@ -1,6 +1,7 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.dto.moment.MomentRequestDto;
+import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
+import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
 import faang.school.projectservice.dto.project.ProjectResponseDto;
 import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.service.ProjectService;
@@ -26,99 +27,61 @@ class MomentServiceValidatorTest {
     @InjectMocks
     MomentServiceValidator momentServiceValidator;
 
-    private MomentRequestDto validMomentRequestDto;
-    private MomentRequestDto validWithIdMomentRequestDto;
-    private MomentRequestDto emptyNameMomentRequestDto;
-    private MomentRequestDto wrongDateMomentRequestDto;
-    private MomentRequestDto wrongDateFormatMomentRequestDto;
+    private MomentCreateRequestDto validMomentCreateRequestDto;
+    private MomentCreateRequestDto notValidMomentCreateRequestDto;
+    private MomentUpdateRequestDto validMomentUpdateRequestDto;
 
     @BeforeEach
     void setUp() {
-        validMomentRequestDto = MomentRequestDto.builder()
+
+        validMomentCreateRequestDto = MomentCreateRequestDto.builder()
                 .name("Cool moment")
                 .description("It's a very cool moment")
-                .date("25/01/2025 12:11:10")
+                .projectIds(List.of(1L, 2L, 3L))
+                .teamMemberIds(List.of(10L, 20L, 30L))
+                .build();
+
+        notValidMomentCreateRequestDto = MomentCreateRequestDto.builder()
+                .description("It's a very cool moment")
+                .teamMemberIds(List.of(10L, 20L, 30L))
+                .build();
+
+        validMomentUpdateRequestDto = MomentUpdateRequestDto.builder()
+                .name("Cool moment")
+                .description("It's a very cool moment")
                 .projectToAddIds(List.of(1L, 2L, 3L))
-                .teamMemberToAddIds(List.of(10L, 20L, 30L))
-                .build();
-        validWithIdMomentRequestDto = MomentRequestDto.builder()
-                .id(123L)
-                .name("Cool moment")
-                .description("It's a very cool moment")
-                .date("25/01/2025 12:11:10")
-                .projectToAddIds(List.of(1L, 2L, 3L))
-                .teamMemberToAddIds(List.of(10L, 20L, 30L))
-                .build();
-        emptyNameMomentRequestDto = MomentRequestDto.builder()
-                .description("It's a very cool moment")
-                .date("25/01/2025 12:11:10")
-                .projectToAddIds(List.of(1L, 2L, 3L))
-                .teamMemberToAddIds(List.of(10L, 20L, 30L))
-                .build();
-        wrongDateMomentRequestDto = MomentRequestDto.builder()
-                .name("Cool moment")
-                .description("It's a very cool moment")
-                .date("33/01/2025 12:11:10")
-                .teamMemberToAddIds(List.of(10L, 20L, 30L))
-                .build();
-        wrongDateFormatMomentRequestDto = MomentRequestDto.builder()
-                .name("Cool moment")
-                .description("It's a very cool moment")
-                .date("2025/01/25 12:11:10")
                 .teamMemberToAddIds(List.of(10L, 20L, 30L))
                 .build();
     }
 
     @Test
-    @DisplayName("Test Id null or not null")
-    void testValidateMomentIdNotNull() {
-        momentServiceValidator.validateMomentIdNotNull(validWithIdMomentRequestDto);
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> momentServiceValidator.validateMomentIdNotNull(validMomentRequestDto));
-    }
-
-    @Test
-    @DisplayName("Test active and non-active projects")
+    @DisplayName("Test active projects")
     void testValidateActiveProjects() {
         List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
                 .map(project -> projectMapper.toProjectResponseDto(project))
                 .toList();
         Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
-        momentServiceValidator.validateMoment(validMomentRequestDto);
+        momentServiceValidator.validateMomentProjectIds(validMomentCreateRequestDto.projectIds());
+    }
+
+    @Test
+    @DisplayName("Test non-active projects")
+    void testValidateNonActiveProjects() {
+        List<ProjectResponseDto> someNonActiveProjects = TestData.getSomeNotActiveProjects().stream()
+                .map(project -> projectMapper.toProjectResponseDto(project))
+                .toList();
+        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someNonActiveProjects);
+
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> momentServiceValidator.validateMoment(emptyNameMomentRequestDto));
+                () -> momentServiceValidator.validateMomentProjectIds(validMomentCreateRequestDto.projectIds()));
     }
 
     @Test
     @DisplayName("Test name of moments")
     void testValidateName() {
-        List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
-                .map(project -> projectMapper.toProjectResponseDto(project))
-                .toList();
-        List<ProjectResponseDto> someInactiveProjects = TestData.getSomeNotActiveProjects().stream()
-                .map(project -> projectMapper.toProjectResponseDto(project))
-                .toList();
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
-        momentServiceValidator.validateMoment(validMomentRequestDto);
-
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someInactiveProjects);
+        momentServiceValidator.validateMomentName(validMomentUpdateRequestDto.name());
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> momentServiceValidator.validateMoment(validMomentRequestDto));
+                () -> momentServiceValidator.validateMomentName(notValidMomentCreateRequestDto.name()));
     }
 
-    @Test
-    @DisplayName("Test date of moments")
-    void testValidateDate() {
-        List<ProjectResponseDto> someActiveProjects = TestData.getSomeActiveProjects().stream()
-                .map(project -> projectMapper.toProjectResponseDto(project))
-                .toList();
-        Mockito.when(projectService.getProjectsByIds(Mockito.anyList())).thenReturn(someActiveProjects);
-        momentServiceValidator.validateMoment(validMomentRequestDto);
-
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> momentServiceValidator.validateMoment(wrongDateMomentRequestDto));
-
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> momentServiceValidator.validateMoment(wrongDateFormatMomentRequestDto));
-    }
 }

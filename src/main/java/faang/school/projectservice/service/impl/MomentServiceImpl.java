@@ -1,8 +1,9 @@
 package faang.school.projectservice.service.impl;
 
-import faang.school.projectservice.dto.moment.MomentRequestDto;
-import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentCreateRequestDto;
 import faang.school.projectservice.dto.moment.MomentFilterDto;
+import faang.school.projectservice.dto.moment.MomentResponseDto;
+import faang.school.projectservice.dto.moment.MomentUpdateRequestDto;
 import faang.school.projectservice.mapper.MomentMapper;
 import faang.school.projectservice.model.Moment;
 import faang.school.projectservice.model.ProjectStatus;
@@ -10,16 +11,12 @@ import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.MomentRepository;
 import faang.school.projectservice.service.MomentFilter;
 import faang.school.projectservice.service.MomentService;
-import faang.school.projectservice.service.ProjectService;
-import faang.school.projectservice.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -27,32 +24,27 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class MomentServiceImpl implements MomentService {
-    private static final String DATE_FORMAT = Constants.DATE_FORMAT;
 
     private final MomentRepository momentRepository;
     private final MomentMapper momentMapper;
     private final List<MomentFilter> momentFilters;
-    private final ProjectService projectService;
     private final MomentServiceValidator momentServiceValidator;
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.ENGLISH);
-
     @Override
-    public MomentResponseDto createMoment(MomentRequestDto momentRequestDto) {
-        momentServiceValidator.validateMoment(momentRequestDto);
-        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentRequestDto));
+    public MomentResponseDto createMoment(MomentCreateRequestDto momentCreateRequestDto) {
+        momentServiceValidator.validateMomentName(momentCreateRequestDto.name());
+        Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(momentCreateRequestDto));
         MomentResponseDto createdMomentResponseDto = momentMapper.toMomentResponseDto(momentSaved);
         log.info("Created moment {}", createdMomentResponseDto);
         return createdMomentResponseDto;
     }
 
     @Override
-    public MomentResponseDto updateMoment(MomentRequestDto momentRequestDto) {
-        momentServiceValidator.validateMomentIdNotNull(momentRequestDto);
-        momentServiceValidator.validateMoment(momentRequestDto);
+    public MomentResponseDto updateMoment(Long momentId, MomentUpdateRequestDto momentUpdateRequestDto) {
+        momentServiceValidator.validateMomentName(momentUpdateRequestDto.name());
 
-        MomentResponseDto initialMomentDto = getMoment(momentRequestDto.id());
-        MomentRequestDto updatedMomentDto = updateMomentData(initialMomentDto, momentRequestDto);
+        MomentResponseDto initialMomentDto = getMoment(momentId);
+        MomentUpdateRequestDto updatedMomentDto = updateMomentData(initialMomentDto, momentUpdateRequestDto);
 
         Moment momentSaved = momentRepository.save(momentMapper.toMomentEntity(updatedMomentDto));
         MomentResponseDto momentSavedDto = momentMapper.toMomentResponseDto(momentSaved);
@@ -90,11 +82,11 @@ public class MomentServiceImpl implements MomentService {
                 .toList();
     }
 
-    private MomentRequestDto updateMomentData(MomentResponseDto initialMomentDto, MomentRequestDto updatedMomentDto) {
+    private MomentUpdateRequestDto updateMomentData(MomentResponseDto initialMomentDto, MomentUpdateRequestDto updatedMomentDto) {
         List<Long> allTeamMembersIds = getAllMomentTeamMembersIds(initialMomentDto, updatedMomentDto);
         List<Long> allProjectsIds = getAllMomentProjects(initialMomentDto, updatedMomentDto);
 
-        return MomentRequestDto.builder()
+        return MomentUpdateRequestDto.builder()
                 .teamMemberToAddIds(allTeamMembersIds)
                 .projectToAddIds(allProjectsIds)
                 .name(updatedMomentDto.name())
@@ -103,7 +95,7 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private List<Long> getAllMomentTeamMembersIds(MomentResponseDto initialMomentDto,
-                                                  MomentRequestDto updatedMomentDto) {
+                                                  MomentUpdateRequestDto updatedMomentDto) {
         List<Long> initialAllProjectTeamMembersIds
                 = getAllProjectsTeamMemberIds(momentMapper.toMomentEntity(initialMomentDto));
         List<Long> addedProjectTeamMembersIds
@@ -124,7 +116,7 @@ public class MomentServiceImpl implements MomentService {
     }
 
     private List<Long> getAllMomentProjects(MomentResponseDto initialMomentDto,
-                                            MomentRequestDto updatedMomentDto) {
+                                            MomentUpdateRequestDto updatedMomentDto) {
         List<Long> initialAllProjects = initialMomentDto.projectIds();
         List<Long> addedProjects = updatedMomentDto.projectToAddIds();
         List<Long> resultProjects = new ArrayList<>();
