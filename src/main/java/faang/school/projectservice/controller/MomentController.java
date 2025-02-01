@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static faang.school.projectservice.utils.Constants.API_VERSION_1;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(API_VERSION_1 + "/moment")
+@RequestMapping("/api/v1/moment")
 public class MomentController {
 
     private final MomentService momentService;
