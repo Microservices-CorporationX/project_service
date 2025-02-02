@@ -2,8 +2,11 @@ package faang.school.projectservice.service.internship;
 
 import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipEditDto;
+import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipReadDto;
+import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
+import faang.school.projectservice.filter.internship.RoleFilter;
 import faang.school.projectservice.filter.internship.StatusFilter;
 import faang.school.projectservice.mapper.internship.InternshipCreateMapperImpl;
 import faang.school.projectservice.mapper.internship.InternshipReadMapperImpl;
@@ -29,8 +32,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 
@@ -70,8 +76,8 @@ class InternshipServiceTest {
     @Mock
     private StatusFilter statusFilter;
 
-//    @Mock
-//    private RoleFilter roleFilter;
+    @Mock
+    private RoleFilter roleFilter;
 
     private InternshipService internshipService;
 
@@ -79,7 +85,7 @@ class InternshipServiceTest {
 
     @BeforeEach
     void setUp() {
-        filters = List.of(statusFilter);
+        filters = List.of(roleFilter);
         internshipService = new InternshipService(projectService,
                 teamMemberService,
                 teamMemberRepository,
@@ -181,5 +187,104 @@ class InternshipServiceTest {
         Mockito.verify(internshipValidator).validateInternCompletedInternship(internshipDto, INTERN_ID);
         Mockito.verify(teamMemberService).findById(INTERN_ID);
         assertEquals(expectedInternshipDto.getInternsIds(), result.getInternsIds());
+    }
+
+    @Test
+    void testInternshipUpdateIfAllInternsNotCompletedInternship() {
+        InternshipEditDto internshipDto = InternshipEditDto.builder()
+                .id(INTERNSHIP_ID)
+                .projectId(PROJECT_ID)
+                .mentorId(MENTOR_ID)
+                .role(ROLE)
+                .internsIds(INTERNS_IDS)
+                .startDate(START_DATE)
+                .endDate(END_DATE)
+                .status(INTERNSHIP_STATUS)
+                .build();
+
+        Internship internship = Internship.builder()
+                .id(INTERNSHIP_ID)
+                .build();
+
+        Mockito.when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.of(internship));
+        Mockito.when(internshipValidator.validateInternCompletedInternship(internshipDto, INTERN_ID)).thenReturn(false);
+        Mockito.when(internshipRepository.save(internship)).thenReturn(internship);
+
+        InternshipReadDto result = internshipService.updateInternship(internshipDto);
+        InternshipReadDto expectedResult = internshipReadMapper.toDto(internship);
+        Mockito.verify(internshipRepository).findById(INTERNSHIP_ID);
+        Mockito.verify(internshipValidator).validateInternCompletedInternship(internshipDto, INTERN_ID);
+        Mockito.verify(teamMemberService, Mockito.times(0)).findById(INTERN_ID);
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    void testGetInternshipsByFiltersIfFilterIsNotNull() {
+        InternshipFilterDto internshipDto = InternshipFilterDto.builder()
+                .role(ROLE)
+                .build();
+
+        Internship internship = Internship.builder()
+                .role(ROLE)
+                .build();
+
+        List<Internship> internshipList = List.of(internship);
+        Stream<Internship> internshipStream = internshipList.stream();
+
+        Mockito.when(internshipRepository.findAll()).thenReturn(internshipList);
+        Mockito.when(roleFilter.isApplicable(any())).thenReturn(true);
+        Mockito.when(roleFilter.apply(any(), any())).thenReturn(internshipStream);
+
+        List<InternshipReadDto> result = internshipService.getInternshipsByFilters(internshipDto);
+        assertEquals(internshipList.size(), result.size());
+    }
+
+    @Test
+    void testGetInternshipsByFiltersIfFilterIsNull() {
+        InternshipFilterDto internshipDto = InternshipFilterDto.builder()
+                .build();
+
+        Internship internship = Internship.builder()
+                .build();
+
+        List<Internship> internshipList = List.of(internship);
+
+        Mockito.when(internshipRepository.findAll()).thenReturn(internshipList);
+        Mockito.when(roleFilter.isApplicable(any())).thenReturn(false);
+
+        List<InternshipReadDto> result = internshipService.getInternshipsByFilters(internshipDto);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetInternshipsMethod() {
+        Internship internship = Internship.builder().build();
+
+        List<Internship> internships = List.of(internship);
+        Mockito.when(internshipRepository.findAll()).thenReturn(internships);
+
+        List<InternshipReadDto> result = internshipService.getInternships();
+        assertEquals(internships.size(), result.size());
+    }
+
+    @Test
+    void testGetInternshipByIdIfIdIsNotNull() {
+        Internship internship = Internship.builder()
+                .id(INTERNSHIP_ID)
+                .build();
+
+        Mockito.when(internshipRepository.findById(INTERNSHIP_ID)).thenReturn(Optional.ofNullable(internship));
+
+        InternshipReadDto result = internshipService.getInternshipById(INTERNSHIP_ID);
+        assertEquals(internship.getId(), result.getId());
+    }
+
+    @Test
+    void testGetInternshipByIdIfIdIsNull() {
+        Mockito.when(internshipRepository.findById(INTERNSHIP_ID)).thenThrow(new EntityNotFoundException(
+                String.format("Стажировка с ID %d не найдена", INTERNSHIP_ID)
+        ));
+
+        assertThrows(EntityNotFoundException.class, () -> internshipService.getInternshipById(INTERNSHIP_ID));
     }
 }

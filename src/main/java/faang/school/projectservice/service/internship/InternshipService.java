@@ -7,12 +7,10 @@ import faang.school.projectservice.dto.internship.InternshipReadDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.filter.internship.InternshipFilter;
 import faang.school.projectservice.mapper.internship.InternshipCreateMapper;
-import faang.school.projectservice.mapper.internship.InternshipEditMapper;
 import faang.school.projectservice.mapper.internship.InternshipReadMapper;
 import faang.school.projectservice.model.Internship;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.team_member.TeamMemberService;
@@ -43,9 +41,7 @@ public class InternshipService {
         internship.setMentorId(teamMemberService.findById(internshipDto.getMentorId()));
         internship.setInterns(getInternsById(internshipDto.getInternsIds()));
 
-        internshipRepository.save(internship);
-
-        return internshipReadMapper.toDto(internship);
+        return internshipReadMapper.toDto(internshipRepository.save(internship));
     }
 
     public InternshipReadDto updateInternship(InternshipEditDto internshipDto) {

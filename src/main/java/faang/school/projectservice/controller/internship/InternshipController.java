@@ -5,7 +5,9 @@ import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.dto.internship.InternshipFilterDto;
 import faang.school.projectservice.dto.internship.InternshipReadDto;
 import faang.school.projectservice.service.internship.InternshipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -15,15 +17,15 @@ import java.util.List;
 public class InternshipController {
     private final InternshipService internshipService;
 
-    public InternshipReadDto createInternship(InternshipCreateDto internship) {
+    public InternshipReadDto createInternship(@Valid @RequestBody InternshipCreateDto internship) {
         return internshipService.createInternship(internship);
     }
 
-    public InternshipReadDto updateInternship(InternshipEditDto internship) {
+    public InternshipReadDto updateInternship(@Valid @RequestBody InternshipEditDto internship) {
         return internshipService.updateInternship(internship);
     }
 
-    public List<InternshipReadDto> getInternshipsByFilters(InternshipFilterDto internship) {
+    public List<InternshipReadDto> getInternshipsByFilters(@Valid @RequestBody InternshipFilterDto internship) {
         return internshipService.getInternshipsByFilters(internship);
     }
 

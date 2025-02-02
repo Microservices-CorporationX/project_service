@@ -11,7 +11,10 @@ import org.mapstruct.ReportingPolicy;
 public interface InternshipReadMapper extends InternshipMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "mentorId.id", target = "mentorId")
-    @Mapping(source = "interns", target = "internsIds", qualifiedByName = "mapToIds")
+    @Mapping(source = "interns",
+            target = "internsIds",
+            qualifiedByName = "mapToIds",
+            conditionExpression = "java(internship.getInterns() != null)")
     InternshipReadDto toDto(Internship internship);
 
     @Mapping(target = "project", ignore = true)

@@ -21,14 +21,13 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class InternshipValidator {
-    private static final String ENTITY_NOT_FOUND = "Сущность не найдена";
+    private static final Integer MONTH_COUNT = 3;
 
     private final InternshipRepository internshipRepository;
     private final ProjectRepository projectRepository;
 
     public void validateInternshipCreation(InternshipCreateDto internshipDto) {
         validateProjectExists(internshipDto);
-        validateInterns(internshipDto);
         validateInternshipDuration(internshipDto);
         validateMentorBelongsProject(internshipDto);
     }
@@ -45,11 +44,10 @@ public class InternshipValidator {
                 .getTasks();
 
         if (internshipDto.getStatus().equals(InternshipStatus.COMPLETED)) {
-            for (Task task : tasks) {
-                if (task.getPerformerUserId().equals(internId) && !(task.getStatus().equals(TaskStatus.DONE))) {
-                        return false;
-                }
-            }
+            return tasks.stream()
+                    .noneMatch(task ->
+                            task.getPerformerUserId().equals(internId)
+                                    && !(task.getStatus().equals(TaskStatus.DONE)));
         }
 
         return true;
@@ -64,27 +62,11 @@ public class InternshipValidator {
         }
     }
 
-    private void validateInterns(InternshipCreateDto internshipDto) {
-        List<Long> interns = internshipDto.getInternsIds();
-        boolean flag = true;
-
-        for (Long id : interns) {
-            if (id == null || id == 0) {
-                flag = false;
-                break;
-            }
-        }
-
-        if (!flag) {
-            throw new DataValidationException("Список стажирующихся не может быть пустым!");
-        }
-    }
-
     private void validateInternshipDuration(InternshipCreateDto internshipDto) {
         LocalDateTime startDate = internshipDto.getStartDate();
         LocalDateTime endDate = internshipDto.getEndDate();
 
-        if (startDate.plusMonths(3).isBefore(endDate)) {
+        if (startDate.plusMonths(MONTH_COUNT).isBefore(endDate)) {
             throw new DataValidationException("Стажировка не может длиться дольше 3 месяцев!");
         }
     }
@@ -96,16 +78,8 @@ public class InternshipValidator {
                         String.format("Проект с ID %d не найден", internshipDto.getProjectId())
                 ));
         List<Team> team = project.getTeams();
-        boolean flag = false;
 
-        for (Team member : team) {
-            if (member.getId().equals(mentorId)) {
-                flag = true;
-                break;
-            }
-        }
-
-        if (!flag) {
+        if (team.stream().noneMatch(member -> member.getId().equals(mentorId))) {
             String message = String.format("Ментор с ID %d не учавствует в проекте!", mentorId);
             throw new EntityNotFoundException(message);
         }

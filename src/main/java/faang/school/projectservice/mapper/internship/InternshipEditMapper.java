@@ -4,16 +4,17 @@ import faang.school.projectservice.dto.internship.InternshipEditDto;
 import faang.school.projectservice.model.Internship;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface InternshipEditMapper extends InternshipMapper {
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "mentorId.id", target = "mentorId")
-    @Mapping(source = "interns", target = "internsIds", qualifiedByName = "mapToIds")
+    @Mapping(source = "interns",
+            target = "internsIds",
+            qualifiedByName = "mapToIds",
+            conditionExpression = "java(internship.getInterns() != null)")
     InternshipEditDto toDto(Internship internship);
 
     @Mapping(target = "project", ignore = true)
