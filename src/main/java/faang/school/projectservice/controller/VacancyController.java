@@ -37,7 +37,7 @@ public class VacancyController {
         return vacancyService.getVacancyCover(id);
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/{id}")
     public void deleteVacancyCover(@PathVariable Long id) {
         vacancyService.deleteVacancyCover(id, userContext.getUserId());
     }
