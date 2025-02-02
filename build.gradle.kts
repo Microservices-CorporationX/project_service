@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.0.6"
     id("io.spring.dependency-management") version "1.1.0"
     id("checkstyle")
@@ -94,6 +95,7 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging.showStandardStreams = true
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
