@@ -1,6 +1,6 @@
 package faang.school.projectservice.mapper;
 
-import faang.school.projectservice.dto.client.subprojectdto.CreateSubProjectDto;
+import faang.school.projectservice.dto.client.subprojectdto.SubProjectCreateDto;
 import faang.school.projectservice.dto.client.subprojectdto.ProjectReadDto;
 import faang.school.projectservice.model.Project;
 import org.mapstruct.Mapper;
@@ -11,7 +11,7 @@ import org.mapstruct.ReportingPolicy;
 public interface SubProjectMapper {
 
     @Mapping(source = "parentProjectId", target = "parentProject.id")
-    Project mapToEntity(CreateSubProjectDto createSubProjectDto);
+    Project mapToEntity(SubProjectCreateDto createSubProjectDto);
 
     @Mapping(source = "parentProject.id", target = "parentProjectId")
     ProjectReadDto mapToProjectDto(Project project);

@@ -1,6 +1,6 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.dto.client.subprojectdto.CreateSubProjectDto;
+import faang.school.projectservice.dto.client.subprojectdto.SubProjectCreateDto;
 import faang.school.projectservice.dto.client.subprojectdto.ProjectReadDto;
 import faang.school.projectservice.dto.client.subprojectdto.SubProjectFilterDto;
 import faang.school.projectservice.filter.SubProjectNameFilter;
@@ -25,40 +25,40 @@ public class ProjectService {
     private final SubProjectMapper subProjectMapper;
     private final ValidatorProjectService validatorProjectService;
 
-    public ProjectReadDto createSubProject(CreateSubProjectDto createSubProjectDto) {
+    public ProjectReadDto createSubProject(SubProjectCreateDto subProjectCreateDto) {
 
-        validatorProjectService.validateProjectExistence(createSubProjectDto.getParentProjectId());
+        validatorProjectService.validateProjectExistence(subProjectCreateDto.getParentProjectId());
 
-        Project parentProject = projectRepository.findById(createSubProjectDto.getParentProjectId())
+        Project parentProject = projectRepository.findById(subProjectCreateDto.getParentProjectId())
                 .orElseThrow(() -> new EntityNotFoundException("Родительский проект не найден"));
 
-        validatorProjectService.validateVisibility(parentProject, createSubProjectDto.getVisibility());
+        validatorProjectService.validateVisibility(parentProject, subProjectCreateDto.getVisibility());
         validatorProjectService.validateParentProjectStatus(parentProject);
 
-        Project projectToSave = subProjectMapper.mapToEntity(createSubProjectDto);
+        Project projectToSave = subProjectMapper.mapToEntity(subProjectCreateDto);
         projectToSave.setParentProject(parentProject);
 
         Project savedProject = projectRepository.save(projectToSave);
         return subProjectMapper.mapToProjectDto(savedProject);
     }
 
-    public ProjectReadDto updateSubProject(Long projectId, CreateSubProjectDto createSubProjectDto) {
+    public ProjectReadDto updateSubProject(Long projectId, SubProjectCreateDto subProjectCreateDto) {
 
-        validatorProjectService.validateProjectExistence(createSubProjectDto.getParentProjectId());
+        validatorProjectService.validateProjectExistence(subProjectCreateDto.getParentProjectId());
 
-        Project parentProject = projectRepository.findById(createSubProjectDto.getParentProjectId())
-                .orElseThrow(() -> new EntityNotFoundException("Родительский проект не найден"));
+        Project parentProject = projectRepository.findById(subProjectCreateDto.getParentProjectId())
+                .orElseThrow(() -> new EntityNotFoundException("Родительский проект c id:" + projectId + "не найден"));
 
         validatorProjectService.validateParentProjectStatus(parentProject);
-        validatorProjectService.validateVisibility(parentProject, createSubProjectDto.getVisibility());
+        validatorProjectService.validateVisibility(parentProject, subProjectCreateDto.getVisibility());
 
         Project projectToUpdate = projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Проект c id: " + projectId + "не найден"));
 
-        projectToUpdate.setName(createSubProjectDto.getName());
-        projectToUpdate.setDescription(createSubProjectDto.getDescription());
-        projectToUpdate.setVisibility(createSubProjectDto.getVisibility());
-        projectToUpdate.setStatus(createSubProjectDto.getStatus());
+        projectToUpdate.setName(subProjectCreateDto.getName());
+        projectToUpdate.setDescription(subProjectCreateDto.getDescription());
+        projectToUpdate.setVisibility(subProjectCreateDto.getVisibility());
+        projectToUpdate.setStatus(subProjectCreateDto.getStatus());
 
         Project updatedProject = projectRepository.save(projectToUpdate);
         return subProjectMapper.mapToProjectDto(updatedProject);
@@ -84,6 +84,6 @@ public class ProjectService {
 
     public Project getProjectById(Long projectId) {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Проект c id:" + projectId + "не найден"));
     }
 }

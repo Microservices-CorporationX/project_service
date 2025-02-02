@@ -7,7 +7,8 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class CreateSubProjectDto {
+public class SubProjectCreateDto {
+    private Long id;
     private String name;
     private String description;
     private ProjectStatus status;
