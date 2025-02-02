@@ -60,6 +60,36 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation ("org.testcontainers:testcontainers")
+    testImplementation ("org.testcontainers:postgresql")
+
+
+    /**
+     *  Swagger UI & OpenAI
+     */
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(false)
+        html.required.set(true)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            element = "PACKAGE"
+            includes = listOf("faang.school.prjectservice.service")
+
+            limit {
+                minimum = BigDecimal.valueOf(0.7)
+            }
+        }
+    }
 }
 
 tasks.withType<Test> {
