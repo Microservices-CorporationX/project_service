@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectController {
     private final ProjectService projectService;
 
-    @PostMapping("{projectId}/presentation")
+    @PostMapping("/{projectId}/presentation")
     public ProjectReadDto generatePdf(@PathVariable long projectId) {
         return projectService.generateProjectPresentation(projectId);
     }
