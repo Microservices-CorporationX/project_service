@@ -13,7 +13,6 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.vacancy.VacancyService;
-import faang.school.projectservice.utility.validator.VacancyDtoValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +36,8 @@ class VacancyControllerTest {
     VacancyMapper vacancyMapper = mock(VacancyMapper.class);
     CandidateMapper candidateMapper = mock(CandidateMapper.class);
     UserContext userContext = mock(UserContext.class);
-    VacancyDtoValidator vacancyDtoValidator = mock(VacancyDtoValidator.class);
-    VacancyController vacancyController = new VacancyController(vacancyService, vacancyMapper, vacancyDtoValidator,
-            userContext, candidateMapper);
+    VacancyController vacancyController = new VacancyController(vacancyService, vacancyMapper, userContext,
+            candidateMapper);
 
     @Test
     void createVacancy() {
@@ -107,7 +105,6 @@ class VacancyControllerTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        when(vacancyDtoValidator.validate(vacancyDto)).thenReturn(true);
         when(userContext.getUserId()).thenReturn(1L);
         when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
         when(vacancyService.createVacancy(vacancy, 1L)).thenReturn(exceptedVacancy);
@@ -116,7 +113,6 @@ class VacancyControllerTest {
         ResponseEntity<VacancyDto> actual = vacancyController.createVacancy(vacancyDto);
         Assertions.assertEquals(ResponseEntity.ok(excepted), actual);
 
-        verify(vacancyDtoValidator, times(1)).validate(vacancyDto);
         verify(vacancyService, times(1)).createVacancy(vacancy, 1L);
         verify(userContext, times(1)).getUserId();
         verify(vacancyMapper, times(1)).toDto(exceptedVacancy);

@@ -9,7 +9,8 @@ import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.service.vacancy.VacancyService;
-import faang.school.projectservice.utility.validator.VacancyDtoValidator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,65 +25,65 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Validated
 @RequiredArgsConstructor
-@RequestMapping("vacancy")
+@RequestMapping("/api/v1/vacancies")
 @RestController
 public class VacancyController {
     private final VacancyService vacancyService;
     private final VacancyMapper vacancyMapper;
-    private final VacancyDtoValidator vacancyDtoValidator;
     private final UserContext userContext;
     private final CandidateMapper candidateMapper;
 
     @PostMapping
-    public ResponseEntity<VacancyDto> createVacancy(@RequestBody VacancyDto vacancyDto) {
-        vacancyDtoValidator.validate(vacancyDto);
+    public ResponseEntity<VacancyDto> createVacancy(@Valid @NotNull @RequestBody VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Long userId = userContext.getUserId();
         vacancy = vacancyService.createVacancy(vacancy, userId);
         return ResponseEntity.ok(vacancyMapper.toDto(vacancy));
     }
 
-    @PatchMapping("close/{id}")
-    public ResponseEntity<VacancyDto> closeVacancy(@PathVariable("id") Long vacancyId) {
+    @PatchMapping("/close/{id}")
+    public ResponseEntity<VacancyDto> closeVacancy(@Valid @NotNull @PathVariable("id") Long vacancyId) {
         Vacancy vacancy = vacancyService.closeVacancy(vacancyId, userContext.getUserId());
         VacancyDto vacancyDto = vacancyMapper.toDto(vacancy);
         return ResponseEntity.ok(vacancyDto);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<VacancyDto> getVacancy(@PathVariable("id") Long vacancyId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<VacancyDto> getVacancy(@Valid @NotNull @PathVariable("id") Long vacancyId) {
         VacancyDto vacancyDto = vacancyMapper.toDto(vacancyService.getVacancy(vacancyId));
         return ResponseEntity.ok(vacancyDto);
     }
 
-    @PatchMapping("{id}")
-    public ResponseEntity<VacancyDto> updateVacancy(@PathVariable("id") Long vacancyId,
-                                                    @RequestBody VacancyDto vacancyDto) {
-        vacancyDtoValidator.validate(vacancyDto);
+    @PatchMapping("/{id}")
+    public ResponseEntity<VacancyDto> updateVacancy(@Valid @NotNull @PathVariable("id") Long vacancyId,
+                                                    @Valid @NotNull @RequestBody VacancyDto vacancyDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyDto);
         Long userId = userContext.getUserId();
         VacancyDto result = vacancyMapper.toDto(vacancyService.updateVacancy(vacancyId, vacancy, userId));
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteVacancy(@PathVariable("id") Long vacancyId) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVacancy(@Valid @NotNull @PathVariable("id") Long vacancyId) {
         Long userId = userContext.getUserId();
         vacancyService.deleteVacancy(vacancyId, userId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("withFilter")
-    public ResponseEntity<List<VacancyDto>> getVacanciesByFilters(@RequestBody VacancyFilterDto filterDto) {
+    @PostMapping("/withFilters")
+    public ResponseEntity<List<VacancyDto>> getVacanciesByFilters(
+            @Valid @NotNull @RequestBody VacancyFilterDto filterDto) {
+
         List<Vacancy> vacancies = vacancyService.getVacancies(filterDto);
         List<VacancyDto> vacancyDtos = vacancyMapper.toDtoList(vacancies);
         return ResponseEntity.ok(vacancyDtos);
     }
 
-    @PatchMapping("{id}/addCandidates")
-    public ResponseEntity<VacancyDto> addCandidates(@PathVariable("id") Long vacancyId,
-                                                    @Validated @RequestBody List<CandidateDto> candidateDtos) {
+    @PatchMapping("/{id}/addCandidates")
+    public ResponseEntity<VacancyDto> addCandidates(@Valid @NotNull @PathVariable("id") Long vacancyId,
+                                                    @Valid @NotNull @RequestBody List<CandidateDto> candidateDtos) {
         Long userId = userContext.getUserId();
         List<Candidate> candidates = candidateMapper.toEntityList(candidateDtos);
         Vacancy vacancy = vacancyService.addCandidates(candidates, vacancyId, userId);

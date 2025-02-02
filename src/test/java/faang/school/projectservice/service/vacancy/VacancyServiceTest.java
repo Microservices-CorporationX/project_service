@@ -291,6 +291,21 @@ class VacancyServiceTest {
                 .build();
 
         Vacancy newVacancy = Vacancy.builder()
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .name("project")
+                        .build())
+                .candidates(candidates)
+                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
+                .createdBy(1L)
+                .status(VacancyStatus.OPEN)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
                 .coverImageKey("coverImageKey")
                 .build();
 

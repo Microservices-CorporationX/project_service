@@ -86,51 +86,18 @@ public class VacancyService {
         if (vacancyId == null || newVacancy == null || tutorId == null) {
             throw new DataValidationException("vacancyId, newVacancy or tutorId is null");
         }
+
         Vacancy sourceVacancy = vacancyRepository.findById(vacancyId).orElseThrow(() ->
                 new DataValidationException("vacancy %d not found".formatted(vacancyId)));
 
         vacancyValidator.validateVacancyStatus(sourceVacancy);
-        sourceVacancy.setUpdatedAt(LocalDateTime.now());
-        sourceVacancy.setUpdatedBy(tutorId);
+        newVacancy.setId(vacancyId);
+        newVacancy.setUpdatedAt(LocalDateTime.now());
+        newVacancy.setUpdatedBy(tutorId);
 
+        vacancyValidator.validateTutorRole(tutorId, newVacancy.getProject().getId());
 
-        if (newVacancy.getProject() != null) {
-            sourceVacancy.setProject(newVacancy.getProject());
-        }
-        vacancyValidator.validateTutorRole(tutorId, sourceVacancy.getProject().getId());
-
-        if (newVacancy.getName() != null) {
-            sourceVacancy.setName(newVacancy.getName());
-        }
-        if (newVacancy.getDescription() != null) {
-            sourceVacancy.setDescription(newVacancy.getDescription());
-        }
-        if (newVacancy.getPosition() != null) {
-            sourceVacancy.setPosition(newVacancy.getPosition());
-        }
-        if (newVacancy.getCandidates() != null && !newVacancy.getCandidates().isEmpty()) {
-            sourceVacancy.setCandidates(newVacancy.getCandidates());
-        }
-        if (newVacancy.getStatus() != null) {
-            sourceVacancy.setStatus(newVacancy.getStatus());
-        }
-        if (newVacancy.getSalary() != null) {
-            sourceVacancy.setSalary(newVacancy.getSalary());
-        }
-        if (newVacancy.getWorkSchedule() != null) {
-            sourceVacancy.setWorkSchedule(newVacancy.getWorkSchedule());
-        }
-        if (newVacancy.getCount() != null) {
-            sourceVacancy.setCount(newVacancy.getCount());
-        }
-        if (newVacancy.getRequiredSkillIds() != null && !newVacancy.getRequiredSkillIds().isEmpty()) {
-            sourceVacancy.setRequiredSkillIds(newVacancy.getRequiredSkillIds());
-        }
-        if (newVacancy.getCoverImageKey() != null) {
-            sourceVacancy.setCoverImageKey(newVacancy.getCoverImageKey());
-        }
-
-        return vacancyRepository.save(sourceVacancy);
+        return vacancyRepository.save(newVacancy);
     }
 
     public void deleteVacancy(Long vacancyId, Long tutorId) {
