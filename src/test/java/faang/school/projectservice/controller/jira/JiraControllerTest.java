@@ -1,6 +1,5 @@
 package faang.school.projectservice.controller.jira;
 
-import faang.school.projectservice.config.context.UserHeaderFilter;
 import faang.school.projectservice.dto.jira.request.create.IssueCreateRequestDto;
 import faang.school.projectservice.dto.jira.request.create.IssueFieldsCreateRequestDto;
 import faang.school.projectservice.dto.jira.request.update.IssueFieldsUpdateRequestDto;
@@ -10,44 +9,62 @@ import faang.school.projectservice.dto.jira.response.IssueDto;
 import faang.school.projectservice.dto.jira.response.IssueFieldsResponseDto;
 import faang.school.projectservice.dto.jira.response.IssueResponseDto;
 import faang.school.projectservice.service.jira.JiraService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
+import java.util.Properties;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(JiraController.class)
+@ExtendWith(MockitoExtension.class)
+//@WebMvcTest(JiraController.class)
+@TestPropertySource(properties = {"domain.path=/api/v1"})
 class JiraControllerTest {
 
-
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private JiraService jiraService;
 
-    @MockBean
-    private UserHeaderFilter filter;
+//    @MockBean
+//    private UserHeaderFilter filter;
+//
+//    @MockBean
+//    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-    @MockBean
-    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+    @InjectMocks
+    private JiraController jiraController;
 
-    private final String basePath = "/api/jira/issues";
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+        Properties properties = new Properties();
+        properties.setProperty("domain.path", "/api/v1");
+        configurer.setProperties(properties);
+
+        mockMvc = MockMvcBuilders.standaloneSetup(jiraController)
+                .addPlaceholderValue("domain.path", "/api/v1")
+                .build();
+    }
+
+    private final String basePath = "/api/v1/jira/issues";
 
     @Test
     public void testGetAllIssues() throws Exception {
@@ -106,18 +123,21 @@ class JiraControllerTest {
 
     @Test
     public void testCreateIssue() throws Exception {
-        IssueCreateResponseDto responseDto = new IssueCreateResponseDto();
-        responseDto.setId("1");
-        responseDto.setKey("PROJ-1");
+        when(jiraService.createIssue(eq(getIssueCreateRequestDto()))).thenReturn(getIssueCreateResponseDto());
+        String requestBody = """
+                {
+                  "fields" : {
+                    "project" : null,
+                    "summary" : "Test Issue",
+                    "description" : "Test Description",
+                    "issuetype" : null
+                  }
+                }
+                """;
 
-        Mockito.when(jiraService.createIssue(getIssueCreateRequestDto())).thenReturn(responseDto);
-
-        String requestBody = "{fields: {\"summary\":\"Test Issue\",\"description\":\"Test Description\"}}";
-
-        mockMvc.perform(MockMvcRequestBuilders.post(basePath)
+        mockMvc.perform(post(basePath)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .content(requestBody))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
@@ -125,30 +145,51 @@ class JiraControllerTest {
     @Test
     public void testEditIssue() throws Exception {
         String issueId = "1";
-        IssueUpdateRequestDto requestDto = getIssueUpdateRequestDto();
+        doNothing().when(jiraService).editIssue(eq(issueId), eq(getIssueUpdateRequestDto()));
 
-        String requestBody = "{\"summary\":\"Updated Summary\",\"description\":\"Updated Description\"}";
+        String requestBody = """
+                {
+                  "fields" : {
+                    "summary" : "Updated Summary",
+                    "description" : "Updated Description",
+                    "assignee" : null,
+                    "issuetype" : null,
+                    "parent" : null,
+                    "duedate" : null
+                  }
+                }
+                """;
 
-        mockMvc.perform(MockMvcRequestBuilders.put(basePath + "/{issueId}", issueId)
+        mockMvc.perform(put(String.format("%s/%s", basePath, issueId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(jiraService, Mockito.times(1)).editIssue(issueId, requestDto);
+        verify(jiraService).editIssue(issueId, getIssueUpdateRequestDto());
     }
 
     private IssueCreateRequestDto getIssueCreateRequestDto() {
-        IssueCreateRequestDto requestDto = new IssueCreateRequestDto();
-        requestDto.setFields(
-                IssueFieldsCreateRequestDto.builder().summary("Test Issue").description("Test Description").build());
-        return requestDto;
+        return IssueCreateRequestDto.builder()
+                .fields(IssueFieldsCreateRequestDto.builder()
+                        .summary("Test Issue")
+                        .description("Test Description")
+                        .build())
+                .build();
+    }
+
+    private IssueCreateResponseDto getIssueCreateResponseDto() {
+        return IssueCreateResponseDto.builder()
+                .id("key")
+                .key("PROJ")
+                .build();
     }
 
     private IssueUpdateRequestDto getIssueUpdateRequestDto() {
-        IssueUpdateRequestDto requestDto = new IssueUpdateRequestDto();
-        requestDto.setFields(
-                IssueFieldsUpdateRequestDto.builder().summary("Updated Summary").description("Updated Description").build());
-        return requestDto;
+        return IssueUpdateRequestDto.builder()
+                .fields(IssueFieldsUpdateRequestDto.builder()
+                        .summary("Updated Summary")
+                        .description("Updated Description")
+                        .build())
+                .build();
     }
-
 }
