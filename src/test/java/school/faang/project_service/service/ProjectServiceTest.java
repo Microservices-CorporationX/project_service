@@ -5,17 +5,17 @@ import faang.school.projectservice.mapper.ProjectMapperImpl;
 import faang.school.projectservice.model.Project;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.service.impl.ProjectServiceImpl;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
-import static faang.school.projectservice.constant.ProjectErrorMessages.PROJECT_WITH_ID_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -32,32 +32,34 @@ class ProjectServiceTest {
     private ProjectServiceImpl projectService;
 
     @Test
-    void getProject_WhenProjectExists_ReturnsProjectDto() {
+    void getProject_WhenProjectExists_ReturnsResponseEntityWithProjectDto() {
         long projectId = 1L;
         Project project = createTestProject();
         ProjectDto expectedProjectDto = projectMapper.toDto(project);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
-        ProjectDto result = projectService.getProject(projectId);
 
-        assertNotNull(result);
-        assertEquals(expectedProjectDto, result);
+        ResponseEntity<ProjectDto> response = projectService.getProject(projectId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedProjectDto, response.getBody());
 
         verify(projectRepository).findById(projectId);
     }
 
     @Test
-    void getProject_WhenProjectDoesNotExist_ThrowsEntityNotFoundException() {
+    void getProject_WhenProjectDoesNotExist_ReturnsNotFoundResponse() {
         long projectId = 1L;
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> projectService.getProject(projectId)
-        );
+        ResponseEntity<ProjectDto> response = projectService.getProject(projectId);
 
-        assertEquals(String.format(PROJECT_WITH_ID_NOT_FOUND, projectId), exception.getMessage());
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+
         verify(projectRepository).findById(projectId);
         verifyNoInteractions(projectMapper);
     }

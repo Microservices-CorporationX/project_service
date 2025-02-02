@@ -8,9 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,25 +24,29 @@ class ProjectControllerTest {
     private ProjectController projectController;
 
     @Test
-    void getProject_WhenProjectExists_ReturnsProjectDto() {
+    void getProject_WhenProjectExists_ReturnsResponseEntityWithProjectDto() {
         long projectId = 1L;
         ProjectDto expectedProjectDto = new ProjectDto(projectId, "Test Project");
-        when(projectService.getProject(projectId)).thenReturn(expectedProjectDto);
-        ProjectDto result = projectController.getProject(projectId);
 
-        assertEquals(expectedProjectDto, result);
+        when(projectService.getProject(projectId)).thenReturn(ResponseEntity.ok(expectedProjectDto));
+
+        ResponseEntity<ProjectDto> response = projectController.getProject(projectId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedProjectDto, response.getBody());
     }
 
     @Test
-    void getProject_WhenProjectDoesNotExist_ThrowsException() {
+    void getProject_WhenProjectDoesNotExist_ReturnsNotFound() {
         long projectId = 999L;
-        String errorMessage = "Project with ID " + projectId + " not found";
-        when(projectService.getProject(projectId)).thenThrow(new RuntimeException(errorMessage));
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> projectController.getProject(projectId)
-        );
-        assertEquals(errorMessage, exception.getMessage());
+        when(projectService.getProject(projectId)).thenReturn(ResponseEntity.notFound().build());
+
+        ResponseEntity<ProjectDto> response = projectController.getProject(projectId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
     }
 }
