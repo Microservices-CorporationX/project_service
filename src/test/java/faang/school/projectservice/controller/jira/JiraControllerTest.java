@@ -34,18 +34,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-//@WebMvcTest(JiraController.class)
 @TestPropertySource(properties = {"domain.path=/api/v1"})
 class JiraControllerTest {
 
     @Mock
     private JiraService jiraService;
-
-//    @MockBean
-//    private UserHeaderFilter filter;
-//
-//    @MockBean
-//    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @InjectMocks
     private JiraController jiraController;
