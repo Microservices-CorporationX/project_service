@@ -4,7 +4,7 @@ import faang.school.projectservice.dto.internship.InternshipCreateDto;
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.validator.InternshipValidator;
+import faang.school.projectservice.service.validator.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,7 +109,7 @@ public class InternshipValidatorTest {
         internship.setStatus(InternshipStatus.COMPLETED);
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> internshipValidator.internshipUpdateValidation(internship, internshipUpdateDto));
-        assertEquals(ex.getMessage(), "Стажирока окончена!!!");
+        assertEquals(ex.getMessage(), "Стажировка окончена!!!");
     }
 
     @Test

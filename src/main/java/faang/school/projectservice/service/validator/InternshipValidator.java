@@ -1,11 +1,8 @@
-package faang.school.projectservice.validator;
+package faang.school.projectservice.service.validator;
 
 import faang.school.projectservice.dto.internship.InternshipUpdateDto;
 import faang.school.projectservice.exception.BusinessException;
-import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.*;
-import faang.school.projectservice.repository.InternshipRepository;
-import faang.school.projectservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +37,7 @@ public class InternshipValidator {
 
     public void internshipUpdateValidation(Internship internship, InternshipUpdateDto updateDto) {
         if (internship.getStatus().equals(InternshipStatus.COMPLETED)) {
-            throw new IllegalArgumentException("Стажирока окончена!!!");
+            throw new IllegalArgumentException("Стажировка окончена!!!");
         }
         if (internship.getStartDate().isBefore(LocalDateTime.now())
                 && isInternsListNotEqualNotEmpty(internship, updateDto)) {

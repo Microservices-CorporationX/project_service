@@ -11,7 +11,7 @@ import faang.school.projectservice.model.*;
 import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
-import faang.school.projectservice.validator.InternshipValidator;
+import faang.school.projectservice.service.validator.InternshipValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -97,7 +97,7 @@ public class InternshipService {
 
     public InternshipCreateDto getInternship(Long id) {
         return mapper.toDto(internshipRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Стажеровки с id: " + id + " не существует")));
+                .orElseThrow(() -> new EntityNotFoundException("Стажировки с id: " + id + " не существует")));
     }
 
     public List<InternshipCreateDto> getInternshipByFilter(InternshipFilterDto filter) {

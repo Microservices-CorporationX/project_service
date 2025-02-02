@@ -12,27 +12,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/project-service/internship")
+@RequestMapping("/v1/internship")
 @RequiredArgsConstructor
 public class InternshipController {
     private final InternshipService internshipService;
 
-    @PostMapping("/create")
+    @PostMapping()
     public InternshipCreateDto createInternship(@Valid @RequestBody InternshipCreateDto internshipCreateDto) {
         return internshipService.create(internshipCreateDto);
     }
 
-    @PutMapping("/update")
+    @PutMapping()
     public InternshipCreateDto updateInternship( @Valid @RequestBody InternshipUpdateDto internshipUpdateDto) {
         return internshipService.updateInternship(internshipUpdateDto);
     }
 
-    @GetMapping("/get-internship-by-id/{id}")
+    @GetMapping("/internship-by-id/{id}")
     public InternshipCreateDto getInternship(@PathVariable("id") long id ) {
         return internshipService.getInternship(id);
     }
 
-    @GetMapping("/get-internship-by-filter")
+    @GetMapping("/internship-by-filter")
     public List<InternshipCreateDto> getInternshipByFilter(@RequestBody InternshipFilterDto filter) {
         return internshipService.getInternshipByFilter(filter);
     }

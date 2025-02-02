@@ -10,7 +10,7 @@ import faang.school.projectservice.repository.InternshipRepository;
 import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.InternshipService;
-import faang.school.projectservice.validator.InternshipValidator;
+import faang.school.projectservice.service.validator.InternshipValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -138,7 +137,7 @@ public class InternshipServiceTest {
 
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,
                 () -> internshipService.getInternship(internship.getId()));
-        assertEquals(ex.getMessage(), "Стажеровки с id: " + internship.getId() + " не существует");
+        assertEquals(ex.getMessage(), "Стажировки с id: " + internship.getId() + " не существует");
     }
 
     @ParameterizedTest
