@@ -16,6 +16,7 @@ import faang.school.projectservice.repository.ProjectRepository;
 import faang.school.projectservice.repository.StageRepository;
 import faang.school.projectservice.repository.StageRolesRepository;
 import faang.school.projectservice.repository.TaskRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,6 @@ public class StageServiceImpl implements StageService {
         return saveValidStage(stageDto);
     }
 
-
     @Override
     public StageDto updateStage(StageDto stageDto) {
         if (null == stageDto.getStageId()) {
@@ -52,13 +52,13 @@ public class StageServiceImpl implements StageService {
     public List<StageDto> getAllStagesByFilter(StageFilterDto filter) {
         validateRole(filter);
         validateStatus(filter);
-        return  getStagesByFilter(filter);
+        return getStagesByFilter(filter);
     }
 
     @Override
     public List<StageDto> getAllStages() {
-        List<Stage> stages = stageRepository.findAll();
-        return stages.stream().map(stageMapper::toDto).toList();
+        return stageRepository.findAll().stream()
+                .map(stageMapper::toDto).toList();
     }
 
     @Override
@@ -71,19 +71,19 @@ public class StageServiceImpl implements StageService {
 
     @Override
     public StageDto getStageById(long stageId) {
-        Stage stage = stageRepository.findById(stageId)
-                .orElseThrow(() -> new ResourceNotFoundException("Stage with id " + stageId + " not found"));
-        return stageMapper.toDto(stage);
+        return stageRepository.findById(stageId)
+                .map(stageMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Stage with id %d not found", stageId)));
     }
 
     private void validateRole(StageFilterDto filter) {
-        if (null != filter.getRole() && !filter.getRole().isEmpty() && !isValidateRole(filter.getRole())) {
+        if (filter.getRole() != null && !filter.getRole().isEmpty() && !isValidateRole(filter.getRole())) {
             throw new DataValidationException("Invalid role" + filter.getRole());
         }
     }
 
     private void validateStatus(StageFilterDto filter) {
-        if (null != filter.getStatus() && !filter.getStatus().isEmpty() && !isValidStatus(filter.getStatus())) {
+        if (filter.getStatus() != null && !filter.getStatus().isEmpty() && !isValidStatus(filter.getStatus())) {
             throw new DataValidationException("Invalid status" + filter.getStatus());
         }
     }
@@ -93,27 +93,34 @@ public class StageServiceImpl implements StageService {
         if (projectRepository.existsByOwnerIdAndName(stageDto.getUserId(), project.getName())) {
             Stage stage = stageMapper.toEntity(stageDto);
             stage.setProject(project);
-            List<StageRoles> stageRoles = stageDto.getStageRoles().stream().map(stageRolesMapper::toEntity).collect(Collectors.toList());
-            stageRoles.forEach(stageRole -> stageRole.setStage(stage));
-            stage.setStageRoles(stageRoles);
+            stage.setStageRoles(mapStageRoles(stageDto, stage));
             Stage savedStage = stageRepository.save(stage);
             return stageMapper.toDto(savedStage);
         }
         throw new DataValidationException(String.format("Project with id %d for this user %d not found", stageDto.getProjectId(), stageDto.getUserId()));
     }
 
-    public boolean isValidStatus(String status) {
-        return Arrays.stream(TaskStatus.values()).anyMatch(enumValue -> enumValue.name().equals(status.toUpperCase()));
+    private List<StageRoles> mapStageRoles(StageDto stageDto, Stage stage) {
+        return stageDto.getStageRoles().stream()
+                .map(stageRolesMapper::toEntity)
+                .peek(stageRole -> stageRole.setStage(stage)).toList();
+    }
+
+    private boolean isValidStatus(String status) {
+        return Arrays.stream(TaskStatus.values())
+                .anyMatch(enumValue -> enumValue.name().equals(status.toUpperCase()));
     }
 
     private boolean isValidateRole(String role) {
-        return Arrays.stream(TeamRole.values()).anyMatch(enumValue -> enumValue.name().equals(role.toUpperCase()));
+        return Arrays.stream(TeamRole.values())
+                .anyMatch(enumValue -> enumValue.name().equals(role.toUpperCase()));
     }
 
     public List<StageRoles> getStageRolesByIds(StageDto stageDto) {
-        return stageDto.getStageRoles().stream().map(stageRolesDto -> stageRolesDto.getId())
+        return stageDto.getStageRoles().stream()
+                .map(stageRolesDto -> stageRolesDto.getId())
                 .map(stageRolesId -> stageRolesRepository.findById(stageRolesId)
-                        .orElseThrow(() -> new DataValidationException("StageRoles with id " + stageRolesId + " not found")))
+                        .orElseThrow(() -> new EntityNotFoundException(String.format("StageRoles with id %d not found", stageRolesId))))
                 .toList();
     }
 
@@ -121,16 +128,25 @@ public class StageServiceImpl implements StageService {
         Project project = projectRepository.findById(stageDto.getProjectId())
                 .orElseThrow(() -> new DataValidationException("Project with id " + stageDto.getProjectId() + " not found"));
         if (List.of(ProjectStatus.COMPLETED, ProjectStatus.CANCELLED).contains(project.getStatus())) {
-            throw new DataValidationException("Project with id " + stageDto.getProjectId() + " is in an invalid status: " + project.getStatus());
+            throw new DataValidationException(String.format("Project with id %d is in an invalid status:%s", stageDto.getProjectId(), project.getStatus()));
         }
         return project;
     }
+
     private List<StageDto> getStagesByFilter(StageFilterDto filter) {
         return stageRepository.findAll().stream()
-                .filter(stage -> (null == filter.getRole() || filter.getRole().isEmpty()
-                        || stage.getStageRoles().stream().anyMatch(role -> role.getTeamRole().name().equalsIgnoreCase(filter.getRole())))
-                        && (null == filter.getStatus() || filter.getStatus().isEmpty()
-                        || stage.getTasks().stream().anyMatch(task -> task.getStatus().name().equalsIgnoreCase(filter.getStatus()))))
+                .filter(stage -> isRoleMatching(stage, filter.getRole())
+                        && isStatusMatching(stage, filter.getStatus()))
                 .map(stageMapper::toDto).toList();
+    }
+
+    private boolean isRoleMatching(Stage stage, String role) {
+        return role == null || role.isEmpty() || stage.getStageRoles().stream()
+                .anyMatch(stageRole -> stageRole.getTeamRole().name().equalsIgnoreCase(role));
+    }
+
+    private boolean isStatusMatching(Stage stage, String status) {
+        return status == null || status.isEmpty() || stage.getTasks().stream()
+                .anyMatch(task -> task.getStatus().name().equalsIgnoreCase(status));
     }
 }

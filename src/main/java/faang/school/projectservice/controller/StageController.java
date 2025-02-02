@@ -39,8 +39,7 @@ public class StageController {
 
     @PostMapping("/filter")
     public ResponseEntity<List<StageDto>> getAllStagesByFilter(@RequestBody StageFilterDto filter) {
-        List<StageDto> retStage = stageService.getAllStagesByFilter(filter);
-        return ResponseEntity.ok(retStage);
+        return ResponseEntity.ok( stageService.getAllStagesByFilter(filter));
     }
 
     @GetMapping
