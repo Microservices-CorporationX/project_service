@@ -16,7 +16,6 @@ import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.service.s3.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +23,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
@@ -44,7 +42,7 @@ public class ResourceServiceImpl implements ResourceService {
         if (newStorageSize.compareTo(project.getMaxStorageSize()) > 0) {
             throw new StorageException("No space in storage");
         }
-        Resource resource = saveResource(file, project, newStorageSize);
+        Resource resource = uploadAndPersistResource(file, project, newStorageSize);
         updateProject(project, newStorageSize);
 
         return resourceMapper.toDto(resource);
@@ -67,10 +65,10 @@ public class ResourceServiceImpl implements ResourceService {
 
         if (member.getRoles().contains(TeamRole.MANAGER) || resource.getCreatedBy().equals(member)) {
             s3Service.deleteFile(key);
-            BigInteger newStorageSize = BigInteger.valueOf(project.getStorageSize().longValue()).add(resource.getSize());
+            BigInteger newStorageSize = BigInteger.valueOf(project.getStorageSize().longValue())
+                    .subtract(resource.getSize());
             updateProject(project, newStorageSize);
             updateResource(resource, member);
-            resourceRepository.save(resource);
         } else {
             throw new AccessDeniedException(
                     String.format("Access denied. User with id = %d not manager or owner", userId));
@@ -83,6 +81,7 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setStatus(ResourceStatus.DELETED);
         resource.setUpdatedAt(LocalDateTime.now());
         resource.setUpdatedBy(member);
+        resourceRepository.save(resource);
     }
 
     private void updateProject(Project project, BigInteger newStorageSize) {
@@ -91,7 +90,7 @@ public class ResourceServiceImpl implements ResourceService {
         projectRepository.save(project);
     }
 
-    private Resource saveResource(MultipartFile file, Project project, BigInteger newStorageSize) {
+    private Resource uploadAndPersistResource(MultipartFile file, Project project, BigInteger newStorageSize) {
         Resource resource = s3Service.uploadFile(file, project.getName());
         resource.setSize(newStorageSize);
         TeamMember member = teamMemberRepository.findByUserIdAndProjectId(userContext.getUserId(), project.getId());

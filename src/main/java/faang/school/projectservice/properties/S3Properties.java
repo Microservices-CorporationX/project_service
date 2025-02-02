@@ -1,4 +1,4 @@
-package faang.school.projectservice.peroperties;
+package faang.school.projectservice.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

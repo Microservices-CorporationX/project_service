@@ -10,7 +10,7 @@ import faang.school.projectservice.exception.UploadResourceException;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
 import faang.school.projectservice.model.ResourceType;
-import faang.school.projectservice.peroperties.S3Properties;
+import faang.school.projectservice.properties.S3Properties;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

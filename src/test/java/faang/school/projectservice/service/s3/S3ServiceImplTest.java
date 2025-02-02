@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import faang.school.projectservice.model.Resource;
 import faang.school.projectservice.model.ResourceStatus;
-import faang.school.projectservice.peroperties.S3Properties;
+import faang.school.projectservice.properties.S3Properties;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
