@@ -87,8 +87,4 @@ public class Internship {
     @OneToOne
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private TeamRole role;
 }
