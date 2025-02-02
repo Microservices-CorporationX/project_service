@@ -10,6 +10,6 @@ public class AppConfig {
     @Value("${app.config.max_team_avatar_side_length}")
     private int maxTeamAvatarSideLength;
 
-    @Value("app.config.max_team_avatar_size_in_mb")
+    @Value("${app.config.max_team_avatar_size_in_mb}")
     private int maxTeamAvatarSize;
 }
