@@ -22,11 +22,19 @@ public class AmazonS3Config {
     @Value("${services.s3.endpoint}")
     private String endpoint;
 
+    @Value("${services.s3.bucketname}")
+    private String bucketName;
+
     @Bean
     public AmazonS3 amazonS3Client() {
-        return AmazonS3ClientBuilder.standard().withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+        final AmazonS3 client = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
                         endpoint, null))
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
                 .build();
+        if (!client.doesBucketExistV2(bucketName)) {
+            client.createBucket(bucketName);
+        }
+        return client;
     }
 }

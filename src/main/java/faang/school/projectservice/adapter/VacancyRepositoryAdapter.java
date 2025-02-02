@@ -17,4 +17,7 @@ public class VacancyRepositoryAdapter {
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Vacancy with id: %d not found!", id)));
     }
 
+    public void save(Vacancy vacancy) {
+        vacancyRepository.save(vacancy);
+    }
 }
