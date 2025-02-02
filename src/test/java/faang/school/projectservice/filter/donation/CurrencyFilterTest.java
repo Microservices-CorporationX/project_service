@@ -1,7 +1,7 @@
 package faang.school.projectservice.filter.donation;
 
-import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.dto.payment.Currency;
 import faang.school.projectservice.model.Donation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package faang.school.projectservice.dto.donation;
 
-import faang.school.projectservice.dto.client.Currency;
+import faang.school.projectservice.dto.payment.Currency;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package faang.school.projectservice.validator;
 
-import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.donation.DonationDto;
+import faang.school.projectservice.dto.payment.Currency;
 import faang.school.projectservice.exception.DataValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

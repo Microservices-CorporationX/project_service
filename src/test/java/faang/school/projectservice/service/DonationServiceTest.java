@@ -2,11 +2,11 @@ package faang.school.projectservice.service;
 
 import faang.school.projectservice.client.PaymentServiceClient;
 import faang.school.projectservice.config.context.UserContext;
-import faang.school.projectservice.dto.client.Currency;
-import faang.school.projectservice.dto.client.PaymentRequest;
-import faang.school.projectservice.dto.client.PaymentResponse;
 import faang.school.projectservice.dto.donation.DonationDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
+import faang.school.projectservice.dto.payment.Currency;
+import faang.school.projectservice.dto.payment.PaymentRequest;
+import faang.school.projectservice.dto.payment.PaymentResponse;
 import faang.school.projectservice.filter.DonationFilter;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Donation;
