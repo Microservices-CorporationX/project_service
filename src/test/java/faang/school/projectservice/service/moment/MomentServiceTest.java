@@ -54,7 +54,7 @@ public class MomentServiceTest {
         long userId = 1L;
         long projectId = 1L;
         Moment momentRequest = Moment.builder().build();
-        List<Long> projectIds = null;
+        List<Long> projectIds = new ArrayList<>();
 
         List<Long> expectedProjectIds = Collections.singletonList(projectId);
 
