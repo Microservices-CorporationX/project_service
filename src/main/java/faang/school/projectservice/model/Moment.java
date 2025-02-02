@@ -16,12 +16,18 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "moment")
 public class Moment {
     @Id
@@ -53,7 +59,7 @@ public class Moment {
     @ElementCollection
     @CollectionTable(name = "moment_user", joinColumns = @JoinColumn(name = "moment_id"))
     @Column(name = "team_member_id")
-    private List<Long> userIds;
+    private List<Long> teamMemberIds;
 
     @Column(name = "image_id")
     private String imageId;
