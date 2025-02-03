@@ -3,7 +3,7 @@ package faang.school.projectservice.controller;
 import faang.school.projectservice.dto.donate.DonationCreateDto;
 import faang.school.projectservice.dto.donate.DonationDto;
 import faang.school.projectservice.dto.donate.DonationFilterDto;
-import faang.school.projectservice.service.donate.DonationService;
+import faang.school.projectservice.service.DonationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

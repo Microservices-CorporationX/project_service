@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CampaignService {
 
-    public final CampaignRepository campaignRepository;
+    private final CampaignRepository campaignRepository;
 
     public Campaign getCampingById(long id) {
         return campaignRepository.findById(id).orElseThrow(

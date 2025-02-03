@@ -1,4 +1,4 @@
-package faang.school.projectservice.service.donate;
+package faang.school.projectservice.service;
 
 
 import faang.school.projectservice.client.PaymentServiceClient;
@@ -12,11 +12,11 @@ import faang.school.projectservice.dto.donate.DonationFilterDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.exception.PaymentFailedException;
 import faang.school.projectservice.exception.PaymentServiceConnectException;
+import faang.school.projectservice.exception.UserServiceConnectionException;
 import faang.school.projectservice.mapper.DonationMapper;
 import faang.school.projectservice.model.Campaign;
 import faang.school.projectservice.model.Donation;
 import faang.school.projectservice.repository.DonationRepository;
-import faang.school.projectservice.service.CampaignService;
 import faang.school.projectservice.service.filter.donation.DonationFilter;
 import faang.school.projectservice.util.RandomGenerator;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +42,7 @@ public class DonationService {
     private final CampaignService campaignService;
     private final RandomGenerator randomGenerator;
 
+
     @Transactional
     public DonationDto createDonation(DonationCreateDto donationDto) {
 
@@ -66,7 +67,7 @@ public class DonationService {
         return donationMapper.toDto(donation);
     }
 
-    private PaymentResponse paymentToDonate(DonationCreateDto donationDto) {
+    protected PaymentResponse paymentToDonate(DonationCreateDto donationDto) {
         var paymentNumber = randomGenerator.getRandomNumber(MIN_PAYMENT_NUMBER, MAX_PAYMENT_NUMBER);
 
         PaymentRequest paymentRequest = new PaymentRequest(
@@ -80,7 +81,7 @@ public class DonationService {
             return paymentServiceClient.sendPayment(paymentRequest);
         } catch (Exception e) {
             log.error("Payment service not working ! {}, {}", paymentRequest, e.getMessage());
-            throw new PaymentServiceConnectException("Payment service not working !");
+                throw new PaymentServiceConnectException("Payment service not working !");
         }
     }
 
@@ -92,9 +93,9 @@ public class DonationService {
                 throw new EntityNotFoundException("User not found with id = %s".formatted(userId));
             }
             return user;
-        } catch (Exception e) {
+        } catch (UserServiceConnectionException e) {
             log.error("User service not working !!!");
-            throw new EntityNotFoundException("User service not working !!!");
+            throw new UserServiceConnectionException("User service not working !!!");
         }
     }
 
