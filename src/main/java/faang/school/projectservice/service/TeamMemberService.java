@@ -36,7 +36,7 @@ public class TeamMemberService {
         teamMemberValidator.validateAlreadyInProject(dto.getUserId(), projectId);
 
         Team team = teamRepository.findById(dto.getTeamId())
-                .orElseThrow(() -> new EntityNotFoundException("Команда не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Команда с id " + dto.getTeamId()+ " не найдена"));
 
         TeamMember newMember = teamMemberMapper.teamMemberDtoToTeamMember(dto);
         newMember.setTeam(team);

@@ -17,8 +17,9 @@ public class TeamMemberValidator {
     private final ProjectRepository projectRepository;
 
     public void validateLeaderOrOwner(TeamMember member) {
-        if (member == null || member.getRoles().stream().noneMatch(role -> role.equals(TeamRole.OWNER))) {
-            throw new DataValidationException("Пользователь не является владельцем проекта!");
+        if (member == null || member.getRoles() == null ||
+                member.getRoles().stream().noneMatch(role -> role == TeamRole.OWNER || role == TeamRole.TEAMLEAD)) {
+            throw new DataValidationException("Пользователь не является владельцем или тимлидом проекта!");
         }
     }
 
@@ -36,7 +37,7 @@ public class TeamMemberValidator {
     }
 
     public boolean isMemberLeader(TeamMember member) {
-        return member == null || member.getRoles().stream().anyMatch(role -> role.equals(TeamRole.OWNER));
+        return member == null || member.getRoles().stream().anyMatch(role -> role.equals(TeamRole.TEAMLEAD));
     }
 
     public boolean isMemberOwner(TeamMember member) {
