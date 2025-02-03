@@ -27,8 +27,8 @@ spring:
 
 jira:
   url: "https://faang-school.atlassian.net"
-  user: "eternity_cr9p@mail.ru"
-  token: "ATATT3xFfGF0g9dIKirc2arHnnZUeAE5sBrNTLEk-G5Qj4sv_IrGGOoagB3OV2Vp74blkWft_c9cOwk9NjH1FaQYfNE-Rb52JzdVXAhwgahjZ95fq-eAXuh3LW78lpN0vF0EAGgMuZqJcP95CB3YqtHtwrZhCF_BODsZOIUnXBncGDMxkv1HlJA=35702E16"
+  user: secret_email
+  token: secret_token
 
 server:
   port: 8082
