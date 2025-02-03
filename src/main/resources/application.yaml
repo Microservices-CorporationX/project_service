@@ -26,9 +26,9 @@ spring:
           name: calculations_channel
 
 jira:
-  url: "https://faang-school.atlassian.net"
-  user: secret_email
-  token: secret_token
+  url: ""
+  user: ""
+  token: ""
 
 server:
   port: 8082
