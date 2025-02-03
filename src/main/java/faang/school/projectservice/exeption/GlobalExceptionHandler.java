@@ -2,11 +2,11 @@ package faang.school.projectservice.exeption;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -16,45 +16,28 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(MethodArgumentNotValidException ex) {
-        return buildValidationExMap(ex);
-    }
+    private static final Map<Class<? extends Exception>, HttpStatus> EXCEPTION_STATUS_MAP = Map.of(
+            MethodArgumentNotValidException.class, HttpStatus.BAD_REQUEST,
+            HttpMessageNotReadableException.class, HttpStatus.BAD_REQUEST,
+            EntityNotFoundException.class, HttpStatus.NOT_FOUND,
+            NotUniqueProjectException.class, HttpStatus.CONFLICT,
+            ProjectNotClosableException.class, HttpStatus.PRECONDITION_FAILED
+    );
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleEnumParseException(HttpMessageNotReadableException ex) {
-        log.error("Http message not readable exception", ex);
-        return "Cannot parse JSON data. Please check it again.";
-    }
+    private static final Map<Class<? extends Exception>, String> EXCEPTION_DEFAULT_MESSAGE_MAP = Map.of(
+            HttpMessageNotReadableException.class, "Cannot parse JSON data. Please check it again.");
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleEntityNotFoundException(EntityNotFoundException ex) {
-        log.error("Entity not found exception", ex);
-        return ex.getMessage();
-    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException(Exception ex) {
+        HttpStatus status = EXCEPTION_STATUS_MAP.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+        String message = EXCEPTION_DEFAULT_MESSAGE_MAP.getOrDefault(ex.getClass(),
+                EXCEPTION_STATUS_MAP.containsKey(ex.getClass()) ? ex.getMessage() : "An unexpected error occurred.");
 
-    @ExceptionHandler(NotUniqueProjectException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public String handleNotUniqueProjectException(NotUniqueProjectException ex) {
-        log.error("Not unique project exception", ex);
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(ProjectNotClosableException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    public String handleProjectNotClosableException(ProjectNotClosableException ex) {
-        log.error("Project not closable exception", ex);
-        return ex.getMessage();
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleRuntimeException(RuntimeException ex) {
-        log.error("Runtime Exception", ex);
-        return "An unexpected error occurred.";
+        log.error("Exception caught: {}", ex.getClass().getSimpleName(), ex);
+        if (ex instanceof MethodArgumentNotValidException validationEx) {
+            return ResponseEntity.status(status).body(buildValidationExMap(validationEx));
+        }
+        return ResponseEntity.status(status).body(message);
     }
 
     private Map<String, String> buildValidationExMap(MethodArgumentNotValidException ex) {
@@ -65,7 +48,6 @@ public class GlobalExceptionHandler {
                 .forEach(err -> errors.put(
                         ((FieldError) err).getField(),
                         err.getDefaultMessage()));
-        log.error("Method argument not valid exception", ex);
         return errors;
     }
 }
