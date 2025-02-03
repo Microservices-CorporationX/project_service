@@ -22,6 +22,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceTest {
 
+    public static final Long TEST_PROJECT_ID = 1L;
+
     @Mock
     private ProjectRepository projectRepository;
 
@@ -33,34 +35,32 @@ class ProjectServiceTest {
 
     @Test
     void getProject_WhenProjectExists_ReturnsResponseEntityWithProjectDto() {
-        long projectId = 1L;
+
         Project project = createTestProject();
         ProjectDto expectedProjectDto = projectMapper.toDto(project);
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findById(TEST_PROJECT_ID)).thenReturn(Optional.of(project));
 
-        ResponseEntity<ProjectDto> response = projectService.getProject(projectId);
+        ResponseEntity<ProjectDto> response = projectService.getProject(TEST_PROJECT_ID);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedProjectDto, response.getBody());
 
-        verify(projectRepository).findById(projectId);
+        verify(projectRepository).findById(TEST_PROJECT_ID);
     }
 
     @Test
     void getProject_WhenProjectDoesNotExist_ReturnsNotFoundResponse() {
-        long projectId = 1L;
+        when(projectRepository.findById(TEST_PROJECT_ID)).thenReturn(Optional.empty());
 
-        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
-
-        ResponseEntity<ProjectDto> response = projectService.getProject(projectId);
+        ResponseEntity<ProjectDto> response = projectService.getProject(TEST_PROJECT_ID);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(projectRepository).findById(projectId);
+        verify(projectRepository).findById(TEST_PROJECT_ID);
         verifyNoInteractions(projectMapper);
     }
 

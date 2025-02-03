@@ -17,7 +17,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ProjectDto> getProject(@PathVariable @Min(value = 1L) long projectId) {
+    public ResponseEntity<ProjectDto> getProject(@PathVariable @Min(1L) Long projectId) {
         return projectService.getProject(projectId);
     }
 }

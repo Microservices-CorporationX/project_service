@@ -4,5 +4,5 @@ import faang.school.projectservice.dto.client.project.ProjectDto;
 import org.springframework.http.ResponseEntity;
 
 public interface ProjectService {
-    ResponseEntity<ProjectDto> getProject(long projectId);
+    ResponseEntity<ProjectDto> getProject(Long projectId);
 }

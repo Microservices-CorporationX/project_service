@@ -17,7 +17,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
 
     @Override
-    public ResponseEntity<ProjectDto> getProject(long projectId) {
+    public ResponseEntity<ProjectDto> getProject(Long projectId) {
         return projectRepository.findById(projectId)
                 .map(projectMapper::toDto)
                 .map(ResponseEntity::ok)

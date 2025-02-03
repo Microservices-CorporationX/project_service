@@ -25,7 +25,7 @@ class ProjectControllerTest {
 
     @Test
     void getProject_WhenProjectExists_ReturnsResponseEntityWithProjectDto() {
-        long projectId = 1L;
+        Long projectId = 1L;
         ProjectDto expectedProjectDto = new ProjectDto(projectId, "Test Project");
 
         when(projectService.getProject(projectId)).thenReturn(ResponseEntity.ok(expectedProjectDto));
@@ -39,7 +39,7 @@ class ProjectControllerTest {
 
     @Test
     void getProject_WhenProjectDoesNotExist_ReturnsNotFound() {
-        long projectId = 999L;
+        Long projectId = 999L;
 
         when(projectService.getProject(projectId)).thenReturn(ResponseEntity.notFound().build());
 
