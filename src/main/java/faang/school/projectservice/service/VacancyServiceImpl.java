@@ -13,11 +13,9 @@ import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -62,12 +60,18 @@ public class VacancyServiceImpl implements VacancyService {
 
     private MultipartFile checkAndConvertFile(MultipartFile file) {
         try {
+            double ratio = 0.0;
             BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
             if (bufferedImage.getWidth() > COVER_MAX_SIZE || bufferedImage.getHeight() > COVER_MAX_SIZE) {
-                int width = bufferedImage.getWidth() > COVER_MAX_SIZE ? COVER_MAX_SIZE : bufferedImage.getWidth();
-                int height = bufferedImage.getHeight() > COVER_MAX_SIZE ? COVER_MAX_SIZE : bufferedImage.getHeight();
-                BufferedImage resizeImage = resizeImage(bufferedImage, width, height);
-               return convertImageToMultipartFile(resizeImage, file);
+                if (bufferedImage.getWidth() > bufferedImage.getHeight()) {
+                    ratio = (double) COVER_MAX_SIZE / bufferedImage.getWidth();
+                } else {
+                    ratio = (double)  COVER_MAX_SIZE / bufferedImage.getHeight();
+                }
+                int widthNew = (int) (ratio * bufferedImage.getWidth());
+                int heightNew = (int) (ratio *  bufferedImage.getHeight());
+                BufferedImage resizeImage = resizeImage(bufferedImage, widthNew, heightNew);
+                return convertImageToMultipartFile(resizeImage, file);
             }
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -76,18 +80,23 @@ public class VacancyServiceImpl implements VacancyService {
         return file;
     }
 
+
     private MultipartFile convertImageToMultipartFile(BufferedImage resizeImage, MultipartFile file) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            ImageIO.write(resizeImage, "jpg", outputStream);
+            String fileType = file.getContentType().substring(file.getContentType().lastIndexOf("/") + 1);
+            ImageIO.write(resizeImage, fileType, outputStream);
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new FileException(e.getMessage());
         }
         byte[] imageBytes = outputStream.toByteArray();
-        FileMultipartFile multipartFile = new FileMultipartFile();
-        multipartFile.setInput(imageBytes);
+        FileMultipartFile multipartFile = new FileMultipartFile(file.getName(),
+                file.getOriginalFilename(),
+                file.getContentType(),
+                imageBytes,
+                imageBytes.length);
         return multipartFile;
     }
 

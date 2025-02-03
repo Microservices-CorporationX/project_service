@@ -1,27 +1,25 @@
 package faang.school.projectservice.file;
 
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-@Setter
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class FileMultipartFile implements MultipartFile {
+    private String name;
+    private String originalFilename;
+    private String contentType;
     private byte[] input;
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public String getOriginalFilename() {
-        return null;
-    }
-
-    @Override
-    public String getContentType() {
-        return null;
-    }
+    private long size;
 
     @Override
     public boolean isEmpty() {

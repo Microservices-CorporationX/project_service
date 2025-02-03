@@ -7,12 +7,13 @@ import com.amazonaws.services.s3.model.S3Object;
 import faang.school.projectservice.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Value;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @Service
@@ -32,9 +33,9 @@ public class S3ServiseImpl implements S3Service {
         try {
             s3Client.putObject(new PutObjectRequest(bucketName, fileName,
                     file.getInputStream(), metadata));
-            log.info("Object with name{} success downloaded", fileName);
+            log.info("Object with name {} success downloaded", fileName);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Error", e);
             throw new FileException("Error while downloading file.");
         }
         return fileName;
@@ -43,7 +44,7 @@ public class S3ServiseImpl implements S3Service {
     @Override
     public void deleteFile(String key) {
         s3Client.deleteObject(bucketName, key);
-        log.info("Object with key{} success deleted", key);
+        log.info("Object with key {} success deleted", key);
     }
 
     @Override
