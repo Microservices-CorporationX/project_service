@@ -28,7 +28,6 @@ spring:
 jira:
   url: "https://faang-school.atlassian.net"
   user: secret_email
-  #token: secret_token
 
 server:
   port: 8082
