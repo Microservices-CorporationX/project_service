@@ -108,6 +108,7 @@ tasks.withType<Test> {
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
 
 tasks.bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveFileName.set("service.jar")
 }
 
