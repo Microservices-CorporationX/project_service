@@ -30,7 +30,7 @@ public class DonationService {
     private final DonationSpecification donationSpecification;
 
 
-    public DonationDto send(DonationDto dto) {
+    public DonationDto createDonation(DonationDto dto) {
         PaymentRequest paymentRequest = mapDonationToPaymentRequest(dto);
         paymentServiceClient.sendPayment(paymentRequest);
         Donation entity = donationMapper.toEntity(dto);

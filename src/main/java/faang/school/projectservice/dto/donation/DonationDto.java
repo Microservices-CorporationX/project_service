@@ -9,15 +9,19 @@ import java.math.BigDecimal;
 
 @Builder
 public record DonationDto(
-        @NotNull
+        @NotNull(message = "Сумма платежа не должна быть пустой")
         Long paymentNumber,
-        @Positive
+
+        @Positive(message = "Сумма должна быть положительной")
         BigDecimal amount,
-        @NotNull
+
+        @NotNull(message = "ID кампании не должен быть пустым")
         Long campaignId,
-        @NotNull
+
+        @NotNull(message = "Валюта не должна быть пустой")
         Currency currency,
-        @NotNull
+
+        @NotNull(message = "ID пользователя не должен быть пустым")
         Long userId
 ) {
 
