@@ -41,9 +41,9 @@ public class TaskService {
     public TaskResult createTask(CreateTaskDto createTaskDto) {
         Long taskCreatorId = createTaskDto.reporterUserId();
         Project project = findByProjectId(createTaskDto.projectId());
-//        areUsersInSystem(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
-//        isItOnePerson(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
-//        isUserInProject(project, taskCreatorId);
+        areUsersInSystem(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
+        isItOnePerson(createTaskDto.performerUserId(), createTaskDto.reporterUserId());
+        isUserInProject(project, taskCreatorId);
 
         Stage stage = findStageById(createTaskDto.stageId());
         Task parentTask = findTaskById(createTaskDto.parentTaskId());
@@ -78,8 +78,8 @@ public class TaskService {
                                  Long taskId,
                                  Long userId) {
         Task task = findTaskById(taskId);
-//        isUserInProject(task.getProject(), userId);
-//        areUsersInSystem(userId);
+        isUserInProject(task.getProject(), userId);
+        areUsersInSystem(userId);
 
         taskMapper.updateTaskFromDto(updateTaskDto, task);
         String username = userServiceClient.getUser(task.getPerformerUserId()).username();
