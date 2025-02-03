@@ -1,5 +1,8 @@
-package faang.school.projectservice.exeption;
+package faang.school.projectservice.exeption.handler;
 
+import faang.school.projectservice.exeption.EntityNotFoundException;
+import faang.school.projectservice.exeption.NotUniqueProjectException;
+import faang.school.projectservice.exeption.ProjectNotClosableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

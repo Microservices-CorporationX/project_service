@@ -88,7 +88,8 @@ val jacocoExcludePackAgeList = listOf(
     "**/controller/**",
     "**/filters/**",
     "**/mapper/**",
-    "**/service/projectfilter/**"
+    "**/service/projectfilter/**",
+    "faang/school/projectservice/exeption/handler"
 )
 
 tasks.jacocoTestReport {
