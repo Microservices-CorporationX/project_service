@@ -55,7 +55,7 @@ public class VacancyServiceImpl implements VacancyService {
         s3Service.deleteFile(coverImageKey);
         vacancy.setCoverImageKey(new String());
         vacancyRepositoryAdapter.save(vacancy);
-        log.info("Cover of vacancy with id{} has been successfully deleted", id);
+        log.info("Cover of vacancy with id {} has been successfully deleted", id);
     }
 
     private MultipartFile checkAndConvertFile(MultipartFile file) {
@@ -66,11 +66,12 @@ public class VacancyServiceImpl implements VacancyService {
                 if (bufferedImage.getWidth() > bufferedImage.getHeight()) {
                     ratio = (double) COVER_MAX_SIZE / bufferedImage.getWidth();
                 } else {
-                    ratio = (double)  COVER_MAX_SIZE / bufferedImage.getHeight();
+                    ratio = (double) COVER_MAX_SIZE / bufferedImage.getHeight();
                 }
                 int widthNew = (int) (ratio * bufferedImage.getWidth());
-                int heightNew = (int) (ratio *  bufferedImage.getHeight());
+                int heightNew = (int) (ratio * bufferedImage.getHeight());
                 BufferedImage resizeImage = resizeImage(bufferedImage, widthNew, heightNew);
+                log.info("Image {} resized.", file.getOriginalFilename());
                 return convertImageToMultipartFile(resizeImage, file);
             }
         } catch (IOException e) {
@@ -79,7 +80,6 @@ public class VacancyServiceImpl implements VacancyService {
         }
         return file;
     }
-
 
     private MultipartFile convertImageToMultipartFile(BufferedImage resizeImage, MultipartFile file) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -92,12 +92,11 @@ public class VacancyServiceImpl implements VacancyService {
             throw new FileException(e.getMessage());
         }
         byte[] imageBytes = outputStream.toByteArray();
-        FileMultipartFile multipartFile = new FileMultipartFile(file.getName(),
+        return new FileMultipartFile(file.getName(),
                 file.getOriginalFilename(),
                 file.getContentType(),
                 imageBytes,
                 imageBytes.length);
-        return multipartFile;
     }
 
     private BufferedImage resizeImage(BufferedImage bufferedImage, int width, int height) {
@@ -118,6 +117,7 @@ public class VacancyServiceImpl implements VacancyService {
                 .findAny()
                 .isEmpty();
         if (!(isVacancyOwner || isProjectOwner || isProjectManager)) {
+            log.error("The user {} does not have enough rights to delete the vacancy cover", userId);
             throw new DataValidationException(String.format("The user %d does not have enough rights to delete the " +
                     "vacancy cover", userId));
         }

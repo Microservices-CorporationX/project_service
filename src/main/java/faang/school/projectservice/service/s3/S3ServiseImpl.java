@@ -1,6 +1,8 @@
 package faang.school.projectservice.service.s3;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -43,13 +45,23 @@ public class S3ServiseImpl implements S3Service {
 
     @Override
     public void deleteFile(String key) {
-        s3Client.deleteObject(bucketName, key);
-        log.info("Object with key {} success deleted", key);
+        try {
+            s3Client.deleteObject(bucketName, key);
+            log.info("Object with key {} success deleted", key);
+        } catch (AmazonS3Exception e) {
+            log.error("Error while deleting file with key{}", key);
+            throw new FileException("Error while deleting file");
+        }
     }
 
     @Override
     public InputStream downloadFile(String key) {
-        S3Object s3Object = s3Client.getObject(bucketName, key);
-        return s3Object.getObjectContent();
+        try {
+            S3Object s3Object = s3Client.getObject(bucketName, key);
+            return s3Object.getObjectContent();
+        } catch (AmazonServiceException e) {
+            log.error("Error while downloading file with key{}", key);
+            throw new FileException("Error while deleting file");
+        }
     }
 }
