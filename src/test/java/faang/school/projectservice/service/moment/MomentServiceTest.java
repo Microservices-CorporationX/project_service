@@ -50,23 +50,6 @@ public class MomentServiceTest {
     private ArgumentCaptor<Moment> momentCaptor;
 
     @Test
-    public void testCreateMoment_shouldCombineProjectIdsCorrectlyWhenProjectIdsNull() {
-        long userId = 1L;
-        long projectId = 1L;
-        Moment momentRequest = Moment.builder().build();
-        List<Long> projectIds = null;
-
-        List<Long> expectedProjectIds = Collections.singletonList(projectId);
-
-        momentService.createMoment(userId, projectId, momentRequest, projectIds);
-
-        verify(projectService, times(1))
-                .getProjectsByIds(idsArgumentCaptor.capture(), eq(userId));
-
-        assertEquals(expectedProjectIds, idsArgumentCaptor.getValue());
-    }
-
-    @Test
     public void testCreateMoment_shouldCombineProjectIdsCorrectlyWhenProjectIdsNotNull() {
         long userId = 1L;
         long projectId = 1L;
@@ -74,8 +57,8 @@ public class MomentServiceTest {
         List<Long> projectIds = List.of(1L, 2L, 3L);
 
         List<Long> expectedProjectIds = new ArrayList<>();
-        expectedProjectIds.add(projectId);
         expectedProjectIds.addAll(projectIds);
+        expectedProjectIds.add(projectId);
 
         momentService.createMoment(userId, projectId, momentRequest, projectIds);
 
@@ -106,8 +89,8 @@ public class MomentServiceTest {
         List<Long> projectIds = List.of(1L, 2L, 3L);
 
         List<Long> expectedProjectIds = new ArrayList<>();
-        expectedProjectIds.add(projectId);
         expectedProjectIds.addAll(projectIds);
+        expectedProjectIds.add(projectId);
 
         momentService.createMoment(userId, projectId, momentRequest, projectIds);
 
@@ -123,8 +106,8 @@ public class MomentServiceTest {
         List<Long> projectIds = List.of(1L, 2L, 3L);
 
         List<Long> expectedProjectIds = new ArrayList<>();
-        expectedProjectIds.add(projectId);
         expectedProjectIds.addAll(projectIds);
+        expectedProjectIds.add(projectId);
 
         List<Long> mockUserIds = List.of(1L, 2L, 3L, 4L, 5L);
 

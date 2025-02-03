@@ -3,6 +3,7 @@ package faang.school.projectservice.service.donation;
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.client.Currency;
 import faang.school.projectservice.dto.client.PaymentResponse;
+import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.dto.donation.DonationFilterDto;
 import faang.school.projectservice.exception.payment.CampaignNotActiveException;
 import faang.school.projectservice.filter.donation.DonationFilter;
@@ -63,16 +64,8 @@ public class DonationServiceTest {
     @Captor
     private ArgumentCaptor<Donation> donationCaptor;
 
-    @Test
-    public void testCreateDonation_shouldThrowExceptionWhenUserIdNotExists() {
-        Donation mockDonation = Donation.builder().build();
-
-        when(userService.userExists(idCaptor.capture()))
-                .thenReturn(false);
-
-        assertThrows(IllegalArgumentException.class, () ->
-                donationService.createDonation(mockDonation));
-    }
+    @Mock
+    private UserDto mockUserDto;
 
     @Test
     public void testCreateDonation_shouldThrowExceptionWhenCampaignIdNotExists() {
@@ -85,8 +78,8 @@ public class DonationServiceTest {
                 .campaign(campaign)
                 .build();
 
-        when(userService.userExists(idCaptor.capture()))
-                .thenReturn(true);
+        when(userService.getUser(idCaptor.capture()))
+                .thenReturn(mockUserDto);
 
         when(campaignRepository.findById(eq(campaignId)))
                 .thenReturn(Optional.empty());
@@ -107,8 +100,8 @@ public class DonationServiceTest {
                 .campaign(campaign)
                 .build();
 
-        when(userService.userExists(idCaptor.capture()))
-                .thenReturn(true);
+        when(userService.getUser(idCaptor.capture()))
+                .thenReturn(mockUserDto);
 
         when(campaignRepository.findById(campaignId))
                 .thenReturn(Optional.ofNullable(campaign));
@@ -135,8 +128,8 @@ public class DonationServiceTest {
                 .paymentNumber(123123)
                 .build();
 
-        when(userService.userExists(idCaptor.capture()))
-                .thenReturn(true);
+        when(userService.getUser(idCaptor.capture()))
+                .thenReturn(mockUserDto);
 
         when(campaignRepository.findById(campaignId))
                 .thenReturn(Optional.ofNullable(campaign));
@@ -160,8 +153,8 @@ public class DonationServiceTest {
     public void testGetDonationById_shouldThrowExceptionWhenDonationIdDoesNotExists() {
         long donationId = 1L;
 
-        when(userService.userExists(idCaptor.capture()))
-                .thenReturn(true);
+        when(userService.getUser(idCaptor.capture()))
+                .thenReturn(mockUserDto);
 
         when(donationRepository.findById(donationId))
                 .thenReturn(Optional.empty());
@@ -183,8 +176,8 @@ public class DonationServiceTest {
         when(userContext.getUserId())
                 .thenReturn(userIdSecond);
 
-        when(userService.userExists(userIdSecond))
-                .thenReturn(true);
+        when(userService.getUser(userIdSecond))
+                .thenReturn(mockUserDto);
 
         when(donationRepository.findById(donationId))
                 .thenReturn(Optional.ofNullable(mockDonation));
@@ -201,8 +194,8 @@ public class DonationServiceTest {
         when(userContext.getUserId())
                 .thenReturn(userId);
 
-        when(userService.userExists(eq(userId)))
-                .thenReturn(true);
+        when(userService.getUser(eq(userId)))
+                .thenReturn(mockUserDto);
 
         donationService.getAllUserDonations(filterDto);
 

@@ -26,10 +26,12 @@ public class MomentService {
     @Transactional
     public Moment createMoment(long userId, long projectId, Moment momentRequest, List<Long> projectIds) {
         projectService.getProjectById(projectId, userId);
-        projectIds.add(projectId);
 
-        List<Project> projects = projectService.getProjectsByIds(projectIds, userId);
-        List<Long> userIds = projectService.getUserIdsByProjectIds(projectIds);
+        List<Long> newProjectIds = new ArrayList<>(projectIds);
+        newProjectIds.add(projectId);
+
+        List<Project> projects = projectService.getProjectsByIds(newProjectIds, userId);
+        List<Long> userIds = projectService.getUserIdsByProjectIds(newProjectIds);
 
         momentRequest.setProjects(projects);
         momentRequest.setUserIds(userIds);

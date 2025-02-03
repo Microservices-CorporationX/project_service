@@ -112,12 +112,7 @@ public class DonationService {
     private long getUserId() {
         long userId = userContext.getUserId();
         log.debug("Retrieving user ID from context: {}", userId);
-
-        if (!userService.userExists(userId)) {
-            log.error("User not found by ID: {}", userId);
-            throw new IllegalArgumentException("User not found");
-        }
-
+        userService.getUser(userId);
         return userId;
     }
 }
