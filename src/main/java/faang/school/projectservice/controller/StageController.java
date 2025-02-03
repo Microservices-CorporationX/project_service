@@ -8,6 +8,7 @@ import faang.school.projectservice.model.Task;
 import faang.school.projectservice.model.TaskStatus;
 import faang.school.projectservice.model.stage.StageRoles;
 import faang.school.projectservice.service.StageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ import java.util.Set;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/projects/stages")
+@RequestMapping("/api/v1/{projectId}/stages")
 public class StageController {
 
     private final StageMapper stageMapper;
@@ -37,49 +38,72 @@ public class StageController {
 
 
     @PostMapping("/stage")
-    public ResponseEntity<StageDto> createStage( @RequestBody StageDto stageDto){
-        return stageService.createStage(stageMapper.toStage(stageDto));
-    };
+    public StageDto createStage(@Valid @PathVariable Long projectId,
+                                @RequestBody StageDto stageDto) {
+        return stageService.createStage(stageDto);
+    }
 
-    @GetMapping
-    public ResponseEntity<List<StageDto>> getStages(@PathVariable Long projectId,
+    ;
+
+    @GetMapping("/stages")
+    public ResponseEntity<List<StageDto>> getStages(@Valid @PathVariable Long projectId,
                                                     @RequestParam(required = false) Set<StageRoles> roles,
-                                                    @RequestParam(required = false) TaskStatus taskStatus){
-        return stageService.getStages(projectId);
-    };
+                                                    @RequestParam(required = false) TaskStatus taskStatus) {
+        return ResponseEntity.ok(stageService.getStages(projectId));
+    }
+
+    ;
 
     @DeleteMapping("/{stageId}")
-    public void deleteStage(@PathVariable Long stageId){
+    public void deleteStage(@Valid @PathVariable Long stageId,
+                            @PathVariable Long projectId) {
         stageService.deleteStage(stageId);
-        log.info("Удален этап {}", stageId);
-    };
+        log.info("Удален этап {} проекта {}", stageId, projectId);
+    }
+
+    ;
 
     @PutMapping("/{stageId}")
-    public ResponseEntity<StageUpdateDto> updateStage(@PathVariable Long stageId,
-                                                      @RequestBody StageDto StageUpdateDto){
-        return stageService.updateStage(stageId,StageUpdateDto);
-    };
+    public StageUpdateDto updateStage(@Valid @PathVariable Long projectId,
+                                @PathVariable Long stageId,
+                                @RequestBody StageUpdateDto StageUpdateDto) {
+        return stageService.updateStage(stageId, StageUpdateDto);
+    }
+
+    ;
 
     @PostMapping("/{stageId}/invitations")
-    public ResponseEntity<StageDto> sendInvitations(@PathVariable Long stageId,
-                                                    @RequestBody StageDto stageDto){
-        return stageService.sendInvitations(stageId,stageMapper.toStage(stageDto));
-    };
+    public ResponseEntity<StageDto> sendInvitations(@Valid @PathVariable Long projectId,
+                                                    @PathVariable Long stageId,
+                                                    @RequestBody StageDto stageDto) {
+        return stageService.sendInvitations(stageId, stageMapper.toStage(stageDto));
+    }
+
+    ;
 
     @GetMapping("/{stageId}")
-    public ResponseEntity<StageDto> getStageDetails(@PathVariable Long stageId){
+    public ResponseEntity<StageDto> getStageDetails(@Valid @PathVariable Long projectId,
+                                                    @PathVariable Long stageId) {
         return stageService.getStageDetails(stageId);
-    };
+    }
 
-    @GetMapping("{stageId}/tasks")
-    public ResponseEntity<List<Task>> getStageTasks(@PathVariable Long stageId,
-                                                    @RequestParam(required = false) TaskStatus status){
-        return stageService.getStageTasks(stageId,status);
-    };
+    ;
 
-    @PutMapping("{stageId}/participants")
-    public ResponseEntity<StageUpdateDto> updateStageTeamMember(@PathVariable Long stageId,
-                                                                  @RequestBody Set<StageUpdateDto> StageUpdateDto){
-    return stageService.updateStageParticipants(StageUpdateDto);
-    };
+    @GetMapping("/{stageId}/tasks")
+    public ResponseEntity<List<Task>> getStageTasks(@Valid @PathVariable Long projectId,
+                                                    @PathVariable Long stageId,
+                                                    @RequestParam(required = false) TaskStatus status) {
+        return stageService.getStageTasks(stageId, status);
+    }
+
+    ;
+
+    @PutMapping("/{stageId}/participants")
+    public ResponseEntity<StageUpdateDto> updateStageTeamMember(@Valid @PathVariable Long projectId,
+                                                                @PathVariable Long stageId,
+                                                                @RequestBody Set<StageUpdateDto> StageUpdateDto) {
+        return stageService.updateStageParticipants(StageUpdateDto);
+    }
+
+    ;
 }
