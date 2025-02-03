@@ -12,6 +12,9 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
+    maven {
+        setUrl("https://packages.atlassian.com/maven/repository/public")
+    }
 }
 
 dependencies {
@@ -48,13 +51,18 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 
     /**
+     * Jira Impl
+     */
+    implementation("com.atlassian.jira:jira-rest-java-client-core:5.1.0")
+    implementation("io.atlassian.fugue:fugue:4.7.2")
+
+    /**
     * Test containers
     */
     implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
-
 
     /**
     * Tests
