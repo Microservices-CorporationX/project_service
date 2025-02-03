@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 public class StageValidator {
     private final StageRepository stageRepository;
     private final ProjectRepository projectRepository;
-    private final StageService stageService;
     private final ProjectService projectService;
 
     public void validateStageCreation(StageDto stageDto) {
