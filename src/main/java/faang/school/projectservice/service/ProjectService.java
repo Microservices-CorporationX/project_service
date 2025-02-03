@@ -67,7 +67,7 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Project getProjectById(Long projectId, Long userId) {
+    public Project getProjectById(Long projectId) {
         return findProjectById(projectId);
     }
 
