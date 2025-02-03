@@ -28,7 +28,7 @@ spring:
 jira:
   url: ""
   user: ""
-  token: ""
+  your_API_token: ""
 
 server:
   port: 8082
