@@ -22,8 +22,8 @@ public class TeamController {
     }
 
     @DeleteMapping("/{id}/remove_avatar")
-    public ResponseEntity<?> removeTeamAvatar(@PathVariable("id") Long id, @RequestParam("requesterId") Long requesterUserId) {
-        return teamAvatarService.removeAvatar(id, requesterUserId);
+    public ResponseEntity<?> removeTeamAvatar(@PathVariable("id") Long id, @RequestHeader String requesterId) {
+        return teamAvatarService.removeAvatar(id, Long.parseLong(requesterId));
     }
     @GetMapping("/a")
     public String test() {

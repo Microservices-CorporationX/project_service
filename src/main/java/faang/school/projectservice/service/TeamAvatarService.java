@@ -1,19 +1,15 @@
 package faang.school.projectservice.service;
 
-import faang.school.projectservice.client.UserServiceClient;
 import faang.school.projectservice.config.AppConfig;
-import faang.school.projectservice.dto.client.UserDto;
 import faang.school.projectservice.exception.EntityNotFoundException;
 import faang.school.projectservice.model.Team;
 import faang.school.projectservice.model.TeamMember;
 import faang.school.projectservice.model.TeamRole;
 import faang.school.projectservice.repository.TeamMemberRepository;
 import faang.school.projectservice.repository.TeamRepository;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
+import org.imgscalr.Scalr;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +20,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -38,6 +32,10 @@ public class TeamAvatarService {
 
     @Transactional
     public ResponseEntity<?> uploadAvatar(Long teamId, MultipartFile avatar) throws IOException {
+        if (!avatar.getContentType().split("/")[0].equals("image")) {
+            throw new IllegalArgumentException("Отправленный файл не является картинкой");
+        }
+
         int maxSizeInMb = appConfig.getMaxTeamAvatarSize();
         int maxSideLength = appConfig.getMaxTeamAvatarSideLength();
 
@@ -64,14 +62,14 @@ public class TeamAvatarService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeAvatar(Long teamId, Long teamMemberUserId) {
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(teamId, teamMemberUserId);
-        if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
-            throw new IllegalArgumentException("Only manager can remove team avatar");
-        }
-
+    public ResponseEntity<?> removeAvatar(Long teamId, Long teamMemberId) {
         validateTeamId(teamId);
         Team team = teamRepository.findById(teamId).get();
+
+        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(teamId, teamMemberId);
+        if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
+            throw new IllegalArgumentException("Only manager can remove team's avatar");
+        }
 
         minioService.removeFile(team.getAvatarKey());
         team.setAvatarKey(null);
@@ -83,16 +81,32 @@ public class TeamAvatarService {
         ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
         BufferedImage originalImage = ImageIO.read(multipartFile.getInputStream());
         log.info("ORIGINAL FILE SIZE {}x{}", originalImage.getWidth(), originalImage.getHeight());
-        try {
-            Thumbnails.of(multipartFile.getInputStream())
-                    .size(maxSideSize, maxSideSize)
-                    .keepAspectRatio(true)
-                    .toOutputStream(resultStream);
-        } catch (IOException e) {
-            log.error("Failed to resize image", e);
-            throw new RuntimeException("Failed to resize image: " + e.getMessage());
+
+        String formatType = multipartFile.getContentType().split("/")[1];
+
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+
+        boolean needsResize = false;
+        if (width > maxSideSize || height > maxSideSize) {
+            needsResize = true;
+            if (width > height) {
+                height = (int) (height * ((double) maxSideSize / width));
+                width = maxSideSize;
+            } else {
+                width = (int) (width * ((double) maxSideSize / height));
+                height = maxSideSize;
+            }
         }
-        BufferedImage resizedImage = ImageIO.read(new ByteArrayInputStream(resultStream.toByteArray()));
+
+        if (!needsResize) {
+            resultStream.write(multipartFile.getBytes());
+            return resultStream;
+        }
+
+        BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, width, height);
+        ImageIO.write(resizedImage, formatType, resultStream);
+
         log.info("RESIZED FILE SIZE {}x{}", resizedImage.getWidth(), resizedImage.getHeight());
         return resultStream;
     }
