@@ -12,4 +12,7 @@ public class AppConfig {
 
     @Value("${app.config.max_team_avatar_size_in_mb}")
     private int maxTeamAvatarSize;
+
+    @Value("${app.config.minio_bucket_name}")
+    private String minioBucketName;
 }

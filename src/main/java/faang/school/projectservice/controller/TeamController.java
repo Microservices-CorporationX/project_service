@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/team")
@@ -17,16 +15,14 @@ public class TeamController {
     private final TeamAvatarService teamAvatarService;
 
     @PostMapping("/{id}/upload_avatar")
-    public ResponseEntity<?> uploadTeamAvatar(@PathVariable("id") Long id, @RequestParam("file") MultipartFile avatar) throws IOException {
-        return teamAvatarService.uploadAvatar(id, avatar);
+    public ResponseEntity<?> uploadTeamAvatar(@PathVariable("id") Long id, @RequestParam("file") MultipartFile avatar) {
+        teamAvatarService.uploadAvatar(id, avatar);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}/remove_avatar")
-    public ResponseEntity<?> removeTeamAvatar(@PathVariable("id") Long id, @RequestHeader String requesterId) {
-        return teamAvatarService.removeAvatar(id, Long.parseLong(requesterId));
-    }
-    @GetMapping("/a")
-    public String test() {
-        return "working";
+    public ResponseEntity<?> removeTeamAvatar(@PathVariable("id") Long id, @RequestParam("teamMemberId") Long teamMemberId) {
+        teamAvatarService.removeAvatar(id, teamMemberId);
+        return ResponseEntity.ok().build();
     }
 }

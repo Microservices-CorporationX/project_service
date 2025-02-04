@@ -1,5 +1,6 @@
 app:
   config:
+    minio_bucket_name: "corpbucket"
     max_team_avatar_side_length: 512
     max_team_avatar_size_in_mb: 5
 

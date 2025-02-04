@@ -28,24 +28,17 @@ public class TeamAvatarService {
     private final MinioService minioService;
     private final AppConfig appConfig;
     private final TeamRepository teamRepository;
-    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
-    public ResponseEntity<?> uploadAvatar(Long teamId, MultipartFile avatar) throws IOException {
+    public void uploadAvatar(Long teamId, MultipartFile avatar) {
         if (!avatar.getContentType().split("/")[0].equals("image")) {
             throw new IllegalArgumentException("Отправленный файл не является картинкой");
         }
 
-        int maxSizeInMb = appConfig.getMaxTeamAvatarSize();
         int maxSideLength = appConfig.getMaxTeamAvatarSideLength();
 
-        float avatarSizeInMb = (float) avatar.getSize() / (1024 * 1024);
-        if (avatarSizeInMb > maxSizeInMb) {
-            throw new IllegalArgumentException("Файл не может весить больше " + maxSizeInMb + " мб");
-        }
-
-        validateTeamId(teamId);
-        Team team = teamRepository.findById(teamId).get();
+        Team team = teamRepository.findById(teamId).orElseThrow(() ->
+                new EntityNotFoundException("Team with id " + teamId + " doesn't exists"));
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(
                 resizeImage(avatar, maxSideLength).toByteArray()
@@ -57,29 +50,37 @@ public class TeamAvatarService {
                 avatar.getContentType(),
                 avatar.getSize());
         team.setAvatarKey(key);
-
-        return ResponseEntity.ok("OK");
     }
 
     @Transactional
-    public ResponseEntity<?> removeAvatar(Long teamId, Long teamMemberId) {
-        validateTeamId(teamId);
-        Team team = teamRepository.findById(teamId).get();
+    public void removeAvatar(Long teamId, Long teamMemberId) {
+        Team team = teamRepository.findById(teamId).orElseThrow(() ->
+                new EntityNotFoundException("Team with id " + teamId + " doesn't exists"));
 
-        TeamMember teamMember = teamMemberRepository.findByUserIdAndProjectId(teamId, teamMemberId);
+        TeamMember teamMember = team.getTeamMembers()
+                .stream().filter(member -> member.getId() == teamMemberId).findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Team member with id " + teamMemberId + " in this team not found"));
+
         if (!teamMember.getRoles().contains(TeamRole.MANAGER)) {
             throw new IllegalArgumentException("Only manager can remove team's avatar");
         }
 
         minioService.removeFile(team.getAvatarKey());
         team.setAvatarKey(null);
-
-        return ResponseEntity.ok("OK");
     }
 
-    private ByteArrayOutputStream resizeImage(MultipartFile multipartFile, int maxSideSize) throws IOException {
+    private ByteArrayOutputStream resizeImage(MultipartFile multipartFile, int maxSideSize) {
         ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
-        BufferedImage originalImage = ImageIO.read(multipartFile.getInputStream());
+        BufferedImage originalImage;
+
+        try {
+            originalImage = ImageIO.read(multipartFile.getInputStream());
+        } catch (IOException e) {
+            log.error("resizeImage: не получилось считать файл", e);
+            throw new IllegalArgumentException("Не получилось считать файл");
+        }
+
         log.info("ORIGINAL FILE SIZE {}x{}", originalImage.getWidth(), originalImage.getHeight());
 
         String formatType = multipartFile.getContentType().split("/")[1];
@@ -100,19 +101,24 @@ public class TeamAvatarService {
         }
 
         if (!needsResize) {
-            resultStream.write(multipartFile.getBytes());
+            try {
+                resultStream.write(multipartFile.getBytes());
+            } catch (IOException e) {
+                log.error("resizeImage: не получилось записать файл", e);
+                throw new IllegalArgumentException("Не получилось записать файл");
+            }
             return resultStream;
         }
 
         BufferedImage resizedImage = Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, width, height);
-        ImageIO.write(resizedImage, formatType, resultStream);
+        try {
+            ImageIO.write(resizedImage, formatType, resultStream);
+        } catch (IOException e) {
+            log.error("resizeImage: не получилось записать файл", e);
+            throw new IllegalArgumentException("Не получилось записать файл");
+        }
 
         log.info("RESIZED FILE SIZE {}x{}", resizedImage.getWidth(), resizedImage.getHeight());
         return resultStream;
-    }
-
-    private void validateTeamId(Long teamId) {
-        teamRepository.findById(teamId).orElseThrow(() ->
-                new EntityNotFoundException("Team with id " + teamId + " doesn't exists"));
     }
 }

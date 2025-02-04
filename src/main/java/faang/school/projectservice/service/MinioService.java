@@ -1,5 +1,6 @@
 package faang.school.projectservice.service;
 
+import faang.school.projectservice.config.AppConfig;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
@@ -15,12 +16,13 @@ import java.io.ByteArrayInputStream;
 @RequiredArgsConstructor
 public class MinioService {
     private final MinioClient minioClient;
+    private final AppConfig appConfig;
 
     public void uploadFile(ByteArrayInputStream fileInputStream, String prefix, String contentType, Long fileSize) {
         PutObjectArgs args = PutObjectArgs.builder()
                 .contentType(contentType)
-                .object( prefix)
-                .bucket("corpbucket")
+                .object(prefix)
+                .bucket(appConfig.getMinioBucketName())
                 .stream(fileInputStream, fileSize, -1)
                 .build();
         try {
@@ -33,7 +35,7 @@ public class MinioService {
 
     public void removeFile(String key) {
         RemoveObjectArgs args = RemoveObjectArgs.builder()
-                .bucket("corbbucket")
+                .bucket(appConfig.getMinioBucketName())
                 .object(key)
                 .build();
         try {
