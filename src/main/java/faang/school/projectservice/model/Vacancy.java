@@ -40,58 +40,58 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class Vacancy {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @NotBlank
-        private String name;
+    @NotBlank
+    private String name;
 
-        @NotBlank
-        private String description;
+    @NotBlank
+    private String description;
 
-        @Enumerated(EnumType.STRING)
-        @NotNull
-        private TeamRole position;
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private TeamRole position;
 
-        @ManyToOne
-        @JoinColumn(name = "project_id")
-        private Project project;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-        @OneToMany(mappedBy = "vacancy")
-        private List<Candidate> candidates;
+    @OneToMany(mappedBy = "vacancy")
+    private List<Candidate> candidates;
 
-        @CreationTimestamp
-        @Temporal(TemporalType.TIMESTAMP)
-        private LocalDateTime createdAt;
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdAt;
 
-        @UpdateTimestamp
-        @Temporal(TemporalType.TIMESTAMP)
-        @Column(name = "updated_at")
-        private LocalDateTime updatedAt;
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-        @CreatedBy
-        private Long createdBy;
+    @CreatedBy
+    private Long createdBy;
 
-        @LastModifiedBy
-        private Long updatedBy;
+    @LastModifiedBy
+    private Long updatedBy;
 
-        @Enumerated(EnumType.STRING)
-        @NotNull
-        private VacancyStatus status;
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private VacancyStatus status;
 
-        private Double salary;
+    private Double salary;
 
-        @Enumerated(EnumType.STRING)
-        private WorkSchedule workSchedule;
+    @Enumerated(EnumType.STRING)
+    private WorkSchedule workSchedule;
 
-        private Integer count;
+    private Integer count;
 
-        @ElementCollection
-        @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
-        @Column(name = "skill_id")
-        private List<Long> requiredSkillIds;
+    @ElementCollection
+    @CollectionTable(name = "vacancy_skills", joinColumns = @JoinColumn(name = "vacancy_id"))
+    @Column(name = "skill_id")
+    private List<Long> requiredSkillIds;
 
-        @Column(name = "cover_image_key")
-        private String coverImageKey;
+    @Column(name = "cover_image_key")
+    private String coverImageKey;
 }

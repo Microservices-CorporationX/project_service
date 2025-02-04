@@ -1,7 +1,6 @@
 package faang.school.projectservice.dto.vacancy;
 
 import faang.school.projectservice.model.TeamRole;
-import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.EnumType;
@@ -11,11 +10,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record VacancyDto(
+public record VacancyUpdateDto(
         Long id,
 
         @NotBlank(message = "name must be not empty")
@@ -30,18 +28,6 @@ public record VacancyDto(
         @NotNull(message = "projectId must be not null")
         @Min(value = 0, message = "projectId must be minimum 0")
         Long projectId,
-
-        List<Long> candidatesId,
-
-        LocalDateTime createdAt,
-
-        LocalDateTime updatedAt,
-
-        @NotNull(message = "createBy must be not null")
-        @Min(value = 0, message = "createBy must be minimum 0")
-        Long createdBy,
-
-        VacancyStatus status,
 
         Double salary,
 

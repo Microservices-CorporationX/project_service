@@ -2,8 +2,9 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.candidate.CandidateDto;
-import faang.school.projectservice.dto.vacancy.VacancyDto;
 import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
+import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
+import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
 import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -14,6 +15,7 @@ import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.service.vacancy.VacancyService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,38 +40,11 @@ class VacancyControllerTest {
     UserContext userContext = mock(UserContext.class);
     VacancyController vacancyController = new VacancyController(vacancyService, vacancyMapper, userContext,
             candidateMapper);
+    VacancyUpdateDto vacancyUpdateDto;
+    Vacancy vacancy;
 
     @Test
     void createVacancy() {
-        VacancyDto vacancyDto = VacancyDto.builder()
-                .name("vacancy")
-                .description("description")
-                .position(TeamRole.ANALYST)
-                .projectId(1L)
-                .createdBy(1L)
-                .status(VacancyStatus.CLOSED)
-                .salary(3000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(5)
-                .requiredSkillIds(List.of(1L, 2L, 3L))
-                .build();
-
-        Vacancy vacancy = Vacancy.builder()
-                .name("vacancy")
-                .description("description")
-                .position(TeamRole.ANALYST)
-                .project(Project.builder()
-                        .id(1L)
-                        .build())
-                .candidates(List.of())
-                .createdBy(1L)
-                .status(VacancyStatus.CLOSED)
-                .salary(3000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(5)
-                .requiredSkillIds(List.of(1L, 2L, 3L))
-                .build();
-
         Vacancy exceptedVacancy = Vacancy.builder()
                 .id(1L)
                 .name("vacancy")
@@ -89,54 +64,47 @@ class VacancyControllerTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        VacancyDto excepted = VacancyDto.builder()
-                .id(1L)
+        VacancyResponseDto excepted = VacancyResponseDto.builder()
                 .name("vacancy")
                 .description("description")
                 .position(TeamRole.ANALYST)
                 .projectId(1L)
-                .createdBy(1L)
-                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
-                .status(VacancyStatus.OPEN)
-                .candidatesId(List.of())
                 .salary(3000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(5)
                 .requiredSkillIds(List.of(1L, 2L, 3L))
+                .candidatesId(List.of())
+                .status(VacancyStatus.OPEN)
                 .build();
 
         when(userContext.getUserId()).thenReturn(1L);
-        when(vacancyMapper.toEntity(vacancyDto)).thenReturn(vacancy);
+        when(vacancyMapper.toEntity(vacancyUpdateDto)).thenReturn(vacancy);
         when(vacancyService.createVacancy(vacancy, 1L)).thenReturn(exceptedVacancy);
         when(vacancyMapper.toDto(exceptedVacancy)).thenReturn(excepted);
 
-        ResponseEntity<VacancyDto> actual = vacancyController.createVacancy(vacancyDto);
+        ResponseEntity<VacancyResponseDto> actual = vacancyController.createVacancy(vacancyUpdateDto);
         Assertions.assertEquals(ResponseEntity.ok(excepted), actual);
 
         verify(vacancyService, times(1)).createVacancy(vacancy, 1L);
         verify(userContext, times(1)).getUserId();
         verify(vacancyMapper, times(1)).toDto(exceptedVacancy);
-        verify(vacancyMapper, times(1)).toEntity(vacancyDto);
+        verify(vacancyMapper, times(1)).toEntity(vacancyUpdateDto);
     }
 
     @Test
     void closeVacancy() {
         when(userContext.getUserId()).thenReturn(11L);
-        VacancyDto expectedDto = VacancyDto.builder()
-                .id(1L)
+        VacancyResponseDto expectedDto = VacancyResponseDto.builder()
                 .name("vacancy")
                 .description("description")
                 .position(TeamRole.ANALYST)
                 .projectId(1L)
-                .candidatesId(List.of())
-                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
-                .createdBy(11L)
-                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
-                .status(VacancyStatus.CLOSED)
                 .salary(3000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
                 .count(5)
                 .requiredSkillIds(List.of(1L, 2L, 3L))
+                .status(VacancyStatus.CLOSED)
+                .candidatesId(List.of(1L, 2L, 3L))
                 .build();
 
         Vacancy vacancy = Vacancy.builder().id(1L)
@@ -160,8 +128,8 @@ class VacancyControllerTest {
         when(vacancyService.closeVacancy(1L, 11L)).thenReturn(vacancy);
         when(vacancyMapper.toDto(vacancy)).thenReturn(expectedDto);
 
-        ResponseEntity<VacancyDto> actual = vacancyController.closeVacancy(1L);
-        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(expectedDto);
+        ResponseEntity<VacancyResponseDto> actual = vacancyController.closeVacancy(1L);
+        ResponseEntity<VacancyResponseDto> expected = ResponseEntity.ok(expectedDto);
 
         Assertions.assertEquals(expected, actual);
         verify(userContext, times(1)).getUserId();
@@ -171,34 +139,6 @@ class VacancyControllerTest {
     @Test
     void updateVacancy() {
         when(userContext.getUserId()).thenReturn(1L);
-        VacancyDto sourceVacancyDto = VacancyDto.builder()
-                .name("vacancy")
-                .description("description")
-                .position(TeamRole.ANALYST)
-                .projectId(1L)
-                .candidatesId(List.of())
-                .status(VacancyStatus.OPEN)
-                .salary(3000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(5)
-                .requiredSkillIds(List.of(1L, 2L, 3L))
-                .build();
-
-        Vacancy newVacancy = Vacancy.builder()
-                .name("vacancy")
-                .description("description")
-                .position(TeamRole.ANALYST)
-                .project(Project.builder()
-                        .id(1L)
-                        .name("project")
-                        .build())
-                .candidates(List.of())
-                .status(VacancyStatus.OPEN)
-                .salary(3000.0)
-                .workSchedule(WorkSchedule.FULL_TIME)
-                .count(5)
-                .requiredSkillIds(List.of(1L, 2L, 3L))
-                .build();
 
         Vacancy exceptedVacancy = Vacancy.builder()
                 .id(1L)
@@ -221,16 +161,12 @@ class VacancyControllerTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        VacancyDto expectedDto = VacancyDto.builder()
-                .id(1L)
+        VacancyResponseDto expectedDto = VacancyResponseDto.builder()
                 .name("vacancy")
                 .description("description")
                 .position(TeamRole.ANALYST)
                 .projectId(1L)
                 .candidatesId(List.of())
-                .createdAt(LocalDateTime.of(2025, 1, 17, 15, 20))
-                .createdBy(11L)
-                .updatedAt(LocalDateTime.of(2025, 1, 23, 15, 20))
                 .status(VacancyStatus.OPEN)
                 .salary(3000.0)
                 .workSchedule(WorkSchedule.FULL_TIME)
@@ -238,19 +174,19 @@ class VacancyControllerTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        when(vacancyMapper.toEntity(sourceVacancyDto)).thenReturn(newVacancy);
+        when(vacancyMapper.toEntity(vacancyUpdateDto)).thenReturn(vacancy);
         when(userContext.getUserId()).thenReturn(1L);
-        when(vacancyService.updateVacancy(1L, newVacancy, 1L)).thenReturn(exceptedVacancy);
+        when(vacancyService.updateVacancy(1L, vacancy, 1L)).thenReturn(exceptedVacancy);
         when(vacancyMapper.toDto(exceptedVacancy)).thenReturn(expectedDto);
 
-        ResponseEntity<VacancyDto> actual = vacancyController.updateVacancy(1L, sourceVacancyDto);
-        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(expectedDto);
+        ResponseEntity<VacancyResponseDto> actual = vacancyController.updateVacancy(1L, vacancyUpdateDto);
+        ResponseEntity<VacancyResponseDto> expected = ResponseEntity.ok(expectedDto);
         Assertions.assertEquals(expected, actual);
 
         verify(userContext, times(1)).getUserId();
-        verify(vacancyService, times(1)).updateVacancy(1L, newVacancy, 1L);
+        verify(vacancyService, times(1)).updateVacancy(1L, vacancy, 1L);
         verify(vacancyMapper, times(1)).toDto(exceptedVacancy);
-        verify(vacancyMapper, times(1)).toEntity(sourceVacancyDto);
+        verify(vacancyMapper, times(1)).toEntity(vacancyUpdateDto);
     }
 
     @Test
@@ -267,16 +203,17 @@ class VacancyControllerTest {
     void getVacancy() {
         Vacancy vacancy = Vacancy.builder()
                 .id(1L)
+                .name("vacancy")
                 .build();
         when(vacancyService.getVacancy(1L)).thenReturn(vacancy);
-        when(vacancyMapper.toDto(vacancy)).thenReturn(VacancyDto.builder()
-                .id(1L)
+        when(vacancyMapper.toDto(vacancy)).thenReturn(VacancyResponseDto.builder()
+                .name("vacancy")
                 .build());
 
-        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(VacancyDto.builder()
-                .id(1L)
+        ResponseEntity<VacancyResponseDto> expected = ResponseEntity.ok(VacancyResponseDto.builder()
+                .name("vacancy")
                 .build());
-        ResponseEntity<VacancyDto> actual = vacancyController.getVacancy(1L);
+        ResponseEntity<VacancyResponseDto> actual = vacancyController.getVacancy(1L);
 
         Assertions.assertEquals(expected, actual);
         verify(vacancyService, times(1)).getVacancy(1L);
@@ -303,14 +240,12 @@ class VacancyControllerTest {
                         .build()
         );
 
-        List<VacancyDto> vacanciesDto = List.of(
-                VacancyDto.builder()
-                        .id(1L)
+        List<VacancyResponseDto> vacanciesDto = List.of(
+                VacancyResponseDto.builder()
                         .position(TeamRole.ANALYST)
                         .name("test")
                         .build(),
-                VacancyDto.builder()
-                        .id(2L)
+                VacancyResponseDto.builder()
                         .position(TeamRole.ANALYST)
                         .name("test-vacancy")
                         .build()
@@ -319,8 +254,8 @@ class VacancyControllerTest {
         when(vacancyService.getVacancies(vacancyFilterDto)).thenReturn(vacancies);
         when(vacancyMapper.toDtoList(vacancies)).thenReturn(vacanciesDto);
 
-        ResponseEntity<List<VacancyDto>> actual = vacancyController.getVacanciesByFilters(vacancyFilterDto);
-        ResponseEntity<List<VacancyDto>> expected = ResponseEntity.ok(vacanciesDto);
+        ResponseEntity<List<VacancyResponseDto>> actual = vacancyController.getVacanciesByFilters(vacancyFilterDto);
+        ResponseEntity<List<VacancyResponseDto>> expected = ResponseEntity.ok(vacanciesDto);
 
         Assertions.assertEquals(expected, actual);
         verify(vacancyService, times(1)).getVacancies(vacancyFilterDto);
@@ -329,9 +264,8 @@ class VacancyControllerTest {
 
     @Test
     void addCandidates() {
-        VacancyDto vacancyDto = VacancyDto.builder()
-                .id(2L)
-                .candidatesId(List.of(1L, 2L, 3L))
+        VacancyResponseDto vacancyResponseDto = VacancyResponseDto.builder()
+                .name("vacancy")
                 .build();
         when(userContext.getUserId()).thenReturn(5L);
 
@@ -350,17 +284,50 @@ class VacancyControllerTest {
                 }).toList();
 
         when(candidateMapper.toEntityList(candidatesDtos)).thenReturn(candidates);
-        when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyDto);
+        when(vacancyMapper.toDto(any(Vacancy.class))).thenReturn(vacancyResponseDto);
         when(vacancyService.addCandidates(candidates, 2L, 5L)).thenReturn(Vacancy.builder()
                 .id(2L)
                 .build());
 
-        ResponseEntity<VacancyDto> expected = ResponseEntity.ok(vacancyDto);
-        ResponseEntity<VacancyDto> actual = vacancyController.addCandidates(2L, candidatesDtos);
+        ResponseEntity<VacancyResponseDto> expected = ResponseEntity.ok(vacancyResponseDto);
+        ResponseEntity<VacancyResponseDto> actual = vacancyController.addCandidates(2L, candidatesDtos);
 
         Assertions.assertEquals(expected, actual);
         verify(vacancyService, times(1)).addCandidates(candidates, 2L, 5L);
         verify(vacancyMapper, times(1)).toDto(any(Vacancy.class));
         verify(candidateMapper, times(1)).toEntityList(candidatesDtos);
+    }
+
+    @BeforeEach
+    void setVacancyUpdateDto() {
+        vacancyUpdateDto = VacancyUpdateDto.builder()
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .projectId(1L)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
+    }
+
+    @BeforeEach
+    void setVacancy() {
+        vacancy = Vacancy.builder()
+                .name("vacancy")
+                .description("description")
+                .position(TeamRole.ANALYST)
+                .project(Project.builder()
+                        .id(1L)
+                        .build())
+                .candidates(List.of())
+                .createdBy(1L)
+                .status(VacancyStatus.CLOSED)
+                .salary(3000.0)
+                .workSchedule(WorkSchedule.FULL_TIME)
+                .count(5)
+                .requiredSkillIds(List.of(1L, 2L, 3L))
+                .build();
     }
 }
