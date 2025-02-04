@@ -7,8 +7,8 @@ import faang.school.projectservice.model.Project;
 import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.candidate.CandidateService;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class VacancyService {
     private final List<VacancyFilter> filters;
 
     public Vacancy createVacancy(Vacancy vacancy, Long userId) {
-        Project project = projectService.getProjectById(vacancy.getProject().getId());
+        Project project = projectService.findProjectById(vacancy.getProject().getId());
         vacancy.setCreatedBy(userId);
         vacancy.setProject(project);
         vacancy.setCandidates(List.of());

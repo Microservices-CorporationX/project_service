@@ -2,9 +2,9 @@ package faang.school.projectservice.controller.vacancy;
 
 import faang.school.projectservice.config.context.UserContext;
 import faang.school.projectservice.dto.candidate.CandidateDto;
+import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.dto.vacancy.VacancyResponseDto;
 import faang.school.projectservice.dto.vacancy.VacancyUpdateDto;
-import faang.school.projectservice.dto.vacancy.VacancyFilterDto;
 import faang.school.projectservice.mapper.CandidateMapper;
 import faang.school.projectservice.mapper.VacancyMapper;
 import faang.school.projectservice.model.Candidate;
@@ -59,7 +59,7 @@ public class VacancyController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<VacancyResponseDto> updateVacancy(@Valid @NotNull @PathVariable("id") Long vacancyId,
-                                                          @Valid @NotNull @RequestBody VacancyUpdateDto vacancyUpdateDto) {
+                                                            @Valid @NotNull @RequestBody VacancyUpdateDto vacancyUpdateDto) {
         Vacancy vacancy = vacancyMapper.toEntity(vacancyUpdateDto);
         Long userId = userContext.getUserId();
         VacancyResponseDto result = vacancyMapper.toDto(vacancyService.updateVacancy(vacancyId, vacancy, userId));
@@ -84,7 +84,7 @@ public class VacancyController {
 
     @PatchMapping("/{id}/addCandidates")
     public ResponseEntity<VacancyResponseDto> addCandidates(@Valid @NotNull @PathVariable("id") Long vacancyId,
-                                                          @Valid @NotNull @RequestBody List<CandidateDto> candidateDtos) {
+                                                            @Valid @NotNull @RequestBody List<CandidateDto> candidateDtos) {
         Long userId = userContext.getUserId();
         List<Candidate> candidates = candidateMapper.toEntityList(candidateDtos);
         Vacancy vacancy = vacancyService.addCandidates(candidates, vacancyId, userId);

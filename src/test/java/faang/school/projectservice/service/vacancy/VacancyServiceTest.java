@@ -9,8 +9,8 @@ import faang.school.projectservice.model.Vacancy;
 import faang.school.projectservice.model.VacancyStatus;
 import faang.school.projectservice.model.WorkSchedule;
 import faang.school.projectservice.repository.VacancyRepository;
+import faang.school.projectservice.service.ProjectService;
 import faang.school.projectservice.service.candidate.CandidateService;
-import faang.school.projectservice.service.project.ProjectService;
 import faang.school.projectservice.service.vacancy.filter.VacancyFilter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -81,7 +81,7 @@ class VacancyServiceTest {
                 .requiredSkillIds(List.of(1L, 2L, 3L))
                 .build();
 
-        when(projectService.getProjectById(1L)).thenReturn(Project.builder().id(1L).build());
+        when(projectService.findProjectById(1L)).thenReturn(Project.builder().id(1L).build());
         when(vacancyRepository.save(any(Vacancy.class))).thenReturn(excepted);
         doNothing().when(vacancyValidator).validateTutorRole(1L, 1L);
 
