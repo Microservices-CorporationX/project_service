@@ -25,6 +25,11 @@ spring:
         calculations_channel:
           name: calculations_channel
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
 server:
   port: 8082
 
@@ -40,6 +45,7 @@ services:
     endpoint: http://127.0.0.0:9000
     accessKey: user
     secretKey: password
+    region: ru
     bucketName: corpbucket
     isMocked: false
   payment-service:
