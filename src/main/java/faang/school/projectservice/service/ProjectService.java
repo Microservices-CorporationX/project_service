@@ -100,7 +100,6 @@ public class ProjectService {
                 .filter(project -> projectValidator.canUserAccessProject(project, currentUserId))
                 .toList();
     }
-
     void validateUniqueProject(Project project) {
         Long ownerId = project.getOwnerId();
         String name = project.getName();
