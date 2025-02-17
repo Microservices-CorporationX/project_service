@@ -7,7 +7,7 @@ import ru.corporationx.projectservice.filters.project.NameProjectFilter;
 import ru.corporationx.projectservice.filters.project.ProjectFilter;
 import ru.corporationx.projectservice.filters.project.StatusProjectFilter;
 import ru.corporationx.projectservice.mapper.project.CreateSubProjectMapper;
-import ru.corporationx.projectservice.mapper.project.ProjectMapper;
+import ru.corporationx.projectservice.mapper.project.ProjectMapperImpl;
 import ru.corporationx.projectservice.model.dto.filter.ProjectFilterDto;
 import ru.corporationx.projectservice.model.dto.moment.MomentDto;
 import ru.corporationx.projectservice.model.dto.project.CreateSubProjectDto;
@@ -57,7 +57,7 @@ public class ProjectServiceTest {
     private ProjectService projectService;
 
     @Spy
-    private ProjectMapper projectMapper;
+    private ProjectMapperImpl projectMapper;
     @Mock
     private CreateSubProjectMapper createSubProjectMapper;
     @Spy

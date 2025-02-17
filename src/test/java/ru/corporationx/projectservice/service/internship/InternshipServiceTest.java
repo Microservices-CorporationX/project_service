@@ -3,7 +3,7 @@ package ru.corporationx.projectservice.service.internship;
 import org.mockito.ArgumentCaptor;
 import ru.corporationx.projectservice.exception.DataValidationException;
 import ru.corporationx.projectservice.filters.internship.InternshipFilter;
-import ru.corporationx.projectservice.mapper.internship.InternshipMapper;
+import ru.corporationx.projectservice.mapper.internship.InternshipMapperImpl;
 import ru.corporationx.projectservice.model.dto.internship.InternshipDto;
 import ru.corporationx.projectservice.model.dto.internship.InternshipFilterDto;
 import ru.corporationx.projectservice.model.entity.Internship;
@@ -45,7 +45,7 @@ public class InternshipServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
     @Spy
-    private InternshipMapper internshipMapper;
+    private InternshipMapperImpl internshipMapper;
     @Mock
     private InternshipValidator internshipValidator;
     @Mock
